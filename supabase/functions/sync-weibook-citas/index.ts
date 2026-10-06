@@ -7,74 +7,33 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const WEIBOOK_API = 'https://api.v2.reservation.weibook.co/v1/filter-reservation';
-const WEIBOOK_KEY = 'keicybarberclub';
+const WEIBOOK_KEY = 'keicy_barber_club';
 const WEIBOOK_ZONE = 'America/Bogota';
 const WEIBOOK_APP_SOURCE = 'console';
 const WEIBOOK_VERSION_APP = '3.0';
-// Cookie de sesión estática (no expira)
-const WEIBOOK_SESSION = '%7B%22v%22%3A1%2C%22businessId%22%3A%2266803f4a7288190011d53ee6%22%2C%22branchLogin%22%3A%22true%22%2C%22role%22%3A%22admin%22%2C%22precision%22%3A0%2C%22locale%22%3A%22America%2FBogota%22%2C%22userId%22%3A%2265c22e29676dc10011ca6f0e%22%7D';
+// Business ID de Keicy Barber Club
+const WEIBOOK_BUSINESS_ID = '684f0086aecdcd001151dd48';
 
-// Sedes de WeiBook (CORREGIDO - los IDs estaban invertidos)
+// Sede única de Keicy (La Flora, Cali)
+// TODO: Obtener el branch ID real desde WeiBook console
 const BRANCHES = [
-  { id: '66803f4a7288190011d53ee8', name: 'Colina' },      // Dayron, Juan Diego, etc.
-  { id: '66803f4a7288190011d53ee6', name: 'Calle 165' },   // Marlon, Ángel, etc.
+  { id: 'PENDIENTE_BRANCH_ID', name: 'La Flora' },
 ];
 
-// Sedes (corregido)
-const SUCURSAL_COLINA = '97cb4114-3e57-4858-809e-7d96e482709f';
-const SUCURSAL_CALLE165 = '4b1e04a6-9a1b-4cff-a116-916e07b97455';
+// Sede en Supabase - TODO: Agregar el UUID real de la sucursal en Supabase
+const SUCURSAL_LAFLORA = 'PENDIENTE_SUCURSAL_UUID';
 
 // Cliente genérico para bloqueos y citas sin cliente
-const CLIENTE_BLOQUEO_ID = 'ddb33d9f-c107-4816-9ef7-ad17b265a653';
+// TODO: Crear este usuario en Supabase y agregar su UUID
+const CLIENTE_BLOQUEO_ID = 'PENDIENTE_CLIENTE_UUID';
 
 // Mapeo de barberos WeiBook -> Supabase (nombre en minúsculas -> id barbero)
+// TODO: Agregar los barberos de Keicy Barber Club
+// Formato: 'nombre en minúsculas': { id: 'UUID_DE_SUPABASE', sucursal: SUCURSAL_LAFLORA }
 const BARBERO_MAP: Record<string, { id: string; sucursal: string }> = {
-  // COLINA (10 barberos)
-  'dayron': { id: 'de809c84-5b8c-4c7c-becc-59b5711bd31b', sucursal: SUCURSAL_COLINA },
-  'dayron ardila': { id: 'de809c84-5b8c-4c7c-becc-59b5711bd31b', sucursal: SUCURSAL_COLINA },
-  'camilo rodriguez': { id: 'e8296aef-2763-43d5-b06f-1f1106916a92', sucursal: SUCURSAL_COLINA },
-  'camilo rodríguez': { id: 'e8296aef-2763-43d5-b06f-1f1106916a92', sucursal: SUCURSAL_COLINA },
-  'roberto': { id: '3dcef93a-dfcc-41c1-9b39-fc8c84d000f5', sucursal: SUCURSAL_COLINA },
-  'roberto lugo': { id: '3dcef93a-dfcc-41c1-9b39-fc8c84d000f5', sucursal: SUCURSAL_COLINA },
-  'camilo merchan': { id: '85d3e609-d17d-4d1c-abfa-c60848ac9248', sucursal: SUCURSAL_COLINA },
-  'camilo merchán': { id: '85d3e609-d17d-4d1c-abfa-c60848ac9248', sucursal: SUCURSAL_COLINA },
-  'daniel': { id: '59c8882f-7376-4232-9a76-128678795d23', sucursal: SUCURSAL_COLINA },
-  'daniel marroquín': { id: '59c8882f-7376-4232-9a76-128678795d23', sucursal: SUCURSAL_COLINA },
-  'daniel marroquin': { id: '59c8882f-7376-4232-9a76-128678795d23', sucursal: SUCURSAL_COLINA },
-  'carlos': { id: 'f880b0db-ab5a-4284-a854-1ead48b01da2', sucursal: SUCURSAL_COLINA },
-  'carlos urrea': { id: 'f880b0db-ab5a-4284-a854-1ead48b01da2', sucursal: SUCURSAL_COLINA },
-  'orlando': { id: 'bfaf33b8-8378-48d7-8bbb-2cfa3be12a06', sucursal: SUCURSAL_COLINA },
-  'orlando rivera': { id: 'bfaf33b8-8378-48d7-8bbb-2cfa3be12a06', sucursal: SUCURSAL_COLINA },
-  'cristian': { id: '2eee1082-ed87-4e83-96fb-eef068daa19e', sucursal: SUCURSAL_COLINA },
-  'cristian moncaleano': { id: '2eee1082-ed87-4e83-96fb-eef068daa19e', sucursal: SUCURSAL_COLINA },
-  'miguel': { id: '81f06b69-4783-467e-bc81-9eca07aad64a', sucursal: SUCURSAL_COLINA },
-  'miguel trujillo': { id: '81f06b69-4783-467e-bc81-9eca07aad64a', sucursal: SUCURSAL_COLINA },
-  'juan diego': { id: '5f4e6e5e-8238-4880-a846-3e350f8b4379', sucursal: SUCURSAL_COLINA },
-  'juan diego quintero': { id: '5f4e6e5e-8238-4880-a846-3e350f8b4379', sucursal: SUCURSAL_COLINA },
-
-  // CALLE 165 (6 barberos)
-  'marlon': { id: '827e9a97-5ef2-432b-9b7a-86dba4ec8466', sucursal: SUCURSAL_CALLE165 },
-  'marlon rodríguez': { id: '827e9a97-5ef2-432b-9b7a-86dba4ec8466', sucursal: SUCURSAL_CALLE165 },
-  'marlon rodriguez': { id: '827e9a97-5ef2-432b-9b7a-86dba4ec8466', sucursal: SUCURSAL_CALLE165 },
-  'ángel': { id: 'b8f7317e-9fcb-4410-9333-2ef690ddebfd', sucursal: SUCURSAL_CALLE165 },
-  'angel': { id: 'b8f7317e-9fcb-4410-9333-2ef690ddebfd', sucursal: SUCURSAL_CALLE165 },
-  'ángel carrasco': { id: 'b8f7317e-9fcb-4410-9333-2ef690ddebfd', sucursal: SUCURSAL_CALLE165 },
-  'angel carrasco': { id: 'b8f7317e-9fcb-4410-9333-2ef690ddebfd', sucursal: SUCURSAL_CALLE165 },
-  'david': { id: '75421122-8881-4b96-ba84-03f9dfc63d34', sucursal: SUCURSAL_CALLE165 },
-  'david romero': { id: '75421122-8881-4b96-ba84-03f9dfc63d34', sucursal: SUCURSAL_CALLE165 },
-  'jesus': { id: 'dce6ac9d-57fd-444e-b656-771a471f28ec', sucursal: SUCURSAL_CALLE165 },
-  'jesus rodriguez': { id: 'dce6ac9d-57fd-444e-b656-771a471f28ec', sucursal: SUCURSAL_CALLE165 },
-  'andi': { id: '48c6ec57-480d-4a69-8dba-376bf7fceda7', sucursal: SUCURSAL_CALLE165 },
-  'andi cely': { id: '48c6ec57-480d-4a69-8dba-376bf7fceda7', sucursal: SUCURSAL_CALLE165 },
-  'andrés cely': { id: '48c6ec57-480d-4a69-8dba-376bf7fceda7', sucursal: SUCURSAL_CALLE165 },
-  'andres cely': { id: '48c6ec57-480d-4a69-8dba-376bf7fceda7', sucursal: SUCURSAL_CALLE165 },
-  'smith': { id: '8e80ae74-60cd-426d-b670-94fd1501a74b', sucursal: SUCURSAL_CALLE165 },
-  'smith molina': { id: '8e80ae74-60cd-426d-b670-94fd1501a74b', sucursal: SUCURSAL_CALLE165 },
-
-  // Otros (sin sede específica o genéricos)
-  'danny': { id: '277f7b56-09c3-4d07-b140-abc83628df54', sucursal: SUCURSAL_COLINA },
-  'juan bermudez': { id: '27db3146-3a13-40fb-a483-d19b186a1c25', sucursal: SUCURSAL_COLINA },
-  'dominique': { id: '1c2db400-c193-42e9-a6ce-361725965661', sucursal: SUCURSAL_COLINA },
+  // Ejemplo (descomentar y completar cuando tengas los barberos):
+  // 'keicy': { id: 'UUID_DEL_BARBERO', sucursal: SUCURSAL_LAFLORA },
+  // 'otro barbero': { id: 'UUID_DEL_BARBERO', sucursal: SUCURSAL_LAFLORA },
 };
 
 const corsHeaders = {
