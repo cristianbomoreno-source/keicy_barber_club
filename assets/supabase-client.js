@@ -4,10 +4,10 @@
 // across the different HTML files in this project.
 
 // =====================================================
-// ⚠️ CONFIGURAR ESTOS VALORES CON TU PROYECTO SUPABASE
+// SUPABASE - Keicy Barber Club
 // =====================================================
-const SUPABASE_URL = 'https://TU_PROYECTO.supabase.co';  // Cambiar por URL de tu proyecto
-const SUPABASE_KEY = 'TU_ANON_KEY_AQUI';  // Cambiar por tu anon key
+const SUPABASE_URL = 'https://ygrmammcaupnygdxmgth.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlncm1hbW1jYXVwbnlnZHhtZ3RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTA5MjksImV4cCI6MjEwNjgyNjkyOX0.PCOjKijvxVdhwe6h2wPbhZR6ZSahfJYHfkef2OwKPi0';
 console.log('[DN] Supabase KEY:', SUPABASE_KEY.substring(0, 20) + '...');
 
 // Verificar que window.supabase esté disponible (puede tardar en cargar desde CDN)
