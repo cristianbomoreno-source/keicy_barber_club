@@ -152,9 +152,7 @@ async function fetchWeibookReservations(date: string, branchId: string, token: s
         'accept': 'application/json',
         'app_source': WEIBOOK_APP_SOURCE,
         'authorization': token,
-        'branch': branchId,
         'content-type': 'application/json',
-        'cookie': `wb_session=${WEIBOOK_SESSION}`,
         'key': WEIBOOK_KEY,
         'origin': 'https://app.weibook.co',
         'referer': 'https://app.weibook.co/',
@@ -163,8 +161,7 @@ async function fetchWeibookReservations(date: string, branchId: string, token: s
       },
       body: JSON.stringify({
         date: date + ' 00:00:00',
-        newCalendar: true,
-        id_branch: branchId
+        newCalendar: true
       })
     });
 
