@@ -15,9 +15,9 @@ const WEIBOOK_VERSION_APP = '3.0';
 const WEIBOOK_BUSINESS_ID = '684f0086aecdcd001151dd48';
 
 // Sede única de Keicy (La Flora, Cali)
-// TODO: Obtener el branch ID real desde WeiBook console
+// Usa el business ID como branch ya que solo hay una sede
 const BRANCHES = [
-  { id: 'PENDIENTE_BRANCH_ID', name: 'La Flora' },
+  { id: '684f0086aecdcd001151dd48', name: 'La Flora' },
 ];
 
 // Sede en Supabase
@@ -27,12 +27,29 @@ const SUCURSAL_LAFLORA = '46c99064-8218-41a0-a8c7-a81103f658fa';
 const CLIENTE_BLOQUEO_ID = 'aa9aa773-0d1f-4b9d-8d8f-a67e57f87853';
 
 // Mapeo de barberos WeiBook -> Supabase (nombre en minúsculas -> id barbero)
-// TODO: Agregar los barberos de Keicy Barber Club
-// Formato: 'nombre en minúsculas': { id: 'UUID_DE_SUPABASE', sucursal: SUCURSAL_LAFLORA }
 const BARBERO_MAP: Record<string, { id: string; sucursal: string }> = {
-  // Ejemplo (descomentar y completar cuando tengas los barberos):
-  // 'keicy': { id: 'UUID_DEL_BARBERO', sucursal: SUCURSAL_LAFLORA },
-  // 'otro barbero': { id: 'UUID_DEL_BARBERO', sucursal: SUCURSAL_LAFLORA },
+  // Danny Uribe - WeiBook ID: 694f0c71ee13c0000d93b128
+  'danny uribe': { id: '0efc1e44-45ff-4a2a-9682-7015a365b139', sucursal: SUCURSAL_LAFLORA },
+  'danny': { id: '0efc1e44-45ff-4a2a-9682-7015a365b139', sucursal: SUCURSAL_LAFLORA },
+
+  // Daniel Rojas - WeiBook ID: 68519630cd06e20011fac0b5
+  'daniel rojas': { id: '6f805d41-35aa-45d4-862a-d584257a3dab', sucursal: SUCURSAL_LAFLORA },
+  'daniel': { id: '6f805d41-35aa-45d4-862a-d584257a3dab', sucursal: SUCURSAL_LAFLORA },
+
+  // Jorge Ivan Atoy - WeiBook ID: 6ac018611c3bf2b85ba165a6
+  'jorge ivan atoy': { id: '646fb723-f182-4772-8f11-394301ddf4ac', sucursal: SUCURSAL_LAFLORA },
+  'jorge': { id: '646fb723-f182-4772-8f11-394301ddf4ac', sucursal: SUCURSAL_LAFLORA },
+
+  // Gabriel Ruiz Ruiz - WeiBook ID: 684f00c7aecdcd001151e0b2
+  'gabriel ruiz ruiz': { id: '5814037c-2fc3-466d-902f-cc9b3773a380', sucursal: SUCURSAL_LAFLORA },
+  'gabriel ruiz': { id: '5814037c-2fc3-466d-902f-cc9b3773a380', sucursal: SUCURSAL_LAFLORA },
+  'gabriel': { id: '5814037c-2fc3-466d-902f-cc9b3773a380', sucursal: SUCURSAL_LAFLORA },
+
+  // Nicolás Castillo - WeiBook ID: 69bc3622c7a39a000dfe65cd
+  'nicolás castillo': { id: '2e531658-2f3a-41a3-90e3-047721c16d48', sucursal: SUCURSAL_LAFLORA },
+  'nicolas castillo': { id: '2e531658-2f3a-41a3-90e3-047721c16d48', sucursal: SUCURSAL_LAFLORA },
+  'nicolás': { id: '2e531658-2f3a-41a3-90e3-047721c16d48', sucursal: SUCURSAL_LAFLORA },
+  'nicolas': { id: '2e531658-2f3a-41a3-90e3-047721c16d48', sucursal: SUCURSAL_LAFLORA },
 };
 
 const corsHeaders = {
