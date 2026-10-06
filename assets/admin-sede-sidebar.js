@@ -91,7 +91,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span class="logout-label">Cerrar sesión</span>
       </div>
-      <a class="nav-link help-link" href="https://wa.me/573212319355" target="_blank">
+      <a class="nav-link help-link" href="https://wa.me/573171713526" target="_blank">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
         <span class="nav-label">Centro de ayuda</span>
       </a>

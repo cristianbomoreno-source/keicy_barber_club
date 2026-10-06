@@ -304,7 +304,7 @@ serve(async (req) => {
       </div>
       <div class="info-item">
         <span class="info-label">Número:</span>
-        <span class="info-value">+57 321 231 9355</span>
+        <span class="info-value">+57 317 171 3526</span>
       </div>
       <div class="info-item">
         <span class="info-label">Estado actual:</span>

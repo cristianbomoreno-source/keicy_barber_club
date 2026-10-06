@@ -4,7 +4,14 @@
 
 Sistema de gestión completo para barbería **Keicy Barber Club**. Incluye agenda, citas, pagos, comisiones, WhatsApp automatizado y más.
 
-Sistema completo con todas las funcionalidades de gestión de barbería.
+## Información de la Barbería
+
+- **Nombre**: Keicy Barber Club
+- **Ciudad**: Cali, Valle del Cauca, Colombia
+- **Dirección**: Av. 4 Nte. #49, Urb. La Flora
+- **Teléfono/WhatsApp**: +57 317 171 3526
+- **Horario**: Lunes a Sábado, 10:00 am - 8:00 pm
+- **Instagram**: @keicy_barber_club
 
 ## Configuración Supabase
 

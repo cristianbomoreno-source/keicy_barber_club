@@ -14,10 +14,10 @@ const BARBERIA_CONFIG = {
   slogan: 'Tu barbería de confianza',
 
   // ===== CONTACTO =====
-  telefono: '+57 XXX XXX XXXX',      // Cambiar por teléfono real
-  telefonoWhatsApp: '57XXXXXXXXXX',  // Sin + ni espacios
+  telefono: '+57 317 171 3526',
+  telefonoWhatsApp: '573171713526',  // Sin + ni espacios
   email: 'contacto@keicybarber.com',
-  instagram: '@keicybarberclub',
+  instagram: '@keicy_barber_club',
 
   // ===== DOMINIO =====
   dominio: 'keicybarber.com',        // Cambiar cuando tengas dominio
@@ -39,10 +39,10 @@ const BARBERIA_CONFIG = {
   // ===== SEDES =====
   sedes: [
     {
-      id: 'sede-principal',
-      nombre: 'Sede Principal',
-      direccion: 'Dirección de la sede',
-      telefono: '+57 XXX XXX XXXX',
+      id: 'sede-laflora',
+      nombre: 'Sede La Flora',
+      direccion: 'Av. 4 Nte. #49, Urb. La Flora, Cali',
+      telefono: '+57 317 171 3526',
       whatsappPhoneNumberId: 'XXXXXXXXXX',
       horario: {
         apertura: 10,  // 10:00 AM
@@ -51,11 +51,10 @@ const BARBERIA_CONFIG = {
         almuerzoFin: 14
       },
       coordenadas: {
-        lat: 0.0000,
-        lng: 0.0000
+        lat: 3.4516,
+        lng: -76.5320
       }
     }
-    // Agregar más sedes aquí si es necesario
   ],
 
   // ===== HORARIOS =====
@@ -76,9 +75,9 @@ const BARBERIA_CONFIG = {
 
   // ===== REDES SOCIALES =====
   redes: {
-    instagram: 'https://instagram.com/keicybarberclub',
+    instagram: 'https://instagram.com/keicy_barber_club',
     facebook: '',
-    tiktok: ''
+    tiktok: 'https://tiktok.com/@keicy_barber_club'
   }
 };
 
