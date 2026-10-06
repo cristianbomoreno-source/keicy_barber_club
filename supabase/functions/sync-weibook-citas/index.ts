@@ -20,12 +20,11 @@ const BRANCHES = [
   { id: 'PENDIENTE_BRANCH_ID', name: 'La Flora' },
 ];
 
-// Sede en Supabase - TODO: Agregar el UUID real de la sucursal en Supabase
-const SUCURSAL_LAFLORA = 'PENDIENTE_SUCURSAL_UUID';
+// Sede en Supabase
+const SUCURSAL_LAFLORA = '46c99064-8218-41a0-a8c7-a81103f658fa';
 
 // Cliente genérico para bloqueos y citas sin cliente
-// TODO: Crear este usuario en Supabase y agregar su UUID
-const CLIENTE_BLOQUEO_ID = 'PENDIENTE_CLIENTE_UUID';
+const CLIENTE_BLOQUEO_ID = 'aa9aa773-0d1f-4b9d-8d8f-a67e57f87853';
 
 // Mapeo de barberos WeiBook -> Supabase (nombre en minúsculas -> id barbero)
 // TODO: Agregar los barberos de Keicy Barber Club

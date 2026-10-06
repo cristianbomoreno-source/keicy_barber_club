@@ -40,6 +40,7 @@ const BARBERIA_CONFIG = {
   sedes: [
     {
       id: 'sede-laflora',
+      uuid: '46c99064-8218-41a0-a8c7-a81103f658fa',  // UUID en Supabase
       nombre: 'Sede La Flora',
       direccion: 'Av. 4 Nte. #49, Urb. La Flora, Cali',
       telefono: '+57 317 171 3526',
