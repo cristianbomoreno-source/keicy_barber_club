@@ -124,7 +124,7 @@ serve(async (req) => {
     }).format(total);
 
     // Generar URLs cortas
-    const baseUrl = 'https://www.diegoneirabarber.com';
+    const baseUrl = 'https://www.keicybarberclub.com';
     let reciboUrl = `${baseUrl}/recibo/?c=${cita_id}`;
     let resenaUrl = `${baseUrl}/resena/?c=${cita_id}` + (cita.barbero_id ? `&b=${cita.barbero_id}` : '');
 

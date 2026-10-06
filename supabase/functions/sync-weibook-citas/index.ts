@@ -7,7 +7,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const WEIBOOK_API = 'https://api.v2.reservation.weibook.co/v1/filter-reservation';
-const WEIBOOK_KEY = 'diegoneirabarber';
+const WEIBOOK_KEY = 'keicybarberclub';
 const WEIBOOK_ZONE = 'America/Bogota';
 const WEIBOOK_APP_SOURCE = 'console';
 const WEIBOOK_VERSION_APP = '3.0';

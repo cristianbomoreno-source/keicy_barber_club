@@ -16,7 +16,7 @@ serve(async (req) => {
     const hora = url.searchParams.get("hora") || "";
     const servicio = url.searchParams.get("servicio") || "Cita";
     const barbero = url.searchParams.get("barbero") || "Barbero disponible";
-    const sede = url.searchParams.get("sede") || "Diego Neira Barbería";
+    const sede = url.searchParams.get("sede") || "Keicy Barber Club";
     const direccion = url.searchParams.get("direccion") || "";
     const precio = url.searchParams.get("precio") || "0";
 
@@ -33,15 +33,15 @@ serve(async (req) => {
     const icsContent = [
       "BEGIN:VCALENDAR",
       "VERSION:2.0",
-      "PRODID:-//Diego Neira Barbería//ES",
+      "PRODID:-//Keicy Barber Club//ES",
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH",
       "BEGIN:VEVENT",
-      `UID:${Date.now()}@diegoneirabarber.com`,
+      `UID:${Date.now()}@keicybarberclub.com`,
       `DTSTAMP:${formatICSDate(new Date())}`,
       `DTSTART:${formatICSDate(startDate)}`,
       `DTEND:${formatICSDate(endDate)}`,
-      `SUMMARY:Cita en Diego Neira - ${servicio}`,
+      `SUMMARY:Cita en Keicy Barber - ${servicio}`,
       `DESCRIPTION:Servicio: ${servicio}\\nBarbero: ${barbero}\\nPrecio: $${Number(precio).toLocaleString()} COP\\n\\n¡Te esperamos!`,
       `LOCATION:${sede}${direccion ? ", " + direccion : ""}`,
       "STATUS:CONFIRMED",
@@ -53,7 +53,7 @@ serve(async (req) => {
       headers: {
         ...corsHeaders,
         "Content-Type": "text/calendar; charset=utf-8",
-        "Content-Disposition": "attachment; filename=cita-diego-neira.ics"
+        "Content-Disposition": "attachment; filename=cita-keicy-barber-club.ics"
       }
     });
   } catch (error) {

@@ -1,9 +1,9 @@
-# Diego Neira Barber Club - Robots.txt
+# Keicy Barber Club - Robots.txt
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://diegoneirabarber.com/sitemap.xml
+Sitemap: https://keicybarberclub.com/sitemap.xml
 
 # Bloquear páginas de admin
 Disallow: /admin/

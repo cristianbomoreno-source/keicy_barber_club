@@ -18,7 +18,7 @@ const SEDES = {
 
 const TEMPLATE_CONFIRMACION = 'confirmacion';
 const TEMPLATE_CONFIRMACION_165 = 'confirmacion_cita';
-const HEADER_IMAGE_URL = 'https://diegoneirabarber.com/assets/whatsapp-header.jpg';
+const HEADER_IMAGE_URL = 'https://keicybarberclub.com/assets/whatsapp-header.jpg';
 
 async function sendTemplateMessage(
   phoneNumberId: string,
@@ -52,7 +52,7 @@ async function sendTemplateMessage(
             { type: 'text', text: 'Hoy' },
             { type: 'text', text: fechaCompleta },
             { type: 'text', text: '3:00 PM' },
-            { type: 'text', text: 'Diego Neira' }
+            { type: 'text', text: 'Keicy Barber' }
           ]
         },
         {
@@ -135,11 +135,11 @@ serve(async (req) => {
           type: 'body',
           parameters: [
             { type: 'text', text: 'Test' },
-            { type: 'text', text: 'Diego Neira Barbería Calle 165' },
+            { type: 'text', text: 'Keicy Barber Club' },
             { type: 'text', text: 'Hoy' },
             { type: 'text', text: fechaCompleta165 },
             { type: 'text', text: '3:00 PM' },
-            { type: 'text', text: 'Diego Neira' }
+            { type: 'text', text: 'Keicy Barber' }
           ]
         },
         {

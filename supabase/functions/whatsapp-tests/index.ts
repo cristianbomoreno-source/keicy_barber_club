@@ -1421,7 +1421,7 @@ serve(async (req) => {
       }
 
       const html = await response.text();
-      if (!html.includes('Diego Neira')) {
+      if (!html.includes('Keicy Barber')) {
         throw new Error('Página debería contener nombre del negocio');
       }
       if (!html.includes('dry-run') && !html.includes('MODO PRUEBA')) {

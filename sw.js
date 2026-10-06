@@ -3,7 +3,7 @@
 // VERSIÓN ACTUALIZADA - Forzar limpieza de caché
 // ============================================
 
-const CACHE_NAME = 'diego-neira-v27';
+const CACHE_NAME = 'keicy-barber-club-v1';
 const FORCE_UPDATE = true;
 
 // Instalación - skipWaiting inmediato

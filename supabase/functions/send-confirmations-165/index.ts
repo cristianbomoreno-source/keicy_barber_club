@@ -2,7 +2,7 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 
 const PHONE_NUMBER_ID_165 = '687040821167199';
 const TEMPLATE_NAME = 'confirmacion_cita';
-const HEADER_IMAGE_URL = 'https://diegoneirabarber.com/assets/whatsapp-header.jpg';
+const HEADER_IMAGE_URL = 'https://keicybarberclub.com/assets/whatsapp-header.jpg';
 
 const CITAS = [
   // 18:00
@@ -43,7 +43,7 @@ serve(async (req) => {
             type: 'body',
             parameters: [
               { type: 'text', text: cita.cliente },
-              { type: 'text', text: 'Diego Neira Barbería Calle 165' },
+              { type: 'text', text: 'Keicy Barber Club' },
               { type: 'text', text: 'Hoy' },
               { type: 'text', text: '3 de octubre de 2026' },
               { type: 'text', text: cita.hora },

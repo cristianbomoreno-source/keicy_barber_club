@@ -1,6 +1,6 @@
 // =====================================================
 // OTP Send - Edge Function para Club de Leales
-// Diego Neira Barbería
+// Keicy Barber Club
 // =====================================================
 //
 // Esta función maneja el envío de códigos OTP por WhatsApp
@@ -66,7 +66,7 @@ async function sendWhatsAppOTP(to: string, codigo: string, nombreCliente: string
     to: formattedPhone,
     type: 'text',
     text: {
-      body: `Hola ${nombreCliente}! Tu código de verificación para Club de Leales Diego Neira es: *${codigo}*
+      body: `Hola ${nombreCliente}! Tu código de verificación para Club de Leales Keicy Barber es: *${codigo}*
 
 Este código expira en 5 minutos.
 

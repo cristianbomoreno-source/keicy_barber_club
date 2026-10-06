@@ -4,8 +4,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-const FROM_EMAIL = "citas@diegoneirabarber.com";
-const FROM_NAME = "Diego Neira Barbería";
+const FROM_EMAIL = "citas@keicybarberclub.com";
+const FROM_NAME = "Keicy Barber Club";
 
 interface ServicioCompletadoData {
   cliente_nombre: string;
@@ -69,7 +69,7 @@ function generateEmailHTML(data: ServicioCompletadoData): string {
     ? data.metodo_pago.charAt(0).toUpperCase() + data.metodo_pago.slice(1)
     : "";
 
-  const resenaLink = `https://www.diegoneirabarber.com/resena/?c=${encodeURIComponent(data.cita_id)}`;
+  const resenaLink = `https://www.keicybarberclub.com/resena/?c=${encodeURIComponent(data.cita_id)}`;
   const googleMapsLink = data.google_maps_link || "https://g.page/r/Cac1YymF3Bu0EBM/review";
 
   return `
@@ -78,7 +78,7 @@ function generateEmailHTML(data: ServicioCompletadoData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gracias por tu visita - Diego Neira Barbería</title>
+  <title>Gracias por tu visita - Keicy Barber Club</title>
 </head>
 <body style="margin:0; padding:0; background-color:#FFFFFF; font-family:'Georgia', 'Times New Roman', serif;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#FFFFFF;">
@@ -92,7 +92,7 @@ function generateEmailHTML(data: ServicioCompletadoData): string {
               <table role="presentation" width="100" height="100" cellspacing="0" cellpadding="0" style="margin:0 auto;">
                 <tr>
                   <td align="center" valign="middle" style="width:100px; height:100px; border-radius:50%; background-color:#FFFFFF; border:2px solid #E5E5E5;">
-                    <img src="https://www.diegoneirabarber.com/assets/logo.png" alt="Diego Neira Barbería" width="60" height="60" style="width:60px; height:60px; display:block;">
+                    <img src="https://www.keicybarberclub.com/assets/logo.png" alt="Keicy Barber Club" width="60" height="60" style="width:60px; height:60px; display:block;">
                   </td>
                 </tr>
               </table>
@@ -159,7 +159,7 @@ function generateEmailHTML(data: ServicioCompletadoData): string {
                       <tr>
                         <td width="50%">
                           <p style="margin:0; color:#D4AF55; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Atendido por</p>
-                          <p style="margin:6px 0 0; color:#111111; font-size:14px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${data.barbero_nombre || "Diego Neira Barbería"}</p>
+                          <p style="margin:6px 0 0; color:#111111; font-size:14px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${data.barbero_nombre || "Keicy Barber Club"}</p>
                         </td>
                         <td width="50%">
                           <p style="margin:0; color:#D4AF55; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Sede</p>
@@ -236,7 +236,7 @@ function generateEmailHTML(data: ServicioCompletadoData): string {
           <tr>
             <td align="center" style="padding:0 24px 32px;">
               <p style="margin:0; color:#999999; font-size:11px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                Diego Neira Barbería · ${data.sede_direccion}
+                Keicy Barber Club · ${data.sede_direccion}
               </p>
             </td>
           </tr>

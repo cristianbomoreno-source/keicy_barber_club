@@ -723,7 +723,7 @@
     addSection('Ingresos por método de pago', Object.entries(porMetodo).sort((a,b)=>b[1]-a[1]).map(([n,v])=>[n, dnFormatCOP(v)]), ['Método','Total']);
     addSection('Gastos por concepto', Object.entries(porGasto).sort((a,b)=>b[1]-a[1]).map(([n,v])=>[n, dnFormatCOP(v)]), ['Concepto','Monto']);
 
-    doc.save(`reporte-diego-neira-${from}_a_${to}.pdf`);
+    doc.save(`reporte-keicy-barber-club-${from}_a_${to}.pdf`);
     toast('PDF descargado.');
   }
 
@@ -772,7 +772,7 @@
     ];
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(citasRows), 'Citas detalle');
 
-    XLSX.writeFile(wb, `reporte-diego-neira-${from}_a_${to}.xlsx`);
+    XLSX.writeFile(wb, `reporte-keicy-barber-club-${from}_a_${to}.xlsx`);
     toast('Excel descargado.');
   }
 

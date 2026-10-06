@@ -73,7 +73,7 @@ serve(async (req) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diego Neira Barbería - WhatsApp Business Setup</title>
+  <title>Keicy Barber Club - WhatsApp Business Setup</title>
   <style>
     * {
       box-sizing: border-box;
@@ -276,7 +276,7 @@ serve(async (req) => {
 <body>
   <div class="container">
     <div class="logo">
-      <h1>Diego Neira Barbería</h1>
+      <h1>Keicy Barber Club</h1>
       <p>Configuración de WhatsApp Business</p>
     </div>
 

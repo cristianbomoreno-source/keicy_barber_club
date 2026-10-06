@@ -4,8 +4,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-const FROM_EMAIL = "citas@diegoneirabarber.com";
-const FROM_NAME = "Diego Neira Barbería";
+const FROM_EMAIL = "citas@keicybarberclub.com";
+const FROM_NAME = "Keicy Barber Club";
 
 interface CitaData {
   cita_id: string;
@@ -78,7 +78,7 @@ function generateCalendarLinks(data: CitaData): { google: string; outlook: strin
   const startStr = formatGoogleDate(startDate);
   const endStr = formatGoogleDate(endDate);
 
-  const title = encodeURIComponent(`Cita en Diego Neira Barbería - ${data.servicio_nombre}`);
+  const title = encodeURIComponent(`Cita en Keicy Barber Club - ${data.servicio_nombre}`);
   const location = encodeURIComponent(`${data.sede_nombre}, ${data.sede_direccion}`);
   const details = encodeURIComponent(
     `Servicio: ${data.servicio_nombre}\n` +
@@ -108,10 +108,10 @@ function generateCalendarLinks(data: CitaData): { google: string; outlook: strin
   const ics = `https://zzmtnjlfrlqmouijfste.supabase.co/functions/v1/calendar-ics?${icsParams.toString()}`;
 
   // Link de cancelación
-  const cancelUrl = `https://www.diegoneirabarber.com/cancelar/?phone=${data.cliente_telefono}`;
+  const cancelUrl = `https://www.keicybarberclub.com/cancelar/?phone=${data.cliente_telefono}`;
 
   // Link de confirmación
-  const confirmUrl = `https://www.diegoneirabarber.com/confirmar/?id=${data.cita_id}`;
+  const confirmUrl = `https://www.keicybarberclub.com/confirmar/?id=${data.cita_id}`;
 
   return { google, outlook, ics, cancel: cancelUrl, confirm: confirmUrl };
 }
@@ -137,7 +137,7 @@ function generateEmailHTML(data: CitaData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cita Agendada - Diego Neira Barbería</title>
+  <title>Cita Agendada - Keicy Barber Club</title>
 </head>
 <body style="margin:0; padding:0; background-color:#FFFFFF; font-family:'Georgia', 'Times New Roman', serif;">
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#FFFFFF;">
@@ -148,7 +148,7 @@ function generateEmailHTML(data: CitaData): string {
           <!-- Logo -->
           <tr>
             <td align="center" style="padding:32px 24px 24px; text-align:center;">
-              <img src="https://www.diegoneirabarber.com/assets/logo.png" alt="Diego Neira Barbería" width="120" style="width:120px; height:auto; display:block; margin:0 auto;">
+              <img src="https://www.keicybarberclub.com/assets/logo.png" alt="Keicy Barber Club" width="120" style="width:120px; height:auto; display:block; margin:0 auto;">
             </td>
           </tr>
 
@@ -338,7 +338,7 @@ function generateEmailHTML(data: CitaData): string {
           <tr>
             <td align="center" style="padding:0 24px 32px;">
               <p style="margin:0; color:#999999; font-size:11px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                Diego Neira Barbería
+                Keicy Barber Club
               </p>
             </td>
           </tr>

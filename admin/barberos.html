@@ -634,7 +634,7 @@
         <div class="field"><label>Años de experiencia</label><input type="number" id="editAnos" min="0" max="60"></div>
       </div>
       <div class="field" id="editPagoDiarioField" style="display:none;"><label>Pago diario ($)</label><input type="number" id="editPagoDiario" min="0"></div>
-      <div class="field"><label>Instagram (sin @)</label><input type="text" id="editInstagram" placeholder="diegoneira_barber"></div>
+      <div class="field"><label>Instagram (sin @)</label><input type="text" id="editInstagram" placeholder="keicy_barber"></div>
       <div class="field">
         <label>Día de descanso (siempre bloqueado)</label>
         <select id="editDiaDescanso">
@@ -923,7 +923,7 @@
 <script src="../assets/admin-sede-nav.js"></script>
 
 <script>
-  const BARBER_INVITE_CODE = 'DIEGO-NEIRA-BARBERO-2026';
+  const BARBER_INVITE_CODE = 'KEICY-BARBER-CLUB-2026';
   const DIA_NOMBRE = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 
   const toastEl = document.getElementById('toast');
@@ -1876,8 +1876,8 @@
     const a = admins.find(x => x.id === currentEditAdminId);
     if (!a) return;
 
-    // No permitir eliminar al admin principal (diegoneira)
-    if (a.username === 'diegoneira') {
+    // No permitir eliminar al admin principal (keicy)
+    if (a.username === 'keicy' || a.username === 'admin') {
       toast('No puedes eliminar al administrador principal.');
       return;
     }

@@ -1809,7 +1809,7 @@ async function dnRegistrarIngreso({ sucursalId, categoria, concepto, monto, meto
 
   // Limpiar caches manualmente al cargar
   if ('caches' in window) {
-    const CURRENT_CACHE = 'diego-neira-v27';
+    const CURRENT_CACHE = 'keicy-barber-club-v1';
     caches.keys().then((cacheNames) => {
       cacheNames.forEach((cacheName) => {
         if (cacheName !== CURRENT_CACHE) {
