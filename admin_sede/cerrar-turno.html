@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#111111">
+<title>Cerrar Turno · Admin Sede</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<style>
+  /* Variables heredadas de design-system.css */
+  body { background:var(--bg); min-height:100vh; min-height:100dvh; }
+
+  .container { max-width:700px; margin:0 auto; padding:24px var(--page-padding-x) 100px; padding-top:calc(24px + var(--safe-top)); padding-bottom:calc(var(--nav-height, 56px) + var(--safe-bottom) + 44px); }
+
+  .header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .back-btn {
+    width:44px; height:44px; border-radius:14px;
+    background:var(--card); border:1px solid var(--divider);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:var(--text); text-decoration:none;
+  }
+  .back-btn svg { width:20px; height:20px; }
+  .header-text .title { font-size:22px; font-weight:800; }
+  .header-text .sub { font-size:13px; color:var(--text-secondary); margin-top:2px; }
+
+  /* Progress bar */
+  .progress-bar { display:flex; gap:6px; margin-bottom:32px; }
+  .progress-step {
+    flex:1; height:6px; border-radius:3px;
+    background:var(--divider); transition:background 0.3s ease;
+  }
+  .progress-step.active { background:var(--gold); }
+  .progress-step.completed { background:var(--success); }
+
+  /* Step content */
+  .step-content { display:none; animation:fadeIn 0.3s ease; }
+  .step-content.active { display:block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+  .step-title { font-size:18px; font-weight:800; margin-bottom:8px; display:flex; align-items:center; gap:10px; }
+  .step-title .num { width:28px; height:28px; border-radius:50%; background:var(--gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; }
+  .step-sub { font-size:13px; color:var(--text-secondary); margin-bottom:20px; }
+
+  /* Money input */
+  .money-input-wrap { position:relative; margin-bottom:20px; }
+  .money-prefix { position:absolute; left:20px; top:50%; transform:translateY(-50%); font-size:24px; font-weight:800; color:var(--gold); }
+  .money-input {
+    width:100%; padding:20px 20px 20px 44px; font-size:28px; font-weight:800;
+    background:var(--card); border:2px solid var(--divider); border-radius:18px;
+    color:var(--text); text-align:right;
+  }
+  .money-input:focus { outline:none; border-color:var(--gold); }
+
+  /* Diferencia */
+  .diferencia-card {
+    padding:16px 20px; border-radius:16px; margin-bottom:20px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .diferencia-card.perfect { background:rgba(78,203,113,0.12); border:1px solid rgba(78,203,113,0.3); }
+  .diferencia-card.sobrante { background:rgba(78,203,113,0.12); border:1px solid rgba(78,203,113,0.3); }
+  .diferencia-card.faltante { background:rgba(239,83,80,0.12); border:1px solid rgba(239,83,80,0.3); }
+  .diferencia-label { font-size:14px; font-weight:600; }
+  .diferencia-value { font-size:18px; font-weight:800; }
+  .diferencia-card.perfect .diferencia-value { color:var(--success); }
+  .diferencia-card.sobrante .diferencia-value { color:var(--success); }
+  .diferencia-card.faltante .diferencia-value { color:var(--error); }
+
+  /* Metodos de pago */
+  #metodosPagoList {
+    max-height: 50vh;
+    overflow-y: auto;
+    padding-right: 4px;
+  }
+  #metodosPagoList::-webkit-scrollbar { width: 4px; }
+  #metodosPagoList::-webkit-scrollbar-track { background: transparent; }
+  #metodosPagoList::-webkit-scrollbar-thumb { background: var(--divider); border-radius: 2px; }
+
+  .metodo-row {
+    display:flex; align-items:center; gap:14px;
+    padding:14px 16px; background:var(--card); border:1px solid var(--divider);
+    border-radius:16px; margin-bottom:12px;
+  }
+  .metodo-row.confirmado { border-color:var(--success); background:rgba(78,203,113,0.08); }
+  .metodo-icon { width:40px; height:40px; border-radius:12px; background:var(--card-2); display:flex; align-items:center; justify-content:center; font-size:20px; }
+  .metodo-info { flex:1; }
+  .metodo-name { font-size:14px; font-weight:700; }
+  .metodo-esperado { font-size:20px; font-weight:800; color:var(--gold); margin-top:4px; }
+  .metodo-transacciones { font-size:11px; color:var(--text-secondary); margin-top:2px; }
+  .btn-confirmar-metodo {
+    padding:10px 16px; border-radius:10px; border:none;
+    background:var(--card-2); border:1px solid var(--divider);
+    color:var(--text); font-size:12px; font-weight:700; cursor:pointer;
+    transition: all 0.2s ease;
+  }
+  .btn-confirmar-metodo:hover { border-color:var(--gold); }
+  .btn-confirmar-metodo.confirmado {
+    background:var(--success); border-color:var(--success); color:#111111;
+  }
+  .metodo-input {
+    width:120px; padding:10px 12px; font-size:14px; font-weight:700;
+    background:var(--card-2); border:1px solid var(--divider); border-radius:10px;
+    color:var(--text); text-align:right;
+  }
+  .metodo-input:focus { outline:none; border-color:var(--gold); }
+
+  /* Colaboradores */
+  .colaborador-card {
+    padding:16px; background:var(--card); border:1px solid var(--divider);
+    border-radius:16px; margin-bottom:12px;
+  }
+  .colaborador-header { display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+  .colaborador-avatar { width:48px; height:48px; border-radius:50%; background:var(--card-2); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; }
+  .colaborador-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+  .colaborador-info { flex:1; }
+  .colaborador-name { font-size:15px; font-weight:700; }
+  .colaborador-stats { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+  .colaborador-stats span { color:var(--gold); font-weight:700; }
+  .colaborador-footer { display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid var(--divider); }
+  .colaborador-comision { font-size:18px; font-weight:800; color:var(--gold); }
+  .btn-pagar {
+    padding:10px 20px; border-radius:12px; border:none;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#141414; font-size:13px; font-weight:800; cursor:pointer;
+  }
+  .btn-pagar:disabled { opacity:0.5; cursor:not-allowed; }
+  .btn-pagar.pagado { background:var(--success); color:#111111; }
+
+  /* Bebidas inventario */
+  .bebida-row {
+    display:flex; align-items:center; gap:14px;
+    padding:14px 16px; background:var(--card); border:1px solid var(--divider);
+    border-radius:16px; margin-bottom:12px;
+  }
+  .bebida-icon { width:44px; height:44px; border-radius:12px; background:var(--card-2); display:flex; align-items:center; justify-content:center; font-size:22px; }
+  .bebida-info { flex:1; }
+  .bebida-name { font-size:14px; font-weight:700; }
+  .bebida-initial { font-size:12px; color:var(--text-secondary); }
+  .bebida-counter { display:flex; align-items:center; gap:10px; }
+  .counter-btn {
+    width:34px; height:34px; border-radius:10px;
+    background:var(--card-2); border:1px solid var(--divider);
+    color:var(--text); font-size:16px; font-weight:700;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .counter-btn:hover { background:var(--divider); }
+  .counter-value { width:36px; text-align:center; font-size:16px; font-weight:800; }
+  .bebida-consumo { font-size:12px; color:var(--warning); margin-top:4px; }
+
+  /* Resumen final */
+  .summary-section { margin-bottom:24px; }
+  .summary-title { font-size:12px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
+  .summary-card { background:var(--card); border:1px solid var(--divider); border-radius:16px; padding:16px; }
+  .summary-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--divider); }
+  .summary-row:last-child { border-bottom:none; }
+  .summary-label { font-size:13px; color:var(--text-secondary); }
+  .summary-value { font-size:14px; font-weight:700; }
+  .summary-value.gold { color:var(--gold); }
+  .summary-value.success { color:var(--success); }
+  .summary-value.error { color:var(--error); }
+
+  /* Navigation buttons */
+  .nav-buttons { display:flex; gap:12px; margin-top:24px; }
+  .btn-secondary {
+    flex:1; padding:16px; border-radius:16px;
+    background:var(--card); border:1px solid var(--divider);
+    color:var(--text); font-size:15px; font-weight:700; cursor:pointer;
+  }
+  .btn-primary {
+    flex:2; padding:16px; border-radius:16px; border:none;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#141414; font-size:15px; font-weight:800; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .btn-primary:active { transform:scale(0.98); }
+  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+  .btn-primary svg { width:20px; height:20px; }
+
+  .btn-confirmar {
+    width:100%; padding:18px; border-radius:16px; border:none;
+    background:linear-gradient(180deg, #5ED27E, #3FB765);
+    color:#111111; font-size:16px; font-weight:800; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+  }
+  .btn-confirmar svg { width:22px; height:22px; }
+
+  /* Toast */
+  #toast {
+    position:fixed; bottom:calc(32px + var(--safe-bottom)); left:50%; transform:translateX(-50%) translateY(20px);
+    background:rgba(250,250,250,0.95); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--divider); border-radius:14px; padding:12px 20px;
+    font-size:13px; font-weight:600; opacity:0; pointer-events:none; max-width:90%;
+    transition:opacity 0.3s ease, transform 0.3s ease; z-index:200;
+  }
+  #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* Loading */
+  .loading-overlay {
+    position:fixed; inset:0; background:rgba(255,255,255,0.95);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    z-index:300; opacity:0; pointer-events:none; transition:opacity 0.3s ease;
+  }
+  .loading-overlay.show { opacity:1; pointer-events:auto; }
+  .loading-spinner { width:48px; height:48px; border:3px solid var(--divider); border-top-color:var(--success); border-radius:50%; animation:spin 1s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { margin-top:16px; font-size:14px; color:var(--text-secondary); }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 600px) {
+    .container { padding: 16px 12px 100px; }
+
+    .header { gap: 12px; margin-bottom: 20px; }
+    .header-text .title { font-size: 18px; }
+    .header-text .sub { font-size: 12px; }
+
+    .step-title { font-size: 16px; }
+    .step-title .num { width: 24px; height: 24px; font-size: 12px; }
+    .step-sub { font-size: 12px; margin-bottom: 16px; }
+
+    /* Métodos de pago - responsive */
+    #metodosPagoList { max-height: 45vh; }
+
+    .metodo-row {
+      flex-wrap: wrap;
+      padding: 12px;
+      gap: 10px;
+    }
+    .metodo-icon { width: 36px; height: 36px; font-size: 18px; }
+    .metodo-info { min-width: 0; }
+    .metodo-name { font-size: 13px; }
+    .metodo-esperado { font-size: 16px; }
+    .metodo-transacciones { font-size: 10px; }
+    .metodo-input { width: 100px; padding: 8px 10px; font-size: 13px; }
+    .btn-confirmar-metodo { padding: 8px 12px; font-size: 11px; }
+
+    /* Colaboradores responsive */
+    .colaborador-card { padding: 12px; }
+    .colaborador-header { gap: 10px; margin-bottom: 10px; }
+    .colaborador-avatar { width: 40px; height: 40px; font-size: 14px; }
+    .colaborador-name { font-size: 14px; }
+    .colaborador-stats { font-size: 11px; }
+    .colaborador-comision { font-size: 16px; }
+    .btn-pagar { padding: 8px 14px; font-size: 12px; }
+
+    /* Bebidas responsive */
+    .bebida-row { padding: 10px 12px; gap: 10px; }
+    .bebida-icon { width: 38px; height: 38px; font-size: 18px; }
+    .bebida-name { font-size: 13px; }
+    .bebida-initial { font-size: 11px; }
+    .counter-btn { width: 30px; height: 30px; font-size: 14px; }
+    .counter-value { width: 30px; font-size: 14px; }
+
+    /* Resumen responsive */
+    .summary-card { padding: 12px; }
+    .summary-row { padding: 8px 0; }
+    .summary-label { font-size: 12px; }
+    .summary-value { font-size: 13px; }
+
+    /* Money input responsive */
+    .money-input { padding: 16px 16px 16px 40px; font-size: 24px; }
+    .money-prefix { font-size: 20px; left: 16px; }
+
+    /* Navigation buttons responsive */
+    .nav-buttons { gap: 10px; margin-top: 20px; }
+    .btn-secondary { padding: 14px; font-size: 14px; }
+    .btn-primary { padding: 14px; font-size: 14px; }
+    .btn-confirmar { padding: 16px; font-size: 15px; }
+  }
+
+  @media (max-width: 380px) {
+    .metodo-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .metodo-row > div:last-child {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header class="header">
+    <a href="ventas.html" class="back-btn">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div class="header-text">
+      <div class="title">Cerrar Turno</div>
+      <div class="sub" id="sedeName">Cargando...</div>
+    </div>
+  </header>
+
+  <div class="progress-bar">
+    <div class="progress-step active" data-step="1"></div>
+    <div class="progress-step" data-step="2"></div>
+    <div class="progress-step" data-step="3"></div>
+    <div class="progress-step" data-step="4"></div>
+    <div class="progress-step" data-step="5"></div>
+    <div class="progress-step" data-step="6"></div>
+  </div>
+
+  <!-- Paso 1: Arqueo de caja -->
+  <div class="step-content active" data-step="1">
+    <div class="step-title"><span class="num">1</span> Arqueo de caja</div>
+    <div class="step-sub">Cuenta el efectivo fisico en caja</div>
+
+    <div class="money-input-wrap">
+      <span class="money-prefix">$</span>
+      <input type="text" class="money-input" id="efectivoReal" placeholder="0" inputmode="numeric">
+    </div>
+
+    <div class="diferencia-card perfect" id="diferenciaCard" style="display:none;">
+      <span class="diferencia-label">Diferencia</span>
+      <span class="diferencia-value" id="diferenciaValue">$0</span>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-row">
+        <span class="summary-label">Base inicial</span>
+        <span class="summary-value" id="s1BaseInicial">$0</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Ventas en efectivo</span>
+        <span class="summary-value" id="s1VentasEfectivo">$0</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Efectivo esperado</span>
+        <span class="summary-value gold" id="s1EfectivoEsperado">$0</span>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn-primary" id="btnPaso2">
+        Siguiente
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Paso 2: Medios de pago -->
+  <div class="step-content" data-step="2">
+    <div class="step-title"><span class="num">2</span> Confirmar medios de pago</div>
+    <div class="step-sub">Verifica que los montos coincidan con tus registros</div>
+
+    <div id="metodosPagoList">
+      <!-- Se llena dinámicamente -->
+    </div>
+
+    <div class="diferencia-card perfect" id="metodosTodosConfirmados" style="display:none;">
+      <span class="diferencia-label">✓ Todos los medios confirmados</span>
+      <span class="diferencia-value" id="totalMediosPago">$0</span>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn-secondary" id="btnAtras1">Atrás</button>
+      <button class="btn-primary" id="btnPaso3">Siguiente <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+
+  <!-- Paso 3: Pagar colaboradores -->
+  <div class="step-content" data-step="3">
+    <div class="step-title"><span class="num">3</span> Pagar colaboradores</div>
+    <div class="step-sub">Paga la comision a cada colaborador</div>
+
+    <div id="colaboradoresList">
+      <!-- Se llena dinamicamente -->
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn-secondary" id="btnAtras2">Atras</button>
+      <button class="btn-primary" id="btnPaso4">Siguiente <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+
+  <!-- Paso 4: Cuadre de caja -->
+  <div class="step-content" data-step="4">
+    <div class="step-title"><span class="num">4</span> Cuadre de caja</div>
+    <div class="step-sub">Resumen del cuadre de caja</div>
+
+    <div class="diferencia-card" id="cuadreCard">
+      <span class="diferencia-label" id="cuadreLabel">Estado</span>
+      <span class="diferencia-value" id="cuadreValue">$0</span>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-row">
+        <span class="summary-label">Efectivo esperado</span>
+        <span class="summary-value" id="s4EfectivoEsperado">$0</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Efectivo contado</span>
+        <span class="summary-value" id="s4EfectivoContado">$0</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Comisiones pagadas</span>
+        <span class="summary-value" id="s4ComisionesPagadas">$0</span>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn-secondary" id="btnAtras3">Atras</button>
+      <button class="btn-primary" id="btnPaso5">Siguiente <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+
+  <!-- Paso 5: Inventario bebidas -->
+  <div class="step-content" data-step="5">
+    <div class="step-title"><span class="num">5</span> Inventario de bebidas</div>
+    <div class="step-sub">Registra las unidades finales de cada bebida</div>
+
+    <div id="bebidasList">
+      <!-- Se llena dinamicamente -->
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn-secondary" id="btnAtras4">Atras</button>
+      <button class="btn-primary" id="btnPaso6">Siguiente <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+
+  <!-- Paso 6: Resumen y confirmacion -->
+  <div class="step-content" data-step="6">
+    <div class="step-title"><span class="num">6</span> Resumen final</div>
+    <div class="step-sub">Revisa y confirma el cierre de turno</div>
+
+    <div class="summary-section">
+      <div class="summary-title">Caja</div>
+      <div class="summary-card">
+        <div class="summary-row">
+          <span class="summary-label">Base inicial</span>
+          <span class="summary-value" id="r1Base">$0</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Ventas totales</span>
+          <span class="summary-value gold" id="r1Ventas">$0</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Efectivo contado</span>
+          <span class="summary-value" id="r1Efectivo">$0</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Diferencia</span>
+          <span class="summary-value" id="r1Diferencia">$0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-section">
+      <div class="summary-title">Colaboradores</div>
+      <div class="summary-card">
+        <div class="summary-row">
+          <span class="summary-label">Total comisiones</span>
+          <span class="summary-value gold" id="r2Comisiones">$0</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Colaboradores pagados</span>
+          <span class="summary-value" id="r2Pagados">0/0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-section">
+      <div class="summary-title">Inventario</div>
+      <div class="summary-card">
+        <div class="summary-row">
+          <span class="summary-label">Bebidas consumidas</span>
+          <span class="summary-value" id="r3Consumidas">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-buttons" style="flex-direction:column;">
+      <button class="btn-confirmar" id="btnConfirmarCierre">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+        Confirmar cierre de turno
+      </button>
+      <button class="btn-secondary" id="btnAtras5" style="flex:1;">Atras</button>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Cerrando turno...</div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/mobile-nav.js"></script>
+<script>
+(async function() {
+  const user = dnRequireAdmin('../index.html');
+  if (!user) return;
+
+  if (user.role !== 'admin_sede') {
+    window.location.href = '../auth.html';
+    return;
+  }
+
+  const sedeId = dnGetTurnoSedeActual();
+  if (!sedeId) {
+    window.location.href = 'seleccionar-sede.html';
+    return;
+  }
+
+  // Cargar turno actual
+  const turno = await dnVerificarTurnoActivo(sedeId);
+  if (!turno || turno.estado === 'cerrado') {
+    window.location.href = 'seleccionar-sede.html';
+    return;
+  }
+
+  // Variables
+  let currentStep = turno.cierre_paso_actual || 1;
+  let cierreData = turno.cierre_datos || {};
+  const hoy = dnTodayISO();
+
+  // Cargar sede
+  const { data: sede } = await sb.from('sucursales').select('nombre').eq('id', sedeId).single();
+  document.getElementById('sedeName').textContent = sede?.nombre || 'Sede';
+
+  // Cargar datos del dia
+  const { data: citasHoy } = await sb
+    .from('citas')
+    .select('id, precio, estado, metodo_pago, comision_calculada, comision_pagada, barbero_id')
+    .eq('sucursal_id', sedeId)
+    .eq('fecha', hoy);
+
+  // Obtener la sesión de caja asociada al turno
+  const { data: cajaSesion } = await sb
+    .from('caja_sesiones')
+    .select('id')
+    .eq('turno_id', turno.id)
+    .single();
+
+  const sesionId = cajaSesion?.id || turno.id;
+
+  // Cargar movimientos de caja del día (para múltiples métodos de pago)
+  const { data: movimientosCaja } = await sb
+    .from('caja_movimientos')
+    .select('*')
+    .eq('sesion_id', sesionId)
+    .eq('tipo', 'ingreso')
+    .in('categoria', ['venta', 'propina']);
+
+  const citasFinalizadas = (citasHoy || []).filter(c => c.estado === 'finalizada');
+  const baseInicial = Number(turno.dinero_inicial) || 0;
+
+  // Calcular efectivo desde movimientos de caja (más preciso)
+  const ventasEfectivo = (movimientosCaja || [])
+    .filter(m => m.metodo_pago === 'efectivo' && m.afecta_efectivo)
+    .reduce((s, m) => s + (Number(m.monto) || 0), 0);
+  const efectivoEsperado = baseInicial + ventasEfectivo;
+
+  // Colaboradores (barberos)
+  const { data: barberos } = await sb
+    .from('barberos')
+    .select('id, comision_pct, tipo_colaborador, usuarios!inner(full_name, avatar_url)')
+    .eq('sucursal_id', sedeId)
+    .eq('activo', true)
+    .or('tipo_colaborador.is.null,tipo_colaborador.eq.barbero');
+
+  // Datos del admin_sede actual (para mostrar su pago)
+  const { data: adminSedeData } = await sb
+    .from('usuarios')
+    .select('id, full_name, avatar_url, config_pago')
+    .eq('id', user.id)
+    .single();
+
+  // Ventas de productos del día para calcular comisiones del admin
+  const { data: ventasProductosHoy } = await sb
+    .from('ventas_productos')
+    .select('*')
+    .eq('turno_id', turno.id)
+    .eq('comision_para', 'admin_sede');
+
+  const comisionProductosAdmin = (ventasProductosHoy || []).reduce((sum, v) => sum + (v.comision_monto || 0), 0);
+
+  // Personal de aseo del turno
+  const personalAseoIds = turno.personal_aseo_hoy || [];
+  let personalAseo = [];
+  if (personalAseoIds.length > 0) {
+    const { data: aseoData } = await sb
+      .from('barberos')
+      .select('id, pago_diario, usuarios!inner(full_name, avatar_url)')
+      .in('id', personalAseoIds);
+    personalAseo = aseoData || [];
+  }
+
+  // Bebidas
+  const { data: bebidas } = await sb.from('bebidas_inventario').select('*').eq('activo', true).order('orden');
+  const inventarioInicial = turno.inventario_bebidas_inicial || [];
+  let inventarioFinal = {};
+  (bebidas || []).forEach(b => {
+    const ini = inventarioInicial.find(i => i.bebida_id === b.id);
+    inventarioFinal[b.id] = ini?.cantidad_inicial || b.cantidad || 0;
+  });
+
+  // Paso 1: Arqueo
+  document.getElementById('s1BaseInicial').textContent = dnFormatCOP(baseInicial);
+  document.getElementById('s1VentasEfectivo').textContent = dnFormatCOP(ventasEfectivo);
+  document.getElementById('s1EfectivoEsperado').textContent = dnFormatCOP(efectivoEsperado);
+
+  const efectivoInput = document.getElementById('efectivoReal');
+  let efectivoContado = cierreData.efectivo_contado || 0;
+
+  efectivoInput.addEventListener('input', (e) => {
+    let val = e.target.value.replace(/\D/g, '');
+    efectivoContado = parseInt(val) || 0;
+    e.target.value = efectivoContado.toLocaleString('es-CO');
+    actualizarDiferencia();
+  });
+
+  function actualizarDiferencia() {
+    const dif = efectivoContado - efectivoEsperado;
+    const card = document.getElementById('diferenciaCard');
+    const val = document.getElementById('diferenciaValue');
+
+    card.style.display = 'flex';
+    card.className = 'diferencia-card';
+
+    if (dif === 0) {
+      card.classList.add('perfect');
+      val.textContent = 'Cuadra perfecto';
+    } else if (dif > 0) {
+      card.classList.add('sobrante');
+      val.textContent = '+' + dnFormatCOP(dif) + ' sobrante';
+    } else {
+      card.classList.add('faltante');
+      val.textContent = dnFormatCOP(dif) + ' faltante';
+    }
+  }
+
+  // Calcular totales por método de pago
+  const METODOS_PAGO = [
+    { id: 'efectivo', nombre: 'Efectivo', icono: '💵' },
+    { id: 'tarjeta', nombre: 'Tarjeta', icono: '💳' },
+    { id: 'nequi', nombre: 'Nequi', icono: '📱' },
+    { id: 'daviplata', nombre: 'Daviplata', icono: '📲' },
+    { id: 'qr', nombre: 'QR', icono: '📲' },
+    { id: 'transferencia', nombre: 'Transferencia', icono: '🏦' },
+  ];
+
+  // Calcular totales desde movimientos de caja (soporta múltiples métodos por venta)
+  const metodosPagoData = {};
+  METODOS_PAGO.forEach(m => {
+    const movimientosMetodo = (movimientosCaja || []).filter(mov => mov.metodo_pago === m.id);
+    metodosPagoData[m.id] = {
+      total: movimientosMetodo.reduce((s, mov) => s + (Number(mov.monto) || 0), 0),
+      transacciones: movimientosMetodo.length,
+      confirmado: cierreData.metodos_confirmados?.[m.id] || false
+    };
+  });
+
+  // Paso 2: Medios de pago
+  function renderMetodosPago() {
+    const container = document.getElementById('metodosPagoList');
+
+    // Filtrar solo métodos con transacciones
+    const metodosConVentas = METODOS_PAGO.filter(m => metodosPagoData[m.id].total > 0);
+
+    if (metodosConVentas.length === 0) {
+      container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No hay ventas con medios electrónicos hoy</div>';
+      verificarTodosConfirmados();
+      return;
+    }
+
+    container.innerHTML = metodosConVentas.map(m => {
+      const data = metodosPagoData[m.id];
+      return `
+        <div class="metodo-row ${data.confirmado ? 'confirmado' : ''}" data-metodo="${m.id}">
+          <div class="metodo-icon">${m.icono}</div>
+          <div class="metodo-info">
+            <div class="metodo-name">${m.nombre}</div>
+            <div class="metodo-esperado">${dnFormatCOP(data.total)}</div>
+            <div class="metodo-transacciones">${data.transacciones} transaccion${data.transacciones === 1 ? '' : 'es'}</div>
+          </div>
+          <button class="btn-confirmar-metodo ${data.confirmado ? 'confirmado' : ''}" data-metodo="${m.id}">
+            ${data.confirmado ? '✓ OK' : 'Confirmar'}
+          </button>
+        </div>
+      `;
+    }).join('');
+
+    container.querySelectorAll('.btn-confirmar-metodo').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const metodo = btn.dataset.metodo;
+        metodosPagoData[metodo].confirmado = true;
+        if (!cierreData.metodos_confirmados) cierreData.metodos_confirmados = {};
+        cierreData.metodos_confirmados[metodo] = true;
+
+        btn.classList.add('confirmado');
+        btn.textContent = '✓ OK';
+        btn.closest('.metodo-row').classList.add('confirmado');
+
+        verificarTodosConfirmados();
+      });
+    });
+
+    verificarTodosConfirmados();
+  }
+
+  function verificarTodosConfirmados() {
+    const metodosConVentas = METODOS_PAGO.filter(m => metodosPagoData[m.id].total > 0);
+    const todosConfirmados = metodosConVentas.every(m => metodosPagoData[m.id].confirmado);
+    const totalMedios = metodosConVentas.reduce((s, m) => s + metodosPagoData[m.id].total, 0);
+
+    const card = document.getElementById('metodosTodosConfirmados');
+    if (todosConfirmados && metodosConVentas.length > 0) {
+      card.style.display = 'flex';
+      document.getElementById('totalMediosPago').textContent = dnFormatCOP(totalMedios);
+    } else if (metodosConVentas.length === 0) {
+      card.style.display = 'flex';
+      document.getElementById('totalMediosPago').textContent = '$0';
+    } else {
+      card.style.display = 'none';
+    }
+  }
+
+  // Paso 3: Colaboradores
+  function renderColaboradores() {
+    const container = document.getElementById('colaboradoresList');
+    let html = '';
+
+    // 1. Admin Sede (si tiene pago configurado)
+    const configPago = adminSedeData?.config_pago || {};
+    const salarioDiario = configPago.salario_diario || 0;
+    const comisionPctAdmin = configPago.comision_productos_pct || 0;
+
+    if (salarioDiario > 0 || comisionProductosAdmin > 0) {
+      const nombreAdmin = adminSedeData?.full_name || 'Admin Sede';
+      const avatarAdmin = adminSedeData?.avatar_url;
+      const totalAdmin = salarioDiario + comisionProductosAdmin;
+      const pagadoAdmin = cierreData.comisiones_pagadas?.['admin_sede'] || false;
+
+      html += `
+        <div class="colaborador-card" data-id="admin_sede" style="border:1px solid var(--gold);">
+          <div class="colaborador-header">
+            <div class="colaborador-avatar" style="background:var(--gold);color:#141414;">
+              ${avatarAdmin ? `<img src="${avatarAdmin}" alt="">` : dnInitials(nombreAdmin)}
+            </div>
+            <div class="colaborador-info">
+              <div class="colaborador-name">${nombreAdmin}</div>
+              <div class="colaborador-stats">
+                Salario: ${dnFormatCOP(salarioDiario)} + Comisión: ${dnFormatCOP(comisionProductosAdmin)}
+              </div>
+            </div>
+          </div>
+          <div class="colaborador-footer">
+            <div class="colaborador-comision">${dnFormatCOP(totalAdmin)}</div>
+            <button class="btn-pagar ${pagadoAdmin ? 'pagado' : ''}" data-id="admin_sede" data-comision="${totalAdmin}" ${pagadoAdmin ? 'disabled' : ''}>
+              ${pagadoAdmin ? 'Pagado' : 'Pagar'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // 2. Barberos
+    if (barberos && barberos.length > 0) {
+      html += barberos.map(b => {
+        const nombre = b.usuarios?.full_name || 'Colaborador';
+        const avatar = b.usuarios?.avatar_url;
+        const citasBarbero = citasFinalizadas.filter(c => c.barbero_id === b.id);
+        const comision = citasBarbero.reduce((s, c) => s + (Number(c.comision_calculada) || 0), 0);
+        const pagado = cierreData.comisiones_pagadas?.[b.id] || false;
+
+        return `
+          <div class="colaborador-card" data-id="${b.id}">
+            <div class="colaborador-header">
+              <div class="colaborador-avatar">
+                ${avatar ? `<img src="${avatar}" alt="">` : dnInitials(nombre)}
+              </div>
+              <div class="colaborador-info">
+                <div class="colaborador-name">${nombre}</div>
+                <div class="colaborador-stats"><span>${citasBarbero.length}</span> servicios hoy</div>
+              </div>
+            </div>
+            <div class="colaborador-footer">
+              <div class="colaborador-comision">${dnFormatCOP(comision)}</div>
+              <button class="btn-pagar ${pagado ? 'pagado' : ''}" data-id="${b.id}" data-comision="${comision}" ${pagado ? 'disabled' : ''}>
+                ${pagado ? 'Pagado' : 'Pagar'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // 3. Personal de aseo
+    if (personalAseo.length > 0) {
+      html += personalAseo.map(p => {
+        const nombre = p.usuarios?.full_name || 'Aseo';
+        const avatar = p.usuarios?.avatar_url;
+        const pago = p.pago_diario || 0;
+        const pagado = cierreData.comisiones_pagadas?.[`aseo_${p.id}`] || false;
+
+        return `
+          <div class="colaborador-card" data-id="aseo_${p.id}" style="border:1px solid var(--success);">
+            <div class="colaborador-header">
+              <div class="colaborador-avatar" style="background:var(--success);color:#111111;">
+                ${avatar ? `<img src="${avatar}" alt="">` : dnInitials(nombre)}
+              </div>
+              <div class="colaborador-info">
+                <div class="colaborador-name">${nombre}</div>
+                <div class="colaborador-stats" style="color:var(--success);">Personal de aseo</div>
+              </div>
+            </div>
+            <div class="colaborador-footer">
+              <div class="colaborador-comision">${dnFormatCOP(pago)}</div>
+              <button class="btn-pagar ${pagado ? 'pagado' : ''}" data-id="aseo_${p.id}" data-comision="${pago}" ${pagado ? 'disabled' : ''}>
+                ${pagado ? 'Pagado' : 'Pagar'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    if (!html) {
+      container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No hay colaboradores</div>';
+      return;
+    }
+
+    container.innerHTML = html;
+
+    container.querySelectorAll('.btn-pagar').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const comision = Number(btn.dataset.comision) || 0;
+
+        // Mostrar selector de método de pago
+        const metodo = await mostrarSelectorMetodo();
+        if (!metodo) return;
+
+        btn.disabled = true;
+        btn.textContent = 'Pagando...';
+
+        try {
+          let tipo, usuarioId, barberoId, concepto;
+
+          if (id === 'admin_sede') {
+            tipo = 'pago_diario_admin';
+            usuarioId = user.id;
+            barberoId = null;
+            concepto = 'Pago diario Admin Sede';
+          } else if (id.startsWith('aseo_')) {
+            tipo = 'pago_diario_aseo';
+            const aseoId = id.replace('aseo_', '');
+            const aseoUser = personalAseo.find(p => p.id === aseoId);
+            usuarioId = aseoUser?.usuarios?.id || aseoId;
+            barberoId = aseoId;
+            concepto = 'Pago diario Aseo';
+          } else {
+            tipo = 'comision';
+            const barbero = barberos.find(b => b.id === id);
+            usuarioId = barbero?.usuarios?.id || id;
+            barberoId = id;
+            concepto = 'Comisiones del día';
+          }
+
+          const result = await dnPagarColaborador({
+            usuarioId,
+            barberoId,
+            sucursalId: sedeId,
+            tipo,
+            concepto,
+            monto: comision,
+            metodo
+          });
+
+          if (result.success) {
+            if (!cierreData.comisiones_pagadas) cierreData.comisiones_pagadas = {};
+            cierreData.comisiones_pagadas[id] = { metodo, monto: comision, pagoId: result.pagoId };
+            btn.classList.add('pagado');
+            btn.textContent = 'Pagado ✓';
+            showToast(`Pago registrado: ${dnFormatCOP(comision)} (${metodo})`);
+          } else if (result.duplicado) {
+            btn.classList.add('pagado');
+            btn.textContent = 'Ya pagado';
+            showToast('Este pago ya fue registrado');
+          } else {
+            throw new Error(result.error);
+          }
+        } catch (err) {
+          console.error(err);
+          showToast('Error al registrar pago');
+          btn.disabled = false;
+          btn.textContent = 'Pagar';
+        }
+      });
+    });
+  }
+
+  // Selector de método de pago
+  function mostrarSelectorMetodo() {
+    return new Promise(resolve => {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.95);z-index:400;display:flex;align-items:center;justify-content:center;';
+      overlay.innerHTML = `
+        <div style="background:var(--card);border:1px solid var(--divider);border-radius:20px;padding:24px;width:90%;max-width:320px;">
+          <div style="font-size:16px;font-weight:700;margin-bottom:16px;text-align:center;">Método de pago</div>
+          <button class="metodo-opt" data-metodo="efectivo" style="width:100%;padding:14px;border-radius:12px;background:var(--card-2);border:1px solid var(--divider);color:var(--text);font-size:14px;font-weight:600;margin-bottom:10px;cursor:pointer;">💵 Efectivo</button>
+          <button class="metodo-opt" data-metodo="transferencia" style="width:100%;padding:14px;border-radius:12px;background:var(--card-2);border:1px solid var(--divider);color:var(--text);font-size:14px;font-weight:600;margin-bottom:10px;cursor:pointer;">🏦 Transferencia</button>
+          <button class="metodo-opt" data-metodo="nequi" style="width:100%;padding:14px;border-radius:12px;background:var(--card-2);border:1px solid var(--divider);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;">📱 Nequi</button>
+          <button style="width:100%;padding:12px;margin-top:16px;border-radius:12px;background:transparent;border:1px solid var(--divider);color:var(--text-secondary);font-size:13px;cursor:pointer;" id="cancelMetodo">Cancelar</button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      overlay.querySelectorAll('.metodo-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.body.removeChild(overlay);
+          resolve(btn.dataset.metodo);
+        });
+      });
+
+      overlay.querySelector('#cancelMetodo').addEventListener('click', () => {
+        document.body.removeChild(overlay);
+        resolve(null);
+      });
+    });
+  }
+
+  // Paso 5: Bebidas
+  function renderBebidas() {
+    const container = document.getElementById('bebidasList');
+    if (!bebidas || bebidas.length === 0) {
+      container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No hay bebidas registradas</div>';
+      return;
+    }
+
+    container.innerHTML = bebidas.map(b => {
+      const ini = inventarioInicial.find(i => i.bebida_id === b.id);
+      const cantInicial = ini?.cantidad_inicial || 0;
+      const cantFinal = inventarioFinal[b.id] || 0;
+      const consumo = cantInicial - cantFinal;
+
+      return `
+        <div class="bebida-row" data-id="${b.id}">
+          <div class="bebida-icon">${b.icono || '🥤'}</div>
+          <div class="bebida-info">
+            <div class="bebida-name">${b.nombre}</div>
+            <div class="bebida-initial">Inicio: ${cantInicial}</div>
+            ${consumo > 0 ? `<div class="bebida-consumo">Consumo: ${consumo}</div>` : ''}
+          </div>
+          <div class="bebida-counter">
+            <button class="counter-btn" data-action="minus" data-id="${b.id}">-</button>
+            <span class="counter-value" id="bebida-${b.id}">${cantFinal}</span>
+            <button class="counter-btn" data-action="plus" data-id="${b.id}">+</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    container.querySelectorAll('.counter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        const action = btn.dataset.action;
+        if (action === 'plus') inventarioFinal[id]++;
+        else if (inventarioFinal[id] > 0) inventarioFinal[id]--;
+        document.getElementById(`bebida-${id}`).textContent = inventarioFinal[id];
+      });
+    });
+  }
+
+  // Paso 6: Resumen
+  function actualizarResumen() {
+    const ventasTotales = citasFinalizadas.reduce((s, c) => s + (Number(c.precio) || 0), 0);
+    const dif = efectivoContado - efectivoEsperado;
+    const totalComisiones = citasFinalizadas.reduce((s, c) => s + (Number(c.comision_calculada) || 0), 0);
+    const pagados = Object.keys(cierreData.comisiones_pagadas || {}).length;
+
+    document.getElementById('r1Base').textContent = dnFormatCOP(baseInicial);
+    document.getElementById('r1Ventas').textContent = dnFormatCOP(ventasTotales);
+    document.getElementById('r1Efectivo').textContent = dnFormatCOP(efectivoContado);
+
+    const difEl = document.getElementById('r1Diferencia');
+    difEl.textContent = dif === 0 ? 'Cuadra' : (dif > 0 ? '+' + dnFormatCOP(dif) : dnFormatCOP(dif));
+    difEl.className = 'summary-value ' + (dif === 0 ? 'success' : dif > 0 ? 'success' : 'error');
+
+    // Calcular total de comisiones incluyendo admin_sede y aseo
+    const configPago = adminSedeData?.config_pago || {};
+    const salarioDiario = configPago.salario_diario || 0;
+    const totalConAdminYAseo = totalComisiones + salarioDiario + comisionProductosAdmin + personalAseo.reduce((s, p) => s + (p.pago_diario || 0), 0);
+
+    // Contar total de colaboradores
+    let totalColaboradores = (barberos?.length || 0);
+    if (salarioDiario > 0 || comisionProductosAdmin > 0) totalColaboradores++;
+    totalColaboradores += personalAseo.length;
+
+    document.getElementById('r2Comisiones').textContent = dnFormatCOP(totalConAdminYAseo);
+    document.getElementById('r2Pagados').textContent = `${pagados}/${totalColaboradores}`;
+
+    let consumidas = 0;
+    (bebidas || []).forEach(b => {
+      const ini = inventarioInicial.find(i => i.bebida_id === b.id);
+      const cantInicial = ini?.cantidad_inicial || 0;
+      consumidas += Math.max(0, cantInicial - (inventarioFinal[b.id] || 0));
+    });
+    document.getElementById('r3Consumidas').textContent = consumidas;
+
+    // Cuadre card (paso 4)
+    const cuadreCard = document.getElementById('cuadreCard');
+    const cuadreLabel = document.getElementById('cuadreLabel');
+    const cuadreValue = document.getElementById('cuadreValue');
+
+    cuadreCard.className = 'diferencia-card';
+    if (dif === 0) {
+      cuadreCard.classList.add('perfect');
+      cuadreLabel.textContent = 'Cuadre perfecto';
+      cuadreValue.textContent = '0';
+    } else if (dif > 0) {
+      cuadreCard.classList.add('sobrante');
+      cuadreLabel.textContent = 'Sobrante';
+      cuadreValue.textContent = '+' + dnFormatCOP(dif);
+    } else {
+      cuadreCard.classList.add('faltante');
+      cuadreLabel.textContent = 'Faltante';
+      cuadreValue.textContent = dnFormatCOP(dif);
+    }
+
+    document.getElementById('s4EfectivoEsperado').textContent = dnFormatCOP(efectivoEsperado);
+    document.getElementById('s4EfectivoContado').textContent = dnFormatCOP(efectivoContado);
+    document.getElementById('s4ComisionesPagadas').textContent = dnFormatCOP(totalComisiones);
+  }
+
+  // Navegacion
+  function irAPaso(paso) {
+    currentStep = paso;
+
+    document.querySelectorAll('.step-content').forEach(el => {
+      el.classList.toggle('active', parseInt(el.dataset.step) === paso);
+    });
+
+    document.querySelectorAll('.progress-step').forEach(el => {
+      const s = parseInt(el.dataset.step);
+      el.classList.toggle('active', s === paso);
+      el.classList.toggle('completed', s < paso);
+    });
+
+    if (paso === 2) renderMetodosPago();
+    if (paso === 3) renderColaboradores();
+    if (paso === 5) renderBebidas();
+    if (paso >= 4) actualizarResumen();
+  }
+
+  // Event listeners
+  document.getElementById('btnPaso2').addEventListener('click', () => {
+    cierreData.efectivo_contado = efectivoContado;
+    irAPaso(2);
+  });
+  document.getElementById('btnPaso3').addEventListener('click', () => irAPaso(3));
+  document.getElementById('btnPaso4').addEventListener('click', () => irAPaso(4));
+  document.getElementById('btnPaso5').addEventListener('click', () => irAPaso(5));
+  document.getElementById('btnPaso6').addEventListener('click', () => irAPaso(6));
+
+  document.getElementById('btnAtras1').addEventListener('click', () => irAPaso(1));
+  document.getElementById('btnAtras2').addEventListener('click', () => irAPaso(2));
+  document.getElementById('btnAtras3').addEventListener('click', () => irAPaso(3));
+  document.getElementById('btnAtras4').addEventListener('click', () => irAPaso(4));
+  document.getElementById('btnAtras5').addEventListener('click', () => irAPaso(5));
+
+  // Confirmar cierre
+  document.getElementById('btnConfirmarCierre').addEventListener('click', async () => {
+    const btn = document.getElementById('btnConfirmarCierre');
+    btn.disabled = true;
+    document.getElementById('loadingOverlay').classList.add('show');
+
+    try {
+      // Preparar datos finales
+      cierreData.efectivo_contado = efectivoContado;
+      cierreData.inventario_final = (bebidas || []).map(b => ({
+        bebida_id: b.id,
+        nombre: b.nombre,
+        cantidad_final: inventarioFinal[b.id] || 0
+      }));
+      cierreData.ventas_totales = citasFinalizadas.reduce((s, c) => s + (Number(c.precio) || 0), 0);
+      cierreData.diferencia = efectivoContado - efectivoEsperado;
+
+      // Usar RPC cerrar_turno para persistir cierre con cálculos completos
+      const resultadoCierre = await dnCerrarTurno({
+        turnoId: turno.id,
+        efectivoContado: efectivoContado,
+        observaciones: cierreData.observaciones || null
+      });
+
+      if (!resultadoCierre.success) {
+        throw new Error(resultadoCierre.error || 'Error al cerrar turno');
+      }
+
+      // Guardar datos adicionales en el cierre
+      await dnActualizarCierreTurno(turno.id, 6, cierreData);
+
+      // Actualizar comisiones pagadas en citas
+      for (const citaId of citasFinalizadas.map(c => c.id)) {
+        await sb.from('citas').update({ comision_pagada: true, comision_pagada_at: new Date().toISOString() }).eq('id', citaId);
+      }
+
+      // Mostrar resumen del cierre
+      const msg = `Turno cerrado. Ganancia neta: ${dnFormatCOP(resultadoCierre.ganancia_neta || 0)}`;
+      showToast(msg);
+      dnClearTurnoSede();
+
+      setTimeout(() => {
+        window.location.href = 'seleccionar-sede.html';
+      }, 2000);
+
+    } catch (err) {
+      console.error(err);
+      showToast('Error al cerrar turno: ' + err.message);
+      document.getElementById('loadingOverlay').classList.remove('show');
+      btn.disabled = false;
+    }
+  });
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // Iniciar en el paso actual
+  irAPaso(currentStep);
+  if (cierreData.efectivo_contado) {
+    efectivoContado = cierreData.efectivo_contado;
+    efectivoInput.value = efectivoContado.toLocaleString('es-CO');
+    actualizarDiferencia();
+  }
+})();
+</script>
+</body>
+</html>

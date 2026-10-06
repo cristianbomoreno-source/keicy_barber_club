@@ -1,0 +1,11 @@
+# Diego Neira Barber Club - Robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://diegoneirabarber.com/sitemap.xml
+
+# Bloquear páginas de admin
+Disallow: /admin/
+Disallow: /barbero/
+Disallow: /admin_sede/

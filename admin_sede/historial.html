@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#111111">
+<title>Historial · Admin Sede</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/mobile-admin.css">
+<style>
+  body { background: var(--bg); min-height: 100vh; overflow-x: hidden; }
+
+  #app { display: flex; min-height: 100vh; min-height: 100dvh; }
+
+  /* Sidebar */
+  .sidebar {
+    width:60px; flex-shrink:0;
+    background:#FAFAFA;
+    border-right:1px solid var(--divider);
+    display:flex; flex-direction:column; align-items:center;
+    padding:20px 6px;
+    padding-top: calc(20px + var(--safe-top));
+    position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden; overflow-y:auto;
+    transition:width 0.28s cubic-bezier(.4,0,.2,1), padding 0.28s ease;
+  }
+  .sidebar.expanded { width:230px; align-items:stretch; padding:22px 16px; }
+  .sidebar-logo { display:block; cursor:pointer; margin:0 auto; }
+  .sidebar-logo-icon{ width:40px; height:40px; border-radius:11px; margin-bottom:26px; }
+  .sidebar-logo-full{ height:48px; margin-bottom:28px; display:none; }
+  .sidebar.expanded .sidebar-logo-icon { display:none; }
+  .sidebar.expanded .sidebar-logo-full { display:block; }
+  .nav-group { flex:1; display:flex; flex-direction:column; gap:3px; width:100%; min-width:0; }
+  .nav-link {
+    display:flex; align-items:center; gap:11px; justify-content:center;
+    width:40px; height:40px; margin:0 auto; padding:0; border-radius:11px;
+    font-size:13px; font-weight:600; color:#9F9F9F;
+    cursor:pointer; transition:background 0.15s ease, color 0.15s ease;
+    text-decoration:none; white-space:nowrap;
+  }
+  .sidebar.expanded .nav-link { justify-content:flex-start; width:100%; height:auto; margin:0; padding:9.5px 12px; }
+  .nav-link svg { width:22px; height:22px; flex-shrink:0; }
+  .nav-link:hover { background:var(--card); color:#111111; }
+  .nav-link.active { background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; }
+  .nav-link.active svg { stroke:#141414; }
+  .nav-link { position:relative; }
+  .nav-badge { display:none; background:#e74c3c; color:#111111; font-size:10px; font-weight:700; min-width:18px; height:18px; line-height:18px; text-align:center; padding:0 5px; border-radius:10px; margin-left:auto; }
+  .nav-badge.has-orders { display:inline-block; }
+  .sidebar:not(.expanded) .nav-badge.has-orders { position:absolute; top:2px; right:2px; min-width:8px; width:8px; height:8px; padding:0; font-size:0; border-radius:50%; }
+  .help-link { margin-top:8px; }
+  .nav-label { opacity:0; max-width:0; overflow:hidden; transition:opacity 0.16s ease, max-width 0.26s ease; }
+  .sidebar.expanded .nav-label { opacity:1; max-width:170px; }
+  .nav-section-label { display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
+  .sidebar.expanded .nav-section-label { display:block; }
+  .sidebar-card { display:none; position:relative; align-items:center; gap:9px; padding:9px; border-radius:14px; background:var(--glass-2); border:1px solid var(--glass-border); margin-bottom:8px; transition:background 0.15s ease; }
+  .sidebar-card:hover { background:var(--glass-3); }
+  .sidebar.expanded .sidebar-card { display:flex; }
+  .sidebar-card-icon { width:32px; height:32px; border-radius:8px; background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .sidebar-card-info { flex:1; min-width:0; }
+  .sidebar-card-name { font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-card-sub { font-size:10.5px; color:var(--text-secondary); }
+  .sede-selector { display:none; background:var(--card); border:1px solid var(--divider); border-radius:12px; margin-bottom:12px; overflow:hidden; }
+  .sidebar.expanded .sede-selector.show { display:block; }
+  .sede-selector-title { font-size:10px; font-weight:700; color:var(--text-secondary); padding:10px 12px 6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .sede-selector-list { max-height:200px; overflow-y:auto; }
+  .sede-option { display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer; transition:background 0.15s ease; }
+  .sede-option:hover { background:rgba(255,255,255,0.05); }
+  .sede-option.active { background:var(--gold); color:#141414; }
+  .sede-option-dot { width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0; }
+  .sede-option-name { font-size:12px; font-weight:600; }
+  .sidebar-bottom {
+    margin-top:auto; padding-top:12px; border-top:1px solid var(--divider);
+    display:flex; flex-direction:column; gap:8px; width:100%;
+  }
+  .logout-btn {
+    font-size:12px; color:#EF5350; display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px; cursor:pointer; width:40px; height:40px; border-radius:10px; background:rgba(239,83,80,0.1);
+    border:1px solid rgba(239,83,80,0.2); transition:all 0.25s ease; margin:0 auto;
+  }
+  .sidebar.expanded .logout-btn { justify-content:flex-start; width:100%; height:auto; padding:10px 12px; margin:0; }
+  .logout-btn:hover { background:rgba(239,83,80,0.2); }
+  .logout-btn svg { width:18px; height:18px; flex-shrink:0; }
+  .logout-label { display:none; }
+  .sidebar.expanded .logout-label { display:inline; }
+
+  /* Dark theme sidebar overrides */
+  [data-theme="dark"] .sidebar {
+    background: var(--surface, #1A1A1C) !important;
+    border-right-color: var(--divider, rgba(255,255,255,0.08)) !important;
+  }
+  [data-theme="dark"] .nav-link { color: var(--text-secondary, #B8B5AE) !important; }
+  [data-theme="dark"] .nav-link svg { stroke: currentColor !important; }
+  [data-theme="dark"] .nav-link:hover { background: var(--glass-2, rgba(255,255,255,0.06)) !important; color: var(--text, #F5F2EA) !important; }
+  [data-theme="dark"] .nav-link.active { background: var(--gold, #D4AF55) !important; color: #141414 !important; }
+  [data-theme="dark"] .nav-link.active svg { stroke: #141414 !important; }
+  [data-theme="dark"] .sidebar-card-name { color: #F5F2EA !important; }
+
+  .main { flex: 1; min-width: 0; padding: 26px 32px 100px; max-width: 1000px; }
+
+  .header-row { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .back-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 1px solid var(--divider); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); text-decoration: none; flex-shrink: 0; }
+  .back-btn svg { width: 20px; height: 20px; }
+  .header-text .title { font-size: 22px; font-weight: 800; }
+  .header-text .sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+  .filters-row { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  @media (max-width: 767px) { .filters-row { display: none; } }
+  .filter-select { padding: 12px 16px; border-radius: 12px; background: var(--card); border: 1px solid var(--divider); color: var(--text); font-size: 14px; min-width: 150px; }
+  .filter-select:focus { outline: none; border-color: var(--gold); }
+
+  .accordions { display: flex; flex-direction: column; gap: 12px; }
+
+  .accordion { background: var(--card); border: 1px solid var(--divider); border-radius: 16px; overflow: hidden; }
+  .accordion-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; cursor: pointer; transition: background 0.2s; }
+  .accordion-header:hover { background: var(--card-2); }
+  .accordion-header-left { display: flex; align-items: center; gap: 14px; }
+  .accordion-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(201,163,91,0.12); color: var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .accordion-icon svg { width: 20px; height: 20px; }
+  .accordion-title { font-size: 15px; font-weight: 700; }
+  .accordion-count { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .accordion-chevron { width: 20px; height: 20px; color: var(--text-secondary); transition: transform 0.3s ease; }
+  .accordion.open .accordion-chevron { transform: rotate(180deg); }
+
+  .accordion-body { display: none; border-top: 1px solid var(--divider); }
+  .accordion.open .accordion-body { display: block; }
+
+  .accordion-content { padding: 16px 20px; max-height: 400px; overflow-y: auto; }
+
+  .history-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--divider); gap: 12px; }
+  .history-row:last-child { border-bottom: none; }
+  .history-info { flex: 1; min-width: 0; }
+  .history-main { font-size: 14px; font-weight: 600; }
+  .history-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .history-amount { font-size: 15px; font-weight: 700; text-align: right; white-space: nowrap; }
+  .history-amount.positive { color: var(--success); }
+  .history-amount.negative { color: var(--error); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
+  .empty-state svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.5; }
+
+  .load-more-btn { width: 100%; padding: 12px; border-radius: 12px; background: var(--card-2); border: 1px solid var(--divider); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 12px; }
+  .load-more-btn:hover { border-color: var(--gold); }
+
+  .badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge-success { background: rgba(78, 203, 113, 0.15); color: var(--success); }
+  .badge-warning { background: rgba(242, 201, 76, 0.15); color: var(--warning); }
+  .badge-error { background: rgba(239, 83, 80, 0.15); color: var(--error); }
+  .badge-gold { background: rgba(201, 163, 91, 0.15); color: var(--gold); }
+
+  .download-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 12px; background: var(--card-2); border: 1px solid var(--divider); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .download-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .download-btn svg { width: 16px; height: 16px; }
+
+  .report-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+  .report-card { padding: 16px; border-radius: 12px; background: var(--card-2); border: 1px solid var(--divider); cursor: pointer; transition: border-color 0.2s; }
+  .report-card:hover { border-color: var(--gold); }
+  .report-card-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .report-card-desc { font-size: 11px; color: var(--text-secondary); }
+
+  @media (max-width: 1023px) {
+    .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); z-index: 70; }
+    .sidebar.open { transform: translateX(0); }
+    .main { padding: 18px 18px 120px; }
+  }
+  @media (max-width: 767px) {
+    .main { padding: calc(16px + var(--safe-top)) var(--page-padding-x) calc(100px + var(--safe-bottom)); }
+    .header-row { gap: 12px; }
+    .filters-row { gap: 8px; }
+    .filter-select { min-width: 120px; font-size: 13px; padding: 10px 12px; }
+    /* Ocultar acordeones en móvil */
+    .accordions.desktop-only { display: none !important; }
+  }
+
+  /* Contenedor de tickets */
+  .tickets-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+
+  /* Card de ticket */
+  .ticket-item {
+    background: var(--card); border: 1px solid var(--divider); border-radius: 16px;
+    padding: 16px; cursor: pointer; transition: all 0.2s ease;
+  }
+  .ticket-item:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .ticket-item-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .ticket-item-number { font-size: 12px; font-weight: 800; color: var(--gold); }
+  .ticket-item-hora { font-size: 11px; color: var(--text-secondary); }
+  .ticket-item-cliente { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .ticket-item-barbero { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .ticket-item-barbero .avatar { width: 20px; height: 20px; border-radius: 50%; background: var(--gold); color: #141414; font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .ticket-item-servicios { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
+  .ticket-item-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid var(--divider); }
+  .ticket-item-total { font-size: 18px; font-weight: 800; color: var(--success); }
+  .ticket-item-metodos { display: flex; gap: 6px; }
+  .ticket-item-metodo { font-size: 10px; padding: 3px 8px; border-radius: 6px; background: var(--card-2); border: 1px solid var(--divider); }
+
+  /* Acciones de ticket */
+  .ticket-item-actions { display: flex; gap: 8px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--divider); }
+  .ticket-action-btn {
+    flex: 1; padding: 10px 12px; border-radius: 10px; font-size: 12px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    border: 1px solid var(--divider); background: var(--card-2); color: var(--text);
+    transition: all 0.15s;
+  }
+  .ticket-action-btn:hover { border-color: var(--gold); background: rgba(200,160,90,0.1); }
+  .ticket-action-btn.anular { background: rgba(220,53,69,0.15); border-color: rgba(220,53,69,0.3); color: #dc3545; }
+  .ticket-action-btn.anular:hover { background: rgba(220,53,69,0.25); }
+  .ticket-action-btn svg { width: 14px; height: 14px; }
+
+  /* Stats de tickets */
+  .tickets-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .ticket-stat { background: var(--card); border: 1px solid var(--divider); border-radius: 14px; padding: 14px; text-align: center; }
+  .ticket-stat-value { font-size: 22px; font-weight: 800; color: var(--gold); }
+  .ticket-stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+
+  @media (max-width: 767px) {
+    .tickets-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .ticket-stat { padding: 12px 8px; }
+    .ticket-stat-value { font-size: 18px; }
+    .ticket-stat-label { font-size: 10px; }
+  }
+
+  /* ========== MODAL DE CONFIRMACIÓN PERSONALIZADO ========== */
+  .dn-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+    display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+  }
+  .dn-modal-overlay.show { display: flex; }
+  .dn-modal {
+    background: var(--card); border: 1px solid var(--divider); border-radius: 20px;
+    width: 100%; max-width: 380px; overflow: hidden;
+    animation: modalSlideIn 0.25s ease;
+  }
+  @keyframes modalSlideIn {
+    from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .dn-modal-header {
+    padding: 20px 20px 16px; display: flex; align-items: center; gap: 14px;
+    border-bottom: 1px solid var(--divider);
+  }
+  .dn-modal-icon {
+    width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .dn-modal-icon.warning { background: rgba(220,53,69,0.15); }
+  .dn-modal-icon.success { background: rgba(78,203,113,0.15); }
+  .dn-modal-icon.info { background: rgba(200,160,90,0.15); }
+  .dn-modal-title { font-size: 17px; font-weight: 800; }
+  .dn-modal-body { padding: 20px; }
+  .dn-modal-message { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
+  .dn-modal-details {
+    margin-top: 16px; padding: 14px; border-radius: 12px;
+    background: var(--card-2); border: 1px solid var(--divider);
+  }
+  .dn-modal-detail-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; font-size: 13px;
+  }
+  .dn-modal-detail-row:not(:last-child) { border-bottom: 1px solid var(--divider); }
+  .dn-modal-detail-label { color: var(--text-secondary); }
+  .dn-modal-detail-value { font-weight: 700; color: var(--text); }
+  .dn-modal-detail-value.highlight { color: var(--gold); }
+  .dn-modal-footer {
+    padding: 16px 20px 20px; display: flex; gap: 10px;
+  }
+  .dn-modal-btn {
+    flex: 1; padding: 14px 20px; border-radius: 12px; font-size: 14px; font-weight: 700;
+    cursor: pointer; border: none; transition: all 0.15s;
+  }
+  .dn-modal-btn.cancel {
+    background: var(--card-2); border: 1px solid var(--divider); color: var(--text);
+  }
+  .dn-modal-btn.cancel:hover { border-color: var(--text-secondary); }
+  .dn-modal-btn.confirm {
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color: #141414;
+  }
+  .dn-modal-btn.confirm:hover { filter: brightness(1.1); }
+  .dn-modal-btn.danger {
+    background: linear-gradient(180deg, #ff6b6b, #dc3545); color:var(--text);
+  }
+  .dn-modal-btn.danger:hover { filter: brightness(1.1); }
+
+  /* Toast mejorado */
+  .dn-toast {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--card); border: 1px solid var(--divider); border-radius: 14px;
+    padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4); z-index: 1001;
+    opacity: 0; pointer-events: none; transition: all 0.3s ease;
+  }
+  .dn-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .dn-toast-icon { font-size: 18px; }
+  .dn-toast-message { font-size: 13px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="sidebar" id="sidebar"></div>
+
+  <div class="main">
+    <div class="header-row">
+      <a href="ventas.html" class="back-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </a>
+      <div class="header-text">
+        <div class="title">Tickets del día</div>
+        <div class="sub" id="ticketsSub">Tickets del turno actual</div>
+      </div>
+    </div>
+
+    <div class="tickets-container" id="ticketsContainer">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <div>Cargando tickets...</div>
+      </div>
+    </div>
+
+    <!-- Filtro de mes - solo visible en desktop -->
+    <div class="filters-row">
+      <select class="filter-select" id="filterMes">
+        <option value="">Este mes</option>
+      </select>
+    </div>
+
+    <!-- Acordeones ocultos - solo visibles en desktop -->
+    <div class="accordions desktop-only">
+      <!-- Historial de Cajas -->
+      <div class="accordion" data-section="cajas">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18"/></svg>
+            </div>
+            <div>
+              <div class="accordion-title">Historial de cajas</div>
+              <div class="accordion-count" id="cajasCount">Cargando...</div>
+            </div>
+          </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-content" id="cajasContent"></div>
+        </div>
+      </div>
+
+      <!-- Historial de Gastos -->
+      <div class="accordion" data-section="gastos">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            </div>
+            <div>
+              <div class="accordion-title">Historial de gastos</div>
+              <div class="accordion-count" id="gastosCount">Cargando...</div>
+            </div>
+          </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-content" id="gastosContent"></div>
+        </div>
+      </div>
+
+      <!-- Historial de Retiros -->
+      <div class="accordion" data-section="retiros">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            </div>
+            <div>
+              <div class="accordion-title">Historial de retiros</div>
+              <div class="accordion-count" id="retirosCount">Cargando...</div>
+            </div>
+          </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-content" id="retirosContent"></div>
+        </div>
+      </div>
+
+      <!-- Historial de Depósitos -->
+      <div class="accordion" data-section="depositos">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+            </div>
+            <div>
+              <div class="accordion-title">Historial de depósitos</div>
+              <div class="accordion-count" id="depositosCount">Cargando...</div>
+            </div>
+          </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-content" id="depositosContent"></div>
+        </div>
+      </div>
+
+      <!-- Historial de Garantías -->
+      <div class="accordion" data-section="garantias">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div>
+              <div class="accordion-title">Historial de garantías</div>
+              <div class="accordion-count" id="garantiasCount">Cargando...</div>
+            </div>
+          </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-content" id="garantiasContent"></div>
+        </div>
+      </div>
+
+      <!-- Historial de Ventas -->
+      <div class="accordion" data-section="ventas">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            </div>
+            <div>
+              <div class="accordion-title">Historial de ventas</div>
+              <div class="accordion-count" id="ventasCount">Cargando...</div>
+            </div>
+          </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-content" id="ventasContent"></div>
+        </div>
+      </div>
+
+      <!-- Ventas Internas -->
+      <div class="accordion" data-section="internas">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2"/></svg>
+            </div>
+            <div>
+              <div class="accordion-title">Ventas internas</div>
+              <div class="accordion-count" id="internasCount">Cargando...</div>
+            </div>
+          </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-content" id="internasContent"></div>
+        </div>
+      </div>
+
+      <!-- Préstamos a Clientes -->
+      <div class="accordion" data-section="prestamos">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+            </div>
+            <div>
+              <div class="accordion-title">Préstamos a clientes</div>
+              <div class="accordion-count" id="prestamosCount">Cargando...</div>
+            </div>
+          </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-content" id="prestamosContent"></div>
+        </div>
+      </div>
+
+      <!-- Reseñas de Clientes -->
+      <div class="accordion" data-section="resenas">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z"/></svg>
+            </div>
+            <div>
+              <div class="accordion-title">Reseñas de clientes</div>
+              <div class="accordion-count" id="resenasCount">Cargando...</div>
+            </div>
+          </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-content" id="resenasContent"></div>
+        </div>
+      </div>
+
+      <!-- Reportes Descargables -->
+      <div class="accordion" data-section="reportes">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+            </div>
+            <div>
+              <div class="accordion-title">Reportes descargables</div>
+              <div class="accordion-count">Genera reportes en PDF o Excel</div>
+            </div>
+          </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-content" id="reportesContent">
+            <div class="report-grid">
+              <div class="report-card" onclick="generarReporte('ventas')">
+                <div class="report-card-title">Reporte de Ventas</div>
+                <div class="report-card-desc">Ventas del período seleccionado</div>
+              </div>
+              <div class="report-card" onclick="generarReporte('cierres')">
+                <div class="report-card-title">Cierres de Caja</div>
+                <div class="report-card-desc">Resumen de cierres diarios</div>
+              </div>
+              <div class="report-card" onclick="generarReporte('gastos')">
+                <div class="report-card-title">Reporte de Gastos</div>
+                <div class="report-card-desc">Detalle de gastos operativos</div>
+              </div>
+              <div class="report-card" onclick="generarReporte('colaboradores')">
+                <div class="report-card-title">Comisiones</div>
+                <div class="report-card-desc">Comisiones por colaborador</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagos a Colaboradores -->
+      <div class="accordion" data-section="pagos">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/><circle cx="14" cy="14" r="2"/></svg>
+            </div>
+            <div>
+              <div class="accordion-title">Pagos a colaboradores</div>
+              <div class="accordion-count" id="pagosCount">Cargando...</div>
+            </div>
+          </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-content" id="pagosContent"></div>
+        </div>
+      </div>
+
+      <!-- Estado de Cuenta Colaboradores -->
+      <div class="accordion" data-section="cuentas">
+        <div class="accordion-header" onclick="toggleAccordion(this)">
+          <div class="accordion-header-left">
+            <div class="accordion-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <div>
+              <div class="accordion-title">Estado de cuenta colaboradores</div>
+              <div class="accordion-count" id="cuentasCount">Saldos pendientes</div>
+            </div>
+          </div>
+          <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-content" id="cuentasContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/mobile-nav.js"></script>
+<script>
+(async function() {
+  // Verificar sesión
+  const user = dnGetSession();
+  if (!user || user.role !== 'admin_sede') {
+    window.location.replace('../index.html');
+    return;
+  }
+
+  const sedeId = dnGetTurnoSedeActual();
+  if (!sedeId) {
+    window.location.replace('seleccionar-sede.html');
+    return;
+  }
+
+  // Variable global para tickets (para acciones)
+  let ticketsGenerados = [];
+
+  // Función para anular ticket (igual que caja.html)
+  window.anularTicket = async function(idx) {
+    const ticket = ticketsGenerados[idx];
+    if (!ticket) return;
+
+    // Mostrar modal de confirmación personalizado
+    const confirmed = await dnShowConfirm({
+      type: 'warning',
+      icon: '⚠️',
+      title: 'Anular ticket',
+      message: 'Esta acción eliminará la venta y la cita volverá a estado pendiente de pago.',
+      details: [
+        { label: 'Cliente', value: ticket.cliente },
+        { label: 'Servicio', value: ticket.servicios.join(', ') },
+        { label: 'Total', value: dnFormatCOP(ticket.total + ticket.propina), highlight: true }
+      ],
+      confirmText: 'Anular ticket',
+      danger: true
+    });
+
+    if (!confirmed) return;
+
+    dnToast('Anulando ticket...', 'info');
+
+    try {
+      const pagoId = ticket.pagoId;
+      const citaId = ticket.citaId;
+
+      if (pagoId && citaId) {
+        const { error } = await sb.rpc('anular_pago_y_cita', {
+          p_pago_id: pagoId,
+          p_cita_id: citaId
+        });
+
+        if (error) {
+          throw new Error(error.message);
+        }
+      }
+
+      dnToast('Ticket anulado correctamente', 'success');
+
+      // Recargar tickets
+      await loadTicketsDelDia();
+
+    } catch (err) {
+      console.error('Error al anular:', err);
+      await dnShowAlert({
+        type: 'warning',
+        icon: '❌',
+        title: 'Error',
+        message: 'No se pudo anular el ticket: ' + err.message,
+        buttonText: 'Entendido'
+      });
+    }
+  };
+
+  // Metodos de pago icons
+  const METODO_ICONS = {
+    efectivo: '💵',
+    tarjeta: '💳',
+    nequi: '📱',
+    transferencia: '🏦',
+    qr: '📲',
+    daviplata: '📱',
+    fiado: '📝'
+  };
+
+  // Cargar tickets del día
+  async function loadTicketsDelDia() {
+    const container = document.getElementById('ticketsContainer');
+    const todayISO = new Date().toISOString().split('T')[0];
+
+    // Buscar sesión activa (igual que caja.html)
+    const { data: sesionActual } = await sb
+      .from('caja_sesiones')
+      .select('*')
+      .eq('sucursal_id', sedeId)
+      .eq('estado', 'abierta')
+      .order('abierta_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    // Calcular rango de fechas igual que caja.html
+    let rangoFiltro;
+    if (sesionActual) {
+      // Si hay sesión abierta, usar desde que abrió hasta ahora
+      rangoFiltro = {
+        start: new Date(sesionActual.abierta_at).toISOString(),
+        end: new Date().toISOString()
+      };
+      console.log('[Historial] Usando rango de sesión activa');
+    } else {
+      // Si no hay sesión, buscar la última sesión cerrada de hoy
+      const { data: ultimaSesion } = await sb
+        .from('caja_sesiones')
+        .select('*')
+        .eq('sucursal_id', sedeId)
+        .eq('fecha', todayISO)
+        .order('abierta_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (ultimaSesion) {
+        rangoFiltro = {
+          start: new Date(ultimaSesion.abierta_at).toISOString(),
+          end: ultimaSesion.cerrada_at ? new Date(ultimaSesion.cerrada_at).toISOString() : new Date().toISOString()
+        };
+        console.log('[Historial] Usando rango de última sesión de hoy');
+      } else {
+        rangoFiltro = dnLocalDayRangeUTC(todayISO);
+        console.log('[Historial] Usando rango del día completo');
+      }
+    }
+
+    console.log('[Historial] Cargando tickets del día:', todayISO);
+    console.log('[Historial] Rango:', rangoFiltro);
+    console.log('[Historial] Sede ID:', sedeId);
+
+    try {
+      // Buscar pagos del día (mismo método que caja.html)
+      const { data: allPagos, error: pagosError } = await sb
+        .from('pagos')
+        .select('*, citas(sucursal_id, precio, servicios(nombre), usuarios!citas_cliente_id_fkey(full_name, username), barberos(usuarios!barberos_id_fkey(full_name, username, avatar_url)))')
+        .eq('estado', 'pagado')
+        .gte('created_at', rangoFiltro.start)
+        .lte('created_at', rangoFiltro.end);
+
+      console.log('[Historial] Pagos encontrados (total):', allPagos?.length || 0);
+      if (pagosError) {
+        console.error('[Historial] Error cargando pagos:', pagosError);
+      }
+
+      // Filtrar por sede
+      const pagosHoy = (allPagos || []).filter(p => {
+        if (p.citas && p.citas.sucursal_id) {
+          return p.citas.sucursal_id === sedeId;
+        }
+        return false;
+      });
+
+      console.log('[Historial] Pagos filtrados por sede:', pagosHoy.length);
+
+      // Generar tickets desde pagos
+      const ticketsMap = new Map();
+      let ticketNum = 1;
+
+      pagosHoy.forEach(p => {
+        const cita = p.citas;
+        if (!cita) return;
+
+        const key = `pago-${p.id}`;
+        if (!ticketsMap.has(key)) {
+          const cliente = cita.usuarios?.full_name || cita.usuarios?.username || 'Cliente';
+          const barbero = cita.barberos?.usuarios?.full_name || cita.barberos?.usuarios?.username || 'Barbero';
+          const barberoAvatar = cita.barberos?.usuarios?.avatar_url;
+          const servicio = cita.servicios?.nombre || 'Servicio';
+
+          ticketsMap.set(key, {
+            id: p.id,
+            pagoId: p.id,
+            citaId: p.cita_id,
+            numero: `#${String(ticketNum++).padStart(3, '0')}`,
+            cliente,
+            barbero,
+            barberoAvatar,
+            servicios: [servicio],
+            total: Number(p.monto) || Number(cita.precio) || 0,
+            propina: Number(p.propina) || 0,
+            metodo: p.metodo || 'efectivo',
+            created_at: p.created_at
+          });
+        }
+      });
+
+    // Guardar en variable global para acciones
+    ticketsGenerados = Array.from(ticketsMap.values()).sort((a, b) =>
+      new Date(b.created_at) - new Date(a.created_at)
+    );
+
+    // Calcular stats
+    const totalVentas = ticketsGenerados.reduce((sum, t) => sum + t.total + t.propina, 0);
+    const totalPropinas = ticketsGenerados.reduce((sum, t) => sum + t.propina, 0);
+
+    // Actualizar subtítulo
+    document.getElementById('ticketsSub').textContent = `${ticketsGenerados.length} tickets · ${dnFormatCOP(totalVentas)} en ventas`;
+
+    if (ticketsGenerados.length === 0) {
+      container.innerHTML = `
+        <div class="tickets-stats">
+          <div class="ticket-stat"><div class="ticket-stat-value">0</div><div class="ticket-stat-label">Tickets</div></div>
+          <div class="ticket-stat"><div class="ticket-stat-value">$0</div><div class="ticket-stat-label">Ventas</div></div>
+          <div class="ticket-stat"><div class="ticket-stat-value">$0</div><div class="ticket-stat-label">Propinas</div></div>
+        </div>
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <div>No hay tickets hoy</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = `
+      <div class="tickets-stats">
+        <div class="ticket-stat"><div class="ticket-stat-value">${ticketsGenerados.length}</div><div class="ticket-stat-label">Tickets</div></div>
+        <div class="ticket-stat"><div class="ticket-stat-value">${dnFormatCOP(totalVentas)}</div><div class="ticket-stat-label">Ventas</div></div>
+        <div class="ticket-stat"><div class="ticket-stat-value">${dnFormatCOP(totalPropinas)}</div><div class="ticket-stat-label">Propinas</div></div>
+      </div>
+      ${ticketsGenerados.map((t, idx) => {
+        const hora = new Date(t.created_at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+        const metodoIcon = METODO_ICONS[t.metodo] || '💳';
+        const avatarInitials = t.barbero.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+        return `
+          <div class="ticket-item">
+            <div class="ticket-item-header">
+              <span class="ticket-item-number">${t.numero}</span>
+              <span class="ticket-item-hora">${hora}</span>
+            </div>
+            <div class="ticket-item-cliente">${t.cliente}</div>
+            <div class="ticket-item-barbero">
+              ${t.barberoAvatar
+                ? `<img src="${t.barberoAvatar}" class="avatar" style="object-fit:cover;">`
+                : `<span class="avatar">${avatarInitials}</span>`
+              }
+              ${t.barbero}
+            </div>
+            <div class="ticket-item-servicios">${t.servicios.join(', ')}</div>
+            <div class="ticket-item-footer">
+              <span class="ticket-item-total">+${dnFormatCOP(t.total + t.propina)}</span>
+              <div class="ticket-item-metodos">
+                <span class="ticket-item-metodo">${metodoIcon} ${t.metodo}</span>
+              </div>
+            </div>
+            <div class="ticket-item-actions">
+              <button class="ticket-action-btn anular" onclick="anularTicket(${idx})">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Anular ticket
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    `;
+    } catch (err) {
+      console.error('Error cargando tickets:', err);
+      container.innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+          <div>Error cargando tickets</div>
+        </div>
+      `;
+    }
+  }
+
+  // Generar opciones de mes
+  const mesSelect = document.getElementById('filterMes');
+  const hoy = new Date();
+  if (mesSelect) {
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+      const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const label = d.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+      mesSelect.innerHTML += `<option value="${val}" ${i === 0 ? 'selected' : ''}>${label}</option>`;
+    }
+  }
+
+  // Helper para formatear dinero
+  function formatMoney(n) {
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n || 0);
+  }
+
+  // Helper para formatear fecha
+  function formatDate(dateStr) {
+    if (!dateStr) return '--';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function formatDateTime(dateStr) {
+    if (!dateStr) return '--';
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  }
+
+  // Obtener rango de fechas del mes seleccionado
+  function getDateRange() {
+    const mes = mesSelect ? mesSelect.value : '';
+    if (!mes) {
+      const now = new Date();
+      const inicio = new Date(now.getFullYear(), now.getMonth(), 1);
+      const fin = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      return { inicio: inicio.toISOString().split('T')[0], fin: fin.toISOString().split('T')[0] };
+    }
+    const [year, month] = mes.split('-').map(Number);
+    const inicio = `${year}-${String(month).padStart(2, '0')}-01`;
+    const fin = new Date(year, month, 0).toISOString().split('T')[0];
+    return { inicio, fin };
+  }
+
+  // Cargar historial de cajas
+  async function loadCajas() {
+    const { inicio, fin } = getDateRange();
+    const { data, error, count } = await sb
+      .from('caja_sesiones')
+      .select('*', { count: 'exact' })
+      .eq('sucursal_id', sedeId)
+      .gte('fecha', inicio)
+      .lte('fecha', fin)
+      .order('fecha', { ascending: false })
+      .limit(20);
+
+    document.getElementById('cajasCount').textContent = `${count || 0} cierres`;
+
+    const container = document.getElementById('cajasContent');
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg><div>No hay cierres en este período</div></div>';
+      return;
+    }
+
+    container.innerHTML = data.map(c => `
+      <div class="history-row">
+        <div class="history-info">
+          <div class="history-main">${formatDate(c.fecha)}</div>
+          <div class="history-sub">Base: ${formatMoney(c.base_caja)} · ${c.estado === 'cerrada' ? 'Cerrada' : 'Abierta'}</div>
+        </div>
+        <div class="history-amount ${(c.ganancia_neta || 0) >= 0 ? 'positive' : 'negative'}">${formatMoney(c.ganancia_neta)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Cargar historial de gastos
+  async function loadGastos() {
+    const { inicio, fin } = getDateRange();
+    const { data, error, count } = await sb
+      .from('gastos')
+      .select('*', { count: 'exact' })
+      .eq('sucursal_id', sedeId)
+      .gte('fecha', inicio)
+      .lte('fecha', fin)
+      .order('fecha', { ascending: false })
+      .limit(20);
+
+    document.getElementById('gastosCount').textContent = `${count || 0} gastos`;
+
+    const container = document.getElementById('gastosContent');
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg><div>No hay gastos registrados</div></div>';
+      return;
+    }
+
+    container.innerHTML = data.map(g => `
+      <div class="history-row">
+        <div class="history-info">
+          <div class="history-main">${g.concepto || 'Gasto'}</div>
+          <div class="history-sub">${formatDateTime(g.created_at)} · ${g.categoria || 'General'}</div>
+        </div>
+        <div class="history-amount negative">-${formatMoney(g.monto)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Cargar movimientos de caja (retiros y depósitos)
+  async function loadMovimientos() {
+    const { inicio, fin } = getDateRange();
+    const { data, error } = await sb
+      .from('movimientos_caja')
+      .select('*')
+      .eq('sucursal_id', sedeId)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59')
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    const retiros = (data || []).filter(m => m.tipo === 'retiro');
+    const depositos = (data || []).filter(m => m.tipo === 'deposito');
+
+    document.getElementById('retirosCount').textContent = `${retiros.length} retiros`;
+    document.getElementById('depositosCount').textContent = `${depositos.length} depósitos`;
+
+    // Retiros
+    const retirosContainer = document.getElementById('retirosContent');
+    if (retiros.length === 0) {
+      retirosContainer.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg><div>No hay retiros en este período</div></div>';
+    } else {
+      retirosContainer.innerHTML = retiros.map(r => `
+        <div class="history-row">
+          <div class="history-info">
+            <div class="history-main">${r.descripcion || 'Retiro de caja'}</div>
+            <div class="history-sub">${formatDateTime(r.created_at)}</div>
+          </div>
+          <div class="history-amount negative">-${formatMoney(r.monto)}</div>
+        </div>
+      `).join('');
+    }
+
+    // Depósitos
+    const depositosContainer = document.getElementById('depositosContent');
+    if (depositos.length === 0) {
+      depositosContainer.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M19 12l-7 7-7-7"/></svg><div>No hay depósitos en este período</div></div>';
+    } else {
+      depositosContainer.innerHTML = depositos.map(d => `
+        <div class="history-row">
+          <div class="history-info">
+            <div class="history-main">${d.descripcion || 'Depósito a caja'}</div>
+            <div class="history-sub">${formatDateTime(d.created_at)}</div>
+          </div>
+          <div class="history-amount positive">+${formatMoney(d.monto)}</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Cargar garantías
+  async function loadGarantias() {
+    const { inicio, fin } = getDateRange();
+    const { data, error, count } = await sb
+      .from('garantias')
+      .select('*, clientes(nombre)', { count: 'exact' })
+      .eq('sucursal_id', sedeId)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59')
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    document.getElementById('garantiasCount').textContent = `${count || 0} garantías`;
+
+    const container = document.getElementById('garantiasContent');
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div>No hay garantías registradas</div></div>';
+      return;
+    }
+
+    container.innerHTML = data.map(g => `
+      <div class="history-row">
+        <div class="history-info">
+          <div class="history-main">${g.clientes?.nombre || 'Cliente'}</div>
+          <div class="history-sub">${formatDateTime(g.created_at)} · ${g.motivo || 'Sin motivo'}</div>
+        </div>
+        <span class="badge badge-warning">${g.estado || 'Pendiente'}</span>
+      </div>
+    `).join('');
+  }
+
+  // Cargar ventas
+  async function loadVentas() {
+    const { inicio, fin } = getDateRange();
+    const { data, error, count } = await sb
+      .from('ventas')
+      .select('*, clientes(nombre)', { count: 'exact' })
+      .eq('sucursal_id', sedeId)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59')
+      .neq('tipo', 'interna')
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    document.getElementById('ventasCount').textContent = `${count || 0} ventas`;
+
+    const container = document.getElementById('ventasContent');
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><div>No hay ventas en este período</div></div>';
+      return;
+    }
+
+    container.innerHTML = data.map(v => `
+      <div class="history-row">
+        <div class="history-info">
+          <div class="history-main">${v.clientes?.nombre || 'Cliente'}</div>
+          <div class="history-sub">${formatDateTime(v.created_at)}</div>
+        </div>
+        <div class="history-amount positive">${formatMoney(v.total)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Cargar ventas internas
+  async function loadVentasInternas() {
+    const { inicio, fin } = getDateRange();
+    const { data, error, count } = await sb
+      .from('ventas')
+      .select('*, usuarios(full_name)', { count: 'exact' })
+      .eq('sucursal_id', sedeId)
+      .eq('tipo', 'interna')
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59')
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    document.getElementById('internasCount').textContent = `${count || 0} ventas internas`;
+
+    const container = document.getElementById('internasContent');
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2"/></svg><div>No hay ventas internas</div></div>';
+      return;
+    }
+
+    container.innerHTML = data.map(v => `
+      <div class="history-row">
+        <div class="history-info">
+          <div class="history-main">${v.usuarios?.full_name || 'Colaborador'}</div>
+          <div class="history-sub">${formatDateTime(v.created_at)}</div>
+        </div>
+        <div class="history-amount">${formatMoney(v.total)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Cargar préstamos
+  async function loadPrestamos() {
+    const { inicio, fin } = getDateRange();
+    const { data, error, count } = await sb
+      .from('prestamos_clientes')
+      .select('*, clientes(nombre)', { count: 'exact' })
+      .eq('sucursal_id', sedeId)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59')
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    document.getElementById('prestamosCount').textContent = `${count || 0} préstamos`;
+
+    const container = document.getElementById('prestamosContent');
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><div>No hay préstamos registrados</div></div>';
+      return;
+    }
+
+    container.innerHTML = data.map(p => `
+      <div class="history-row">
+        <div class="history-info">
+          <div class="history-main">${p.clientes?.nombre || 'Cliente'}</div>
+          <div class="history-sub">${formatDateTime(p.created_at)} · ${p.estado || 'Activo'}</div>
+        </div>
+        <div class="history-amount">${formatMoney(p.monto)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Cargar reseñas
+  async function loadResenas() {
+    const { inicio, fin } = getDateRange();
+    const { data, error, count } = await sb
+      .from('resenas')
+      .select('*, clientes(nombre)', { count: 'exact' })
+      .eq('sucursal_id', sedeId)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59')
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    document.getElementById('resenasCount').textContent = `${count || 0} reseñas`;
+
+    const container = document.getElementById('resenasContent');
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z"/></svg><div>No hay reseñas en este período</div></div>';
+      return;
+    }
+
+    container.innerHTML = data.map(r => {
+      const stars = '★'.repeat(r.calificacion || 0) + '☆'.repeat(5 - (r.calificacion || 0));
+      return `
+        <div class="history-row">
+          <div class="history-info">
+            <div class="history-main">${r.clientes?.nombre || 'Cliente'}</div>
+            <div class="history-sub">${r.comentario || 'Sin comentario'}</div>
+          </div>
+          <span class="badge badge-gold">${stars}</span>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Cargar pagos a colaboradores
+  async function loadPagos() {
+    const { inicio, fin } = getDateRange();
+    const { data, error, count } = await sb
+      .from('pagos_colaboradores')
+      .select('*, usuarios(full_name)', { count: 'exact' })
+      .eq('sucursal_id', sedeId)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59')
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    document.getElementById('pagosCount').textContent = `${count || 0} pagos`;
+
+    const container = document.getElementById('pagosContent');
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/><circle cx="14" cy="14" r="2"/></svg><div>No hay pagos registrados</div></div>';
+      return;
+    }
+
+    container.innerHTML = data.map(p => `
+      <div class="history-row">
+        <div class="history-info">
+          <div class="history-main">${p.usuarios?.full_name || 'Colaborador'}</div>
+          <div class="history-sub">${formatDateTime(p.created_at)} · ${p.concepto || 'Pago'}</div>
+        </div>
+        <div class="history-amount negative">-${formatMoney(p.monto)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Cargar estado de cuenta colaboradores
+  async function loadCuentasColaboradores() {
+    const { data, error } = await sb
+      .from('usuarios')
+      .select('id, full_name, saldo_pendiente')
+      .eq('sucursal_id', sedeId)
+      .in('role', ['barbero', 'colaborador'])
+      .order('full_name');
+
+    const container = document.getElementById('cuentasContent');
+    if (!data || data.length === 0) {
+      container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><div>No hay colaboradores</div></div>';
+      return;
+    }
+
+    container.innerHTML = data.map(c => {
+      const saldo = c.saldo_pendiente || 0;
+      return `
+        <div class="history-row">
+          <div class="history-info">
+            <div class="history-main">${c.full_name}</div>
+            <div class="history-sub">Saldo ${saldo >= 0 ? 'a favor' : 'pendiente'}</div>
+          </div>
+          <div class="history-amount ${saldo >= 0 ? 'positive' : 'negative'}">${formatMoney(Math.abs(saldo))}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Función toggle accordion
+  window.toggleAccordion = function(header) {
+    const accordion = header.closest('.accordion');
+    const wasOpen = accordion.classList.contains('open');
+
+    // Cerrar otros acordeones (opcional - comentar para permitir múltiples abiertos)
+    // document.querySelectorAll('.accordion.open').forEach(a => a.classList.remove('open'));
+
+    if (!wasOpen) {
+      accordion.classList.add('open');
+    } else {
+      accordion.classList.remove('open');
+    }
+  };
+
+  // Función generar reporte
+  window.generarReporte = function(tipo) {
+    alert('Generando reporte de ' + tipo + '...\n\nEsta funcionalidad estará disponible próximamente.');
+  };
+
+  // Cargar todo (acordeones para desktop)
+  async function loadAll() {
+    await Promise.all([
+      loadCajas(),
+      loadGastos(),
+      loadMovimientos(),
+      loadGarantias(),
+      loadVentas(),
+      loadVentasInternas(),
+      loadPrestamos(),
+      loadResenas(),
+      loadPagos(),
+      loadCuentasColaboradores()
+    ]);
+  }
+
+  // Listener cambio de mes (solo para acordeones desktop)
+  if (mesSelect) {
+    mesSelect.addEventListener('change', loadAll);
+  }
+
+  // Cargar tickets del día primero (siempre visible)
+  loadTicketsDelDia();
+
+  // Solo cargar acordeones en desktop
+  if (window.innerWidth > 767) {
+    loadAll();
+  }
+})();
+</script>
+
+<!-- Modal de confirmación personalizado -->
+<div class="dn-modal-overlay" id="dnModalOverlay" onclick="if(event.target===this) dnCloseModal()">
+  <div class="dn-modal">
+    <div class="dn-modal-header">
+      <div class="dn-modal-icon" id="dnModalIcon">⚠️</div>
+      <div class="dn-modal-title" id="dnModalTitle">Confirmar acción</div>
+    </div>
+    <div class="dn-modal-body">
+      <div class="dn-modal-message" id="dnModalMessage"></div>
+      <div class="dn-modal-details" id="dnModalDetails" style="display:none;"></div>
+    </div>
+    <div class="dn-modal-footer">
+      <button class="dn-modal-btn cancel" onclick="dnCloseModal()">Cancelar</button>
+      <button class="dn-modal-btn" id="dnModalConfirmBtn" onclick="dnConfirmAction()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast mejorado -->
+<div class="dn-toast" id="dnToast">
+  <span class="dn-toast-icon" id="dnToastIcon">✓</span>
+  <span class="dn-toast-message" id="dnToastMessage"></span>
+</div>
+
+<script>
+// ========== SISTEMA DE MODALES Y ALERTAS PERSONALIZADAS ==========
+let dnModalCallback = null;
+
+function dnShowConfirm(options) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('dnModalOverlay');
+    const icon = document.getElementById('dnModalIcon');
+    const title = document.getElementById('dnModalTitle');
+    const message = document.getElementById('dnModalMessage');
+    const details = document.getElementById('dnModalDetails');
+    const confirmBtn = document.getElementById('dnModalConfirmBtn');
+
+    // Configurar icono
+    icon.className = 'dn-modal-icon ' + (options.type || 'warning');
+    icon.textContent = options.icon || (options.type === 'success' ? '✓' : options.type === 'info' ? 'ℹ️' : '⚠️');
+
+    // Configurar título y mensaje
+    title.textContent = options.title || 'Confirmar';
+    message.innerHTML = options.message || '¿Estás seguro?';
+
+    // Configurar detalles si existen
+    if (options.details && options.details.length > 0) {
+      details.style.display = 'block';
+      details.innerHTML = options.details.map(d => `
+        <div class="dn-modal-detail-row">
+          <span class="dn-modal-detail-label">${d.label}</span>
+          <span class="dn-modal-detail-value ${d.highlight ? 'highlight' : ''}">${d.value}</span>
+        </div>
+      `).join('');
+    } else {
+      details.style.display = 'none';
+    }
+
+    // Configurar botón de confirmar
+    confirmBtn.textContent = options.confirmText || 'Confirmar';
+    confirmBtn.className = 'dn-modal-btn ' + (options.danger ? 'danger' : 'confirm');
+
+    // Guardar callback
+    dnModalCallback = resolve;
+
+    // Mostrar modal
+    overlay.classList.add('show');
+  });
+}
+
+function dnCloseModal() {
+  document.getElementById('dnModalOverlay').classList.remove('show');
+  if (dnModalCallback) {
+    dnModalCallback(false);
+    dnModalCallback = null;
+  }
+}
+
+function dnConfirmAction() {
+  document.getElementById('dnModalOverlay').classList.remove('show');
+  if (dnModalCallback) {
+    dnModalCallback(true);
+    dnModalCallback = null;
+  }
+}
+
+function dnShowAlert(options) {
+  return dnShowConfirm({
+    ...options,
+    type: options.type || 'info',
+    confirmText: options.buttonText || 'Aceptar'
+  }).then(() => true);
+}
+
+function dnToast(message, type = 'success') {
+  const toast = document.getElementById('dnToast');
+  const icon = document.getElementById('dnToastIcon');
+  const msg = document.getElementById('dnToastMessage');
+
+  icon.textContent = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ️';
+  msg.textContent = message;
+
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// Cerrar modal con Escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') dnCloseModal();
+});
+</script>
+</body>
+</html>

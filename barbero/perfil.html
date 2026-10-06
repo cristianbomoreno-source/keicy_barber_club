@@ -1,0 +1,1476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://zzmtnjlfrlqmouijfste.supabase.co" crossorigin>
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" as="script">
+<link rel="dns-prefetch" href="https://zzmtnjlfrlqmouijfste.supabase.co">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Keicy Barbería · Mi perfil</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/barbero-nav.css">
+<style>
+  /* Variables heredadas de design-system.css */
+  html, body{ height:100%; }
+  body{
+    overflow:hidden; overscroll-behavior:none; -webkit-font-smoothing:antialiased;
+    background:var(--bg);
+  }
+  [data-theme="dark"] body{
+    background:
+      radial-gradient(ellipse 120% 60% at 50% -10%, rgba(217,184,114,0.08), transparent 60%),
+      radial-gradient(ellipse 100% 50% at 90% 110%, rgba(255,255,255,0.035), transparent 55%),
+      #000000;
+  }
+  * { -webkit-tap-highlight-color: transparent; }
+
+  #app{
+    max-width:480px; margin:0 auto; height:100dvh;
+    display:flex; flex-direction:column;
+    padding:var(--effective-top) var(--page-padding-x) calc(var(--nav-height, 56px) + var(--safe-bottom, 0px) + 16px);
+    box-sizing:border-box; overflow:hidden;
+  }
+
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+  .fade-in{ animation:fadeUp 0.42s var(--ease-ios) both; }
+  .fade-in:nth-child(2){ animation-delay:0.05s; }
+  .fade-in:nth-child(3){ animation-delay:0.1s; }
+
+  /* ---- Header ---- */
+  .hdr-main{
+    display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+    padding:8px 0 12px;
+  }
+  .hdr-logo{ height:32px; border-radius:8px; opacity:.96; filter:drop-shadow(0 2px 10px rgba(0,0,0,0.55)); }
+  .bell-btn{
+    width:38px; height:38px; border-radius:13px; flex-shrink:0; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+    background:var(--glass-card-2); border:1px solid var(--glass-border); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    transition:transform .16s var(--ease-ios), background .16s ease;
+  }
+  .bell-btn:active{ transform:scale(0.9); background:var(--bg-hover); }
+  .bell-btn svg{ width:17px; height:17px; stroke:var(--text); }
+  .bell-badge{
+    position:absolute; top:-3px; right:-3px; min-width:15px; height:15px; padding:0 3px; border-radius:8px;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-size:9px; font-weight:800;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .content-scroll{ flex:1; min-height:0; overflow-y:auto; padding-bottom:20px; -webkit-overflow-scrolling:touch; }
+
+  /* ---- Glass card base ---- */
+  .glass-card{
+    background:var(--glass-card);
+    border:1px solid var(--glass-border);
+    border-radius:22px;
+    backdrop-filter:blur(24px) saturate(160%);
+    -webkit-backdrop-filter:blur(24px) saturate(160%);
+    box-shadow:0 1px 0 rgba(255,255,255,0.04) inset, 0 12px 30px rgba(0,0,0,0.35);
+  }
+
+  /* ---- Tarjeta de perfil ---- */
+  .profile-card{
+    padding:24px 20px 20px; text-align:center; margin-bottom:14px;
+  }
+  .profile-avatar-wrap{
+    position:relative; width:90px; height:90px; margin:0 auto 14px;
+  }
+  .profile-avatar-ring{
+    position:absolute; inset:-4px; border-radius:50%;
+    background:linear-gradient(165deg, var(--gold-bright), var(--gold));
+    animation:pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{ opacity:0.7; } 50%{ opacity:1; } }
+  .profile-avatar{
+    position:absolute; inset:0; width:100%; height:100%; border-radius:50%;
+    object-fit:cover; display:block; border:3px solid var(--bg); box-sizing:border-box;
+  }
+  .profile-avatar-fallback{
+    position:absolute; inset:0; width:100%; height:100%; border-radius:50%;
+    font-size:28px; font-weight:800; box-sizing:border-box;
+    background:var(--surface); color:var(--gold);
+    display:flex; align-items:center; justify-content:center; border:3px solid var(--bg);
+  }
+  .profile-badge{
+    position:absolute; bottom:-2px; right:-2px; width:28px; height:28px; border-radius:50%;
+    background:linear-gradient(165deg, var(--gold-bright), var(--gold));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 3px 10px rgba(0,0,0,0.4); border:2px solid var(--bg); z-index:2;
+  }
+  .profile-badge svg{ width:14px; height:14px; stroke:#141414; fill:none; }
+  .profile-name{ font-size:22px; font-weight:800; letter-spacing:-0.5px; color:var(--text); }
+  .profile-puesto{
+    font-size:11px; font-weight:700; letter-spacing:0.8px; color:var(--ring-gold); text-transform:uppercase; margin-top:4px;
+  }
+  .profile-rating{
+    display:inline-flex; align-items:center; gap:6px; margin-top:12px;
+    padding:6px 14px; border-radius:999px;
+    background:rgba(217,184,114,0.12); border:1px solid rgba(217,184,114,0.25);
+  }
+  .profile-rating svg{ width:14px; height:14px; }
+  .profile-rating span{ font-size:14px; font-weight:800; color:var(--ring-gold); }
+
+  /* ---- Section header ---- */
+  .section-hdr{
+    display:flex; align-items:center; gap:8px; padding:14px 4px 10px;
+  }
+  .section-icon{
+    width:28px; height:28px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    background:rgba(217,184,114,0.12); border:1px solid rgba(217,184,114,0.2);
+  }
+  .section-icon svg{ width:14px; height:14px; }
+  .section-title{ font-size:14px; font-weight:800; letter-spacing:-0.2px; color:var(--text); }
+
+  /* ---- Stats grid ---- */
+  .stats-grid{
+    display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:14px;
+  }
+  .stat-card{
+    padding:14px; border-radius:18px;
+    background:var(--glass-card); border:1px solid var(--glass-border);
+    backdrop-filter:blur(20px);
+  }
+  .stat-card.highlight{
+    background:rgba(217,184,114,0.08); border-color:rgba(217,184,114,0.2);
+  }
+  .stat-label{
+    font-size:9px; font-weight:700; letter-spacing:0.8px; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px;
+  }
+  .stat-value{ font-size:20px; font-weight:800; letter-spacing:-0.5px; line-height:1; color:var(--text); }
+  .stat-value.gold{ color:var(--ring-gold); }
+  .stat-value.green{ color:#5EEAB2; }
+  .stat-value.orange{ color:#FB923C; }
+  .stat-meta{ font-size:10px; color:var(--text-muted); margin-top:5px; }
+
+  /* ---- Period tabs ---- */
+  .period-tabs{
+    display:flex; gap:6px; margin-bottom:12px; padding:3px;
+    background:var(--glass-card-2); border-radius:14px; border:1px solid var(--glass-border);
+  }
+  .period-tab{
+    flex:1; text-align:center; padding:9px 0; border-radius:11px;
+    font-size:12px; font-weight:700; cursor:pointer; color:var(--text-muted);
+    transition:all 0.25s var(--ease-ios); border:none; background:transparent;
+  }
+  .period-tab:active{ transform:scale(0.96); }
+  .period-tab.active{
+    background:linear-gradient(165deg, var(--gold-bright), var(--gold));
+    color:#141414; box-shadow:0 4px 12px rgba(217,184,114,0.25);
+  }
+
+  /* ---- Stats row ---- */
+  .stats-row{
+    display:flex; gap:10px; margin-bottom:14px;
+  }
+  .stat-box{
+    flex:1; padding:12px 14px; border-radius:16px; text-align:center;
+    background:var(--glass-card); border:1px solid var(--glass-border);
+  }
+  .stat-box .num{ font-size:24px; font-weight:800; color:var(--ring-gold); line-height:1; }
+  .stat-box .txt{ font-size:9px; color:var(--text-muted); margin-top:5px; text-transform:uppercase; letter-spacing:0.5px; }
+
+  /* ---- Top servicios ---- */
+  .top-card{
+    padding:6px; margin-bottom:14px; border-radius:20px;
+    background:var(--glass-card); border:1px solid var(--glass-border);
+  }
+  .top-row{
+    display:flex; align-items:center; gap:10px; padding:10px 12px; margin:3px; border-radius:14px;
+    transition:background 0.2s ease;
+  }
+  .top-row:nth-child(1){ background:rgba(217,184,114,0.08); }
+  .top-rank{
+    width:24px; height:24px; border-radius:7px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:800;
+    background:rgba(217,184,114,0.15); color:var(--ring-gold); flex-shrink:0;
+  }
+  .top-row:nth-child(1) .top-rank{
+    background:linear-gradient(165deg, var(--gold-bright), var(--gold)); color:#141414;
+  }
+  .top-mid{ flex:1; min-width:0; }
+  .top-name{ font-size:12px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text); }
+  .top-bar{ height:3px; border-radius:999px; background:var(--divider); margin-top:5px; overflow:hidden; }
+  .top-bar-fill{ height:100%; border-radius:999px; background:linear-gradient(90deg, var(--gold-bright), var(--gold)); }
+  .top-count{ font-size:10px; color:var(--text-muted); flex-shrink:0; text-align:right; }
+  .top-count b{ color:var(--text); font-size:13px; font-weight:700; display:block; }
+
+  /* ---- Info card ---- */
+  .info-card{
+    padding:4px; margin-bottom:14px; border-radius:20px;
+    background:var(--glass-card); border:1px solid var(--glass-border);
+  }
+  .info-row{
+    display:flex; align-items:center; gap:12px; padding:12px 14px; margin:3px; border-radius:14px;
+    transition:background 0.2s ease;
+  }
+  .info-row:active{ background:var(--glass-card-2); }
+  .info-icon{
+    width:40px; height:40px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .info-icon.red{ background:rgba(239,68,68,0.12); }
+  .info-icon.green{ background:rgba(52,211,153,0.12); }
+  .info-icon.gold{ background:rgba(217,184,114,0.12); }
+  .info-icon svg{ width:18px; height:18px; }
+  .info-content{ flex:1; }
+  .info-label{ font-size:10px; font-weight:600; color:var(--text-muted); }
+  .info-value{ font-size:14px; font-weight:700; margin-top:1px; color:var(--text); }
+  .info-value.red{ color:#EF4444; }
+  .info-value.green{ color:#5EEAB2; }
+  .info-value.gold{ color:var(--ring-gold); }
+
+  /* ---- Link de reserva ---- */
+  .share-link-card{
+    padding:16px; margin-bottom:14px; border-radius:20px;
+    background:linear-gradient(165deg, rgba(217,184,114,0.12), rgba(217,184,114,0.05));
+    border:1px solid rgba(217,184,114,0.3);
+  }
+  .share-link-header{
+    display:flex; align-items:center; gap:10px; margin-bottom:12px;
+  }
+  .share-link-icon{
+    width:40px; height:40px; border-radius:12px;
+    background:linear-gradient(165deg, var(--gold-bright), var(--gold));
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .share-link-icon svg{ width:20px; height:20px; stroke:#141414; fill:none; }
+  .share-link-title{ font-size:14px; font-weight:800; color:var(--text); }
+  .share-link-desc{ font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .share-link-url{
+    display:flex; align-items:center; gap:8px; padding:10px 14px;
+    background:var(--glass-card); border:1px solid var(--glass-border);
+    border-radius:12px; margin-bottom:12px;
+  }
+  .share-link-url input{
+    flex:1; border:none; background:transparent; font-size:12px;
+    color:var(--text-secondary); outline:none; font-family:inherit;
+  }
+  .share-link-copy{
+    width:36px; height:36px; border-radius:10px; border:none; cursor:pointer;
+    background:linear-gradient(165deg, var(--gold-bright), var(--gold));
+    display:flex; align-items:center; justify-content:center;
+    transition:transform 0.15s ease;
+  }
+  .share-link-copy:active{ transform:scale(0.9); }
+  .share-link-copy svg{ width:16px; height:16px; stroke:#141414; }
+  .share-link-actions{
+    display:flex; gap:8px;
+  }
+  .share-link-btn{
+    flex:1; padding:12px; border-radius:12px; border:none; cursor:pointer;
+    font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px;
+    transition:transform 0.15s ease;
+  }
+  .share-link-btn:active{ transform:scale(0.96); }
+  .share-link-btn.whatsapp{
+    background:#25D366; color:white;
+  }
+  .share-link-btn.share{
+    background:var(--glass-card); border:1px solid var(--glass-border); color:var(--text);
+  }
+  .share-link-btn svg{ width:16px; height:16px; }
+  .share-link-toast{
+    position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px);
+    padding:12px 20px; border-radius:12px; font-size:13px; font-weight:600;
+    background:var(--gold); color:#141414; opacity:0; pointer-events:none;
+    transition:all 0.3s ease; z-index:999;
+  }
+  .share-link-toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* ---- Account card ---- */
+  .account-card{
+    padding:4px; margin-bottom:14px; border-radius:20px;
+    background:var(--glass-card); border:1px solid var(--glass-border);
+  }
+  .account-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 16px; margin:3px; border-radius:12px;
+  }
+  .account-row .key{ font-size:12px; color:var(--text-secondary); }
+  .account-row .val{ font-size:12px; font-weight:700; color:var(--text); }
+  .account-row .val.gold{ color:var(--ring-gold); }
+  .account-row .val.green{ color:#5EEAB2; }
+
+  /* ---- Pagos list ---- */
+  .pagos-list{ margin-bottom:14px; }
+  .pago-card{
+    padding:14px 16px; margin-bottom:10px; border-radius:16px; cursor:pointer;
+    background:var(--glass-card); border:1px solid var(--glass-border);
+    transition:all 0.2s ease;
+  }
+  .pago-card:active{ transform:scale(0.98); background:var(--glass-card-2); }
+  .pago-card-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .pago-card-fecha{ font-size:12px; font-weight:700; color:var(--text); }
+  .pago-card-metodo{
+    font-size:9px; font-weight:700; padding:3px 8px; border-radius:999px;
+    text-transform:uppercase; letter-spacing:0.3px;
+  }
+  .pago-card-metodo.efectivo{ background:rgba(76,175,80,0.15); color:#5EEAB2; }
+  .pago-card-metodo.transferencia{ background:rgba(33,150,243,0.15); color:#64B5F6; }
+  .pago-card-body{ display:flex; justify-content:space-between; align-items:flex-end; }
+  .pago-card-info{ font-size:11px; color:var(--text-secondary); }
+  .pago-card-total{ font-size:18px; font-weight:800; color:var(--ring-gold); }
+  .pago-card-download{
+    display:flex; align-items:center; gap:4px; margin-top:10px; padding-top:10px;
+    border-top:1px solid var(--divider);
+    font-size:11px; color:var(--text-secondary);
+  }
+  .pago-card-download svg{ width:14px; height:14px; }
+  .pagos-empty{ text-align:center; padding:30px 20px; color:var(--text-muted); font-size:13px; }
+
+  /* ---- Ticket modal ---- */
+  .ticket-modal{
+    position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.6); backdrop-filter:blur(10px);
+    opacity:0; pointer-events:none; transition:opacity 0.3s ease; padding:20px;
+  }
+  .ticket-modal.show{ opacity:1; pointer-events:auto; }
+  .ticket-content{
+    width:100%; max-width:340px; background:var(--card); border-radius:12px; overflow:hidden;
+    transform:scale(0.9); transition:transform 0.3s ease; border:1px solid var(--glass-border);
+  }
+  .ticket-modal.show .ticket-content{ transform:scale(1); }
+  .ticket-header{ background:var(--gold); color:#111111; padding:20px; text-align:center; }
+  .ticket-logo{ font-size:18px; font-weight:800; margin-bottom:4px; }
+  .ticket-subtitle{ font-size:11px; opacity:0.7; }
+  .ticket-body{ padding:20px; color:var(--text); }
+  .ticket-row{ display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed var(--divider); font-size:13px; }
+  .ticket-row:last-child{ border-bottom:none; }
+  .ticket-row.total{ border-top:2px solid var(--text); border-bottom:none; margin-top:8px; padding-top:12px; font-weight:800; font-size:15px; }
+  .ticket-servicios{ margin:12px 0; padding:12px; background:var(--surface); border-radius:8px; }
+  .ticket-servicio{ display:flex; justify-content:space-between; font-size:11px; padding:4px 0; color:var(--text-secondary); }
+  .ticket-footer{ text-align:center; padding:16px 20px 20px; border-top:1px dashed var(--divider); }
+  .ticket-fecha{ font-size:11px; color:var(--text-muted); margin-bottom:12px; }
+  .ticket-actions{ display:flex; gap:10px; }
+  .ticket-btn{
+    flex:1; padding:12px; border-radius:10px; border:none; font-size:13px; font-weight:700; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .ticket-btn.primary{ background:var(--gold); color:#111111; }
+  .ticket-btn.secondary{ background:var(--surface); color:var(--text); }
+
+  /* ---- Action buttons ---- */
+  .action-btn{
+    display:flex; align-items:center; gap:12px; padding:14px 16px; margin-bottom:10px;
+    border-radius:16px; cursor:pointer; transition:all 0.2s ease; border:1px solid;
+  }
+  .action-btn:active{ transform:scale(0.98); }
+  .action-btn.gold{
+    background:rgba(217,184,114,0.06); border-color:rgba(217,184,114,0.15);
+  }
+  .action-btn.gold:active{ background:rgba(217,184,114,0.12); }
+  .action-btn.red{
+    background:rgba(239,68,68,0.06); border-color:rgba(239,68,68,0.15);
+  }
+  .action-btn .icon{
+    width:40px; height:40px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .action-btn.gold .icon{ background:rgba(217,184,114,0.12); }
+  .action-btn.red .icon{ background:rgba(239,68,68,0.12); }
+  .action-btn .icon svg{ width:18px; height:18px; }
+  .action-btn .text{ flex:1; }
+  .action-btn .title{ font-size:13px; font-weight:700; color:var(--text); }
+  .action-btn.red .title{ color:#EF4444; }
+  .action-btn .sub{ font-size:10px; color:var(--text-muted); margin-top:1px; }
+  .action-btn .arrow{ opacity:0.3; }
+
+  /* ---- Theme toggle mini ---- */
+  .theme-toggle-mini{ display:flex; gap:6px; align-items:center; }
+  .theme-dot{
+    width:22px; height:22px; border-radius:50%;
+    border:2px solid var(--divider);
+    transition:all 0.2s var(--ease-ios);
+  }
+  .theme-dot.light{ background:#FFFFFF; }
+  .theme-dot.dark{ background:#1a1a1a; }
+  .theme-dot.active{ border-color:var(--gold); box-shadow:0 0 8px rgba(217,184,114,0.4); }
+
+  /* ---- Skeleton ---- */
+  .skel{
+    background:linear-gradient(100deg, var(--glass-card-2) 30%, var(--divider) 50%, var(--glass-card-2) 70%);
+    background-size:220% 100%; animation:skelShine 1.5s ease-in-out infinite; border-radius:16px;
+  }
+  @keyframes skelShine{ 0%{ background-position:120% 0; } 100%{ background-position:-20% 0; } }
+
+  /* ---- Sheet modales ---- */
+  .sheet-bg{
+    position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); z-index:100;
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity 0.28s var(--ease-ios); padding:20px;
+  }
+  .sheet-bg.show{ opacity:1; pointer-events:auto; }
+  .sheet-box{
+    width:100%; max-width:400px; margin:0 auto;
+    background:var(--card); border:1px solid var(--glass-border);
+    backdrop-filter:blur(30px) saturate(160%);
+    border-radius:22px; padding:20px 20px 24px;
+    transform:scale(0.9) translateY(20px); transition:transform 0.32s cubic-bezier(.22,1,.36,1), opacity 0.28s ease;
+    max-height:80vh; overflow-y:auto; position:relative; opacity:0;
+  }
+  .sheet-bg.show .sheet-box{ transform:scale(1) translateY(0); opacity:1; }
+  .sheet-title{ font-size:16px; font-weight:800; margin-bottom:4px; letter-spacing:-0.2px; padding-right:36px; color:var(--text); }
+  .sheet-sub{ font-size:12px; color:var(--text-secondary); line-height:1.5; margin-bottom:16px; }
+  .sheet-close{
+    position:absolute; top:18px; right:18px; width:32px; height:32px; border-radius:50%;
+    background:var(--glass-card-2); display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:transform .14s var(--ease-ios), background .15s ease;
+  }
+  .sheet-close:active{ transform:scale(0.88); }
+  .sheet-close svg{ width:14px; height:14px; opacity:0.9; stroke:var(--text); }
+
+  .waiting-note{ font-size:12px; color:var(--text-secondary); line-height:1.5; text-align:center; }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <div class="hdr-main fade-in">
+    <img src="../assets/logo-transparent.png" class="hdr-logo" alt="Keicy Barbería">
+    <div class="bell-btn" onclick="openAlertsSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      <span class="bell-badge" id="bellBadge" style="display:none;">0</span>
+    </div>
+  </div>
+
+  <div class="content-scroll">
+    <!-- Tarjeta de perfil -->
+    <div class="glass-card profile-card fade-in">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar-ring"></div>
+        <div id="profileFallback" class="profile-avatar-fallback">--</div>
+        <img id="profileAvatar" class="profile-avatar" style="opacity:0;" alt="">
+        <div class="profile-badge">
+          <svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+      </div>
+      <div class="profile-name" id="profileName">—</div>
+      <div class="profile-puesto" id="profilePuesto">—</div>
+      <div class="profile-rating">
+        <svg viewBox="0 0 24 24" fill="#D9B872" stroke="none"><path d="M12 2l2.9 6.5L22 9.3l-5 4.9L18.2 21 12 17.6 5.8 21 7 14.2 2 9.3l7.1-.8z"/></svg>
+        <span id="profileRating">—</span>
+      </div>
+    </div>
+
+    <!-- Link de reserva directa -->
+    <div class="share-link-card fade-in" id="shareLinkCard">
+      <div class="share-link-header">
+        <div class="share-link-icon">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <div>
+          <div class="share-link-title">Mi link de reserva</div>
+          <div class="share-link-desc">Compártelo con tus clientes para que reserven contigo</div>
+        </div>
+      </div>
+      <div class="share-link-url">
+        <input type="text" id="shareLinkInput" readonly value="Cargando...">
+        <button class="share-link-copy" onclick="copyShareLink()">
+          <svg viewBox="0 0 24 24" stroke-width="2" fill="none"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        </button>
+      </div>
+      <div class="share-link-actions">
+        <button class="share-link-btn whatsapp" onclick="shareViaWhatsApp()">
+          <svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          WhatsApp
+        </button>
+        <button class="share-link-btn share" onclick="shareNative()">
+          <svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+          Compartir
+        </button>
+      </div>
+    </div>
+    <div class="share-link-toast" id="shareLinkToast">¡Link copiado!</div>
+
+    <!-- Finanzas -->
+    <div class="section-hdr fade-in">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      </div>
+      <div class="section-title">Mis Finanzas</div>
+    </div>
+
+    <div class="stats-grid fade-in">
+      <div class="stat-card highlight">
+        <div class="stat-label">Comisión del mes</div>
+        <div class="stat-value gold" id="pComisionMes">—</div>
+        <div class="stat-meta" id="pComisionMesComp">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Pendiente</div>
+        <div class="stat-value orange" id="pPendiente">—</div>
+        <div class="stat-meta">Sin cobrar</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Propinas</div>
+        <div class="stat-value green" id="pPropinasMes">—</div>
+        <div class="stat-meta" id="pPropinasProm">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Productos</div>
+        <div class="stat-value" id="pProductosMes">—</div>
+        <div class="stat-meta" id="pProductosComision">—</div>
+      </div>
+    </div>
+
+    <!-- Rendimiento -->
+    <div class="section-hdr fade-in">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.8"><path d="M3 3v18h18"/><path d="M18 9l-5 5-4-4-3 3"/></svg>
+      </div>
+      <div class="section-title">Mi Rendimiento</div>
+    </div>
+
+    <div class="period-tabs fade-in" id="periodTabs">
+      <div class="period-tab active" data-p="hoy" onclick="selectPeriod('hoy')">Hoy</div>
+      <div class="period-tab" data-p="semana" onclick="selectPeriod('semana')">Semana</div>
+      <div class="period-tab" data-p="mes" onclick="selectPeriod('mes')">Mes</div>
+    </div>
+
+    <div class="stats-row fade-in">
+      <div class="stat-box">
+        <div class="num" id="pCortes">—</div>
+        <div class="txt">Servicios</div>
+      </div>
+      <div class="stat-box">
+        <div class="num" id="pClientesNuevos" style="color:#5EEAB2;">—</div>
+        <div class="txt">Clientes nuevos</div>
+      </div>
+    </div>
+
+    <div class="section-hdr fade-in" style="padding-top:6px;">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
+      </div>
+      <div class="section-title">Top Servicios</div>
+    </div>
+    <div class="top-card fade-in" id="topList"><div class="skel" style="height:140px;"></div></div>
+
+    <!-- Horario -->
+    <div class="section-hdr fade-in">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </div>
+      <div class="section-title">Mi Horario</div>
+    </div>
+
+    <div class="info-card fade-in">
+      <div class="info-row">
+        <div class="info-icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.8"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </div>
+        <div class="info-content">
+          <div class="info-label">Día de descanso</div>
+          <div class="info-value red" id="pDiaDescanso">—</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#5EEAB2" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div class="info-content">
+          <div class="info-label">Horario de la sede</div>
+          <div class="info-value green" id="pHorarioSede">—</div>
+        </div>
+      </div>
+      <div class="info-row">
+        <div class="info-icon gold">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        </div>
+        <div class="info-content">
+          <div class="info-label">Próximas citas</div>
+          <div class="info-value gold" id="pProximasCitas">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cuenta -->
+    <div class="section-hdr fade-in">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+      </div>
+      <div class="section-title">Mi Cuenta</div>
+    </div>
+
+    <div class="account-card fade-in">
+      <div class="account-row">
+        <span class="key">Sede asignada</span>
+        <span class="val" id="pSedeNombre">—</span>
+      </div>
+      <div class="account-row">
+        <span class="key">Porcentaje comisión</span>
+        <span class="val gold" id="pComisionPct">—</span>
+      </div>
+      <div class="account-row">
+        <span class="key">Comisión por producto</span>
+        <span class="val green">$5,000</span>
+      </div>
+      <div class="account-row">
+        <span class="key">Fecha de ingreso</span>
+        <span class="val" id="pFechaIngreso">—</span>
+      </div>
+    </div>
+
+    <!-- Historial de Pagos -->
+    <div class="section-hdr fade-in">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      </div>
+      <div class="section-title">Mis Pagos</div>
+    </div>
+
+    <div class="pagos-list fade-in" id="pagosList">
+      <div class="skel" style="height:100px;"></div>
+    </div>
+
+    <!-- Configuración -->
+    <div class="section-hdr fade-in">
+      <div class="section-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </div>
+      <div class="section-title">Configuración</div>
+    </div>
+
+    <div class="fade-in">
+      <div class="action-btn" onclick="toggleThemeOption()" style="cursor:pointer;">
+        <div class="icon" style="background:linear-gradient(135deg, rgba(255,215,0,0.15), rgba(26,26,26,0.15));">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </div>
+        <div class="text">
+          <div class="title">Tema de la app</div>
+          <div class="sub" id="currentThemeLabel">Tema claro</div>
+        </div>
+        <div class="theme-toggle-mini" id="themeToggleMini">
+          <span class="theme-dot light"></span>
+          <span class="theme-dot dark"></span>
+        </div>
+      </div>
+
+      <div class="action-btn gold" onclick="openPasswordSheet()">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4" stroke-linecap="round"/></svg>
+        </div>
+        <div class="text">
+          <div class="title">Cambiar contraseña</div>
+          <div class="sub">Actualiza tu clave de acceso</div>
+        </div>
+        <svg class="arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+
+      <div class="action-btn red" onclick="logoutBarbero()">
+        <div class="icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        </div>
+        <div class="text">
+          <div class="title">Cerrar sesión</div>
+          <div class="sub">Salir de tu cuenta</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-bar fade-in">
+    <div class="tab-item" onclick="location.href='home.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11.5 12 4l9 7.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v9.5a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Inicio</span>
+    </div>
+    <div class="tab-item" onclick="location.href='agenda.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="4"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg>
+      <span>Agenda</span>
+    </div>
+    <div class="tab-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg>
+      <span>Perfil</span>
+    </div>
+  </div>
+
+  <div id="toast"><span class="toast-dot"></span><span id="toastText"></span></div>
+</div>
+
+<!-- Sheet: Alertas -->
+<div class="sheet-bg" id="alertsSheetBg" onclick="if(event.target===this) closeAlertsSheet()">
+  <div class="sheet-box">
+    <div class="sheet-close" onclick="closeAlertsSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg></div>
+    <div class="sheet-title">Notificaciones</div>
+    <div id="alertsList" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- Sheet: Cambiar contraseña -->
+<div class="sheet-bg" id="passwordSheetBg" onclick="if(event.target===this) closePasswordSheet()">
+  <div class="sheet-box">
+    <div class="sheet-close" onclick="closePasswordSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg></div>
+    <div class="sheet-title">Cambiar contraseña</div>
+    <div class="sheet-sub">Ingresa tu contraseña actual y la nueva contraseña.</div>
+
+    <div style="margin-top:16px;">
+      <label style="font-size:10px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">Contraseña actual</label>
+      <input type="password" id="currentPassword" placeholder="Tu contraseña actual" style="width:100%; height:46px; border-radius:12px; padding:0 14px; background:var(--glass-card-2); border:1px solid var(--glass-border); color:var(--text); font-size:14px; outline:none; box-sizing:border-box;">
+    </div>
+
+    <div style="margin-top:12px;">
+      <label style="font-size:10px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">Nueva contraseña</label>
+      <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres" style="width:100%; height:46px; border-radius:12px; padding:0 14px; background:var(--glass-card-2); border:1px solid var(--glass-border); color:var(--text); font-size:14px; outline:none; box-sizing:border-box;">
+    </div>
+
+    <div style="margin-top:12px;">
+      <label style="font-size:10px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:6px;">Confirmar nueva contraseña</label>
+      <input type="password" id="confirmPassword" placeholder="Repite la nueva contraseña" style="width:100%; height:46px; border-radius:12px; padding:0 14px; background:var(--glass-card-2); border:1px solid var(--glass-border); color:var(--text); font-size:14px; outline:none; box-sizing:border-box;">
+    </div>
+
+    <div id="passwordError" style="display:none; margin-top:12px; padding:10px 14px; border-radius:12px; background:rgba(255,107,94,0.12); border:1px solid rgba(255,107,94,0.3); color:var(--ring-red); font-size:12px;"></div>
+
+    <button id="savePasswordBtn" onclick="saveNewPassword()" style="width:100%; height:48px; margin-top:16px; border-radius:14px; border:none; background:linear-gradient(165deg, var(--gold-bright), var(--gold)); color:#141414; font-size:14px; font-weight:700; cursor:pointer;">
+      Guardar contraseña
+    </button>
+  </div>
+</div>
+
+<!-- Modal: Ticket de pago -->
+<div class="ticket-modal" id="ticketModal" onclick="if(event.target===this) closeTicketModal()">
+  <div class="ticket-content" id="ticketContent">
+    <div class="ticket-header">
+      <div class="ticket-logo">Keicy Barbería</div>
+      <div class="ticket-subtitle">Comprobante de pago</div>
+    </div>
+    <div class="ticket-body">
+      <div class="ticket-row"><span>Colaborador</span><span id="tkNombre">—</span></div>
+      <div class="ticket-row"><span>Servicios</span><span id="tkServicios">—</span></div>
+      <div class="ticket-servicios" id="tkDesglose"></div>
+      <div class="ticket-row"><span>Comisión</span><span id="tkComision">—</span></div>
+      <div class="ticket-row"><span>Propinas</span><span id="tkPropinas">—</span></div>
+      <div class="ticket-row" id="tkBebidasRow" style="display:none;"><span>Bebidas (desc.)</span><span id="tkBebidas" style="color:#e74c3c;">—</span></div>
+      <div class="ticket-row total"><span>TOTAL PAGADO</span><span id="tkTotal">—</span></div>
+    </div>
+    <div class="ticket-footer">
+      <div class="ticket-fecha" id="tkFecha">—</div>
+      <div class="ticket-metodo" id="tkMetodo" style="font-size:11px; color:var(--text-secondary); margin-bottom:12px;">—</div>
+      <div class="ticket-actions">
+        <button class="ticket-btn secondary" onclick="closeTicketModal()">Cerrar</button>
+        <button class="ticket-btn primary" onclick="downloadTicket()">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Descargar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/mobile-nav.js"></script>
+<script>
+  const toastEl = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  function toast(msg){
+    toastText.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(window._t);
+    window._t = setTimeout(() => toastEl.classList.remove('show'), 2400);
+  }
+  function vibrate(pattern){ if (navigator.vibrate) navigator.vibrate(pattern); }
+
+  const user = dnRequireBarbero();
+
+  const DIAS_SEMANA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+  // Función auxiliar para convertir Date a ISO string (YYYY-MM-DD)
+  function isoFromDate(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+
+  let barberRow = null;
+  let sedeData = null;
+
+  async function loadBarberProfile(){
+    const { data, error } = await sb.from('barberos')
+      .select('puesto, especialidad, comision_pct, calificacion, dia_descanso, sucursal_id, usuarios!barberos_id_fkey(full_name, username, avatar_url, created_at)')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error('Error cargando perfil:', error);
+      return;
+    }
+
+    barberRow = data;
+    const name = data?.usuarios?.full_name || data?.usuarios?.username || user?.full_name || user?.username || 'Barbero';
+    const puesto = data?.puesto ? `Puesto ${data.puesto}` : (data?.especialidad || 'Barbero');
+
+    document.getElementById('profileName').textContent = name || '—';
+    document.getElementById('profilePuesto').textContent = data?.especialidad ? data.especialidad : puesto;
+    document.getElementById('profileRating').textContent = data?.calificacion ? Number(data.calificacion).toFixed(1) : '5.0';
+
+    // Porcentaje de comisión
+    const comisionPct = Number(data?.comision_pct) || 40;
+    document.getElementById('pComisionPct').textContent = `${comisionPct}%`;
+
+    // Día de descanso
+    if (data?.dia_descanso !== null && data?.dia_descanso !== undefined) {
+      document.getElementById('pDiaDescanso').textContent = DIAS_SEMANA[data.dia_descanso];
+    } else {
+      document.getElementById('pDiaDescanso').textContent = 'No asignado';
+    }
+
+    // Fecha de ingreso (desde usuarios.created_at)
+    if (data?.usuarios?.created_at) {
+      const fecha = new Date(data.usuarios.created_at);
+      document.getElementById('pFechaIngreso').textContent = `${fecha.getDate()} de ${MESES[fecha.getMonth()]} ${fecha.getFullYear()}`;
+    }
+
+    // Cargar datos de la sede
+    if (data?.sucursal_id) {
+      loadSedeInfo(data.sucursal_id);
+    }
+
+    // Cargar foto desde Supabase
+    const avatarUrl = data?.usuarios?.avatar_url;
+    const img = document.getElementById('profileAvatar');
+    const fallback = document.getElementById('profileFallback');
+    if (avatarUrl) {
+      img.src = avatarUrl;
+      img.style.opacity = '1';
+      fallback.style.display = 'none';
+    } else {
+      fallback.textContent = dnInitials(name);
+      fallback.style.display = 'flex';
+      img.style.opacity = '0';
+    }
+  }
+
+  async function loadSedeInfo(sucursalId) {
+    try {
+      const { data } = await sb.from('sucursales').select('nombre, horario').eq('id', sucursalId).single();
+      sedeData = data;
+      if (data?.nombre) {
+        document.getElementById('pSedeNombre').textContent = data.nombre;
+      }
+      if (data?.horario) {
+        const hoy = new Date().getDay();
+        const diasKey = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+        const horarioDia = data.horario[diasKey[hoy]];
+        if (horarioDia?.abierto && horarioDia?.apertura && horarioDia?.cierre) {
+          document.getElementById('pHorarioSede').textContent = `${horarioDia.apertura} - ${horarioDia.cierre}`;
+        } else {
+          document.getElementById('pHorarioSede').textContent = 'Cerrado hoy';
+        }
+      }
+    } catch (err) {
+      console.error('Error cargando sede:', err);
+    }
+  }
+
+  async function loadFinanzas() {
+    if (!user?.id) {
+      console.error('No hay usuario para cargar finanzas');
+      return;
+    }
+
+    try {
+      const today = new Date();
+      const firstDayMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const firstDayLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const lastDayLastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+
+      const fromMes = isoFromDate(firstDayMonth);
+      const toMes = isoFromDate(today);
+      const fromMesAnterior = isoFromDate(firstDayLastMonth);
+      const toMesAnterior = isoFromDate(lastDayLastMonth);
+
+      const comisionPct = Number(barberRow?.comision_pct) || 40;
+
+      const [citasMesRes, citasMesAntRes, productosRes] = await Promise.all([
+        sb.from('citas')
+          .select('precio, propina, comision_pagada')
+          .eq('barbero_id', user.id)
+          .eq('estado', 'finalizada')
+          .gte('fecha', fromMes)
+          .lte('fecha', toMes),
+        sb.from('citas')
+          .select('precio')
+          .eq('barbero_id', user.id)
+          .eq('estado', 'finalizada')
+          .gte('fecha', fromMesAnterior)
+          .lte('fecha', toMesAnterior),
+        sb.from('comisiones')
+          .select('valor_comision, tipo')
+          .eq('barbero_id', user.id)
+          .eq('tipo', 'producto')
+          .gte('created_at', fromMes + 'T00:00:00')
+      ]);
+
+      const citasMes = citasMesRes.data || [];
+      const citasMesAnt = citasMesAntRes.data || [];
+      const productosMes = productosRes.data || [];
+
+      let comisionMes = 0;
+      let propinasMes = 0;
+      let pendiente = 0;
+
+      citasMes.forEach(c => {
+        const precio = Number(c.precio) || 0;
+        const comision = Math.round(precio * comisionPct / 100);
+        comisionMes += comision;
+        propinasMes += Number(c.propina) || 0;
+        if (!c.comision_pagada) {
+          pendiente += comision + (Number(c.propina) || 0);
+        }
+      });
+
+      let comisionMesAnt = 0;
+      citasMesAnt.forEach(c => {
+        const precio = Number(c.precio) || 0;
+        comisionMesAnt += Math.round(precio * comisionPct / 100);
+      });
+
+      let comisionProductos = 0;
+      productosMes.forEach(p => {
+        comisionProductos += Number(p.valor_comision) || 0;
+      });
+
+      document.getElementById('pComisionMes').textContent = dnFormatCOP(comisionMes);
+
+      if (comisionMesAnt > 0) {
+        const diff = ((comisionMes - comisionMesAnt) / comisionMesAnt * 100).toFixed(0);
+        const arrow = comisionMes >= comisionMesAnt ? '↑' : '↓';
+        const color = comisionMes >= comisionMesAnt ? '#5EEAB2' : '#FF6B5E';
+        document.getElementById('pComisionMesComp').innerHTML = `<span style="color:${color}">${arrow} ${Math.abs(diff)}%</span> vs mes anterior`;
+      } else {
+        document.getElementById('pComisionMesComp').textContent = 'Primer mes';
+      }
+
+      document.getElementById('pPendiente').textContent = dnFormatCOP(pendiente);
+      document.getElementById('pPropinasMes').textContent = dnFormatCOP(propinasMes);
+
+      if (citasMes.length > 0) {
+        const promPropina = Math.round(propinasMes / citasMes.length);
+        document.getElementById('pPropinasProm').textContent = `~${dnFormatCOP(promPropina)}/servicio`;
+      } else {
+        document.getElementById('pPropinasProm').textContent = '—';
+      }
+
+      document.getElementById('pProductosMes').textContent = productosMes.length;
+      document.getElementById('pProductosComision').textContent = `+${dnFormatCOP(comisionProductos)}`;
+
+    } catch (err) {
+      console.error('Error cargando finanzas:', err);
+    }
+  }
+
+  async function loadProximasCitas() {
+    try {
+      const today = dnTodayISO();
+      const { data, error } = await sb.from('citas')
+        .select('id, fecha, hora_inicio')
+        .eq('barbero_id', user.id)
+        .gte('fecha', today)
+        .in('estado', ['agendada', 'confirmada'])
+        .order('fecha', { ascending: true })
+        .order('hora_inicio', { ascending: true })
+        .limit(5);
+
+      if (error) throw error;
+
+      const citas = data || [];
+      if (citas.length === 0) {
+        document.getElementById('pProximasCitas').textContent = 'Sin citas pendientes';
+      } else {
+        const hoy = citas.filter(c => c.fecha === today).length;
+        const total = citas.length;
+        if (hoy > 0) {
+          document.getElementById('pProximasCitas').textContent = `${hoy} hoy · ${total} próximas`;
+        } else {
+          document.getElementById('pProximasCitas').textContent = `${total} próximas`;
+        }
+      }
+    } catch (err) {
+      console.error('Error cargando próximas citas:', err);
+    }
+  }
+
+  let alertsCache = [];
+  async function loadAlerts(){
+    const { data } = await sb.from('alertas_barbero').select('id, tipo, mensaje, leida, created_at').eq('barbero_id', user.id).order('created_at', { ascending:false }).limit(20);
+    alertsCache = data || [];
+    const unread = alertsCache.filter(a => !a.leida).length;
+    const badge = document.getElementById('bellBadge');
+    badge.textContent = unread;
+    badge.style.display = unread ? 'flex' : 'none';
+  }
+
+  function openAlertsSheet(){
+    vibrate(8);
+    const list = document.getElementById('alertsList');
+    list.innerHTML = alertsCache.length ? alertsCache.map(a => {
+      const mins = Math.max(1, Math.round((Date.now() - new Date(a.created_at))/60000));
+      const timeLabel = mins < 60 ? `Hace ${mins} min` : `Hace ${Math.round(mins/60)} h`;
+      return `<div style="padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; gap:10px; align-items:flex-start;">
+        <div style="width:7px; height:7px; border-radius:50%; margin-top:5px; flex-shrink:0; background:${a.leida ? 'rgba(255,255,255,0.18)' : 'var(--gold)'};"></div>
+        <div style="flex:1;"><div style="font-size:12px; font-weight:600;">${a.mensaje}</div><div style="font-size:10px; color:rgba(255,255,255,0.36); margin-top:2px;">${timeLabel}</div></div>
+      </div>`;
+    }).join('') : '<div class="waiting-note">Sin notificaciones.</div>';
+    document.getElementById('alertsSheetBg').classList.add('show');
+    const unreadIds = alertsCache.filter(a => !a.leida).map(a => a.id);
+    if (unreadIds.length) sb.from('alertas_barbero').update({ leida:true }).in('id', unreadIds).then(() => loadAlerts());
+  }
+  function closeAlertsSheet(){ document.getElementById('alertsSheetBg').classList.remove('show'); }
+
+  function openPasswordSheet(){
+    vibrate(8);
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    document.getElementById('passwordError').style.display = 'none';
+    document.getElementById('passwordSheetBg').classList.add('show');
+  }
+  function closePasswordSheet(){ document.getElementById('passwordSheetBg').classList.remove('show'); }
+
+  async function saveNewPassword(){
+    const current = document.getElementById('currentPassword').value;
+    const newPwd = document.getElementById('newPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    const errorEl = document.getElementById('passwordError');
+    const btn = document.getElementById('savePasswordBtn');
+
+    errorEl.style.display = 'none';
+
+    if (!current || !newPwd || !confirm) {
+      errorEl.textContent = 'Completa todos los campos.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (newPwd.length < 6) {
+      errorEl.textContent = 'La nueva contraseña debe tener al menos 6 caracteres.';
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (newPwd !== confirm) {
+      errorEl.textContent = 'Las contraseñas no coinciden.';
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    try {
+      const { data: userData } = await sb.from('usuarios').select('password_hash').eq('id', user.id).single();
+      if (!userData?.password_hash) {
+        throw new Error('No se encontró tu cuenta.');
+      }
+
+      const isValid = await dcrypt.compare(current, userData.password_hash);
+      if (!isValid) {
+        errorEl.textContent = 'La contraseña actual es incorrecta.';
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Guardar contraseña';
+        return;
+      }
+
+      const newHash = await dcrypt.hash(newPwd, 10);
+      const { error } = await sb.from('usuarios').update({ password_hash: newHash }).eq('id', user.id);
+      if (error) throw error;
+
+      closePasswordSheet();
+      toast('Contraseña actualizada');
+      vibrate([10, 50, 10]);
+
+    } catch (err) {
+      console.error(err);
+      errorEl.textContent = err.message || 'Error al actualizar la contraseña.';
+      errorEl.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar contraseña';
+    }
+  }
+
+  function logoutBarbero(){
+    vibrate(8);
+    if (confirm('¿Cerrar sesión?')) {
+      dnClearSession();
+      window.location.href = '../auth.html';
+    }
+  }
+
+  // ============ RENDIMIENTO (Período) ============
+  let currentPeriod = 'hoy';
+
+  function selectPeriod(p){
+    vibrate(8);
+    currentPeriod = p;
+    document.querySelectorAll('.period-tab').forEach(t => t.classList.toggle('active', t.dataset.p === p));
+    loadRendimiento();
+  }
+
+  async function loadRendimiento(){
+    const today = new Date();
+    let fromDate, toDate;
+
+    if (currentPeriod === 'hoy') {
+      fromDate = toDate = dnTodayISO();
+    } else if (currentPeriod === 'semana') {
+      const dayOfWeek = today.getDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const monday = new Date(today);
+      monday.setDate(today.getDate() + mondayOffset);
+      fromDate = isoFromDate(monday);
+      toDate = isoFromDate(today);
+    } else {
+      fromDate = isoFromDate(new Date(today.getFullYear(), today.getMonth(), 1));
+      toDate = isoFromDate(today);
+    }
+
+    try {
+      const { data: citas } = await sb.from('citas')
+        .select('id, cliente_id, servicios(nombre)')
+        .eq('barbero_id', user.id)
+        .eq('estado', 'finalizada')
+        .gte('fecha', fromDate)
+        .lte('fecha', toDate);
+
+      const total = citas?.length || 0;
+      document.getElementById('pCortes').textContent = total;
+
+      // Contar clientes únicos que podrían ser nuevos
+      const clienteIds = [...new Set((citas || []).map(c => c.cliente_id).filter(Boolean))];
+
+      // Verificar cuántos de esos clientes tienen solo citas en este período
+      let clientesNuevos = 0;
+      if (clienteIds.length > 0) {
+        const { data: citasAnteriores } = await sb.from('citas')
+          .select('cliente_id')
+          .eq('barbero_id', user.id)
+          .eq('estado', 'finalizada')
+          .lt('fecha', fromDate)
+          .in('cliente_id', clienteIds);
+
+        const clientesConHistorial = new Set((citasAnteriores || []).map(c => c.cliente_id));
+        clientesNuevos = clienteIds.filter(id => !clientesConHistorial.has(id)).length;
+      }
+      document.getElementById('pClientesNuevos').textContent = clientesNuevos;
+
+      // Top servicios
+      const servicioCount = {};
+      (citas || []).forEach(c => {
+        const nombre = c.servicios?.nombre || 'Sin nombre';
+        servicioCount[nombre] = (servicioCount[nombre] || 0) + 1;
+      });
+
+      const sorted = Object.entries(servicioCount).sort((a,b) => b[1] - a[1]).slice(0, 3);
+      const maxCount = sorted[0]?.[1] || 1;
+
+      const topList = document.getElementById('topList');
+      if (sorted.length === 0) {
+        topList.innerHTML = '<div class="waiting-note" style="padding:20px;">Sin servicios en este período.</div>';
+      } else {
+        topList.innerHTML = sorted.map(([nombre, count], i) => `
+          <div class="top-row">
+            <div class="top-rank">${i + 1}</div>
+            <div class="top-mid">
+              <div class="top-name">${nombre}</div>
+              <div class="top-bar"><div class="top-bar-fill" style="width:${(count/maxCount*100).toFixed(0)}%"></div></div>
+            </div>
+            <div class="top-count"><b>${count}</b>servicios</div>
+          </div>
+        `).join('');
+      }
+
+    } catch (err) {
+      console.error('Error cargando rendimiento:', err);
+    }
+  }
+
+  // ============ HISTORIAL DE PAGOS ============
+  let pagosCache = [];
+  let pagoActual = null;
+
+  async function loadPagos() {
+    try {
+      const { data, error } = await sb.from('pagos_comisiones')
+        .select('*')
+        .eq('barbero_id', user.id)
+        .order('fecha_pago', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+
+      pagosCache = data || [];
+      renderPagos();
+    } catch (err) {
+      console.error('Error cargando pagos:', err);
+      document.getElementById('pagosList').innerHTML = '<div class="pagos-empty">No se pudieron cargar los pagos</div>';
+    }
+  }
+
+  function renderPagos() {
+    const container = document.getElementById('pagosList');
+    if (pagosCache.length === 0) {
+      container.innerHTML = '<div class="pagos-empty">Aún no tienes pagos registrados</div>';
+      return;
+    }
+
+    container.innerHTML = pagosCache.map(p => {
+      const fecha = new Date(p.fecha_pago);
+      const fechaStr = `${fecha.getDate()} ${MESES[fecha.getMonth()].substring(0,3)} ${fecha.getFullYear()}`;
+      return `
+        <div class="pago-card" onclick="openTicketModal('${p.id}')">
+          <div class="pago-card-header">
+            <span class="pago-card-fecha">${fechaStr}</span>
+            <span class="pago-card-metodo ${p.metodo_pago}">${p.metodo_pago === 'efectivo' ? '💵 Efectivo' : '🏦 Transferencia'}</span>
+          </div>
+          <div class="pago-card-body">
+            <span class="pago-card-info">${p.cantidad_servicios} servicio${p.cantidad_servicios === 1 ? '' : 's'}</span>
+            <span class="pago-card-total">${dnFormatCOP(p.total_pagado)}</span>
+          </div>
+          <div class="pago-card-download">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Toca para ver detalles y descargar
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openTicketModal(pagoId) {
+    vibrate(8);
+    const pago = pagosCache.find(p => p.id === pagoId);
+    if (!pago) return;
+    pagoActual = pago;
+
+    const nombre = barberRow?.usuarios?.full_name || barberRow?.usuarios?.username || 'Barbero';
+    document.getElementById('tkNombre').textContent = nombre;
+    document.getElementById('tkServicios').textContent = pago.cantidad_servicios;
+    document.getElementById('tkComision').textContent = dnFormatCOP(pago.total_comision);
+    document.getElementById('tkPropinas').textContent = dnFormatCOP(pago.total_propinas);
+
+    const bebidasRow = document.getElementById('tkBebidasRow');
+    if (pago.descuento_bebidas > 0) {
+      bebidasRow.style.display = 'flex';
+      document.getElementById('tkBebidas').textContent = `-${dnFormatCOP(pago.descuento_bebidas)}`;
+    } else {
+      bebidasRow.style.display = 'none';
+    }
+
+    document.getElementById('tkTotal').textContent = dnFormatCOP(pago.total_pagado);
+
+    const fecha = new Date(pago.fecha_pago);
+    const fechaStr = `${fecha.getDate()} de ${MESES[fecha.getMonth()]} de ${fecha.getFullYear()} - ${fecha.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}`;
+    document.getElementById('tkFecha').textContent = fechaStr;
+    document.getElementById('tkMetodo').textContent = `Pagado por ${pago.metodo_pago === 'efectivo' ? 'efectivo' : 'transferencia'}${pago.pagado_por ? ` · ${pago.pagado_por}` : ''}`;
+
+    // Desglose de servicios
+    const desglose = pago.desglose || [];
+    if (desglose.length > 0) {
+      document.getElementById('tkDesglose').innerHTML = desglose.map(s => `
+        <div class="ticket-servicio">
+          <span>${s.servicio}</span>
+          <span>${dnFormatCOP(s.comision)}${s.propina > 0 ? ` (+${dnFormatCOP(s.propina)} propina)` : ''}</span>
+        </div>
+      `).join('');
+      document.getElementById('tkDesglose').style.display = 'block';
+    } else {
+      document.getElementById('tkDesglose').style.display = 'none';
+    }
+
+    document.getElementById('ticketModal').classList.add('show');
+  }
+
+  function closeTicketModal() {
+    document.getElementById('ticketModal').classList.remove('show');
+  }
+
+  async function downloadTicket() {
+    if (!pagoActual) return;
+
+    vibrate(8);
+    const nombre = barberRow?.usuarios?.full_name || barberRow?.usuarios?.username || 'Barbero';
+    const fecha = new Date(pagoActual.fecha_pago);
+    const fechaStr = `${fecha.getDate()}/${fecha.getMonth()+1}/${fecha.getFullYear()}`;
+
+    // Crear contenido del ticket como texto
+    let ticketText = `
+══════════════════════════════
+      DIEGO NEIRA BARBERÍA
+       Comprobante de Pago
+══════════════════════════════
+
+Colaborador: ${nombre}
+Fecha: ${fechaStr}
+Método: ${pagoActual.metodo_pago === 'efectivo' ? 'Efectivo' : 'Transferencia'}
+
+──────────────────────────────
+DETALLE DE SERVICIOS
+──────────────────────────────
+`;
+
+    const desglose = pagoActual.desglose || [];
+    desglose.forEach(s => {
+      ticketText += `${s.servicio}: ${dnFormatCOP(s.comision)}${s.propina > 0 ? ` (+${dnFormatCOP(s.propina)})` : ''}\n`;
+    });
+
+    ticketText += `
+──────────────────────────────
+Comisión:        ${dnFormatCOP(pagoActual.total_comision)}
+Propinas:        ${dnFormatCOP(pagoActual.total_propinas)}`;
+
+    if (pagoActual.descuento_bebidas > 0) {
+      ticketText += `\nBebidas:        -${dnFormatCOP(pagoActual.descuento_bebidas)}`;
+    }
+
+    ticketText += `
+──────────────────────────────
+TOTAL PAGADO:   ${dnFormatCOP(pagoActual.total_pagado)}
+══════════════════════════════
+`;
+
+    // Descargar como archivo de texto
+    const blob = new Blob([ticketText], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ticket_pago_${fechaStr.replace(/\//g, '-')}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    toast('Ticket descargado');
+  }
+
+  // ============ INIT ============
+  async function init(){
+    try {
+      await loadBarberProfile();
+    } catch(e) { console.error('Error en loadBarberProfile:', e); }
+
+    try {
+      await loadFinanzas();
+    } catch(e) { console.error('Error en loadFinanzas:', e); }
+
+    try {
+      await loadProximasCitas();
+    } catch(e) { console.error('Error en loadProximasCitas:', e); }
+
+    try {
+      await loadRendimiento();
+    } catch(e) { console.error('Error en loadRendimiento:', e); }
+
+    try {
+      await loadAlerts();
+    } catch(e) { console.error('Error en loadAlerts:', e); }
+
+    try {
+      await loadPagos();
+    } catch(e) { console.error('Error en loadPagos:', e); }
+  }
+
+  init();
+
+  // ============ THEME TOGGLE ============
+  function initThemeToggle() {
+    const currentTheme = window.dnGetTheme ? window.dnGetTheme() : 'light';
+    updateThemeUI(currentTheme);
+  }
+
+  function updateThemeUI(theme) {
+    const label = document.getElementById('currentThemeLabel');
+    const lightDot = document.querySelector('.theme-dot.light');
+    const darkDot = document.querySelector('.theme-dot.dark');
+
+    if (label) {
+      label.textContent = theme === 'dark' ? 'Tema oscuro' : 'Tema claro';
+    }
+    if (lightDot) lightDot.classList.toggle('active', theme === 'light');
+    if (darkDot) darkDot.classList.toggle('active', theme === 'dark');
+  }
+
+  function toggleThemeOption() {
+    vibrate(8);
+    if (window.dnToggleTheme) {
+      const newTheme = window.dnToggleTheme();
+      updateThemeUI(newTheme);
+    }
+  }
+
+  // Inicializar el toggle del tema cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', initThemeToggle);
+  if (document.readyState !== 'loading') initThemeToggle();
+
+  // ============ LINK DE RESERVA ============
+  function getShareLink() {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/reservar/?barberoId=${user.id}`;
+  }
+
+  function initShareLink() {
+    const input = document.getElementById('shareLinkInput');
+    if (input && user?.id) {
+      input.value = getShareLink();
+    }
+  }
+
+  function copyShareLink() {
+    vibrate(8);
+    const link = getShareLink();
+    navigator.clipboard.writeText(link).then(() => {
+      showShareToast('¡Link copiado!');
+    }).catch(() => {
+      // Fallback para navegadores sin clipboard API
+      const input = document.getElementById('shareLinkInput');
+      input.select();
+      document.execCommand('copy');
+      showShareToast('¡Link copiado!');
+    });
+  }
+
+  function showShareToast(msg) {
+    const toast = document.getElementById('shareLinkToast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2000);
+  }
+
+  function shareViaWhatsApp() {
+    vibrate(8);
+    const link = getShareLink();
+    const nombre = barberRow?.usuarios?.full_name || user?.full_name || 'tu barbero';
+    const text = `¡Hola! Agenda tu cita conmigo en Keicy Barbería 💈\n\n${link}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  }
+
+  function shareNative() {
+    vibrate(8);
+    const link = getShareLink();
+    const nombre = barberRow?.usuarios?.full_name || user?.full_name || 'tu barbero';
+
+    if (navigator.share) {
+      navigator.share({
+        title: 'Reserva tu cita',
+        text: `Agenda tu cita con ${nombre} en Keicy Barbería`,
+        url: link
+      }).catch(err => console.log('Error compartiendo:', err));
+    } else {
+      // Fallback: copiar al portapapeles
+      copyShareLink();
+    }
+  }
+
+  // Inicializar link después de cargar el perfil
+  setTimeout(initShareLink, 500);
+</script>
+</body>
+</html>

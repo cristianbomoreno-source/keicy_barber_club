@@ -1,0 +1,1139 @@
+:root,
+[data-theme="light"]{
+  /* ================================================================
+     COLORES — Paleta Premium Barbería (Tema Claro - Por defecto)
+     ================================================================ */
+  --bg:#FFFFFF;
+  --bg-deep:#FAFAFA;
+  --surface:#F5F5F5;
+  --bg-card:#FFFFFF;
+  --card:#FFFFFF;
+  --bg-elevated:#FFFFFF;
+  --card-2:#F8F8F8;
+  --bg-hover:#F0F0F0;
+
+  /* Dorados Premium */
+  --gold:#D4AF55;
+  --gold-primary:#D4AF55;
+  --gold-bright:#E8C66A;
+  --gold-glow:rgba(212,175,85,0.15);
+  --accent:var(--gold);
+  --accent-bright:var(--gold-bright);
+
+  /* Texto Premium (oscuro para fondo claro) */
+  --text:#111111;
+  --text-primary:#111111;
+  --text-secondary:#666666;
+  --text-muted:#999999;
+
+  /* Bordes Premium */
+  --divider:rgba(0,0,0,0.08);
+  --border:rgba(0,0,0,0.1);
+  --border-subtle:rgba(0,0,0,0.06);
+  --border-light:rgba(0,0,0,0.05);
+  --border-gold:rgba(212,175,85,0.4);
+
+  /* Estados */
+  --success:#22C55E;
+  --error:#EF4444;
+  --danger:var(--error);
+  --warning:#F59E0B;
+
+  /* Glass effects (adaptados para tema claro) */
+  --glass:rgba(255,255,255,0.92);
+  --glass-2:rgba(0,0,0,0.02);
+  --glass-card:rgba(255,255,255,0.95);
+  --glass-card-2:rgba(0,0,0,0.03);
+  --glass-border:rgba(0,0,0,0.08);
+  --glass-border-soft:rgba(0,0,0,0.05);
+}
+
+/* ================================================================
+   TEMA OSCURO
+   ================================================================ */
+[data-theme="dark"]{
+  --bg:#0A0A0C;
+  --bg-deep:#0A0A0C;
+  --surface:#101112;
+  --bg-card:#101112;
+  --card:#16181D;
+  --bg-elevated:#16181D;
+  --card-2:#1C1E24;
+  --bg-hover:#1C1E24;
+
+  /* Texto Premium (claro para fondo oscuro) */
+  --text:#F5F2EA;
+  --text-primary:#F5F2EA;
+  --text-secondary:#8A8780;
+  --text-muted:#5A5852;
+
+  /* Bordes Premium */
+  --divider:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.06);
+  --border-subtle:rgba(255,255,255,0.06);
+  --border-light:rgba(255,255,255,0.1);
+  --border-gold:rgba(212,175,85,0.35);
+
+  /* Estados */
+  --success:#4ADE80;
+  --error:#EF5350;
+  --warning:#FBBF24;
+
+  /* Glass effects */
+  --glass:rgba(16,17,18,0.85);
+  --glass-2:rgba(255,255,255,0.03);
+  --glass-card:rgba(255,255,255,0.04);
+  --glass-card-2:rgba(255,255,255,0.06);
+  --glass-border:rgba(255,255,255,0.08);
+  --glass-border-soft:rgba(255,255,255,0.05);
+}
+
+:root{
+
+  /* Status colors para citas */
+  --status-active:#4ADE80;
+  --status-libre:#4ADE80;
+  --status-agendada:#60A5FA;
+  --status-espera:#FBBF24;
+  --status-servicio:#A78BFA;
+  --status-pago:#FB923C;
+  --status-fin:#34D399;
+  --status-gold:#D4AF55;
+  --status-inactive:#FF6B5E;
+
+  /* Aliases para compatibilidad con barbero/ */
+  --ring-green:var(--status-active);
+  --ring-gold:var(--status-gold);
+  --ring-red:var(--status-inactive);
+
+  /* Easing */
+  --ease-ios:cubic-bezier(.32,.72,0,1);
+
+  /* ================================================================
+     TIPOGRAFÍA — Sistema global
+     ================================================================ */
+  --font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+
+  /* Tamaños de texto */
+  --font-size-page-title:22px;
+  --font-size-section-title:16px;
+  --font-size-card-title:15px;
+  --font-size-body:14px;
+  --font-size-small:13px;
+  --font-size-caption:11px;
+  --font-size-button:15px;
+  --font-size-nav:10px;
+  --font-size-input:15px;
+  --font-size-label:12px;
+
+  /* Pesos */
+  --font-weight-normal:400;
+  --font-weight-medium:500;
+  --font-weight-semibold:600;
+  --font-weight-bold:700;
+  --font-weight-black:800;
+
+  /* Line heights */
+  --line-height-tight:1.2;
+  --line-height-normal:1.5;
+  --line-height-relaxed:1.65;
+
+  /* ================================================================
+     BORDER RADIUS — Sistema unificado
+     ================================================================ */
+  --radius-xs:8px;
+  --radius-sm:12px;
+  --radius-md:14px;
+  --radius-lg:16px;
+  --radius-xl:18px;
+  --radius-2xl:22px;
+  --radius-full:999px;
+
+  /* Aliases semánticos */
+  --radius-button:var(--radius-lg);
+  --radius-card:var(--radius-xl);
+  --radius-input:var(--radius-md);
+  --radius-modal:var(--radius-2xl);
+  --radius-pill:var(--radius-full);
+
+  /* ================================================================
+     COMPONENTES — Tamaños estándar
+     ================================================================ */
+  --button-height:48px;
+  --button-height-sm:40px;
+  --button-height-lg:56px;
+  --input-height:48px;
+  --input-height-lg:56px;
+  --icon-size-sm:18px;
+  --icon-size-md:22px;
+  --icon-size-lg:28px;
+
+  /* ================================================================
+     NAVBAR — Tokens unificados para todas las barras
+     ================================================================ */
+  --nav-height:56px;
+  --nav-icon-size:22px;
+  --nav-font-size:10px;
+  --nav-gap:2px;
+  --nav-padding:6px 0;
+  --nav-bg:rgba(255,255,255,0.95);
+  --nav-border:rgba(0,0,0,0.08);
+  --nav-color:rgba(100,100,100,0.9);
+  --nav-color-active:#D4AF55;
+  --nav-total:calc(var(--nav-height) + var(--safe-bottom));
+
+  /* ================================================================
+     SISTEMA GLOBAL DE SAFE AREAS
+     Respeta Dynamic Island, notch, cámara perforada, gestos, etc.
+     ================================================================ */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /* ================================================================
+     SISTEMA GLOBAL DE SPACING RESPONSIVO
+     Padding horizontal adaptativo según tamaño de pantalla:
+     - Móvil compacto (<375px): 12-14px
+     - Móvil normal (375-428px): 16px
+     - Móvil grande (428-768px): 18-20px
+     - Tablet (768-1024px): 24-32px
+     - Desktop (>1024px): contenido centrado con max-width
+     ================================================================ */
+
+  /* Padding horizontal base - se adapta al ancho de pantalla */
+  --page-padding-x: clamp(12px, 4vw, 32px);
+
+  /* Padding vertical base para contenido */
+  --page-padding-top: clamp(12px, 3vh, 24px);
+  --page-padding-bottom: clamp(12px, 3vh, 24px);
+
+  /* Spacing interno de cards y componentes */
+  --card-padding: clamp(12px, 3.5vw, 24px);
+  --card-padding-sm: clamp(10px, 2.5vw, 16px);
+
+  /* Gap entre secciones */
+  --section-gap: clamp(16px, 4vh, 32px);
+  --component-gap: clamp(8px, 2vh, 16px);
+
+  /* ================================================================
+     PADDINGS COMBINADOS: Visual + Safe Area
+     Usa max() para garantizar el mayor entre padding visual y safe area
+     ================================================================ */
+  --effective-top: max(var(--page-padding-top), var(--safe-top));
+  --effective-bottom: max(var(--page-padding-bottom), var(--safe-bottom));
+  --effective-left: max(var(--page-padding-x), var(--safe-left));
+  --effective-right: max(var(--page-padding-x), var(--safe-right));
+
+  /* ================================================================
+     ALTURAS DE ELEMENTOS FIJOS
+     IMPORTANTE: Mantener sincronizado con mobile-nav.js
+     ================================================================ */
+  --header-height: 56px;
+  --bottom-nav-height: 56px;
+  --bottom-nav-total: calc(var(--bottom-nav-height) + var(--safe-bottom));
+
+  /* ================================================================
+     CONTENEDOR MÁXIMO
+     ================================================================ */
+  --content-max-width: 520px;
+  --content-max-width-lg: 1200px;
+
+  /* ================================================================
+     ÁREAS TÁCTILES MÍNIMAS (44x44 puntos)
+     ================================================================ */
+  --touch-target-min: 44px;
+}
+
+*{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+/* ================================================================
+   ESTILOS GLOBALES PARA TEMA CLARO - Componentes Admin
+   ================================================================ */
+[data-theme="light"] .sidebar { background:var(--surface) !important; border-color:var(--border) !important; }
+[data-theme="light"] .sidebar-card { background:var(--bg-hover) !important; border-color:var(--border) !important; }
+[data-theme="light"] .sidebar-card-name { color:var(--text) !important; }
+[data-theme="light"] .sidebar-card-sub { color:var(--text-secondary) !important; }
+[data-theme="light"] .sidebar-card-menu { background:var(--bg-card) !important; border-color:var(--border) !important; box-shadow:0 8px 24px rgba(0,0,0,0.12) !important; }
+[data-theme="light"] .nav-link { color:var(--text-secondary) !important; }
+[data-theme="light"] .nav-link svg { stroke:var(--text-secondary) !important; }
+[data-theme="light"] .nav-link:hover { background:var(--bg-hover) !important; color:var(--text) !important; }
+[data-theme="light"] .nav-link:hover svg { stroke:var(--text) !important; }
+[data-theme="light"] .nav-link.active { background:var(--gold) !important; color:#141414 !important; }
+[data-theme="light"] .nav-link.active svg { stroke:#141414 !important; }
+[data-theme="light"] .sidebar svg { stroke:var(--text-secondary) !important; }
+[data-theme="light"] .icon-pill svg { stroke:var(--text-secondary) !important; }
+[data-theme="light"] .rail-btn svg { stroke:var(--text-secondary) !important; }
+[data-theme="light"] .nav-section-label { color:var(--text-muted) !important; }
+[data-theme="light"] .plan-card { background:rgba(212,175,85,0.08) !important; }
+[data-theme="light"] .plan-card .sub { color:var(--text-secondary) !important; }
+[data-theme="light"] .main { background:var(--bg) !important; }
+[data-theme="light"] .header-row { background:linear-gradient(to bottom, var(--bg) 0%, var(--bg) 85%, transparent 100%) !important; }
+[data-theme="light"] .kpi-card { background:var(--bg-card) !important; border-color:var(--border) !important; }
+[data-theme="light"] .modal-box { background:var(--bg-card) !important; border-color:var(--border) !important; }
+[data-theme="light"] .modal-header { border-color:var(--border) !important; }
+[data-theme="light"] #toast { background:rgba(255,255,255,0.95) !important; border-color:var(--border) !important; color:var(--text) !important; }
+
+html{
+  background:var(--bg);
+  height: 100%;
+  height: -webkit-fill-available;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-family);
+  font-size:var(--font-size-body);
+  line-height:var(--line-height-normal);
+  min-height: 100%;
+  min-height: -webkit-fill-available;
+  min-height: 100dvh;
+  /* Por defecto, body NO aplica safe-areas - las maneja el layout */
+  padding: 0;
+}
+
+/* ================================================================
+   TIPOGRAFÍA — Clases utilitarias
+   ================================================================ */
+.text-page-title{
+  font-size:var(--font-size-page-title);
+  font-weight:var(--font-weight-black);
+  line-height:var(--line-height-tight);
+}
+.text-section-title{
+  font-size:var(--font-size-section-title);
+  font-weight:var(--font-weight-bold);
+  line-height:var(--line-height-tight);
+}
+.text-card-title{
+  font-size:var(--font-size-card-title);
+  font-weight:var(--font-weight-bold);
+  line-height:var(--line-height-tight);
+}
+.text-body{
+  font-size:var(--font-size-body);
+  font-weight:var(--font-weight-normal);
+  line-height:var(--line-height-normal);
+}
+.text-small{
+  font-size:var(--font-size-small);
+  line-height:var(--line-height-normal);
+}
+.text-caption{
+  font-size:var(--font-size-caption);
+  font-weight:var(--font-weight-semibold);
+  line-height:var(--line-height-tight);
+  letter-spacing:0.5px;
+}
+.text-muted{ color:var(--text-muted); }
+.text-secondary{ color:var(--text-secondary); }
+.text-accent{ color:var(--accent); }
+.text-success{ color:var(--success); }
+.text-error{ color:var(--error); }
+.text-warning{ color:var(--warning); }
+
+/* ================================================================
+   COMPONENTES — Botones unificados
+   ================================================================ */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  height:var(--button-height);
+  padding:0 24px;
+  border-radius:var(--radius-button);
+  font-size:var(--font-size-button);
+  font-weight:var(--font-weight-bold);
+  font-family:var(--font-family);
+  cursor:pointer;
+  border:none;
+  transition:transform 0.15s ease, filter 0.2s ease, opacity 0.2s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn:active{ transform:scale(0.97); }
+.btn:disabled{ opacity:0.5; cursor:not-allowed; }
+.btn-sm{ height:var(--button-height-sm); padding:0 16px; font-size:var(--font-size-small); }
+.btn-lg{ height:var(--button-height-lg); padding:0 32px; }
+.btn-full{ width:100%; }
+.btn-primary{
+  background:linear-gradient(180deg, var(--accent-bright), var(--accent));
+  color:#141414;
+}
+.btn-primary:active{ filter:brightness(0.96); }
+.btn-secondary{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+}
+.btn-danger{
+  background:rgba(239,83,80,0.15);
+  color:var(--error);
+  border:1px solid rgba(239,83,80,0.3);
+}
+.btn-ghost{
+  background:transparent;
+  color:var(--accent);
+  border:1px solid var(--border);
+}
+.btn-ghost:hover{ border-color:var(--accent); background:rgba(212,175,85,0.06); }
+
+/* ================================================================
+   COMPONENTES — Inputs unificados
+   ================================================================ */
+.input{
+  width:100%;
+  height:var(--input-height);
+  padding:0 16px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-input);
+  color:var(--text);
+  font-size:var(--font-size-input);
+  font-family:var(--font-family);
+  outline:none;
+  transition:border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.input:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(212,175,85,0.14);
+}
+.input::placeholder{ color:var(--text-muted); }
+.input-lg{ height:var(--input-height-lg); }
+.input-error{ border-color:var(--error); }
+
+.textarea{
+  width:100%;
+  min-height:120px;
+  padding:14px 16px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-input);
+  color:var(--text);
+  font-size:var(--font-size-body);
+  font-family:var(--font-family);
+  resize:vertical;
+  outline:none;
+}
+.textarea:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(212,175,85,0.14);
+}
+
+.label{
+  display:block;
+  font-size:var(--font-size-label);
+  font-weight:var(--font-weight-semibold);
+  letter-spacing:0.5px;
+  text-transform:uppercase;
+  color:var(--text-secondary);
+  margin-bottom:8px;
+}
+
+/* ================================================================
+   COMPONENTES — Cards unificadas
+   ================================================================ */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-card);
+  padding:var(--card-padding);
+}
+.card-glass{
+  background:var(--glass);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius-card);
+  padding:var(--card-padding);
+}
+
+/* ================================================================
+   COMPONENTES — Modal unificado
+   ================================================================ */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  z-index:100;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:var(--page-padding-x);
+}
+.modal-box{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-modal);
+  padding:24px;
+  width:100%;
+  max-width:400px;
+  max-height:calc(100dvh - 48px);
+  overflow-y:auto;
+}
+.modal-title{
+  font-size:var(--font-size-page-title);
+  font-weight:var(--font-weight-black);
+  margin-bottom:8px;
+}
+.modal-subtitle{
+  font-size:var(--font-size-body);
+  color:var(--text-secondary);
+  margin-bottom:20px;
+}
+.modal-actions{
+  display:flex;
+  gap:12px;
+  margin-top:24px;
+}
+.modal-actions .btn{ flex:1; }
+
+/* ================================================================
+   COMPONENTES — Badges/Pills
+   ================================================================ */
+.badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  padding:4px 10px;
+  border-radius:var(--radius-pill);
+  font-size:var(--font-size-caption);
+  font-weight:var(--font-weight-semibold);
+}
+.badge-success{ background:rgba(74,222,128,0.14); color:var(--success); }
+.badge-warning{ background:rgba(251,191,36,0.14); color:var(--warning); }
+.badge-error{ background:rgba(239,83,80,0.14); color:var(--error); }
+.badge-neutral{ background:rgba(159,159,159,0.12); color:var(--text-secondary); }
+.badge-accent{ background:rgba(212,175,85,0.14); color:var(--accent); }
+
+/* ================================================================
+   COMPONENTES — Tabs
+   ================================================================ */
+.tabs{
+  display:flex;
+  gap:4px;
+  padding:4px;
+  background:var(--surface);
+  border-radius:var(--radius-sm);
+}
+.tab{
+  flex:1;
+  padding:10px 16px;
+  border-radius:var(--radius-xs);
+  font-size:var(--font-size-small);
+  font-weight:var(--font-weight-semibold);
+  color:var(--text-secondary);
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  transition:all 0.15s ease;
+}
+.tab.active{
+  background:var(--card);
+  color:var(--text);
+}
+.tab:hover:not(.active){
+  color:var(--text);
+}
+
+/* ================================================================
+   SISTEMA DE LAYOUT GLOBAL
+   Usar estas clases en lugar de padding inline en cada página
+   ================================================================ */
+
+/* Contenedor principal de página - aplica safe areas + padding visual */
+.dn-page{
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  /* Padding combinado: mayor entre visual y safe-area */
+  padding-top: var(--effective-top);
+  padding-bottom: var(--effective-bottom);
+  padding-left: var(--effective-left);
+  padding-right: var(--effective-right);
+}
+
+/* Página con navegación inferior fija */
+.dn-page.has-bottom-nav{
+  padding-bottom: calc(var(--bottom-nav-total) + var(--page-padding-bottom));
+}
+
+/* Página con header fijo */
+.dn-page.has-fixed-header{
+  padding-top: calc(var(--header-height) + var(--effective-top));
+}
+
+/* Contenedor centrado con ancho máximo */
+.dn-container{
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--effective-left);
+  padding-right: var(--effective-right);
+}
+
+.dn-container-lg{
+  max-width: var(--content-max-width-lg);
+}
+
+/* Área de contenido principal (flex-grow para ocupar espacio) */
+.dn-content{
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--component-gap);
+  min-height: 0;
+}
+
+/* Header fijo global */
+.dn-header{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--divider);
+  /* Padding: safe-top + padding visual */
+  padding: max(12px, var(--safe-top)) var(--effective-left) 12px var(--effective-right);
+  min-height: calc(var(--header-height) + var(--safe-top));
+  display: flex;
+  align-items: flex-end;
+}
+
+/* Header sticky (dentro del flujo) */
+.dn-header-sticky{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: var(--effective-top) 0 12px;
+  margin-left: calc(-1 * var(--effective-left));
+  margin-right: calc(-1 * var(--effective-right));
+  padding-left: var(--effective-left);
+  padding-right: var(--effective-right);
+}
+
+/* Footer/Navegación inferior fija */
+.dn-footer{
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--divider);
+  /* Padding: visual + safe-bottom */
+  padding: 10px var(--effective-left) max(10px, var(--safe-bottom)) var(--effective-right);
+}
+
+/* ================================================================
+   LAYOUT PARA PANTALLAS FULLSCREEN (sin scroll, altura fija)
+   ================================================================ */
+.dn-fullscreen{
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--effective-top);
+  padding-bottom: var(--effective-bottom);
+  padding-left: var(--effective-left);
+  padding-right: var(--effective-right);
+}
+
+.dn-fullscreen.has-bottom-nav{
+  padding-bottom: calc(var(--bottom-nav-total) + 8px);
+}
+
+/* ================================================================
+   HERO/BANNER QUE EXTIENDE HASTA BORDES
+   Contenido respeta safe areas, fondo extiende edge-to-edge
+   ================================================================ */
+.dn-hero{
+  position: relative;
+  margin-left: calc(-1 * var(--effective-left));
+  margin-right: calc(-1 * var(--effective-right));
+  margin-top: calc(-1 * var(--effective-top));
+  padding: var(--effective-top) var(--effective-left) var(--page-padding-bottom) var(--effective-right);
+}
+
+.dn-hero-content{
+  position: relative;
+  z-index: 2;
+}
+
+img{ display:block; max-width:100%; }
+
+.eyebrow{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:1.2px;
+  text-transform:uppercase;
+  color:var(--gold);
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--divider);
+  border-radius:18px;
+  box-shadow:0 2px 12px rgba(0,0,0,0.06);
+}
+
+.avatar{
+  border-radius:50%;
+  background:linear-gradient(135deg, var(--gold-bright), var(--gold));
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#141414;
+  font-weight:700;
+  flex-shrink:0;
+}
+
+.btn-gold{
+  background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color:#141414;
+  border:none;
+  border-radius:16px;
+  font-weight:700;
+  cursor:pointer;
+  transition:transform 0.15s ease, filter 0.2s ease;
+}
+.btn-gold:active{ transform:scale(0.97); filter:brightness(0.96); }
+
+.btn-ghost{
+  background:transparent;
+  color:var(--gold);
+  border:1px solid var(--divider);
+  border-radius:16px;
+  font-weight:600;
+  cursor:pointer;
+  transition:border-color 0.2s ease, background 0.2s ease;
+}
+.btn-ghost:hover{ border-color:var(--gold); background:rgba(212,175,85,0.06); }
+
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 12px;
+  border-radius:999px;
+  font-size:11.5px;
+  font-weight:600;
+}
+.pill.success{ background:rgba(74,222,128,0.14); color:var(--success); }
+.pill.warning{ background:rgba(251,191,36,0.14); color:var(--warning); }
+.pill.error{ background:rgba(239,83,80,0.14); color:var(--error); }
+.pill.neutral{ background:rgba(159,159,159,0.12); color:var(--text-secondary); }
+
+::-webkit-scrollbar{ width:0; height:0; }
+
+.fade-in{
+  animation:fadeIn 0.5s ease forwards;
+}
+@keyframes fadeIn{
+  from{ opacity:0; transform:translateY(8px); }
+  to{ opacity:1; transform:translateY(0); }
+}
+
+/* ================================================================
+   NAVEGACIÓN MÓVIL UNIFICADA — FUENTE ÚNICA DE VERDAD
+   Estilos cargados con CSS para evitar FOUT/layout shift
+   Usa tokens de --nav-* definidos en :root
+   ================================================================ */
+
+/* Navbar móvil - TODOS LOS ROLES */
+.mobile-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none; /* Mostrar solo en móvil */
+  align-items: center;
+  justify-content: space-around;
+  height: var(--nav-height);
+  background: var(--nav-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 1px solid var(--nav-border);
+  padding: 0;
+  padding-bottom: var(--safe-bottom);
+  z-index: 9999;
+  box-sizing: content-box;
+}
+
+/* Items de navegación - tamaño UNIFORME para todos los roles */
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  min-width: var(--touch-target-min);
+  padding: var(--nav-padding);
+  text-decoration: none;
+  color: var(--nav-color);
+  font-size: var(--nav-font-size);
+  font-weight: var(--font-weight-semibold);
+  gap: var(--nav-gap);
+  transition: color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-nav-item:active {
+  transform: scale(0.92);
+}
+
+/* Iconos - tamaño UNIFORME */
+.mobile-nav-item svg {
+  width: var(--nav-icon-size);
+  height: var(--nav-icon-size);
+  stroke-width: 1.8;
+  flex-shrink: 0;
+}
+
+.mobile-nav-item span {
+  display: block;
+  line-height: var(--line-height-tight);
+}
+
+/* Estado activo - dorado */
+.mobile-nav-item.active {
+  color: var(--nav-color-active);
+}
+
+.mobile-nav-item.active svg {
+  color: var(--nav-color-active);
+}
+
+/* Badge de notificaciones en navegación */
+.mobile-nav-item {
+  position: relative;
+}
+
+.nav-badge {
+  position: absolute;
+  top: 2px;
+  right: 50%;
+  transform: translateX(14px);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #EF4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  border-radius: 99px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+  z-index: 10;
+}
+
+.nav-badge.pulse {
+  animation: navBadgePulse 0.6s ease;
+}
+
+@keyframes navBadgePulse {
+  0%, 100% { transform: translateX(14px) scale(1); }
+  50% { transform: translateX(14px) scale(1.2); }
+}
+
+/* Ocultar en modo popup */
+html.popup-mode .mobile-nav {
+  display: none !important;
+}
+
+/* Mostrar solo en móvil */
+@media (max-width: 767px) {
+  .mobile-nav {
+    display: flex;
+  }
+
+  /* Espacio inferior para contenido */
+  body:not(.popup-mode):not(.no-nav-padding) {
+    padding-bottom: var(--nav-total) !important;
+  }
+
+  /* Ocultar sidebar en móvil */
+  .sidebar {
+    display: none !important;
+  }
+
+  /* Toast encima de la nav */
+  #toast, .toast, .dn-toast {
+    bottom: calc(var(--nav-total) + 16px) !important;
+  }
+}
+
+/* Eliminar barras legacy */
+.dn-bottom-nav,
+.tab-bar:not(.mobile-nav) {
+  display: none !important;
+}
+
+/* ================================================================
+   Toast global - Compatible con todos los dispositivos
+   ================================================================ */
+.dn-toast, #toast, .toast {
+  position: fixed;
+  left: 50%;
+  /* Se posiciona encima de la nav inferior */
+  bottom: calc(var(--bottom-nav-total) + 16px);
+  transform: translate(-50%, 16px);
+  background: rgba(17, 17, 17, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 2000;
+  max-width: calc(100% - 2 * var(--effective-left));
+  text-align: center;
+}
+.dn-toast.show, #toast.show, .toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
+/* Toast para páginas sin nav inferior */
+body:not(.has-bottom-nav) .dn-toast,
+body:not(.has-bottom-nav) #toast,
+body:not(.has-bottom-nav) .toast {
+  bottom: calc(var(--effective-bottom) + 16px);
+}
+
+/* ================================================================
+   UTILIDADES DE SAFE AREA (para casos específicos)
+   Preferir usar .dn-page o .dn-container para layouts completos
+   ================================================================ */
+.safe-area-top { padding-top: var(--safe-top); }
+.safe-area-bottom { padding-bottom: var(--safe-bottom); }
+.safe-area-left { padding-left: var(--safe-left); }
+.safe-area-right { padding-right: var(--safe-right); }
+.safe-area-x { padding-left: var(--safe-left); padding-right: var(--safe-right); }
+.safe-area-y { padding-top: var(--safe-top); padding-bottom: var(--safe-bottom); }
+.safe-area-all { padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left); }
+
+/* Margin variants */
+.safe-margin-top { margin-top: var(--safe-top); }
+.safe-margin-bottom { margin-bottom: var(--safe-bottom); }
+
+/* Para elementos fixed */
+.fixed-safe-top { top: var(--safe-top); }
+.fixed-safe-bottom { bottom: var(--safe-bottom); }
+
+/* ================================================================
+   UTILIDADES DE PADDING EFECTIVO (visual + safe area combinados)
+   ================================================================ */
+.pad-effective-top { padding-top: var(--effective-top); }
+.pad-effective-bottom { padding-bottom: var(--effective-bottom); }
+.pad-effective-left { padding-left: var(--effective-left); }
+.pad-effective-right { padding-right: var(--effective-right); }
+.pad-effective-x { padding-left: var(--effective-left); padding-right: var(--effective-right); }
+.pad-effective-y { padding-top: var(--effective-top); padding-bottom: var(--effective-bottom); }
+.pad-effective-all { padding: var(--effective-top) var(--effective-right) var(--effective-bottom) var(--effective-left); }
+
+/* ================================================================
+   UTILIDADES DE HEIGHT
+   ================================================================ */
+.h-screen-dynamic { height: 100vh; height: 100dvh; }
+.min-h-screen-dynamic { min-height: 100vh; min-height: 100dvh; }
+.h-screen-safe { height: calc(100dvh - var(--safe-top) - var(--safe-bottom)); }
+.min-h-screen-safe { min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom)); }
+
+/* ================================================================
+   CLASES DE ESTADO PARA BODY
+   ================================================================ */
+body.has-bottom-nav {
+  /* Marcar que la página tiene nav inferior */
+}
+
+body.has-fixed-header {
+  /* Marcar que la página tiene header fijo */
+}
+
+/* ================================================================
+   MEDIA QUERIES RESPONSIVOS
+   Ajustar variables según tamaño de pantalla
+   ================================================================ */
+
+/* Móviles compactos (iPhone SE, etc.) */
+@media (max-width: 374px) {
+  :root {
+    --page-padding-x: 12px;
+    --page-padding-top: 10px;
+    --page-padding-bottom: 10px;
+    --card-padding: 12px;
+    --section-gap: 14px;
+    --component-gap: 8px;
+  }
+}
+
+/* Móviles normales */
+@media (min-width: 375px) and (max-width: 427px) {
+  :root {
+    --page-padding-x: 16px;
+    --page-padding-top: 12px;
+    --page-padding-bottom: 12px;
+    --card-padding: 14px;
+  }
+}
+
+/* Móviles grandes */
+@media (min-width: 428px) and (max-width: 767px) {
+  :root {
+    --page-padding-x: 20px;
+    --page-padding-top: 14px;
+    --page-padding-bottom: 14px;
+    --card-padding: 16px;
+  }
+}
+
+/* Tablets */
+@media (min-width: 768px) and (max-width: 1023px) {
+  :root {
+    --page-padding-x: 28px;
+    --page-padding-top: 20px;
+    --page-padding-bottom: 20px;
+    --card-padding: 20px;
+    --section-gap: 24px;
+    --content-max-width: 680px;
+  }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  :root {
+    --page-padding-x: 32px;
+    --page-padding-top: 24px;
+    --page-padding-bottom: 24px;
+    --card-padding: 24px;
+    --section-gap: 32px;
+    --content-max-width: 800px;
+  }
+}
+
+/* Pantallas muy altas (ajustar espaciado vertical) */
+@media (min-height: 900px) {
+  :root {
+    --section-gap: clamp(20px, 4vh, 40px);
+    --component-gap: clamp(12px, 2vh, 20px);
+  }
+}
+
+/* Pantallas cortas (compactar) */
+@media (max-height: 700px) {
+  :root {
+    --page-padding-top: 8px;
+    --page-padding-bottom: 8px;
+    --section-gap: 12px;
+    --component-gap: 6px;
+    --header-height: 48px;
+    --bottom-nav-height: 56px;
+  }
+}
+
+/* Orientación horizontal en móviles */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --page-padding-top: 6px;
+    --page-padding-bottom: 6px;
+    --header-height: 44px;
+    /* Mantener altura consistente en todas las orientaciones */
+    --bottom-nav-height: 56px;
+  }
+
+  .dn-bottom-nav {
+    padding-top: 6px;
+    padding-bottom: max(6px, var(--safe-bottom));
+  }
+}
+
+/* ================================================================
+   SISTEMA GLOBAL DE LAYOUT PARA MÓVILES
+   Estas reglas aseguran que TODAS las páginas respeten safe-area
+   sin necesidad de modificar cada archivo HTML individualmente
+   ================================================================ */
+
+@media (max-width: 767px) {
+  /* Asegurar que html y body ocupen toda la altura */
+  html, body {
+    min-height: 100%;
+    min-height: 100dvh;
+  }
+
+  /* Contenedor principal #app - patrón común en todas las páginas */
+  #app {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    /* Safe area superior */
+    padding-top: max(var(--page-padding-top), var(--safe-top));
+    /* Safe area inferior + espacio para nav (se suma via mobile-nav.js) */
+  }
+
+  /* Contenido scrolleable dentro de #app */
+  #app > .content-scroll,
+  #app > .main,
+  #app > .main-content {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    /* Espacio inferior para que el último elemento no quede detrás de la nav */
+    padding-bottom: 20px;
+  }
+
+  /* Modales y sheets - respetar safe-area inferior */
+  .modal-overlay,
+  .sheet-bg {
+    /* Asegurar que el fondo cubra toda la pantalla */
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+  }
+
+  .modal-box,
+  .sheet-box {
+    /* Padding inferior para safe-area */
+    padding-bottom: max(20px, var(--safe-bottom));
+  }
+
+  /* Botones de acción en modales - nunca detrás del home indicator */
+  .modal-actions,
+  .sheet-actions,
+  .cart-actions {
+    padding-bottom: max(12px, var(--safe-bottom));
+  }
+
+  /* Formularios en modales */
+  .modal-form,
+  .sheet-form {
+    max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 120px);
+    overflow-y: auto;
+  }
+}

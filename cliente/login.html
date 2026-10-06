@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#FFFFFF">
+<title>Club de Leales | Keicy Barberia</title>
+<style>
+  :root {
+    --club-bg: #FFFFFF;
+    --club-surface: #F8F8F8;
+    --club-text: #1A1A1A;
+    --club-text-secondary: #666666;
+    --club-gold: #C9A35B;
+    --club-gold-bright: #D4B06A;
+    --club-divider: rgba(0,0,0,0.08);
+    --club-error: #E53935;
+    --club-success: #43A047;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--club-bg);
+    color: var(--club-text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 0 24px;
+    padding-top: max(40px, var(--safe-top));
+    padding-bottom: max(40px, var(--safe-bottom));
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  }
+
+  .title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: var(--club-text-secondary);
+    line-height: 1.5;
+  }
+
+  .form-section {
+    flex: 1;
+  }
+
+  .input-group {
+    margin-bottom: 20px;
+  }
+
+  .input-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--club-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+
+  /* Phone input with country selector */
+  .phone-input-group {
+    display: flex;
+    gap: 10px;
+  }
+
+  .country-select {
+    width: 110px;
+    height: 56px;
+    border: 2px solid var(--club-divider);
+    border-radius: 14px;
+    padding: 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+    background: var(--club-surface);
+    color: var(--club-text);
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+
+  .country-select:focus {
+    border-color: var(--club-gold);
+    box-shadow: 0 0 0 4px rgba(201,163,91,0.15);
+  }
+
+  .input-field {
+    flex: 1;
+    height: 56px;
+    border: 2px solid var(--club-divider);
+    border-radius: 14px;
+    padding: 0 16px;
+    font-size: 18px;
+    font-weight: 500;
+    background: var(--club-surface);
+    color: var(--club-text);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .input-field:focus {
+    border-color: var(--club-gold);
+    box-shadow: 0 0 0 4px rgba(201,163,91,0.15);
+  }
+
+  .input-field::placeholder {
+    color: #BBBBBB;
+    font-weight: 400;
+  }
+
+  .input-field.error {
+    border-color: var(--club-error);
+  }
+
+  /* PIN Input - Single field for password manager */
+  .pin-single-input {
+    width: 100%;
+    height: 64px;
+    border: 2px solid var(--club-divider);
+    border-radius: 16px;
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 16px;
+    padding-left: 20px;
+    background: var(--club-surface);
+    color: var(--club-text);
+    outline: none;
+    transition: all 0.2s ease;
+  }
+
+  .pin-single-input:focus {
+    border-color: var(--club-gold);
+    box-shadow: 0 0 0 4px rgba(201,163,91,0.15);
+  }
+
+  .pin-single-input.error {
+    border-color: var(--club-error);
+    animation: shake 0.4s ease;
+  }
+
+  .pin-single-input::placeholder {
+    letter-spacing: 8px;
+    font-size: 24px;
+    color: #CCCCCC;
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  /* PIN Container */
+  .pin-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .pin-container.show {
+    display: flex;
+  }
+
+  .pin-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .pin-subtitle {
+    font-size: 14px;
+    color: var(--club-text-secondary);
+    margin-bottom: 24px;
+    text-align: center;
+  }
+
+  .pin-input-wrapper {
+    width: 100%;
+    max-width: 220px;
+    margin-bottom: 24px;
+  }
+
+  .error-message {
+    background: rgba(229,57,53,0.1);
+    border: 1px solid rgba(229,57,53,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--club-error);
+    margin-bottom: 20px;
+    display: none;
+    text-align: center;
+    width: 100%;
+  }
+
+  .error-message.show {
+    display: block;
+  }
+
+  .btn {
+    width: 100%;
+    height: 56px;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(180deg, var(--club-gold-bright), var(--club-gold));
+    color: #1A1A1A;
+    box-shadow: 0 4px 16px rgba(201,163,91,0.35);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(201,163,91,0.45);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+  }
+
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    border: 2px solid var(--club-divider);
+    color: var(--club-text-secondary);
+    margin-top: 12px;
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(26,26,26,0.2);
+    border-top-color: #1A1A1A;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .footer {
+    text-align: center;
+    padding: 24px 0;
+    font-size: 13px;
+    color: var(--club-text-secondary);
+  }
+
+  .footer a {
+    color: var(--club-gold);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  /* User preview card */
+  .user-preview {
+    background: var(--club-surface);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .user-preview.show {
+    display: flex;
+  }
+
+  .user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--club-gold);
+    color: #1A1A1A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 800;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .user-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .user-name {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .user-meta {
+    font-size: 14px;
+    color: var(--club-text-secondary);
+  }
+
+  .user-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: white;
+  }
+
+  .user-badge.tiene-pin { background: var(--club-success); }
+  .user-badge.sin-pin { background: var(--club-gold); color: #1A1A1A; }
+
+  /* Steps indicator */
+  .step { display: none; }
+  .step.active { display: block; animation: fadeIn 0.3s ease; }
+
+  /* Password manager hint */
+  .pm-hint {
+    font-size: 12px;
+    color: var(--club-text-secondary);
+    text-align: center;
+    margin-top: 16px;
+  }
+
+  .pm-hint svg {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    margin-right: 4px;
+  }
+
+  /* Hidden inputs for password manager */
+  .hidden-field {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  /* Responsive */
+  @media (min-width: 768px) {
+    .container {
+      padding-top: 80px;
+    }
+
+    .title {
+      font-size: 32px;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .pin-single-input {
+      font-size: 28px;
+      letter-spacing: 12px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <img src="../assets/apple-touch-icon-v2.png" alt="Keicy Barber" class="logo">
+    <h1 class="title">Club de Leales</h1>
+    <p class="subtitle" id="headerSubtitle">Ingresa con tu numero de telefono para ver tus beneficios exclusivos</p>
+  </div>
+
+  <div class="form-section">
+    <!-- Step 1: Phone Input -->
+    <div class="step active" id="stepPhone">
+      <form id="phoneForm" autocomplete="on">
+        <div class="user-preview" id="userPreview">
+          <div class="user-avatar" id="userAvatar">--</div>
+          <div class="user-info">
+            <div class="user-name" id="userName">Cliente</div>
+            <div class="user-meta" id="userMeta">Club de Leales</div>
+          </div>
+          <div class="user-badge sin-pin" id="userBadge">--</div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="phoneInput">Numero de celular</label>
+          <div class="phone-input-group">
+            <select class="country-select" id="countrySelect" name="country">
+              <option value="57">🇨🇴 +57</option>
+              <option value="1">🇺🇸 +1</option>
+              <option value="52">🇲🇽 +52</option>
+              <option value="34">🇪🇸 +34</option>
+              <option value="54">🇦🇷 +54</option>
+              <option value="56">🇨🇱 +56</option>
+              <option value="51">🇵🇪 +51</option>
+              <option value="593">🇪🇨 +593</option>
+              <option value="58">🇻🇪 +58</option>
+              <option value="507">🇵🇦 +507</option>
+              <option value="506">🇨🇷 +506</option>
+              <option value="502">🇬🇹 +502</option>
+              <option value="503">🇸🇻 +503</option>
+              <option value="504">🇭🇳 +504</option>
+              <option value="505">🇳🇮 +505</option>
+              <option value="591">🇧🇴 +591</option>
+              <option value="595">🇵🇾 +595</option>
+              <option value="598">🇺🇾 +598</option>
+              <option value="55">🇧🇷 +55</option>
+              <option value="44">🇬🇧 +44</option>
+              <option value="49">🇩🇪 +49</option>
+              <option value="33">🇫🇷 +33</option>
+              <option value="39">🇮🇹 +39</option>
+              <option value="351">🇵🇹 +351</option>
+              <option value="31">🇳🇱 +31</option>
+              <option value="32">🇧🇪 +32</option>
+              <option value="41">🇨🇭 +41</option>
+              <option value="43">🇦🇹 +43</option>
+              <option value="61">🇦🇺 +61</option>
+              <option value="64">🇳🇿 +64</option>
+              <option value="81">🇯🇵 +81</option>
+              <option value="82">🇰🇷 +82</option>
+              <option value="86">🇨🇳 +86</option>
+              <option value="91">🇮🇳 +91</option>
+              <option value="971">🇦🇪 +971</option>
+              <option value="972">🇮🇱 +972</option>
+              <option value="27">🇿🇦 +27</option>
+            </select>
+            <input
+              type="tel"
+              id="phoneInput"
+              name="phone"
+              class="input-field"
+              placeholder="315 750 1827"
+              maxlength="15"
+              autocomplete="tel"
+              inputmode="numeric"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <button type="submit" class="btn btn-primary" id="btnContinue">
+          Continuar
+        </button>
+      </form>
+
+      <div class="footer">
+        <p>No tienes cuenta? <a href="../reservar/index.html">Reserva tu primera cita</a></p>
+      </div>
+    </div>
+
+    <!-- Step 2: Create PIN -->
+    <div class="step" id="stepCreatePin">
+      <form id="createPinForm" autocomplete="on">
+        <!-- Hidden username field for password manager -->
+        <input type="text" id="createUsername" name="username" class="hidden-field" autocomplete="username" readonly>
+
+        <div class="pin-container show">
+          <div class="pin-title">Crea tu PIN</div>
+          <div class="pin-subtitle">Este PIN de 4 digitos sera tu clave para ingresar</div>
+
+          <div class="pin-input-wrapper">
+            <input
+              type="password"
+              id="createPinInput"
+              name="new-password"
+              class="pin-single-input"
+              placeholder="••••"
+              maxlength="4"
+              inputmode="numeric"
+              pattern="[0-9]{4}"
+              autocomplete="new-password"
+              required
+            >
+          </div>
+
+          <div class="error-message" id="createPinError"></div>
+
+          <button type="submit" class="btn btn-primary" id="btnCreatePin">
+            Crear PIN
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="goToStep('stepPhone')">
+            Volver
+          </button>
+
+          <p class="pm-hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            Tu navegador puede guardar este PIN
+          </p>
+        </div>
+      </form>
+    </div>
+
+    <!-- Step 3: Enter PIN -->
+    <div class="step" id="stepEnterPin">
+      <form id="enterPinForm" autocomplete="on">
+        <!-- Hidden username field for password manager -->
+        <input type="text" id="enterUsername" name="username" class="hidden-field" autocomplete="username" readonly>
+
+        <div class="pin-container show">
+          <div class="pin-title">Ingresa tu PIN</div>
+          <div class="pin-subtitle" id="enterPinSubtitle">Hola! Ingresa tu PIN de 4 digitos</div>
+
+          <div class="pin-input-wrapper">
+            <input
+              type="password"
+              id="enterPinInput"
+              name="current-password"
+              class="pin-single-input"
+              placeholder="••••"
+              maxlength="4"
+              inputmode="numeric"
+              pattern="[0-9]{4}"
+              autocomplete="current-password"
+              required
+            >
+          </div>
+
+          <div class="error-message" id="enterPinError"></div>
+
+          <button type="submit" class="btn btn-primary" id="btnEnterPin">
+            Ingresar
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="goToStep('stepPhone')">
+            Cambiar numero
+          </button>
+
+          <p class="pm-hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            Usa tu gestor de contrasenas
+          </p>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+  // State
+  let currentClienteId = null;
+  let currentClienteNombre = null;
+  let currentFullPhone = null;
+
+  // Check existing session
+  const existingSession = dnGetLealtadSession();
+  if (existingSession) {
+    window.location.href = 'club.html';
+  }
+
+  // Helpers
+  function normalizePhone(phone) {
+    return phone.replace(/\D/g, '');
+  }
+
+  function getFullPhone() {
+    const countryCode = document.getElementById('countrySelect').value;
+    const phone = normalizePhone(document.getElementById('phoneInput').value);
+    return '+' + countryCode + phone;
+  }
+
+  function getInitials(name) {
+    if (!name) return '??';
+    const parts = name.trim().split(/\s+/);
+    return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+  }
+
+  function showError(elementId, message) {
+    const el = document.getElementById(elementId);
+    el.textContent = message;
+    el.classList.add('show');
+  }
+
+  function hideError(elementId) {
+    document.getElementById(elementId).classList.remove('show');
+  }
+
+  function goToStep(stepId) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById(stepId).classList.add('active');
+
+    // Update hidden username fields and focus PIN input
+    if (stepId === 'stepCreatePin') {
+      document.getElementById('createUsername').value = currentFullPhone;
+      setTimeout(() => document.getElementById('createPinInput').focus(), 100);
+    } else if (stepId === 'stepEnterPin') {
+      document.getElementById('enterUsername').value = currentFullPhone;
+      setTimeout(() => document.getElementById('enterPinInput').focus(), 100);
+    }
+  }
+
+  // Save credentials to password manager
+  async function saveCredentials(username, password) {
+    if (window.PasswordCredential) {
+      try {
+        const cred = new PasswordCredential({
+          id: username,
+          password: password,
+          name: currentClienteNombre || 'Club de Leales'
+        });
+        await navigator.credentials.store(cred);
+        console.log('Credentials saved to password manager');
+      } catch (e) {
+        console.log('Could not save credentials:', e);
+      }
+    }
+  }
+
+  // Try to auto-fill from password manager
+  async function tryAutoFill() {
+    if (navigator.credentials && navigator.credentials.get) {
+      try {
+        const cred = await navigator.credentials.get({
+          password: true,
+          mediation: 'optional'
+        });
+        if (cred && cred.type === 'password') {
+          // Parse phone from credential ID
+          const match = cred.id.match(/^\+(\d+)(\d{7,})$/);
+          if (match) {
+            const countryCode = match[1];
+            const phone = match[2];
+
+            // Set country
+            const countrySelect = document.getElementById('countrySelect');
+            for (let opt of countrySelect.options) {
+              if (opt.value === countryCode) {
+                countrySelect.value = countryCode;
+                break;
+              }
+            }
+
+            // Set phone
+            document.getElementById('phoneInput').value = phone;
+
+            // Auto search
+            await buscarCliente();
+
+            // If user has PIN, auto-fill it
+            if (cred.password && document.getElementById('stepEnterPin').classList.contains('active')) {
+              document.getElementById('enterPinInput').value = cred.password;
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Auto-fill not available:', e);
+      }
+    }
+  }
+
+  // Search for client
+  async function buscarCliente() {
+    const countryCode = document.getElementById('countrySelect').value;
+    const phone = normalizePhone(document.getElementById('phoneInput').value);
+    const btn = document.getElementById('btnContinue');
+    const preview = document.getElementById('userPreview');
+
+    hideError('errorMessage');
+
+    if (phone.length < 7) {
+      showError('errorMessage', 'Ingresa un numero de celular valido');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Buscando...';
+
+    try {
+      const { data, error } = await sb.rpc('buscar_cliente_login', {
+        p_telefono: phone,
+        p_codigo_pais: countryCode
+      });
+
+      if (error) throw error;
+
+      if (!data.encontrado) {
+        showError('errorMessage', data.mensaje || 'No encontramos tu numero en Club de Leales');
+        preview.classList.remove('show');
+        btn.disabled = false;
+        btn.textContent = 'Continuar';
+        return;
+      }
+
+      // Save client info
+      currentClienteId = data.id;
+      currentClienteNombre = data.nombre;
+      currentFullPhone = getFullPhone();
+
+      // Show preview
+      if (data.avatar_url) {
+        document.getElementById('userAvatar').innerHTML = `<img src="${data.avatar_url}" alt="">`;
+      } else {
+        document.getElementById('userAvatar').textContent = getInitials(data.nombre);
+      }
+      document.getElementById('userName').textContent = data.nombre || 'Cliente';
+
+      const badge = document.getElementById('userBadge');
+      if (data.tiene_pin) {
+        badge.className = 'user-badge tiene-pin';
+        badge.textContent = 'VERIFICADO';
+        document.getElementById('userMeta').textContent = 'Ingresa tu PIN';
+      } else {
+        badge.className = 'user-badge sin-pin';
+        badge.textContent = 'NUEVO';
+        document.getElementById('userMeta').textContent = 'Crea tu PIN';
+      }
+      preview.classList.add('show');
+
+      // Go to appropriate step
+      setTimeout(() => {
+        if (data.tiene_pin) {
+          document.getElementById('enterPinSubtitle').textContent = `Hola ${data.nombre?.split(' ')[0] || ''}! Ingresa tu PIN`;
+          goToStep('stepEnterPin');
+        } else {
+          goToStep('stepCreatePin');
+        }
+      }, 500);
+
+    } catch (err) {
+      console.error('Error:', err);
+      showError('errorMessage', 'Error de conexion. Intenta de nuevo.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Continuar';
+    }
+  }
+
+  // Create PIN
+  async function crearPin(e) {
+    if (e) e.preventDefault();
+
+    const pin = document.getElementById('createPinInput').value.replace(/\D/g, '');
+    const btn = document.getElementById('btnCreatePin');
+    const pinInput = document.getElementById('createPinInput');
+
+    hideError('createPinError');
+
+    if (pin.length !== 4) {
+      showError('createPinError', 'El PIN debe tener 4 digitos');
+      pinInput.classList.add('error');
+      pinInput.focus();
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Creando...';
+
+    try {
+      const { data, error } = await sb.rpc('crear_pin_cliente', {
+        p_cliente_id: currentClienteId,
+        p_pin: pin
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        showError('createPinError', data.error);
+        pinInput.classList.add('error');
+        btn.disabled = false;
+        btn.textContent = 'Crear PIN';
+        return;
+      }
+
+      // Save to password manager
+      await saveCredentials(currentFullPhone, pin);
+
+      // PIN created, now login
+      await loginWithPin(pin);
+
+    } catch (err) {
+      console.error('Error:', err);
+      showError('createPinError', 'Error al crear PIN. Intenta de nuevo.');
+      btn.disabled = false;
+      btn.textContent = 'Crear PIN';
+    }
+  }
+
+  // Validate PIN
+  async function validarPin(e) {
+    if (e) e.preventDefault();
+
+    const pin = document.getElementById('enterPinInput').value.replace(/\D/g, '');
+
+    if (pin.length !== 4) {
+      showError('enterPinError', 'Ingresa los 4 digitos');
+      document.getElementById('enterPinInput').classList.add('error');
+      return;
+    }
+
+    await loginWithPin(pin);
+  }
+
+  // Login with PIN
+  async function loginWithPin(pin) {
+    const countryCode = document.getElementById('countrySelect').value;
+    const phone = normalizePhone(document.getElementById('phoneInput').value);
+    const isCreating = document.getElementById('stepCreatePin').classList.contains('active');
+    const btn = isCreating ? document.getElementById('btnCreatePin') : document.getElementById('btnEnterPin');
+    const errorId = isCreating ? 'createPinError' : 'enterPinError';
+    const pinInput = isCreating ? document.getElementById('createPinInput') : document.getElementById('enterPinInput');
+
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Ingresando...';
+    hideError(errorId);
+
+    try {
+      const { data, error } = await sb.rpc('validar_pin_cliente', {
+        p_telefono: phone,
+        p_codigo_pais: countryCode,
+        p_pin: pin
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        if (data.code === 'INVALID_PIN') {
+          showError(errorId, 'PIN incorrecto');
+          pinInput.classList.add('error');
+          pinInput.value = '';
+          pinInput.focus();
+        } else {
+          showError(errorId, data.error);
+        }
+        btn.disabled = false;
+        btn.textContent = isCreating ? 'Crear PIN' : 'Ingresar';
+        return;
+      }
+
+      // Save to password manager (for existing users too)
+      await saveCredentials(currentFullPhone, pin);
+
+      // Success - save session
+      const usuario = data.usuario;
+      dnSaveLealtadSession({
+        id: usuario.id,
+        full_name: usuario.full_name,
+        phone: usuario.phone,
+        email: usuario.email,
+        avatar_url: usuario.avatar_url,
+        total_visitas: usuario.total_visitas,
+        total_visitas_weibook: usuario.total_visitas_weibook,
+        total_gastado: usuario.total_gastado,
+        total_gastado_weibook: usuario.total_gastado_weibook,
+        ultima_visita: usuario.ultima_visita,
+        lealtad_info: usuario.lealtad_info,
+        membership_tier: usuario.membership_tier,
+        cliente_desde: usuario.cliente_desde
+      });
+
+      // Redirect
+      window.location.href = 'club.html';
+
+    } catch (err) {
+      console.error('Error:', err);
+      showError(errorId, 'Error de conexion. Intenta de nuevo.');
+      btn.disabled = false;
+      btn.textContent = isCreating ? 'Crear PIN' : 'Ingresar';
+    }
+  }
+
+  // Form submissions
+  document.getElementById('phoneForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    buscarCliente();
+  });
+
+  document.getElementById('createPinForm').addEventListener('submit', crearPin);
+  document.getElementById('enterPinForm').addEventListener('submit', validarPin);
+
+  // PIN input validation (only numbers)
+  ['createPinInput', 'enterPinInput'].forEach(id => {
+    const input = document.getElementById(id);
+    input.addEventListener('input', (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+      e.target.classList.remove('error');
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.target.form.dispatchEvent(new Event('submit'));
+      }
+    });
+  });
+
+  // Phone input events
+  document.getElementById('phoneInput').addEventListener('input', (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    // Format with spaces
+    if (value.length > 3) {
+      value = value.slice(0, 3) + ' ' + value.slice(3);
+    }
+    if (value.length > 7) {
+      value = value.slice(0, 7) + ' ' + value.slice(7);
+    }
+    e.target.value = value.slice(0, 12);
+    hideError('errorMessage');
+    document.getElementById('userPreview').classList.remove('show');
+  });
+
+  // Try auto-fill on load
+  setTimeout(tryAutoFill, 500);
+</script>
+
+</body>
+</html>

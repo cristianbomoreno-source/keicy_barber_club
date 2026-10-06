@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Historial de Cierres · Admin</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<style>
+  body { background:var(--bg); min-height:100vh; }
+  .container { max-width:900px; margin:0 auto; padding:24px var(--page-padding-x) 100px; padding-top:calc(24px + var(--safe-top)); }
+
+  .header { display:flex; align-items:center; gap:16px; margin-bottom:24px; }
+  .back-btn { width:44px; height:44px; border-radius:14px; background:var(--card); border:1px solid var(--divider); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); text-decoration:none; }
+  .back-btn svg { width:20px; height:20px; }
+  .header-text .title { font-size:22px; font-weight:800; }
+  .header-text .sub { font-size:13px; color:var(--text-secondary); margin-top:2px; }
+
+  .filters { display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap; }
+  .filter-select { padding:12px 16px; border-radius:12px; background:var(--card); border:1px solid var(--divider); color:var(--text); font-size:14px; min-width:150px; }
+  .filter-select:focus { outline:none; border-color:var(--gold); }
+
+  .cierres-list { display:flex; flex-direction:column; gap:12px; }
+
+  .cierre-card { background:var(--card); border:1px solid var(--divider); border-radius:16px; padding:16px; cursor:pointer; transition:border-color 0.2s; }
+  .cierre-card:hover { border-color:var(--gold); }
+  .cierre-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px; }
+  .cierre-sede { font-size:16px; font-weight:700; }
+  .cierre-fecha { font-size:13px; color:var(--text-secondary); margin-top:2px; }
+  .cierre-ganancia { text-align:right; }
+  .cierre-ganancia-label { font-size:11px; color:var(--text-secondary); text-transform:uppercase; }
+  .cierre-ganancia-value { font-size:20px; font-weight:800; color:var(--success); }
+  .cierre-ganancia-value.negativo { color:var(--error); }
+
+  .cierre-stats { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; padding-top:12px; border-top:1px solid var(--divider); }
+  .cierre-stat { text-align:center; }
+  .cierre-stat-label { font-size:10px; color:var(--text-secondary); text-transform:uppercase; }
+  .cierre-stat-value { font-size:14px; font-weight:700; margin-top:2px; }
+
+  .cierre-admin { font-size:12px; color:var(--text-secondary); margin-top:12px; display:flex; align-items:center; gap:6px; }
+  .cierre-admin svg { width:14px; height:14px; }
+
+  /* Modal detalle */
+  .modal-bg { position:fixed; inset:0; background:rgba(255,255,255,0.95); z-index:100; display:none; align-items:center; justify-content:center; padding:20px; }
+  .modal-bg.show { display:flex; }
+  .modal-content { background:var(--card); border:1px solid var(--divider); border-radius:20px; width:100%; max-width:500px; max-height:90vh; overflow-y:auto; }
+  .modal-header { padding:20px; border-bottom:1px solid var(--divider); display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:var(--card); z-index:10; }
+  .modal-title { font-size:18px; font-weight:700; }
+  .modal-close { width:36px; height:36px; border-radius:10px; background:var(--card-2); border:1px solid var(--divider); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .modal-close svg { width:18px; height:18px; }
+  .modal-body { padding:20px; }
+
+  .detail-section { margin-bottom:20px; }
+  .detail-title { font-size:12px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; }
+  .detail-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--divider); }
+  .detail-row:last-child { border-bottom:none; }
+  .detail-label { font-size:13px; color:var(--text-secondary); }
+  .detail-value { font-size:14px; font-weight:600; }
+  .detail-value.gold { color:var(--gold); }
+  .detail-value.success { color:var(--success); }
+  .detail-value.error { color:var(--error); }
+
+  .empty-state { text-align:center; padding:60px 20px; color:var(--text-secondary); }
+  .empty-state svg { width:48px; height:48px; margin-bottom:16px; opacity:0.5; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header class="header">
+    <a href="dashboard.html" class="back-btn">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div class="header-text">
+      <div class="title">Historial de Cierres</div>
+      <div class="sub">Consulta los cierres de turno de todas las sedes</div>
+    </div>
+  </header>
+
+  <div class="filters">
+    <select class="filter-select" id="filterSede">
+      <option value="">Todas las sedes</option>
+    </select>
+    <select class="filter-select" id="filterMes">
+      <option value="">Este mes</option>
+    </select>
+  </div>
+
+  <div class="cierres-list" id="cierresList">
+    <div class="empty-state">
+      <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <div>Cargando cierres...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal detalle -->
+<div class="modal-bg" id="detalleModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Detalle del Cierre</div>
+      <button class="modal-close" onclick="document.getElementById('detalleModal').classList.remove('show')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+(async function() {
+  const user = dnRequireAdmin('../index.html');
+  if (!user) return;
+
+  // Solo admin general puede ver historial completo
+  if (user.role !== 'admin') {
+    window.location.href = 'dashboard.html';
+    return;
+  }
+
+  // Cargar sedes para filtro
+  const { data: sedes } = await sb.from('sucursales').select('id, nombre').eq('activa', true).eq('es_test', false);
+  const sedeSelect = document.getElementById('filterSede');
+  (sedes || []).forEach(s => {
+    sedeSelect.innerHTML += `<option value="${s.id}">${s.nombre}</option>`;
+  });
+
+  // Generar opciones de mes
+  const mesSelect = document.getElementById('filterMes');
+  const hoy = new Date();
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+    const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label = d.toLocaleDateString('es-CO', { month: 'long', year: 'numeric' });
+    mesSelect.innerHTML += `<option value="${val}" ${i === 0 ? 'selected' : ''}>${label}</option>`;
+  }
+
+  async function cargarCierres() {
+    const sedeId = sedeSelect.value;
+    const mes = mesSelect.value;
+
+    let query = sb.from('caja_sesiones')
+      .select('*, sucursales(nombre), usuarios!cerrado_por(full_name)')
+      .eq('estado', 'cerrada')
+      .order('cerrado_at', { ascending: false })
+      .limit(50);
+
+    if (sedeId) {
+      query = query.eq('sucursal_id', sedeId);
+    }
+
+    if (mes) {
+      const [year, month] = mes.split('-');
+      const inicio = `${year}-${month}-01`;
+      const fin = new Date(year, month, 0).toISOString().split('T')[0];
+      query = query.gte('fecha', inicio).lte('fecha', fin);
+    }
+
+    // Excluir sedes TEST
+    const sedesTestIds = await dnGetSedesTestIds();
+    if (sedesTestIds.length > 0) {
+      query = query.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+    }
+
+    const { data, error } = await query;
+
+    const container = document.getElementById('cierresList');
+
+    if (error || !data || data.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <div>No hay cierres en este período</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = data.map(c => {
+      const ganancia = c.ganancia_neta || 0;
+      const fechaStr = new Date(c.fecha + 'T12:00:00').toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' });
+      const horaApertura = c.abierta_at ? new Date(c.abierta_at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) : '--';
+      const horaCierre = c.cerrado_at ? new Date(c.cerrado_at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) : '--';
+
+      return `
+        <div class="cierre-card" onclick="verDetalle('${c.id}')">
+          <div class="cierre-header">
+            <div>
+              <div class="cierre-sede">${c.sucursales?.nombre || 'Sede'}</div>
+              <div class="cierre-fecha">${fechaStr} · ${horaApertura} - ${horaCierre}</div>
+            </div>
+            <div class="cierre-ganancia">
+              <div class="cierre-ganancia-label">Ganancia neta</div>
+              <div class="cierre-ganancia-value ${ganancia < 0 ? 'negativo' : ''}">${dnFormatCOP(ganancia)}</div>
+            </div>
+          </div>
+          <div class="cierre-stats">
+            <div class="cierre-stat">
+              <div class="cierre-stat-label">Ingresos</div>
+              <div class="cierre-stat-value">${dnFormatCOP(c.total_ingresos || 0)}</div>
+            </div>
+            <div class="cierre-stat">
+              <div class="cierre-stat-label">Egresos</div>
+              <div class="cierre-stat-value">${dnFormatCOP(c.total_egresos || 0)}</div>
+            </div>
+            <div class="cierre-stat">
+              <div class="cierre-stat-label">Efectivo</div>
+              <div class="cierre-stat-value">${dnFormatCOP(c.efectivo_cierre_real || 0)}</div>
+            </div>
+            <div class="cierre-stat">
+              <div class="cierre-stat-label">Diferencia</div>
+              <div class="cierre-stat-value" style="color:${(c.diferencia || 0) === 0 ? 'var(--success)' : (c.diferencia || 0) > 0 ? 'var(--success)' : 'var(--error)'}">${c.diferencia === 0 ? 'Cuadra' : dnFormatCOP(c.diferencia || 0)}</div>
+            </div>
+          </div>
+          <div class="cierre-admin">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            Cerrado por ${c.usuarios?.full_name || c.abierta_por || 'Admin'}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  window.verDetalle = async function(turnoId) {
+    const { data: turno } = await sb.from('caja_sesiones')
+      .select('*, sucursales(nombre)')
+      .eq('id', turnoId)
+      .single();
+
+    if (!turno) return;
+
+    // Cargar movimientos del turno
+    const { data: movimientos } = await sb.from('caja_movimientos')
+      .select('*')
+      .eq('sesion_id', turnoId)
+      .order('created_at');
+
+    // Cargar pagos colaboradores
+    const { data: pagos } = await sb.from('pagos_colaboradores')
+      .select('*, usuarios(full_name)')
+      .eq('turno_id', turnoId);
+
+    // Cargar comisiones
+    const { data: comisiones } = await sb.from('comisiones')
+      .select('*, barberos(usuarios!barberos_id_fkey(full_name))')
+      .eq('turno_id', turnoId);
+
+    const fechaStr = new Date(turno.fecha + 'T12:00:00').toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    document.getElementById('modalTitle').textContent = `${turno.sucursales?.nombre} · ${fechaStr}`;
+
+    // Calcular totales por método
+    const porMetodo = {};
+    (movimientos || []).forEach(m => {
+      const met = m.metodo_pago || 'otro';
+      if (!porMetodo[met]) porMetodo[met] = { ingresos: 0, egresos: 0 };
+      if (m.tipo === 'ingreso') porMetodo[met].ingresos += Number(m.monto) || 0;
+      else porMetodo[met].egresos += Number(m.monto) || 0;
+    });
+
+    const totalComisiones = (comisiones || []).reduce((s, c) => s + (Number(c.valor_comision) || 0), 0);
+
+    document.getElementById('modalBody').innerHTML = `
+      <div class="detail-section">
+        <div class="detail-title">Resumen del Turno</div>
+        <div class="detail-row"><span class="detail-label">Apertura</span><span class="detail-value">${dnFormatCOP(turno.base_apertura || 0)}</span></div>
+        <div class="detail-row"><span class="detail-label">Total Ingresos</span><span class="detail-value gold">${dnFormatCOP(turno.total_ingresos || 0)}</span></div>
+        <div class="detail-row"><span class="detail-label">Total Egresos</span><span class="detail-value">${dnFormatCOP(turno.total_egresos || 0)}</span></div>
+        <div class="detail-row"><span class="detail-label">Flujo Neto</span><span class="detail-value">${dnFormatCOP(turno.flujo_neto || 0)}</span></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-title">Costos del Turno</div>
+        <div class="detail-row"><span class="detail-label">Comisiones Barberos</span><span class="detail-value">${dnFormatCOP(totalComisiones)}</span></div>
+        ${(pagos || []).filter(p => p.tipo === 'pago_diario_admin').map(p => `
+          <div class="detail-row"><span class="detail-label">Pago Admin (${p.usuarios?.full_name || 'Admin'})</span><span class="detail-value">${dnFormatCOP(p.monto)}</span></div>
+        `).join('')}
+        ${(pagos || []).filter(p => p.tipo === 'pago_diario_aseo').map(p => `
+          <div class="detail-row"><span class="detail-label">Pago Aseo</span><span class="detail-value">${dnFormatCOP(p.monto)}</span></div>
+        `).join('')}
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-title">Arqueo de Caja</div>
+        <div class="detail-row"><span class="detail-label">Efectivo Esperado</span><span class="detail-value">${dnFormatCOP(turno.efectivo_esperado || 0)}</span></div>
+        <div class="detail-row"><span class="detail-label">Efectivo Contado</span><span class="detail-value">${dnFormatCOP(turno.efectivo_cierre_real || 0)}</span></div>
+        <div class="detail-row"><span class="detail-label">Diferencia</span><span class="detail-value ${(turno.diferencia || 0) === 0 ? 'success' : (turno.diferencia || 0) < 0 ? 'error' : 'success'}">${turno.diferencia === 0 ? 'Cuadra perfecto' : dnFormatCOP(turno.diferencia || 0)}</span></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-title">Desglose por Método</div>
+        ${Object.entries(porMetodo).map(([met, vals]) => `
+          <div class="detail-row">
+            <span class="detail-label">${met.charAt(0).toUpperCase() + met.slice(1)}</span>
+            <span class="detail-value">+${dnFormatCOP(vals.ingresos)} / -${dnFormatCOP(vals.egresos)}</span>
+          </div>
+        `).join('') || '<div class="detail-row"><span class="detail-label">Sin movimientos</span><span class="detail-value">--</span></div>'}
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-title">Ganancia Neta Operativa</div>
+        <div class="detail-row">
+          <span class="detail-label" style="font-weight:700;">GANANCIA NETA</span>
+          <span class="detail-value ${(turno.ganancia_neta || 0) >= 0 ? 'success' : 'error'}" style="font-size:18px;">${dnFormatCOP(turno.ganancia_neta || 0)}</span>
+        </div>
+      </div>
+
+      ${turno.observaciones_cierre ? `
+        <div class="detail-section">
+          <div class="detail-title">Observaciones</div>
+          <div style="font-size:13px;color:var(--text-secondary);">${turno.observaciones_cierre}</div>
+        </div>
+      ` : ''}
+    `;
+
+    document.getElementById('detalleModal').classList.add('show');
+  };
+
+  sedeSelect.addEventListener('change', cargarCierres);
+  mesSelect.addEventListener('change', cargarCierres);
+
+  cargarCierres();
+})();
+</script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+</body>
+</html>

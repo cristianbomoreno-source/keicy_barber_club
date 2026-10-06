@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#111111">
+<title>Órdenes en Espera · Admin Sede</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/mobile-admin.css">
+<style>
+  body { background:var(--bg); overflow-x:hidden; }
+  #app { display:flex; min-height:100vh; min-height:100dvh; }
+
+  /* Sidebar */
+  .sidebar {
+    width:60px; flex-shrink:0;
+    background:#FAFAFA;
+    border-right:1px solid var(--divider);
+    display:flex; flex-direction:column; align-items:center;
+    padding:20px 6px;
+    padding-top: calc(20px + var(--safe-top));
+    position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden; overflow-y:auto;
+    transition:width 0.28s cubic-bezier(.4,0,.2,1), padding 0.28s ease;
+  }
+  .sidebar.expanded { width:230px; align-items:stretch; padding:22px 16px; }
+  .sidebar-logo { display:block; cursor:pointer; margin:0 auto; }
+  .sidebar-logo-icon{ width:40px; height:40px; border-radius:11px; margin-bottom:26px; }
+  .sidebar-logo-full{ height:48px; margin-bottom:28px; display:none; }
+  .sidebar.expanded .sidebar-logo-icon { display:none; }
+  .sidebar.expanded .sidebar-logo-full { display:block; }
+  .nav-group { flex:1; display:flex; flex-direction:column; gap:3px; width:100%; min-width:0; }
+  .nav-link {
+    display:flex; align-items:center; gap:11px; justify-content:center;
+    width:40px; height:40px; margin:0 auto; padding:0; border-radius:11px;
+    font-size:13px; font-weight:600; color:#9F9F9F;
+    cursor:pointer; transition:background 0.15s ease, color 0.15s ease;
+    text-decoration:none; white-space:nowrap;
+  }
+  .sidebar.expanded .nav-link { justify-content:flex-start; width:100%; height:auto; margin:0; padding:9.5px 12px; }
+  .nav-link svg { width:22px; height:22px; flex-shrink:0; }
+  .nav-link:hover { background:var(--card); color:#111111; }
+  .nav-link.active { background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; }
+  .nav-link.active svg { stroke:#141414; }
+  .nav-link { position:relative; }
+  .nav-badge { display:none; background:#e74c3c; color:#111111; font-size:10px; font-weight:700; min-width:18px; height:18px; line-height:18px; text-align:center; padding:0 5px; border-radius:10px; margin-left:auto; }
+  .nav-badge.has-orders { display:inline-block; }
+  .sidebar:not(.expanded) .nav-badge.has-orders { position:absolute; top:2px; right:2px; min-width:8px; width:8px; height:8px; padding:0; font-size:0; border-radius:50%; }
+  .help-link { margin-top:8px; }
+  .nav-label { opacity:0; max-width:0; overflow:hidden; transition:opacity 0.16s ease, max-width 0.26s ease; }
+  .sidebar.expanded .nav-label { opacity:1; max-width:170px; }
+  .nav-section-label { display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
+  .sidebar.expanded .nav-section-label { display:block; }
+
+  .sidebar-card { display:none; position:relative; align-items:center; gap:9px; padding:9px; border-radius:14px; background:var(--glass-2); border:1px solid var(--glass-border); margin-bottom:8px; transition:background 0.15s ease; }
+  .sidebar-card:hover { background:var(--glass-3); }
+  .sidebar.expanded .sidebar-card { display:flex; }
+  .sidebar-card-icon { width:32px; height:32px; border-radius:8px; background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .sidebar-card-info { flex:1; min-width:0; }
+  .sidebar-card-name { font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-card-sub { font-size:10.5px; color:var(--text-secondary); }
+  .sede-selector { display:none; background:var(--card); border:1px solid var(--divider); border-radius:12px; margin-bottom:12px; overflow:hidden; }
+  .sidebar.expanded .sede-selector.show { display:block; }
+  .sede-selector-title { font-size:10px; font-weight:700; color:var(--text-secondary); padding:10px 12px 6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .sede-selector-list { max-height:200px; overflow-y:auto; }
+  .sede-option { display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer; transition:background 0.15s ease; }
+  .sede-option:hover { background:rgba(255,255,255,0.05); }
+  .sede-option.active { background:var(--gold); color:#141414; }
+  .sede-option-dot { width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0; }
+  .sede-option-name { font-size:12px; font-weight:600; }
+
+  .sidebar-bottom { margin-top:auto; padding-top:12px; border-top:1px solid var(--divider); display:flex; flex-direction:column; gap:8px; width:100%; }
+  .logout-btn {
+    font-size:12px; color:#EF5350; display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px; cursor:pointer; width:40px; height:40px; border-radius:10px; background:rgba(239,83,80,0.1);
+    border:1px solid rgba(239,83,80,0.2); transition:all 0.25s ease; margin:0 auto;
+  }
+  .sidebar.expanded .logout-btn { justify-content:flex-start; width:100%; height:auto; padding:10px 12px; margin:0; }
+  .logout-btn:hover { background:rgba(239,83,80,0.2); }
+  .logout-btn svg { width:18px; height:18px; flex-shrink:0; }
+  .logout-label { display:none; }
+  .sidebar.expanded .logout-label { display:inline; }
+
+  /* Dark theme sidebar overrides */
+  [data-theme="dark"] .sidebar {
+    background: var(--surface, #1A1A1C) !important;
+    border-right-color: var(--divider, rgba(255,255,255,0.08)) !important;
+  }
+  [data-theme="dark"] .nav-link { color: var(--text-secondary, #B8B5AE) !important; }
+  [data-theme="dark"] .nav-link svg { stroke: currentColor !important; }
+  [data-theme="dark"] .nav-link:hover { background: var(--glass-2, rgba(255,255,255,0.06)) !important; color: var(--text, #F5F2EA) !important; }
+  [data-theme="dark"] .nav-link.active { background: var(--gold, #D4AF55) !important; color: #141414 !important; }
+  [data-theme="dark"] .nav-link.active svg { stroke: #141414 !important; }
+  [data-theme="dark"] .sidebar-card-name { color: #F5F2EA !important; }
+
+  /* Main content */
+  .main {
+    flex:1; padding:24px;
+    padding-top: calc(24px + var(--safe-top));
+    padding-bottom: calc(24px + var(--safe-bottom));
+    max-width:900px; margin:0 auto;
+  }
+
+  /* Header */
+  .page-header {
+    display:flex; align-items:center; gap:16px; margin-bottom:24px;
+  }
+  .page-title {
+    display:flex; align-items:center; gap:12px;
+    font-size:24px; font-weight:800; color:var(--text);
+  }
+  .page-title svg { color:var(--gold); width:28px; height:28px; }
+  .ordenes-count {
+    background:var(--gold); color:#141414;
+    font-size:14px; font-weight:800;
+    padding:4px 12px; border-radius:12px; margin-left:8px;
+  }
+  .page-sub {
+    font-size:14px; color:var(--text-secondary); margin-bottom:24px;
+  }
+
+  /* Lista de órdenes */
+  .ordenes-list {
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .ordenes-empty {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:80px 20px; text-align:center;
+  }
+  .ordenes-empty svg { color:var(--text-secondary); opacity:0.3; margin-bottom:16px; }
+  .ordenes-empty .title { font-size:18px; font-weight:600; color:var(--text-secondary); margin-bottom:8px; }
+  .ordenes-empty .sub { font-size:14px; color:var(--text-secondary); opacity:0.6; }
+
+  /* Tarjeta de orden */
+  .orden-card {
+    background:var(--glass); border:1px solid var(--glass-border);
+    border-radius:16px; padding:16px 20px;
+    cursor:pointer; transition:all 0.15s ease;
+  }
+  .orden-card:hover { border-color:var(--gold); background:rgba(201,163,91,0.05); }
+  .orden-card-header {
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;
+  }
+  .orden-card-cliente { display:flex; align-items:center; gap:12px; }
+  .orden-card-avatar {
+    width:44px; height:44px; border-radius:50%;
+    background:var(--gold); color:#141414;
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; font-weight:700;
+  }
+  .orden-card-info .name { font-size:16px; font-weight:700; color:var(--text); }
+  .orden-card-info .phone { font-size:13px; color:var(--text-secondary); }
+  .orden-card-precio { font-size:20px; font-weight:800; color:var(--gold); }
+  .orden-card-servicio {
+    display:flex; align-items:center; gap:10px;
+    padding:12px 16px; background:rgba(255,255,255,0.03);
+    border-radius:12px; margin-bottom:12px;
+  }
+  .orden-card-servicio svg { color:var(--gold); flex-shrink:0; }
+  .orden-card-servicio .servicio-nombre { font-size:15px; font-weight:600; color:var(--text); }
+  .orden-card-servicio .servicio-meta { font-size:13px; color:var(--text-secondary); margin-left:auto; }
+  .orden-card-footer { display:flex; align-items:center; justify-content:space-between; }
+  .orden-card-barbero { display:flex; align-items:center; gap:8px; font-size:14px; color:var(--text-secondary); }
+  .orden-card-barbero svg { width:18px; height:18px; }
+  .orden-card-actions { display:flex; align-items:center; gap:8px; }
+  .orden-card-action {
+    display:flex; align-items:center; gap:6px;
+    padding:8px 16px; border-radius:8px;
+    font-size:13px; font-weight:700; cursor:pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .orden-card-action:hover { transform:scale(1.02); }
+  .orden-card-action.cobrar { background:rgba(201,163,91,0.15); color:var(--gold); }
+  .orden-card-action.cobrar:hover { background:rgba(201,163,91,0.25); }
+  .orden-card-action.delete { background:rgba(231,76,60,0.1); color:#e74c3c; }
+  .orden-card-action.delete:hover { background:rgba(231,76,60,0.2); }
+
+  /* Responsive */
+  @media (max-width:768px) {
+    .main { padding:16px; }
+    .page-title { font-size:20px; }
+    .orden-card { padding:14px 16px; }
+    .orden-card-avatar { width:40px; height:40px; font-size:14px; }
+    .orden-card-info .name { font-size:15px; }
+    .orden-card-precio { font-size:18px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Sidebar - generado por admin-sede-sidebar.js -->
+  <div class="sidebar" id="sidebar"></div>
+
+  <!-- Main content -->
+  <div class="main">
+    <div class="page-header">
+      <div class="page-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4" stroke-linecap="round"/></svg>
+        Órdenes en Espera
+        <span class="ordenes-count" id="ordenesCount">0</span>
+      </div>
+    </div>
+    <div class="page-sub">Órdenes enviadas por barberos pendientes de cobro</div>
+
+    <div class="ordenes-list" id="ordenesList">
+      <div class="ordenes-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <div class="title">No hay órdenes pendientes</div>
+        <div class="sub">Las órdenes de los barberos aparecerán aquí</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span class="toast-dot"></span><span id="toastText"></span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/mobile-nav.js"></script>
+<script>
+(async function() {
+  const user = dnRequireAdmin('../index.html');
+  if (!user) return;
+
+  const sedeId = dnGetTurnoSedeActual();
+  if (!sedeId) {
+    window.location.href = 'seleccionar-sede.html';
+    return;
+  }
+
+  // Toast
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2500);
+  }
+
+  // Cargar órdenes pendientes
+  async function loadOrdenes() {
+    const { data: ordenes, error } = await sb.from('citas')
+      .select(`
+        id, fecha, hora_inicio, precio, estado, created_at, servicios_adicionales,
+        usuarios!citas_cliente_id_fkey(id, full_name, phone),
+        barberos!citas_barbero_id_fkey(id, usuarios!barberos_id_fkey(full_name)),
+        servicios(id, nombre, precio, duracion_min)
+      `)
+      .eq('sucursal_id', sedeId)
+      .eq('estado', 'pendiente_pago')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error cargando órdenes:', error);
+      return;
+    }
+
+    renderOrdenes(ordenes || []);
+  }
+
+  function renderOrdenes(ordenes) {
+    const list = document.getElementById('ordenesList');
+    const countEl = document.getElementById('ordenesCount');
+
+    countEl.textContent = ordenes.length;
+
+    // Actualizar badge del sidebar
+    const sidebarBadge = document.getElementById('ordenesBadge');
+    if (sidebarBadge) {
+      sidebarBadge.textContent = ordenes.length;
+      if (ordenes.length > 0) {
+        sidebarBadge.classList.add('has-orders');
+      } else {
+        sidebarBadge.classList.remove('has-orders');
+      }
+    }
+
+    if (!ordenes.length) {
+      list.innerHTML = `
+        <div class="ordenes-empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          <div class="title">No hay órdenes pendientes</div>
+          <div class="sub">Las órdenes de los barberos aparecerán aquí</div>
+        </div>
+      `;
+      return;
+    }
+
+    list.innerHTML = ordenes.map(o => {
+      const clienteNombre = o.usuarios?.full_name || 'Cliente';
+      const clientePhone = o.usuarios?.phone || '';
+      const barberoNombre = o.barberos?.usuarios?.full_name || 'Barbero';
+      const servicioNombre = o.servicios?.nombre || 'Servicio';
+      const adicionales = o.servicios_adicionales?.length || 0;
+      const precioTotal = o.precio || 0;
+      const fechaStr = o.fecha ? new Date(o.fecha + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+      const horaStr = o.hora_inicio?.slice(0, 5) || '';
+      const initials = clienteNombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+
+      return `
+        <div class="orden-card">
+          <div class="orden-card-header">
+            <div class="orden-card-cliente">
+              <div class="orden-card-avatar">${initials}</div>
+              <div class="orden-card-info">
+                <div class="name">${clienteNombre}</div>
+                <div class="phone">${clientePhone}</div>
+              </div>
+            </div>
+            <div class="orden-card-precio">${dnFormatCOP(precioTotal)}</div>
+          </div>
+          <div class="orden-card-servicio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
+            <span class="servicio-nombre">${servicioNombre}${adicionales > 0 ? ` +${adicionales} más` : ''}</span>
+            <span class="servicio-meta">${fechaStr} · ${horaStr}</span>
+          </div>
+          <div class="orden-card-footer">
+            <div class="orden-card-barbero">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg>
+              ${barberoNombre}
+            </div>
+            <div class="orden-card-actions">
+              <div class="orden-card-action delete" onclick="event.stopPropagation(); eliminarOrden('${o.id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+                Eliminar
+              </div>
+              <div class="orden-card-action cobrar" onclick="event.stopPropagation(); cobrarOrden('${o.id}')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M5 13l4 4L19 7"/></svg>
+                Cobrar
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Cobrar orden - ir a ventas con la cita precargada
+  window.cobrarOrden = function(citaId) {
+    window.location.href = `ventas.html?pagar_cita=${citaId}`;
+  };
+
+  // Eliminar orden - devolver al barbero para que pueda reenviar
+  window.eliminarOrden = async function(citaId) {
+    if (!confirm('¿Eliminar esta orden? Volverá a aparecer al barbero para que pueda enviarla de nuevo.')) {
+      return;
+    }
+
+    try {
+      const { error } = await sb
+        .from('citas')
+        .update({ estado: 'en_servicio' })
+        .eq('id', citaId);
+
+      if (error) {
+        console.error('Error eliminando orden:', error);
+        toast('Error al eliminar la orden');
+        return;
+      }
+
+      toast('Orden eliminada. El barbero puede volver a enviarla.');
+      loadOrdenes();
+    } catch (err) {
+      console.error('Error:', err);
+      toast('Error al eliminar la orden');
+    }
+  };
+
+  // Cargar órdenes inicialmente
+  await loadOrdenes();
+
+  // Actualizar cada 15 segundos
+  setInterval(loadOrdenes, 15000);
+})();
+</script>
+</body>
+</html>

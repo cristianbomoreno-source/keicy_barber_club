@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://qguxzopvfjmivbngccwz.supabase.co" crossorigin>
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#111111">
+<title>Admin Sede · Dashboard</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/mobile-admin.css">
+<style>
+  /* Variables heredadas de design-system.css */
+  body { background:var(--bg); overflow-x:hidden; }
+  #app { display:flex; min-height:100vh; min-height:100dvh; }
+
+  /* Sidebar */
+  .sidebar {
+    width:60px; flex-shrink:0;
+    background:#FAFAFA;
+    border-right:1px solid var(--divider);
+    display:flex; flex-direction:column; align-items:center;
+    padding:20px 6px;
+    padding-top: calc(20px + var(--safe-top));
+    position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden; overflow-y:auto;
+    transition:width 0.28s cubic-bezier(.4,0,.2,1), padding 0.28s ease;
+  }
+  .sidebar.expanded { width:230px; align-items:stretch; padding:22px 16px; }
+  .sidebar-logo { display:block; cursor:pointer; margin:0 auto; }
+  .sidebar-logo-icon{ width:40px; height:40px; border-radius:11px; margin-bottom:26px; }
+  .sidebar-logo-full{ height:48px; margin-bottom:28px; display:none; }
+  .sidebar.expanded .sidebar-logo-icon { display:none; }
+  .sidebar.expanded .sidebar-logo-full { display:block; }
+  .nav-group { flex:1; display:flex; flex-direction:column; gap:3px; width:100%; min-width:0; }
+  .nav-link {
+    display:flex; align-items:center; gap:11px; justify-content:center;
+    width:40px; height:40px; margin:0 auto; padding:0; border-radius:11px;
+    font-size:13px; font-weight:600; color:#9F9F9F;
+    cursor:pointer; transition:background 0.15s ease, color 0.15s ease;
+    text-decoration:none; white-space:nowrap;
+  }
+  .sidebar.expanded .nav-link { justify-content:flex-start; width:100%; height:auto; margin:0; padding:9.5px 12px; }
+  .nav-link svg { width:22px; height:22px; flex-shrink:0; }
+  .nav-link:hover { background:var(--card); color:#111111; }
+  .nav-link.active { background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; }
+  .nav-link.active svg { stroke:#141414; }
+  .nav-link { position:relative; }
+  .nav-badge { display:none; background:#e74c3c; color:#111111; font-size:10px; font-weight:700; min-width:18px; height:18px; line-height:18px; text-align:center; padding:0 5px; border-radius:10px; margin-left:auto; }
+  .nav-badge.has-orders { display:inline-block; }
+  .sidebar:not(.expanded) .nav-badge.has-orders { position:absolute; top:2px; right:2px; min-width:8px; width:8px; height:8px; padding:0; font-size:0; border-radius:50%; }
+  .help-link { margin-top:8px; }
+  .nav-label { opacity:0; max-width:0; overflow:hidden; transition:opacity 0.16s ease, max-width 0.26s ease; }
+  .sidebar.expanded .nav-label { opacity:1; max-width:170px; }
+
+  .nav-section-label { display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
+  .sidebar.expanded .nav-section-label { display:block; }
+
+  .sidebar-card { display:none; position:relative; align-items:center; gap:9px; padding:9px; border-radius:14px; background:var(--glass-2); border:1px solid var(--glass-border); margin-bottom:8px; transition:background 0.15s ease; }
+  .sidebar-card:hover { background:var(--glass-3); }
+  .sidebar.expanded .sidebar-card { display:flex; }
+  .sidebar-card-icon { width:32px; height:32px; border-radius:8px; background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .sidebar-card-info { flex:1; min-width:0; }
+  .sidebar-card-name { font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-card-sub { font-size:10.5px; color:var(--text-secondary); }
+  .sede-selector { display:none; background:var(--card); border:1px solid var(--divider); border-radius:12px; margin-bottom:12px; overflow:hidden; }
+  .sidebar.expanded .sede-selector.show { display:block; }
+  .sede-selector-title { font-size:10px; font-weight:700; color:var(--text-secondary); padding:10px 12px 6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .sede-selector-list { max-height:200px; overflow-y:auto; }
+  .sede-option { display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer; transition:background 0.15s ease; }
+  .sede-option:hover { background:rgba(255,255,255,0.05); }
+  .sede-option.active { background:var(--gold); color:#141414; }
+  .sede-option-dot { width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0; }
+  .sede-option-name { font-size:12px; font-weight:600; }
+
+  .help-link { margin-top:10px; font-size:12px; color:#9F9F9F; display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; cursor:pointer; width:100%; }
+  .sidebar.expanded .help-link { justify-content:flex-start; }
+  .help-link:hover { color:#111111; }
+
+  /* Contenedor inferior del sidebar */
+  .sidebar-bottom {
+    margin-top:auto; padding-top:12px; border-top:1px solid var(--divider);
+    display:flex; flex-direction:column; gap:8px; width:100%;
+  }
+
+  /* Plan card y logout */
+  .logout-btn {
+    font-size:12px; color:#EF5350; display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px; cursor:pointer; width:40px; height:40px; border-radius:10px; background:rgba(239,83,80,0.1);
+    border:1px solid rgba(239,83,80,0.2); transition:all 0.25s ease; margin:0 auto;
+  }
+  .sidebar.expanded .logout-btn {
+    justify-content:flex-start; width:100%; height:auto; padding:10px 12px; margin:0;
+  }
+  .logout-btn:hover { background:rgba(239,83,80,0.2); }
+  .logout-btn svg { width:18px; height:18px; flex-shrink:0; }
+  .logout-label { display:none; }
+  .sidebar.expanded .logout-label { display:inline; }
+
+  .plan-card {
+    padding:8px; border:1px solid var(--gold); border-radius:10px;
+    background:rgba(200,160,90,0.08); text-align:center;
+    transition:all 0.25s ease;
+  }
+  .plan-card .plan-icon { font-size:16px; }
+  .plan-card .plan-label {
+    font-size:10px; font-weight:700; letter-spacing:0.3px; color:var(--gold);
+    text-transform:uppercase; display:none; margin-top:4px;
+  }
+  .plan-card .plan-sub { font-size:9px; color:var(--text-secondary); display:none; margin-top:2px; }
+  .sidebar.expanded .plan-card { padding:12px; text-align:left; }
+  .sidebar.expanded .plan-card .plan-label { display:flex; align-items:center; gap:6px; font-size:11px; }
+  .sidebar.expanded .plan-card .plan-sub { display:block; font-size:10px; }
+
+  /* Main */
+  .main { flex:1; min-width:0; padding:18px 24px 80px; max-width:1400px; }
+
+  .header-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+  .header-left { display:flex; align-items:center; gap:14px; }
+  .sidebar-toggle-btn { width:36px; height:36px; border-radius:10px; background:var(--card); border:1px solid var(--divider); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .sidebar-toggle-btn svg { width:16px; height:16px; }
+  .header-title { font-size:19px; font-weight:800; }
+  .header-sub { font-size:12px; color:#9F9F9F; margin-top:2px; }
+  .header-actions { display:flex; align-items:center; gap:10px; }
+
+  .turno-pill {
+    display:flex; align-items:center; gap:8px;
+    padding:8px 14px; border-radius:14px;
+    background:rgba(78,203,113,0.12);
+    border:1px solid rgba(78,203,113,0.3);
+  }
+  .turno-pill .dot { width:8px; height:8px; border-radius:50%; background:var(--success); animation:pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+  .turno-pill .text { font-size:12px; font-weight:700; color:var(--success); }
+
+  .btn-cerrar-turno {
+    padding:10px 18px; border-radius:14px; border:none;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#141414; font-size:13px; font-weight:800;
+    cursor:pointer; display:flex; align-items:center; gap:8px;
+    transition:transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .btn-cerrar-turno:hover { transform:scale(1.03); box-shadow:0 4px 20px rgba(200,160,90,0.4); }
+  .btn-cerrar-turno svg { width:16px; height:16px; }
+
+
+
+  /* KPIs */
+  .kpi-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+  .kpi-card { background:var(--card); border:1px solid var(--divider); border-radius:18px; padding:16px; }
+  .kpi-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .kpi-icon { width:36px; height:36px; border-radius:10px; background:rgba(200,160,90,0.12); display:flex; align-items:center; justify-content:center; }
+  .kpi-icon svg { width:18px; height:18px; stroke:var(--gold); }
+  .kpi-value { font-size:24px; font-weight:800; }
+  .kpi-label { font-size:12px; color:var(--text-secondary); }
+
+  /* Panels */
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  .panel { background:var(--card); border:1px solid var(--divider); border-radius:20px; padding:18px; }
+  .panel-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .panel-title { font-size:14px; font-weight:800; display:flex; align-items:center; gap:8px; }
+  .panel-title svg { width:16px; height:16px; stroke:var(--gold); }
+  .panel-link { font-size:12px; font-weight:700; color:var(--gold); cursor:pointer; text-decoration:none; }
+
+  /* Citas list */
+  .cita-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--divider); }
+  .cita-row:last-child { border-bottom:none; }
+  .cita-time { width:50px; font-size:12px; font-weight:700; color:var(--text-secondary); }
+  .cita-avatar { width:36px; height:36px; border-radius:50%; background:var(--card-2); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; }
+  .cita-info { flex:1; min-width:0; }
+  .cita-name { font-size:13px; font-weight:600; }
+  .cita-service { font-size:11px; color:var(--text-secondary); }
+  .cita-status { padding:4px 10px; border-radius:8px; font-size:10px; font-weight:700; text-transform:uppercase; }
+  .cita-status.agendada { background:rgba(242,201,76,0.15); color:var(--warning); }
+  .cita-status.en_servicio { background:rgba(78,203,113,0.15); color:var(--success); }
+  .cita-status.finalizada { background:rgba(159,159,159,0.15); color:var(--text-secondary); }
+
+  /* Colaboradores */
+  .colaborador-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid var(--divider); }
+  .colaborador-row:last-child { border-bottom:none; }
+  .colaborador-avatar { width:40px; height:40px; border-radius:50%; background:var(--card-2); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; }
+  .colaborador-info { flex:1; }
+  .colaborador-name { font-size:13px; font-weight:600; }
+  .colaborador-stats { font-size:11px; color:var(--text-secondary); }
+  .colaborador-comision { font-size:14px; font-weight:700; color:var(--gold); }
+
+  /* Resumen caja */
+  .caja-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--divider); }
+  .caja-row:last-child { border-bottom:none; }
+  .caja-label { font-size:13px; color:var(--text-secondary); }
+  .caja-value { font-size:14px; font-weight:700; }
+  .caja-value.gold { color:var(--gold); }
+  .panel-caja { max-width:100%; }
+  @media (min-width:768px) { .panel-caja { max-width:600px; } }
+  @media (min-width:1200px) { .panel-caja { max-width:700px; } }
+
+  /* Toast */
+  #toast {
+    position:fixed; bottom:calc(var(--bottom-nav-total) + 16px); left:50%; transform:translateX(-50%) translateY(20px);
+    background:rgba(250,250,250,0.95); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--divider); border-radius:14px; padding:12px 20px;
+    font-size:13px; font-weight:600; opacity:0; pointer-events:none; max-width:90%;
+    transition:opacity 0.3s ease, transform 0.3s ease; z-index:200;
+  }
+  #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* Empty state */
+  .empty-state { text-align:center; padding:40px 20px; color:var(--text-secondary); }
+  .empty-state .icon { font-size:36px; margin-bottom:12px; }
+
+  /* Responsive - Web/Desktop optimizations */
+  @media (min-width:1200px) {
+    .main { padding:24px 32px 60px; }
+    .kpi-card { padding:20px; }
+    .kpi-value { font-size:28px; }
+    .panel { padding:22px; }
+    .btn-cerrar-turno { padding:12px 24px; font-size:14px; }
+  }
+
+  @media (max-width:1080px) {
+    .kpi-grid { grid-template-columns:repeat(2,1fr); }
+    .grid-2 { grid-template-columns:1fr; }
+  }
+
+  /* Tablet landscape */
+  @media (max-width:900px) {
+    .header-row { flex-wrap:wrap; gap:12px; }
+    .header-actions { flex-wrap:wrap; gap:8px; }
+    .btn-cerrar-turno { padding:10px 16px; font-size:12px; }
+  }
+
+  /* Tablet portrait */
+  @media (max-width:767px) {
+    .sidebar { display:none; }
+    .main { padding:16px 16px calc(var(--nav-height, 56px) + var(--safe-bottom, 0px) + 20px); }
+    .kpi-grid { grid-template-columns:1fr 1fr; gap:10px; }
+    .header-row { flex-direction:column; align-items:flex-start; gap:12px; }
+    .header-actions { width:100%; justify-content:space-between; flex-wrap:nowrap; }
+    .turno-pill { padding:6px 10px; }
+    .turno-pill .text { font-size:11px; }
+    .btn-cerrar-turno { flex:1; justify-content:center; padding:10px 14px; }
+  }
+
+  /* Mobile small */
+  @media (max-width:400px) {
+    .header-title { font-size:16px; }
+    .kpi-value { font-size:20px; }
+    .kpi-label { font-size:11px; }
+    .btn-cerrar-turno { font-size:12px; padding:8px 12px; }
+    .turno-pill .text { display:none; }
+  }
+
+  /* Mobile nav: estilos inyectados por mobile-nav.js */
+</style>
+</head>
+<body>
+<script src="../assets/splash-screen.js"></script>
+
+<div id="app">
+  <!-- Sidebar - generado por admin-sede-sidebar.js -->
+  <div class="sidebar" id="sidebar"></div>
+
+  <div class="main">
+    <div class="header-row">
+      <div class="header-left">
+        <div class="sidebar-toggle-btn" id="sidebarToggleBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="header-title" id="greeting">Buenos dias</div>
+          <div class="header-sub" id="dateDisplay">Cargando...</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="turno-pill">
+          <span class="dot"></span>
+          <span class="text">Turno activo</span>
+        </div>
+        <button class="btn-cerrar-turno" id="btnCerrarTurno">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+          Cerrar turno
+        </button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 2"/></svg></div>
+        </div>
+        <div class="kpi-value" id="kpiCitas">0</div>
+        <div class="kpi-label">Citas hoy</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+        </div>
+        <div class="kpi-value" id="kpiIngresos">$0</div>
+        <div class="kpi-label">Ingresos hoy</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4"/></svg></div>
+        </div>
+        <div class="kpi-value" id="kpiClientes">0</div>
+        <div class="kpi-label">Clientes atendidos</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M20 12V8H6a2 2 0 01-2-2V4"/><path d="M4 6v10a2 2 0 002 2h14v-4"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg></div>
+        </div>
+        <div class="kpi-value" id="kpiComisiones">$0</div>
+        <div class="kpi-label">Comisiones</div>
+      </div>
+    </div>
+
+    <!-- Panel de colaboradores activos -->
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-head">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2"/></svg>
+          Colaboradores activos hoy
+        </div>
+        <a href="barberos.html" class="panel-link">Gestionar</a>
+      </div>
+      <div id="colaboradoresList">
+        <div class="empty-state">
+          <div class="icon">👥</div>
+          <div>Cargando colaboradores...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resumen de caja -->
+    <div class="panel panel-caja">
+      <div class="panel-head">
+        <div class="panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18"/></svg>
+          Resumen de caja
+        </div>
+        <a href="caja.html" class="panel-link">Ver detalle</a>
+      </div>
+      <div id="cajaSummary">
+        <div class="caja-row">
+          <span class="caja-label">Base inicial</span>
+          <span class="caja-value" id="cajaBase">$0</span>
+        </div>
+        <div class="caja-row">
+          <span class="caja-label">Ventas efectivo</span>
+          <span class="caja-value" id="cajaEfectivo">$0</span>
+        </div>
+        <div class="caja-row">
+          <span class="caja-label">Ventas otros medios</span>
+          <span class="caja-value" id="cajaOtros">$0</span>
+        </div>
+        <div class="caja-row">
+          <span class="caja-label">Total en caja</span>
+          <span class="caja-value gold" id="cajaTotal">$0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile nav (inyectada por mobile-nav.js) -->
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+(async function() {
+  // Verificar sesion
+  const user = dnRequireAdmin('../index.html');
+  if (!user) return;
+
+  if (user.role !== 'admin_sede') {
+    window.location.href = '../auth.html';
+    return;
+  }
+
+  const sedeId = dnGetTurnoSedeActual();
+  if (!sedeId) {
+    window.location.href = 'seleccionar-sede.html';
+    return;
+  }
+
+  // Verificar turno activo
+  const turno = await dnVerificarTurnoActivo(sedeId);
+  if (!turno || turno.estado === 'cerrado') {
+    window.location.href = 'seleccionar-sede.html';
+    return;
+  }
+
+  // Ocultar módulos sin permiso en la navegación
+  const permisos = await dnGetPermisosAdminSede(user.id);
+  document.querySelectorAll('[data-modulo]').forEach(el => {
+    const modulo = el.dataset.modulo;
+    if (modulo !== 'dashboard' && permisos[modulo] === false) {
+      el.style.display = 'none';
+    }
+  });
+
+  // Fecha y saludo
+  const ahora = new Date();
+  const hora = ahora.getHours();
+  const saludo = hora < 12 ? 'Buenos dias' : hora < 18 ? 'Buenas tardes' : 'Buenas noches';
+  document.getElementById('greeting').textContent = `${saludo}, ${user.full_name || user.username}`;
+  document.getElementById('dateDisplay').textContent = ahora.toLocaleDateString('es-CO', {
+    weekday: 'long', day: 'numeric', month: 'long'
+  });
+
+  const hoy = dnTodayISO();
+
+  // Cargar KPIs
+  async function cargarKPIs() {
+    // Citas de hoy en esta sede
+    const { data: citas } = await sb
+      .from('citas')
+      .select('id, precio, estado, comision_calculada')
+      .eq('sucursal_id', sedeId)
+      .eq('fecha', hoy);
+
+    const totalCitas = citas?.length || 0;
+    const citasFinalizadas = citas?.filter(c => c.estado === 'finalizada') || [];
+    const ingresos = citasFinalizadas.reduce((sum, c) => sum + (Number(c.precio) || 0), 0);
+    const comisiones = citasFinalizadas.reduce((sum, c) => sum + (Number(c.comision_calculada) || 0), 0);
+
+    document.getElementById('kpiCitas').textContent = totalCitas;
+    document.getElementById('kpiIngresos').textContent = dnFormatCOP(ingresos);
+    document.getElementById('kpiClientes').textContent = citasFinalizadas.length;
+    document.getElementById('kpiComisiones').textContent = dnFormatCOP(comisiones);
+
+    // Resumen de caja
+    document.getElementById('cajaBase').textContent = dnFormatCOP(turno.dinero_inicial || 0);
+
+    const ventasEfectivo = citasFinalizadas
+      .filter(c => c.estado === 'finalizada')
+      .reduce((sum, c) => {
+        // Asumimos efectivo por ahora
+        return sum + (Number(c.precio) || 0);
+      }, 0);
+
+    document.getElementById('cajaEfectivo').textContent = dnFormatCOP(ventasEfectivo);
+    document.getElementById('cajaOtros').textContent = dnFormatCOP(0);
+    document.getElementById('cajaTotal').textContent = dnFormatCOP((turno.dinero_inicial || 0) + ventasEfectivo);
+  }
+
+  // Cargar colaboradores activos
+  async function cargarColaboradores() {
+    // Cargar barberos de la sede
+    const { data: barberos } = await sb
+      .from('barberos')
+      .select(`
+        id, comision_pct, tipo_colaborador,
+        usuarios!inner(full_name, avatar_url)
+      `)
+      .eq('sucursal_id', sedeId)
+      .eq('activo', true)
+      .eq('tipo_colaborador', 'barbero');
+
+    const container = document.getElementById('colaboradoresList');
+
+    if (!barberos || barberos.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="icon">👥</div><div>No hay colaboradores en esta sede</div></div>';
+      return;
+    }
+
+    // Obtener stats de cada barbero hoy
+    const barberIds = barberos.map(b => b.id);
+    const { data: citasHoy } = await sb
+      .from('citas')
+      .select('barbero_id, precio, comision_calculada, estado')
+      .eq('sucursal_id', sedeId)
+      .eq('fecha', hoy)
+      .in('barbero_id', barberIds);
+
+    const statsPorBarbero = {};
+    (citasHoy || []).forEach(c => {
+      if (!statsPorBarbero[c.barbero_id]) {
+        statsPorBarbero[c.barbero_id] = { total: 0, finalizadas: 0, comision: 0 };
+      }
+      statsPorBarbero[c.barbero_id].total++;
+      if (c.estado === 'finalizada') {
+        statsPorBarbero[c.barbero_id].finalizadas++;
+        statsPorBarbero[c.barbero_id].comision += Number(c.comision_calculada) || 0;
+      }
+    });
+
+    container.innerHTML = barberos.map(b => {
+      const nombre = b.usuarios?.full_name || 'Colaborador';
+      const avatar = b.usuarios?.avatar_url;
+      const stats = statsPorBarbero[b.id] || { total: 0, finalizadas: 0, comision: 0 };
+      const tieneActividad = stats.total > 0;
+
+      return `
+        <div class="colaborador-row">
+          <div class="colaborador-avatar" style="${avatar ? '' : ''}">
+            ${avatar ? `<img src="${avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` : dnInitials(nombre)}
+          </div>
+          <div class="colaborador-info">
+            <div class="colaborador-name">${nombre}</div>
+            <div class="colaborador-stats">${stats.finalizadas}/${stats.total} servicios completados</div>
+          </div>
+          <div class="colaborador-comision">${dnFormatCOP(stats.comision)}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Toggle sidebar - el botón toggle usa la función global de admin-sede-sidebar.js
+  document.getElementById('sidebarToggleBtn')?.addEventListener('click', () => {
+    if (typeof window.toggleSidebar === 'function') window.toggleSidebar();
+  });
+
+  // Cerrar turno
+  document.getElementById('btnCerrarTurno').addEventListener('click', () => {
+    window.location.href = 'cerrar-turno.html';
+  });
+
+  // Toast
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // Iniciar
+  cargarKPIs();
+  cargarColaboradores();
+})();
+</script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/mobile-nav.js"></script>
+</body>
+</html>

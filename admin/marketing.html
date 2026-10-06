@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Keicy Barbería · Marketing</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/mobile-admin.css">
+<style>
+  /* Variables heredadas de design-system.css */
+  body{ overflow-x:hidden; background:var(--bg); }
+  #app{ display:flex; min-height:100vh; }
+  .main{ flex:1; min-width:0; max-width:1440px; margin:0 auto; padding:26px 30px 60px; width:100%; }
+
+  .sidebar{ width:60px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--divider); display:flex; flex-direction:column; align-items:center; padding:20px 6px; position:sticky; top:0; height:100vh; z-index:40; overflow:hidden; overflow-y:auto; transition:width .28s cubic-bezier(.4,0,.2,1), padding .28s ease; }
+  .sidebar.expanded{ width:230px; align-items:stretch; padding:22px 16px; }
+  .sidebar-logo{ display:block; cursor:pointer; margin:0 auto; }
+  .sidebar-logo-icon{ width:48px; height:48px; border-radius:12px; margin-bottom:26px; }
+  .sidebar-logo-full{ height:56px; margin-bottom:28px; display:none; border-radius:12px; }
+  .sidebar.expanded .sidebar-logo-icon{ display:none; }
+  .sidebar.expanded .sidebar-logo-full{ display:block; }
+  .nav-group{ flex:1; display:flex; flex-direction:column; gap:3px; overflow-y:auto; width:100%; min-width:0; }
+  .nav-link{ display:flex; align-items:center; gap:12px; justify-content:center; width:40px; height:40px; margin:0 auto; padding:0; border-radius:12px; font-size:13.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:background .15s ease, color .15s ease; text-decoration:none; white-space:nowrap; }
+  .sidebar.expanded .nav-link{ justify-content:flex-start; width:100%; height:auto; margin:0; padding:11px 12px; }
+  .nav-link svg{ width:22px; height:22px; flex-shrink:0; }
+  .nav-link:hover{ background:var(--card); color:var(--text); }
+  .nav-link.active{ background:var(--gold); color:#141414; }
+  .nav-link.active svg{ stroke:#141414; }
+  .nav-label{ opacity:0; max-width:0; overflow:hidden; transition:opacity .16s ease, max-width .26s ease; }
+  .sidebar.expanded .nav-label{ opacity:1; max-width:170px; }
+    .sidebar-card{ display:none; position:relative; align-items:center; gap:9px; padding:9px; border-radius:14px; background:var(--glass-2, rgba(255,255,255,0.04)); border:1px solid var(--glass-border); margin-bottom:16px; cursor:pointer; }
+  .sidebar.expanded .sidebar-card{ display:flex; }
+  .sidebar-card-avatar{ width:32px; height:32px; border-radius:50%; background:var(--gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:800; flex-shrink:0; }
+  .sidebar-card-info{ flex:1; min-width:0; }
+  .sidebar-card-name{ font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-card-sub{ font-size:10.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+  .sidebar-card-chevron{ width:14px; height:14px; color:var(--text-secondary); flex-shrink:0; }
+  .sidebar-card-menu{ display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--card, #1c1c1c); border:1px solid var(--glass-border); border-radius:12px; padding:6px; z-index:60; max-height:220px; overflow-y:auto; box-shadow:0 12px 30px rgba(0,0,0,0.4); }
+  .sidebar-card-menu.show{ display:block; }
+  .sidebar-card-menu-item{ padding:9px 10px; border-radius:8px; font-size:12px; font-weight:600; color:var(--text-secondary); cursor:pointer; }
+  .sidebar-card-menu-item:hover{ background:var(--glass-2, rgba(255,255,255,0.06)); color:var(--text); }
+  .sidebar-card-menu-item.active{ color:var(--gold); font-weight:700; }
+  .nav-section-label{ display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
+  .nav-section-label:first-of-type{ padding-top:2px; }
+  .sidebar.expanded .nav-section-label{ display:block; }
+  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0; display:none; }
+  .sidebar.expanded .plan-card{ display:block; }
+  .plan-card .label{ font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--gold); text-transform:uppercase; display:flex; align-items:center; gap:6px; }
+  .plan-card .sub{ font-size:12px; color:var(--text-secondary); margin-top:6px; }
+  .sidebar-bottom { margin-top:auto; padding-top:12px; border-top:1px solid var(--divider); display:flex; flex-direction:column; gap:8px; width:100%; }
+  .logout-btn { font-size:12px; color:#EF5350; display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; cursor:pointer; width:40px; height:40px; border-radius:10px; background:rgba(239,83,80,0.1); border:1px solid rgba(239,83,80,0.2); }
+  .sidebar.expanded .logout-btn { justify-content:flex-start; width:100%; height:auto; padding:10px 12px; margin:0; }
+  .logout-btn:hover { background:rgba(239,83,80,0.2); }
+  .logout-btn svg { width:16px; height:16px; flex-shrink:0; }
+  .logout-label { display:none; }
+  .sidebar.expanded .logout-label { display:inline; }
+  .help-link{ margin-top:14px; font-size:12.5px; color:var(--text-secondary); display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; cursor:pointer; width:100%; }
+  .sidebar.expanded .help-link{ justify-content:flex-start; }
+  .help-link:hover{ color:var(--text); }
+
+  .header-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; gap:14px; flex-wrap:wrap; }
+  .header-left{ display:flex; align-items:center; gap:14px; }
+  .header-left img{ height:40px; cursor:pointer; }
+  .header-title{ font-size:21px; font-weight:800; }
+  .header-sub{ font-size:12.5px; color:var(--text-secondary); }
+
+  .panel{
+    background:var(--glass); backdrop-filter:blur(16px); border:1px solid var(--glass-border);
+    border-radius:22px; padding:22px 24px; box-shadow:0 20px 50px rgba(0,0,0,0.3);
+  }
+  .panel-title{ font-size:16px; font-weight:800; }
+  .panel-sub{ font-size:12.5px; color:var(--text-secondary); margin-top:2px; }
+
+  .hub-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+  @media (max-width:1000px){ .hub-grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:640px){ .hub-grid{ grid-template-columns:1fr; } }
+
+  .hub-card{ padding:18px; cursor:pointer; transition:transform .15s ease, border-color .2s ease; position:relative; }
+  .hub-card:hover{ border-color:rgba(255,255,255,0.18); }
+  .hub-card:active{ transform:scale(0.98); }
+  .hub-card .ic{ width:40px; height:40px; border-radius:12px; background:rgba(201,163,91,0.12); display:flex; align-items:center; justify-content:center; margin-bottom:12px; }
+  .hub-card .ic svg{ width:20px; height:20px; color:var(--gold); }
+  .hub-card .t{ font-size:14.5px; font-weight:800; }
+  .hub-card .s{ font-size:12px; color:var(--text-secondary); margin-top:4px; line-height:1.4; }
+  .hub-badge{ position:absolute; top:16px; right:16px; font-size:9.5px; font-weight:800; padding:3px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:.4px; }
+  .hub-badge.ready{ background:rgba(78,203,113,0.16); color:#4ECB71; }
+  .hub-badge.soon{ background:var(--glass-2); color:var(--text-secondary); border:1px solid var(--glass-border); }
+
+  /* Tarjetas deshabilitadas (próximamente) */
+  .hub-card.disabled{ opacity:0.5; cursor:not-allowed; pointer-events:none; }
+  .hub-card.coming-soon{ cursor:default; }
+  .hub-card.coming-soon:hover{ border-color:var(--divider); transform:none; }
+  .hub-card.coming-soon:active{ transform:none; }
+  .hub-card.coming-soon .ic{ background:rgba(159,159,159,0.1); }
+  .hub-card.coming-soon .ic svg{ color:var(--text-secondary); }
+
+  .tabs-row{ display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px; scrollbar-width:none; }
+  .tabs-row::-webkit-scrollbar{ display:none; }
+  .tab-btn{ flex-shrink:0; padding:9px 16px; border-radius:12px; font-size:13px; font-weight:700; cursor:pointer; background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text-secondary); white-space:nowrap; }
+  .tab-btn.active{ background:var(--gold); color:#141414; border-color:var(--gold); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:7px; }
+  .field input, .field select, .field textarea{
+    width:100%; border-radius:13px; padding:0 14px; height:48px;
+    background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text);
+    font-size:14px; outline:none; transition:border-color .2s ease; font-family:inherit;
+  }
+  .field textarea{ height:auto; padding:12px 14px; min-height:90px; resize:vertical; }
+  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--gold); }
+  .field textarea{ height:auto; padding:12px 14px; min-height:70px; resize:vertical; }
+  .field-hint{ font-size:11px; color:var(--text-secondary); margin-top:6px; }
+
+  .wa-list-row{ display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--glass-border); }
+  .wa-list-row:last-child{ border-bottom:none; }
+  .wa-mid{ flex:1; min-width:0; }
+  .wa-mid .n{ font-size:13.5px; font-weight:700; }
+  .wa-mid .p{ font-size:11.5px; color:var(--text-secondary); }
+  .wa-send-btn{
+    display:flex; align-items:center; gap:7px; padding:9px 14px; border-radius:11px; font-size:12.5px; font-weight:700;
+    background:rgba(78,203,113,0.14); color:#4ECB71; text-decoration:none; flex-shrink:0;
+  }
+  .wa-send-btn svg{ width:14px; height:14px; }
+
+  .empty-row{ padding:24px 0; text-align:center; color:var(--text-secondary); font-size:13px; }
+
+  .btn-gold-sm{
+    padding:11px 18px; border-radius:13px; background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#141414; font-weight:700; font-size:13px; cursor:pointer; border:none; white-space:nowrap;
+  }
+
+  #toast{
+    position:fixed; left:50%; bottom:calc(var(--bottom-nav-total) + 16px); transform:translate(-50%, 16px);
+    background:rgba(250,250,250,0.95); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--glass-border); border-radius:14px; padding:12px 18px;
+    font-size:13px; display:flex; align-items:center; gap:8px; max-width:90%;
+    opacity:0; pointer-events:none; transition:opacity 0.3s ease, transform 0.3s ease; z-index:200;
+  }
+  #toast.show{ opacity:1; transform:translate(-50%, 0); }
+  .toast-dot{ width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0; }
+
+  @media (max-width:767px){
+    .sidebar{ display:none; }
+    .main{ padding:calc(16px + var(--safe-top)) var(--page-padding-x) calc(96px + var(--safe-bottom)); }
+  }
+  @media (max-width:900px){
+    .tab-panel[data-panel="mensajes-email"] > div > div:first-child > div { grid-template-columns:1fr !important; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <script>
+    if (localStorage.getItem('dnNavExpanded') === '1' && window.innerWidth > 767) {
+      document.write('<style>@media(min-width:768px){#sidebar{width:230px!important;align-items:stretch!important;padding:22px 16px!important;}}</style>');
+    }
+  </script>
+  <div class="sidebar" id="sidebar">
+    <img src="../assets/apple-touch-icon-v2.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
+    <img src="../assets/logo-transparent.png" class="sidebar-logo sidebar-logo-full" alt="Keicy Barbería" id="sidebarLogoFull">
+    <div class="sidebar-card" id="sidebarCard" title="Cambiar de sede">
+      <div class="sidebar-card-avatar">DN</div>
+      <div class="sidebar-card-info">
+        <div class="sidebar-card-name" id="sidebarCardName">Keicy Barbería</div>
+        <div class="sidebar-card-sub" id="sidebarCardSede">—</div>
+      </div>
+      <svg class="sidebar-card-chevron" id="sidebarCardChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="sidebar-card-menu" id="sidebarCardMenu"></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-section-label">Gestionar</div>
+      <a class="nav-link" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Resumen
+      </a>
+      <a class="nav-link" href="calendario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        Agenda
+      </a>
+      <a class="nav-link" href="clientes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg>
+        Clientes
+      </a>
+      <a class="nav-link" href="caja.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        Cuadre de caja
+      </a>
+      <a class="nav-link" href="fidelizacion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z" stroke-linejoin="round"/></svg>
+        Fidelización
+      </a>
+      <div class="nav-section-label">Desempeño</div>
+      <a class="nav-link" href="servicios.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
+        Servicios
+      </a>
+      <a class="nav-link" href="barberos.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2M14.5 14.8c2 .3 3.7 1.7 4.5 4.2" stroke-linecap="round"/></svg>
+        Colaboradores
+      </a>      <a class="nav-link" href="inventario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+        Inventario
+      </a>
+      <a class="nav-link" href="reportes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7" stroke-linecap="round"/></svg>
+        Reportes
+      </a>
+      <a class="nav-link active" href="marketing.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4h4l6 5V5L7 10H3z"/></svg>
+        Marketing
+      </a>
+      <a class="nav-link" href="configuracion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="logout-label">Cerrar sesión</span>
+      </div>
+      <div class="plan-card">
+        <div class="label">👑 Plan de por vida</div>
+        <div class="sub">✓ Crisbo</div>
+      </div>
+      <div class="help-link" onclick="toast('Abriendo centro de ayuda…')">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2 1.9-2 3.5" stroke-linecap="round"/><circle cx="12" cy="16.3" r="0.6" fill="currentColor"/></svg>
+        Centro de ayuda
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="header-row fade-in">
+      <div class="header-left">
+        <img src="../assets/logo-transparent.png" alt="Keicy Barber" onclick="window.location.href='dashboard.html'">
+        <div>
+          <div class="header-title">Marketing</div>
+          <div class="header-sub">Personalización, fidelización, campañas y automatizaciones — todo agrupado aquí.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hub-grid fade-in">
+      <div class="card hub-card" onclick="window.location.href='configuracion.html'">
+        <span class="hub-badge ready">Listo</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></div>
+        <div class="t">Personalización</div>
+        <div class="s">Marca, nombre del negocio e Instagram — vive en Configuración.</div>
+      </div>
+
+      <div class="card hub-card" onclick="window.location.href='fidelizacion.html'">
+        <span class="hub-badge ready">Listo</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z" stroke-linejoin="round"/></svg></div>
+        <div class="t">Fidelización</div>
+        <div class="s">Puntos, retos, cupones y recompensas — módulo completo aparte.</div>
+      </div>
+
+      <div class="card hub-card" onclick="switchTab('whatsapp')">
+        <span class="hub-badge ready">Listo</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg></div>
+        <div class="t">WhatsApp</div>
+        <div class="s">Envía un mensaje a un grupo de clientes, uno por uno, con plantilla editable.</div>
+      </div>
+
+      <div class="card hub-card" onclick="switchTab('pixel')">
+        <span class="hub-badge ready">Listo</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg></div>
+        <div class="t">Pixel</div>
+        <div class="s">Meta Pixel y Google Ads/Analytics en la página pública de reservas.</div>
+      </div>
+
+      <div class="card hub-card coming-soon">
+        <span class="hub-badge soon">Próximamente</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l18-8-8 18-2-8-8-2z"/></svg></div>
+        <div class="t">Campañas</div>
+        <div class="s">Promociones programadas multicanal. Disponible en una próxima actualización.</div>
+      </div>
+
+      <div class="card hub-card" onclick="switchTab('mensajes-email')">
+        <span class="hub-badge ready">Listo</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>
+        <div class="t">Mensajes de Email</div>
+        <div class="s">Personaliza los textos del email de confirmación de citas.</div>
+      </div>
+
+      <div class="card hub-card coming-soon">
+        <span class="hub-badge soon">Próximamente</span>
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+        <div class="t">Automatizaciones</div>
+        <div class="s">Mensajes automáticos por eventos (cumpleaños, cliente inactivo, etc).</div>
+      </div>
+    </div>
+
+    <div class="panel fade-in">
+      <div class="tabs-row" id="tabsRow">
+        <div class="tab-btn active" data-tab="whatsapp">WhatsApp</div>
+        <div class="tab-btn" data-tab="pixel">Pixel</div>
+        <div class="tab-btn" data-tab="mensajes-email">Mensajes Email</div>
+      </div>
+
+      <!-- WhatsApp broadcast -->
+      <div class="tab-panel active" data-panel="whatsapp">
+        <div class="panel-sub" style="margin-bottom:14px;">Genera un enlace de WhatsApp por cada cliente del segmento elegido. No hay envío automático — Keicy Barbería usa esto como ayuda para escribirles uno por uno, sin depender de una API de WhatsApp Business.</div>
+        <div class="field">
+          <label>Segmento de clientes</label>
+          <select id="waSegmento">
+            <option value="todos">Todos los clientes con teléfono</option>
+            <option value="con_puntos">Clientes con puntos acumulados</option>
+            <option value="sin_visitas_30">Sin visitas en los últimos 30 días</option>
+            <option value="gold">Nivel Gold</option>
+            <option value="black">Nivel Black</option>
+            <option value="elite">Nivel Elite</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Mensaje (usa {nombre} para personalizar)</label>
+          <textarea id="waMensaje">Hola {nombre}, en Keicy Barbería tenemos una sorpresa para ti esta semana. ¿Te gustaría agendar tu próxima cita?</textarea>
+        </div>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:14px;">
+          <div class="btn-gold-sm" onclick="generarListaWhatsApp()">Generar lista</div>
+        </div>
+        <div id="waList"><div class="empty-row">Elige un segmento y genera la lista.</div></div>
+      </div>
+
+      <!-- Pixel -->
+      <div class="tab-panel" data-panel="pixel">
+        <div class="panel-sub" style="margin-bottom:14px;">Si defines un ID aquí, se inyecta automáticamente en la página pública de reservas (`reservar/index.html`) para medir conversiones de campañas.</div>
+        <div class="field"><label>Meta Pixel ID (Facebook/Instagram Ads)</label><input type="text" id="pxMeta" placeholder="Ej. 1234567890123456"></div>
+        <div class="field-hint" style="margin-top:-8px; margin-bottom:14px;">Lo encuentras en Meta Events Manager → Orígenes de datos → tu píxel.</div>
+        <div class="field"><label>Google Ads / Analytics ID</label><input type="text" id="pxGoogle" placeholder="Ej. G-XXXXXXXXXX o AW-XXXXXXXXX"></div>
+        <div class="field-hint" style="margin-top:-8px; margin-bottom:14px;">Etiqueta de Google tag (gtag.js).</div>
+        <div style="display:flex; justify-content:flex-end;">
+          <div class="btn-gold-sm" onclick="guardarPixels()">Guardar</div>
+        </div>
+      </div>
+
+      <!-- Mensajes Email -->
+      <div class="tab-panel" data-panel="mensajes-email">
+        <div class="panel-sub" style="margin-bottom:14px;">Personaliza los textos del email de confirmación que reciben tus clientes. Usa <code style="background:var(--glass-2);padding:2px 6px;border-radius:4px;">{nombre}</code>, <code style="background:var(--glass-2);padding:2px 6px;border-radius:4px;">{fecha}</code> y <code style="background:var(--glass-2);padding:2px 6px;border-radius:4px;">{hora}</code> para personalizar.</div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+          <!-- Columna izquierda: Campos editables -->
+          <div>
+            <div class="field">
+              <label>Asunto del email</label>
+              <input type="text" id="emailAsunto" placeholder="✅ Cita confirmada - {fecha} a las {hora}" oninput="renderEmailPreview()">
+            </div>
+            <div class="field">
+              <label>Título principal</label>
+              <input type="text" id="emailTitulo" placeholder="¡Cita Confirmada!" oninput="renderEmailPreview()">
+            </div>
+            <div class="field">
+              <label>Subtítulo</label>
+              <input type="text" id="emailSubtitulo" placeholder="Te esperamos, {nombre}" oninput="renderEmailPreview()">
+            </div>
+            <div class="field">
+              <label>Recordatorio - Título</label>
+              <input type="text" id="emailRecordatorioTitulo" placeholder="📍 Recuerda llegar 5 minutos antes" oninput="renderEmailPreview()">
+            </div>
+            <div class="field">
+              <label>Recordatorio - Texto</label>
+              <textarea id="emailRecordatorioTexto" placeholder="Si necesitas cancelar o reprogramar, contáctanos con anticipación." oninput="renderEmailPreview()" style="height:70px;"></textarea>
+            </div>
+            <div class="field">
+              <label>Botón agregar calendario</label>
+              <input type="text" id="emailCalendarioTexto" placeholder="📅 Agregar a tu calendario" oninput="renderEmailPreview()">
+            </div>
+            <div class="field" style="margin-bottom:0;">
+              <label>Botón cancelar cita</label>
+              <input type="text" id="emailCancelarTexto" placeholder="✕ Cancelar cita" oninput="renderEmailPreview()">
+            </div>
+            <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+              <div class="btn-gold-sm" onclick="guardarMensajesEmail()">Guardar cambios</div>
+            </div>
+          </div>
+
+          <!-- Columna derecha: Preview -->
+          <div>
+            <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--text-secondary); margin-bottom:8px;">Vista previa</div>
+            <div id="emailPreviewContainer" style="background:var(--bg); border-radius:12px; padding:16px; max-height:600px; overflow-y:auto; border:1px solid var(--glass-border);">
+              <div id="emailPreview"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"><span class="toast-dot"></span><span id="toastText"></span></div>
+
+<!-- Barra de navegación inferior — idéntica en todas las páginas del panel -->
+<div class="dn-bottom-nav">
+      <a href="calendario.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        Agenda
+      </a>
+      <a href="caja.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        Cuadre de caja
+      </a>
+      <a href="dashboard.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Resumen
+      </a>
+      <a href="configuracion.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+  const toastEl = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  function toast(msg){
+    toastText.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(window._t);
+    window._t = setTimeout(() => toastEl.classList.remove('show'), 2600);
+  }
+
+  const sidebarEl = document.getElementById('sidebar');
+  document.querySelectorAll('.nav-link, .help-link').forEach(el => {
+    const lastNode = el.lastChild;
+    if (lastNode && lastNode.nodeType === 3 && lastNode.textContent.trim()) {
+      const span = document.createElement('span');
+      span.className = 'nav-label';
+      span.textContent = lastNode.textContent.trim();
+      el.replaceChild(span, lastNode);
+    }
+  });
+  function dnSetNavExpanded(exp){
+    sidebarEl.classList.toggle('expanded', exp);
+    localStorage.setItem('dnNavExpanded', exp ? '1' : '0');
+  }
+  dnSetNavExpanded(localStorage.getItem('dnNavExpanded') === '1');
+  document.getElementById('sidebarLogoIcon').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+  document.getElementById('sidebarLogoFull').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+
+  // Cerrar sesión
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    if (confirm('¿Seguro que deseas cerrar sesión?')) {
+      dnClearSession();
+      window.location.href = '../auth.html';
+    }
+  });
+
+  const user = dnRequireAdmin();
+  dnInitSidebarCard();
+
+  document.getElementById('tabsRow').addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    switchTab(btn.dataset.tab);
+  });
+  function switchTab(tab){
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === tab));
+    document.querySelector('.panel').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  // ---- WhatsApp broadcast helper ----
+  async function generarListaWhatsApp(){
+    const segmento = document.getElementById('waSegmento').value;
+    const el = document.getElementById('waList');
+    el.innerHTML = '<div class="empty-row">Cargando…</div>';
+    try {
+      // OPTIMIZADO: Query con filtros específicos según segmento para reducir transferencia
+      let query = sb.from('usuarios').select('id, full_name, username, phone, points, membership_tier').eq('role', 'cliente').not('phone', 'is', null);
+
+      // Aplicar filtros en la query según segmento
+      if (segmento === 'con_puntos') {
+        query = query.gt('points', 0);
+      } else if (segmento === 'gold' || segmento === 'black' || segmento === 'elite') {
+        query = query.eq('membership_tier', segmento);
+      }
+
+      // Limitar a 500 para evitar sobrecargas
+      query = query.limit(500);
+
+      const { data: clientes, error } = await query;
+      if (error) throw error;
+
+      let filtrados = clientes || [];
+      if (segmento === 'con_puntos') {
+        filtrados = filtrados.filter(c => (c.points || 0) > 0);
+      } else if (segmento === 'gold' || segmento === 'black' || segmento === 'elite') {
+        filtrados = filtrados.filter(c => c.membership_tier === segmento);
+      } else if (segmento === 'sin_visitas_30') {
+        const hace30 = new Date(); hace30.setDate(hace30.getDate() - 30);
+        const hace30ISO = hace30.toISOString().slice(0,10);
+        const { data: citas, error: cErr } = await sb.from('citas').select('cliente_id, fecha').eq('estado', 'finalizada').gte('fecha', hace30ISO);
+        if (cErr) throw cErr;
+        const activos = new Set((citas || []).map(c => c.cliente_id));
+        filtrados = filtrados.filter(c => !activos.has(c.id));
+      }
+      filtrados = filtrados.filter(c => c.phone);
+
+      if (!filtrados.length) { el.innerHTML = '<div class="empty-row">Ningún cliente de este segmento tiene teléfono registrado.</div>'; return; }
+
+      const template = document.getElementById('waMensaje').value || 'Hola {nombre}';
+      el.innerHTML = filtrados.map(c => {
+        const nombre = c.full_name || c.username || 'cliente';
+        const msg = encodeURIComponent(template.replace(/{nombre}/g, nombre));
+        const phone = c.phone.replace(/\D/g, '');
+        return `
+          <div class="wa-list-row">
+            <div class="wa-mid"><div class="n">${nombre}</div><div class="p">${c.phone}</div></div>
+            <a class="wa-send-btn" href="https://wa.me/${phone}?text=${msg}" target="_blank">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg>
+              Enviar
+            </a>
+          </div>`;
+      }).join('');
+      toast(`${filtrados.length} cliente(s) en este segmento.`);
+    } catch (err) {
+      console.error(err);
+      el.innerHTML = '<div class="empty-row">No pudimos generar la lista.</div>';
+    }
+  }
+
+  // ---- Pixel settings ----
+  async function loadPixelConfig(){
+    try {
+      const { data, error } = await sb.from('configuracion_negocio').select('pixel_meta_id, pixel_google_id').eq('id', true).maybeSingle();
+      if (error) throw error;
+      document.getElementById('pxMeta').value = data?.pixel_meta_id || '';
+      document.getElementById('pxGoogle').value = data?.pixel_google_id || '';
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function guardarPixels(){
+    const metaId = document.getElementById('pxMeta').value.trim() || null;
+    const googleId = document.getElementById('pxGoogle').value.trim() || null;
+    try {
+      const { error } = await sb.from('configuracion_negocio').update({ pixel_meta_id: metaId, pixel_google_id: googleId }).eq('id', true);
+      if (error) throw error;
+      toast('Píxeles guardados. Ya se inyectan en la reserva pública.');
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos guardar los píxeles.');
+    }
+  }
+
+  loadPixelConfig();
+  loadMensajesEmail();
+
+  // ---- Mensajes Email ----
+  const EMAIL_DEFAULTS = {
+    email_asunto: '✅ Cita confirmada - {fecha} a las {hora}',
+    email_titulo: '¡Cita Confirmada!',
+    email_subtitulo: 'Te esperamos, {nombre}',
+    email_recordatorio_titulo: '📍 Recuerda llegar 5 minutos antes',
+    email_recordatorio_texto: 'Si necesitas cancelar o reprogramar, contáctanos con anticipación.',
+    email_calendario_texto: '📅 Agregar a tu calendario',
+    email_cancelar_texto: '✕ Cancelar cita'
+  };
+
+  async function loadMensajesEmail() {
+    try {
+      const keys = Object.keys(EMAIL_DEFAULTS);
+      const { data, error } = await sb.from('app_config').select('key, value').in('key', keys);
+      if (error) throw error;
+
+      const values = {};
+      (data || []).forEach(item => { values[item.key] = item.value; });
+
+      document.getElementById('emailAsunto').value = values.email_asunto || '';
+      document.getElementById('emailTitulo').value = values.email_titulo || '';
+      document.getElementById('emailSubtitulo').value = values.email_subtitulo || '';
+      document.getElementById('emailRecordatorioTitulo').value = values.email_recordatorio_titulo || '';
+      document.getElementById('emailRecordatorioTexto').value = values.email_recordatorio_texto || '';
+      document.getElementById('emailCalendarioTexto').value = values.email_calendario_texto || '';
+      document.getElementById('emailCancelarTexto').value = values.email_cancelar_texto || '';
+
+      renderEmailPreview();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function guardarMensajesEmail() {
+    const values = {
+      email_asunto: document.getElementById('emailAsunto').value.trim(),
+      email_titulo: document.getElementById('emailTitulo').value.trim(),
+      email_subtitulo: document.getElementById('emailSubtitulo').value.trim(),
+      email_recordatorio_titulo: document.getElementById('emailRecordatorioTitulo').value.trim(),
+      email_recordatorio_texto: document.getElementById('emailRecordatorioTexto').value.trim(),
+      email_calendario_texto: document.getElementById('emailCalendarioTexto').value.trim(),
+      email_cancelar_texto: document.getElementById('emailCancelarTexto').value.trim()
+    };
+
+    try {
+      for (const [key, value] of Object.entries(values)) {
+        await sb.from('app_config').upsert({ key, value: value || EMAIL_DEFAULTS[key] }, { onConflict: 'key' });
+      }
+      toast('Mensajes de email guardados. Se aplicarán a las próximas reservas.');
+    } catch (err) {
+      console.error(err);
+      toast('Error al guardar mensajes de email.');
+    }
+  }
+
+  function renderEmailPreview() {
+    const asunto = document.getElementById('emailAsunto').value || EMAIL_DEFAULTS.email_asunto;
+    const titulo = document.getElementById('emailTitulo').value || EMAIL_DEFAULTS.email_titulo;
+    const subtitulo = document.getElementById('emailSubtitulo').value || EMAIL_DEFAULTS.email_subtitulo;
+    const recordatorioTitulo = document.getElementById('emailRecordatorioTitulo').value || EMAIL_DEFAULTS.email_recordatorio_titulo;
+    const recordatorioTexto = document.getElementById('emailRecordatorioTexto').value || EMAIL_DEFAULTS.email_recordatorio_texto;
+    const calendarioTexto = document.getElementById('emailCalendarioTexto').value || EMAIL_DEFAULTS.email_calendario_texto;
+    const cancelarTexto = document.getElementById('emailCancelarTexto').value || EMAIL_DEFAULTS.email_cancelar_texto;
+
+    // Reemplazar variables de ejemplo
+    const reemplazar = (text) => text
+      .replace(/{nombre}/g, 'Juan')
+      .replace(/{fecha}/g, 'sábado 15 de marzo')
+      .replace(/{hora}/g, '10:00 AM');
+
+    const preview = document.getElementById('emailPreview');
+    preview.innerHTML = `
+      <div style="background:#FFFFFF; border-radius:12px; border:1px solid #E5E5E5; padding:20px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+        <!-- Asunto -->
+        <div style="font-size:10px; color:#888888666; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Asunto</div>
+        <div style="font-size:13px; color:#111111; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #E5E5E5;">${reemplazar(asunto)}</div>
+
+        <!-- Logo -->
+        <div style="text-align:center; margin-bottom:12px;">
+          <img src="../assets/logo-transparent.png" alt="Logo" style="width:80px; height:auto;">
+        </div>
+
+        <!-- Header -->
+        <div style="text-align:center; margin-bottom:16px;">
+          <div style="font-size:18px; font-weight:700; color:#111111; margin-bottom:4px;">${reemplazar(titulo)}</div>
+          <div style="font-size:12px; color:#888888666;">${reemplazar(subtitulo)}</div>
+        </div>
+
+        <!-- Detalles de la cita (simplificado) -->
+        <div style="background:#1C1E24; border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid #E5E5E5;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <div>
+              <div style="font-size:9px; color:#D4AF55; text-transform:uppercase; letter-spacing:0.4px;">Fecha</div>
+              <div style="font-size:12px; color:#111111; margin-top:2px;">sábado 15 de marzo</div>
+            </div>
+            <div>
+              <div style="font-size:9px; color:#D4AF55; text-transform:uppercase; letter-spacing:0.4px;">Hora</div>
+              <div style="font-size:12px; color:#111111; margin-top:2px;">10:00 AM</div>
+            </div>
+          </div>
+          <div style="padding-top:8px; border-top:1px solid #E5E5E5;">
+            <div style="font-size:9px; color:#D4AF55; text-transform:uppercase; letter-spacing:0.4px;">Servicio</div>
+            <div style="font-size:12px; color:#111111; margin-top:2px;">Corte + Barba</div>
+          </div>
+        </div>
+
+        <!-- Recordatorio -->
+        <div style="background:rgba(201,163,91,0.1); border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid rgba(201,163,91,0.2);">
+          <div style="font-size:12px; font-weight:600; color:#D4AF55; margin-bottom:4px;">${reemplazar(recordatorioTitulo)}</div>
+          <div style="font-size:11px; color:#888888666;">${reemplazar(recordatorioTexto)}</div>
+        </div>
+
+        <!-- Botón Calendario -->
+        <div style="text-align:center; margin-bottom:12px;">
+          <div style="font-size:12px; font-weight:600; color:#111111; margin-bottom:8px;">${reemplazar(calendarioTexto)}</div>
+          <div style="display:flex; justify-content:center; gap:6px;">
+            <span style="padding:6px 12px; background:#4285F4; color:#111111; border-radius:6px; font-size:10px; font-weight:600;">Google</span>
+            <span style="padding:6px 12px; background:#0078D4; color:#111111; border-radius:6px; font-size:10px; font-weight:600;">Outlook</span>
+            <span style="padding:6px 12px; background:var(--card-2); color:#111111; border-radius:6px; font-size:10px; font-weight:600;">Apple</span>
+          </div>
+        </div>
+
+        <!-- Botón Cancelar -->
+        <div style="text-align:center;">
+          <span style="display:inline-block; padding:8px 20px; border:1px solid rgba(239,83,80,0.4); color:#EF5350; border-radius:8px; font-size:11px; font-weight:600;">${reemplazar(cancelarTexto)}</span>
+        </div>
+      </div>
+    `;
+  }
+</script>
+
+<script src="../assets/mobile-nav.js"></script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+</body>
+</html>

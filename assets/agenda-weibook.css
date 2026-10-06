@@ -1,0 +1,1693 @@
+/**
+ * AGENDA WEIBOOK STYLE - Diego Neira Barber
+ * Diseño limpio, minimalista, 10 barberos simultáneos
+ * Fondo blanco, colores pastel, texto horizontal
+ */
+
+@media (max-width: 767px) {
+  /* ================================================================
+     VARIABLES
+     ================================================================ */
+  :root {
+    --wb-bg: #FFFFFF;
+    --wb-bg-secondary: #F8F9FA;
+    --wb-text: #1A1A1A;
+    --wb-text-secondary: #6B7280;
+    --wb-text-muted: #9CA3AF;
+    --wb-border: #E5E7EB;
+    --wb-border-light: #F3F4F6;
+
+    /* Colores de marca */
+    --wb-gold: #D4A853;
+    --wb-gold-bg: #FDF8ED;
+    --wb-gold-dark: #B8923A;
+
+    /* Estados de citas - Unificados con versión web */
+    --wb-agendada: rgba(120,120,120,0.15);
+    --wb-agendada-text: #666666;
+    --wb-confirmada: rgba(59,130,246,0.15);
+    --wb-confirmada-text: #2563EB;
+    --wb-sala-espera: rgba(245,158,11,0.15);
+    --wb-sala-espera-text: #D97706;
+    --wb-en-servicio: rgba(139,92,246,0.15);
+    --wb-en-servicio-text: #7C3AED;
+    --wb-pendiente-pago: rgba(249,115,22,0.15);
+    --wb-pendiente-pago-text: #EA580C;
+    --wb-finalizada: rgba(16,185,129,0.15);
+    --wb-finalizada-text: #059669;
+    --wb-bloqueada: rgba(239,68,68,0.12);
+    --wb-bloqueada-text: #DC2626;
+    --wb-disponible: #F4F5F7;
+
+    /* Layout */
+    --wb-slot-height: 100px;
+    --wb-gutter-width: 40px;
+    --wb-header-height: auto;
+  }
+
+  /* ================================================================
+     CONTENEDOR PRINCIPAL
+     ================================================================ */
+  .agenda-mobile {
+    display: flex !important;
+    flex-direction: column;
+    height: calc(100dvh - 70px - env(safe-area-inset-bottom, 0px));
+    max-height: calc(100dvh - 70px - env(safe-area-inset-bottom, 0px));
+    background: var(--wb-bg);
+    padding-top: env(safe-area-inset-top, 0);
+    overflow: hidden;
+  }
+
+  /* Ocultar elementos desktop */
+  .board-wrap, .kpi-strip, .date-nav, .header-row,
+  .mobile-view, .sidebar {
+    display: none !important;
+  }
+
+  .main {
+    padding: 0 !important;
+    background: var(--wb-bg) !important;
+    overflow: visible !important;
+  }
+
+  body {
+    background: var(--wb-bg) !important;
+  }
+
+  /* Forzar tema claro en la agenda incluso si el sistema usa tema oscuro */
+  [data-theme="dark"] .agenda-mobile {
+    background: #FFFFFF !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-header,
+  [data-theme="dark"] .agenda-mobile .am-barberos-header,
+  [data-theme="dark"] .agenda-mobile .am-time-gutter,
+  [data-theme="dark"] .agenda-mobile .am-grid,
+  [data-theme="dark"] .agenda-mobile .am-barbero-col,
+  [data-theme="dark"] .agenda-mobile .am-legend,
+  [data-theme="dark"] .agenda-mobile .am-bottom-nav {
+    background: #FFFFFF !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-barbero-name,
+  [data-theme="dark"] .agenda-mobile .am-date-current,
+  [data-theme="dark"] .agenda-mobile .am-day-num {
+    color: #1A1A1A !important;
+  }
+
+  /* ================================================================
+     TEMA OSCURO - Agenda completa
+     ================================================================ */
+  [data-theme="dark"] .agenda-mobile {
+    --wb-bg: #0A0A0C;
+    --wb-bg-secondary: #16181D;
+    --wb-text: #F5F2EA;
+    --wb-text-secondary: #A0A0A0;
+    --wb-text-muted: #6B6B6B;
+    --wb-border: #2A2D35;
+    --wb-border-light: #1E2028;
+    --wb-gold: #D9B872;
+    --wb-gold-bg: rgba(217, 184, 114, 0.12);
+    --wb-gold-dark: #C9A55A;
+    --wb-disponible: #1A1C22;
+    background: #0A0A0C !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-header,
+  [data-theme="dark"] .agenda-mobile .am-barberos-header,
+  [data-theme="dark"] .agenda-mobile .am-time-gutter,
+  [data-theme="dark"] .agenda-mobile .am-barbero-col {
+    background: #0A0A0C !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-logo {
+    filter: brightness(0) invert(1) !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-barbero-name,
+  [data-theme="dark"] .agenda-mobile .am-date-current,
+  [data-theme="dark"] .agenda-mobile .am-day-num {
+    color: #F5F2EA !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-day-name,
+  [data-theme="dark"] .agenda-mobile .am-time-slot {
+    color: #6B6B6B !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-sede-tab {
+    background: #16181D !important;
+    border-color: #2A2D35 !important;
+    color: #A0A0A0 !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-sede-tab.active {
+    background: var(--wb-gold) !important;
+    border-color: var(--wb-gold) !important;
+    color: #000 !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-day-item.active {
+    background: var(--wb-gold) !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-day-item.active .am-day-name,
+  [data-theme="dark"] .agenda-mobile .am-day-item.active .am-day-num {
+    color: #000 !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-icon-btn {
+    background: #16181D !important;
+    border-color: #2A2D35 !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-icon-btn svg {
+    color: #A0A0A0 !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-date-arrow {
+    background: #16181D !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-date-arrow svg {
+    color: #F5F2EA !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-hour-slot {
+    background: #1A1C22 !important;
+    border-color: #2A2D35 !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-hour-slot::after {
+    color: #6B6B6B !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-hour-line {
+    background: #1E2028 !important;
+  }
+
+  /* Colores de citas en tema oscuro - unificados con versión web */
+  [data-theme="dark"] .agenda-mobile .am-cita.agendada {
+    background: rgba(159,159,159,0.25) !important;
+    border: 1px solid rgba(159,159,159,0.4) !important;
+  }
+  [data-theme="dark"] .agenda-mobile .am-cita.agendada .am-cita-hora,
+  [data-theme="dark"] .agenda-mobile .am-cita.agendada .am-cita-cliente,
+  [data-theme="dark"] .agenda-mobile .am-cita.agendada .am-cita-servicio {
+    color: #B8B8B8 !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-cita.confirmada {
+    background: rgba(96,165,250,0.25) !important;
+    border: 1px solid rgba(96,165,250,0.4) !important;
+  }
+  [data-theme="dark"] .agenda-mobile .am-cita.confirmada .am-cita-hora,
+  [data-theme="dark"] .agenda-mobile .am-cita.confirmada .am-cita-cliente,
+  [data-theme="dark"] .agenda-mobile .am-cita.confirmada .am-cita-servicio {
+    color: #93C5FD !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-cita.sala_espera {
+    background: rgba(251,191,36,0.25) !important;
+    border: 1px solid rgba(251,191,36,0.4) !important;
+  }
+  [data-theme="dark"] .agenda-mobile .am-cita.sala_espera .am-cita-hora,
+  [data-theme="dark"] .agenda-mobile .am-cita.sala_espera .am-cita-cliente,
+  [data-theme="dark"] .agenda-mobile .am-cita.sala_espera .am-cita-servicio {
+    color: #FCD34D !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-cita.en_servicio {
+    background: rgba(167,139,250,0.25) !important;
+    border: 1px solid rgba(167,139,250,0.4) !important;
+  }
+  [data-theme="dark"] .agenda-mobile .am-cita.en_servicio .am-cita-hora,
+  [data-theme="dark"] .agenda-mobile .am-cita.en_servicio .am-cita-cliente,
+  [data-theme="dark"] .agenda-mobile .am-cita.en_servicio .am-cita-servicio {
+    color: #C4B5FD !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-cita.pendiente_pago {
+    background: rgba(251,146,60,0.25) !important;
+    border: 1px solid rgba(251,146,60,0.4) !important;
+  }
+  [data-theme="dark"] .agenda-mobile .am-cita.pendiente_pago .am-cita-hora,
+  [data-theme="dark"] .agenda-mobile .am-cita.pendiente_pago .am-cita-cliente,
+  [data-theme="dark"] .agenda-mobile .am-cita.pendiente_pago .am-cita-servicio {
+    color: #FDBA74 !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-cita.finalizada {
+    background: rgba(52,211,153,0.25) !important;
+    border: 1px solid rgba(52,211,153,0.4) !important;
+  }
+  [data-theme="dark"] .agenda-mobile .am-cita.finalizada .am-cita-hora,
+  [data-theme="dark"] .agenda-mobile .am-cita.finalizada .am-cita-cliente,
+  [data-theme="dark"] .agenda-mobile .am-cita.finalizada .am-cita-servicio {
+    color: #6EE7B7 !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-cita.cancelada {
+    background: rgba(239,68,68,0.25) !important;
+    border: 1px solid rgba(239,68,68,0.4) !important;
+  }
+  [data-theme="dark"] .agenda-mobile .am-cita.cancelada .am-cita-hora,
+  [data-theme="dark"] .agenda-mobile .am-cita.cancelada .am-cita-cliente,
+  [data-theme="dark"] .agenda-mobile .am-cita.cancelada .am-cita-servicio {
+    color: #FCA5A5 !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-bloqueo {
+    background: #2A2D35 !important;
+  }
+
+  [data-theme="dark"] .agenda-mobile .am-bloqueo-text {
+    color: #A0A0A0 !important;
+  }
+
+  /* Bottom nav en tema oscuro */
+  [data-theme="dark"] .dn-bottom-nav {
+    background: #0A0A0C !important;
+    border-top-color: #2A2D35 !important;
+  }
+
+  [data-theme="dark"] .dn-bottom-nav .dn-nav-item {
+    color: #6B6B6B !important;
+  }
+
+  [data-theme="dark"] .dn-bottom-nav .dn-nav-item svg {
+    stroke: #6B6B6B !important;
+  }
+
+  [data-theme="dark"] .dn-bottom-nav .dn-nav-item.active {
+    background: rgba(217, 184, 114, 0.12) !important;
+    color: #D9B872 !important;
+  }
+
+  [data-theme="dark"] .dn-bottom-nav .dn-nav-item.active svg {
+    stroke: #D9B872 !important;
+  }
+
+  /* Modal en tema oscuro */
+  [data-theme="dark"] #newApptModal .modal-box,
+  [data-theme="dark"] #amDetailModal .modal-box,
+  [data-theme="dark"] .modal-box {
+    background: #16181D !important;
+    border-color: #2A2D35 !important;
+  }
+
+  [data-theme="dark"] #newApptModal .modal-title,
+  [data-theme="dark"] #amDetailModal .modal-title,
+  [data-theme="dark"] .modal-box .modal-title {
+    color: #F5F2EA !important;
+  }
+
+  /* Popup detalle cita - tema oscuro */
+  [data-theme="dark"] #amDetailModal .modal-box *,
+  [data-theme="dark"] .modal-box .det-name,
+  [data-theme="dark"] .modal-box .det-row,
+  [data-theme="dark"] .modal-box .det-row span,
+  [data-theme="dark"] .modal-box .det-row b {
+    color: #F5F2EA !important;
+  }
+
+  [data-theme="dark"] #amDetailModal .modal-close,
+  [data-theme="dark"] .modal-box .modal-close {
+    color: #A0A0A0 !important;
+  }
+
+  [data-theme="dark"] #amDetailModal .det-phone-link,
+  [data-theme="dark"] .modal-box .det-phone-link {
+    color: #D9B872 !important;
+  }
+
+  [data-theme="dark"] #amDetailModal .det-row,
+  [data-theme="dark"] .modal-box .det-row {
+    background: #0A0A0C !important;
+    border: 1px solid #2A2D35 !important;
+  }
+
+  [data-theme="dark"] #amDetailModal .det-estado-pill,
+  [data-theme="dark"] .modal-box .det-estado-pill {
+    background: #0A0A0C !important;
+    border: 1px solid #2A2D35 !important;
+    color: #A0A0A0 !important;
+  }
+
+  [data-theme="dark"] #amDetailModal .apple-btn,
+  [data-theme="dark"] .modal-box .apple-btn {
+    background: #0A0A0C !important;
+    border: 1px solid #2A2D35 !important;
+    color: #F5F2EA !important;
+  }
+
+  [data-theme="dark"] #amDetailModal .apple-btn.primary,
+  [data-theme="dark"] .modal-box .apple-btn.primary {
+    background: #D9B872 !important;
+    border-color: #D9B872 !important;
+    color: #000 !important;
+  }
+
+  [data-theme="dark"] #amDetailModal .apple-btn.btn-cancel-danger {
+    background: rgba(239, 83, 80, 0.15) !important;
+    color: #EF5350 !important;
+  }
+
+  /* Modal detailModal (citas agenda desktop) - tema oscuro */
+  [data-theme="dark"] #detailModal.modal-overlay {
+    background: rgba(0,0,0,0.7) !important;
+  }
+
+  [data-theme="dark"] #detailModal .modal-box {
+    background: #16181D !important;
+    border: 1px solid #2A2D35 !important;
+  }
+
+  [data-theme="dark"] #detailModal .modal-box *,
+  [data-theme="dark"] #detailModal .modal-title,
+  [data-theme="dark"] #detailModal .modal-sub,
+  [data-theme="dark"] #detailModal #detBody,
+  [data-theme="dark"] #detailModal #detBody * {
+    color: #F5F2EA !important;
+  }
+
+  [data-theme="dark"] #detailModal .modal-close {
+    color: #A0A0A0 !important;
+  }
+
+  [data-theme="dark"] #detailModal .apple-btn {
+    background: #0A0A0C !important;
+    border: 1px solid #2A2D35 !important;
+    color: #F5F2EA !important;
+  }
+
+  [data-theme="dark"] #detailModal .apple-btn.primary {
+    background: #D9B872 !important;
+    border-color: #D9B872 !important;
+    color: #000 !important;
+  }
+
+  /* Modal opciones de teléfono - tema oscuro */
+  [data-theme="dark"] #phoneOptionsModal.modal-overlay {
+    background: rgba(0,0,0,0.7) !important;
+  }
+
+  [data-theme="dark"] #phoneOptionsModal .modal-box {
+    background: #16181D !important;
+    border: 1px solid #2A2D35 !important;
+  }
+
+  [data-theme="dark"] #phoneOptionsModal .modal-box * {
+    color: #F5F2EA !important;
+  }
+
+  [data-theme="dark"] #newApptModal .modal-sub,
+  [data-theme="dark"] #newApptModal .modal-close {
+    color: #A0A0A0 !important;
+  }
+
+  [data-theme="dark"] #newApptModal .field label {
+    color: #F5F2EA !important;
+  }
+
+  [data-theme="dark"] #newApptModal .field input,
+  [data-theme="dark"] #newApptModal .field select {
+    background: #0A0A0C !important;
+    border-color: #2A2D35 !important;
+    color: #F5F2EA !important;
+  }
+
+  [data-theme="dark"] #newApptModal .phone-field {
+    background: #0A0A0C !important;
+    border-color: #2A2D35 !important;
+  }
+
+  [data-theme="dark"] #newApptModal .phone-field .phone-prefix {
+    background: rgba(217, 184, 114, 0.15) !important;
+    color: #D9B872 !important;
+    border-right-color: #2A2D35 !important;
+  }
+
+  [data-theme="dark"] #newApptModal .na-category-chips .na-cat-chip {
+    background: #0A0A0C !important;
+    border-color: #2A2D35 !important;
+    color: #A0A0A0 !important;
+  }
+
+  [data-theme="dark"] #newApptModal .na-category-chips .na-cat-chip.active {
+    background: #D9B872 !important;
+    border-color: #D9B872 !important;
+    color: #000 !important;
+  }
+
+  [data-theme="dark"] #newApptModal .na-service-list {
+    background: #0A0A0C !important;
+  }
+
+  [data-theme="dark"] #newApptModal .na-service-card {
+    background: #16181D !important;
+    border-color: #2A2D35 !important;
+  }
+
+  [data-theme="dark"] #newApptModal .na-service-card .na-service-name {
+    color: #F5F2EA !important;
+  }
+
+  [data-theme="dark"] #newApptModal .na-service-card .na-service-price {
+    color: #D9B872 !important;
+  }
+
+  [data-theme="dark"] #newApptModal .na-service-card .na-service-dur {
+    color: #6B6B6B !important;
+  }
+
+  [data-theme="dark"] #newApptModal .na-service-card.selected {
+    background: #D9B872 !important;
+    border-color: #D9B872 !important;
+  }
+
+  [data-theme="dark"] #newApptModal .na-service-card.selected .na-service-name,
+  [data-theme="dark"] #newApptModal .na-service-card.selected .na-service-price,
+  [data-theme="dark"] #newApptModal .na-service-card.selected .na-service-dur {
+    color: #000 !important;
+  }
+
+  [data-theme="dark"] #newApptModal .apple-btn {
+    background: #0A0A0C !important;
+    border-color: #2A2D35 !important;
+    color: #F5F2EA !important;
+  }
+
+  [data-theme="dark"] #newApptModal .apple-btn.primary {
+    background: #D9B872 !important;
+    border-color: #D9B872 !important;
+    color: #000 !important;
+  }
+
+  [data-theme="dark"] #newApptModal .na-service-summary {
+    background: rgba(217, 184, 114, 0.15) !important;
+    border-color: #D9B872 !important;
+    color: #F5F2EA !important;
+  }
+
+  /* ================================================================
+     HEADER PRINCIPAL
+     ================================================================ */
+  .am-header {
+    background: var(--wb-bg);
+    padding: 12px 12px 8px;
+    border-bottom: 1px solid var(--wb-border-light);
+  }
+
+  .am-header-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  /* Logo grande - negro sobre fondo blanco */
+  .am-logo {
+    height: 44px;
+    width: auto;
+    flex-shrink: 0;
+    filter: brightness(0);
+  }
+
+  /* Tabs de sedes - compactas sin scroll */
+  .am-sede-tabs {
+    display: flex;
+    gap: 4px;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .am-sede-tab {
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--wb-border);
+    background: var(--wb-bg);
+    color: var(--wb-text-secondary);
+    flex-shrink: 0;
+  }
+
+  .am-sede-tab.active {
+    background: var(--wb-gold);
+    color: #000;
+    border-color: var(--wb-gold);
+    font-weight: 700;
+  }
+
+  /* Iconos header derecha */
+  .am-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .am-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--wb-bg);
+    border: 1px solid var(--wb-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .am-icon-btn svg {
+    width: 18px;
+    height: 18px;
+    color: var(--wb-text-secondary);
+  }
+
+  .am-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--wb-gold);
+    color: #000;
+    font-size: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Ocultar selectores antiguos */
+  .am-sede-selector,
+  .am-header-left { display: none !important; }
+
+  /* ================================================================
+     NAVEGACIÓN DE FECHA
+     ================================================================ */
+  .am-date-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--wb-bg);
+  }
+
+  .am-date-arrow {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--wb-bg-secondary);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .am-date-arrow svg {
+    width: 16px;
+    height: 16px;
+    color: var(--wb-text);
+  }
+
+  .am-date-current {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--wb-text);
+    min-width: 180px;
+    text-align: center;
+  }
+
+  .am-today-btn {
+    padding: 8px 16px;
+    background: var(--wb-gold);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  /* ================================================================
+     SELECTOR DE SEMANA
+     ================================================================ */
+  .am-week-selector {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px 12px;
+    gap: 4px;
+    background: var(--wb-bg);
+    border-bottom: 1px solid var(--wb-border-light);
+  }
+
+  .am-day-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    background: transparent;
+  }
+
+  .am-day-item.active {
+    background: var(--wb-gold);
+  }
+
+  .am-day-item.active .am-day-name,
+  .am-day-item.active .am-day-num {
+    color: #000;
+  }
+
+  .am-day-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--wb-text-muted);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .am-day-num {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--wb-text);
+  }
+
+  .am-day-item.today:not(.active) .am-day-num {
+    color: var(--wb-gold-dark);
+  }
+
+  /* ================================================================
+     CABECERA DE BARBEROS - 10 COLUMNAS
+     ================================================================ */
+  .am-barberos-header {
+    display: flex !important;
+    background: var(--wb-bg) !important;
+    border-bottom: 1px solid var(--wb-border) !important;
+    padding: 8px 0 8px 40px !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+  }
+
+  .am-barberos-scroll {
+    display: flex !important;
+    flex: 1 !important;
+    overflow: hidden !important;
+    width: calc(100% - 40px) !important;
+  }
+
+  .am-barbero-col-header {
+    flex: 1 1 0;
+    min-width: 28px;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 1px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .am-barbero-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--wb-bg-secondary);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 3px;
+    position: relative;
+  }
+
+  .am-barbero-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .am-barbero-avatar-initials {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--wb-text-secondary);
+  }
+
+  /* Indicador de estado online */
+  .am-barbero-avatar::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 8px;
+    height: 8px;
+    background: #22C55E;
+    border-radius: 50%;
+    border: 2px solid var(--wb-bg);
+  }
+
+  .am-barbero-name {
+    font-size: 9px;
+    font-weight: 600;
+    color: var(--wb-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    line-height: 1.2;
+  }
+
+  .am-barbero-espacios {
+    font-size: 9px;
+    font-weight: 700;
+    color: #22C55E;
+    margin-top: 1px;
+  }
+
+  .am-barbero-espacios.am-espacios-pocos {
+    color: #F59E0B;
+  }
+
+  .am-barbero-espacios.am-espacios-lleno {
+    color: #EF4444;
+  }
+
+  /* Ocultar elementos legacy */
+  .am-time-gutter-header,
+  .am-page-indicator { display: none; }
+
+  /* ================================================================
+     CONTENEDOR DE AGENDA
+     ================================================================ */
+  .am-agenda-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    min-height: 0;
+  }
+
+  /* ================================================================
+     GRID DE AGENDA - Todo se mueve junto
+     ================================================================ */
+  .am-grid-wrap {
+    flex: 1 !important;
+    display: flex !important;
+    overflow-y: scroll !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    position: relative !important;
+    padding-bottom: 20px !important;
+  }
+
+  /* Columna de horas - se mueve con el grid */
+  .am-time-gutter {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    max-width: 40px !important;
+    flex-shrink: 0 !important;
+    background: var(--wb-bg) !important;
+    border-right: 1px solid var(--wb-border-light) !important;
+    overflow: visible !important;
+  }
+
+  .am-time-slot {
+    height: 100px !important;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--wb-text-muted);
+    flex-shrink: 0;
+    transform: none !important;
+  }
+
+  /* Grid scroll - ya no tiene scroll propio */
+  .am-grid-scroll {
+    flex: 1 !important;
+    overflow: visible !important;
+  }
+
+  .am-grid {
+    display: flex !important;
+    position: relative !important;
+    min-height: 100% !important;
+    width: 100% !important;
+  }
+
+  /* Columnas de barberos - dinámicas según cantidad */
+  .am-barbero-col {
+    flex: 1 1 0 !important;
+    min-width: 28px !important;
+    max-width: none !important;
+    position: relative !important;
+    background: var(--wb-bg) !important;
+    border-right: 1px solid var(--wb-border-light) !important;
+    box-sizing: border-box !important;
+  }
+
+  .am-barbero-col:last-child {
+    border-right: none !important;
+  }
+
+  /* Líneas de hora */
+  .am-hour-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--wb-border-light);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ================================================================
+     CITAS - TEXTO HORIZONTAL
+     ================================================================ */
+  .am-cita {
+    position: absolute !important;
+    left: 2px !important;
+    right: 2px !important;
+    border-radius: 6px !important;
+    padding: 4px 4px !important;
+    overflow: hidden !important;
+    cursor: pointer !important;
+    z-index: 10 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1px !important;
+    transition: transform 0.1s ease !important;
+    border: none !important;
+    border-bottom: none !important;
+  }
+
+  .am-cita:active {
+    transform: scale(0.98) !important;
+  }
+
+  /* Estados de citas */
+  .am-cita.agendada {
+    background: var(--wb-agendada);
+  }
+  .am-cita.agendada .am-cita-hora,
+  .am-cita.agendada .am-cita-cliente,
+  .am-cita.agendada .am-cita-servicio {
+    color: var(--wb-agendada-text);
+  }
+
+  .am-cita.confirmada {
+    background: var(--wb-confirmada);
+  }
+  .am-cita.confirmada .am-cita-hora,
+  .am-cita.confirmada .am-cita-cliente,
+  .am-cita.confirmada .am-cita-servicio {
+    color: var(--wb-confirmada-text);
+  }
+
+  .am-cita.sala_espera {
+    background: var(--wb-sala-espera);
+  }
+  .am-cita.sala_espera .am-cita-hora,
+  .am-cita.sala_espera .am-cita-cliente,
+  .am-cita.sala_espera .am-cita-servicio {
+    color: var(--wb-sala-espera-text);
+  }
+
+  .am-cita.en_servicio {
+    background: var(--wb-en-servicio);
+  }
+  .am-cita.en_servicio .am-cita-hora,
+  .am-cita.en_servicio .am-cita-cliente,
+  .am-cita.en_servicio .am-cita-servicio {
+    color: var(--wb-en-servicio-text);
+  }
+
+  .am-cita.pendiente_pago {
+    background: var(--wb-pendiente-pago);
+  }
+  .am-cita.pendiente_pago .am-cita-hora,
+  .am-cita.pendiente_pago .am-cita-cliente,
+  .am-cita.pendiente_pago .am-cita-servicio {
+    color: var(--wb-pendiente-pago-text);
+  }
+
+  .am-cita.finalizada {
+    background: var(--wb-finalizada);
+  }
+  .am-cita.finalizada .am-cita-hora,
+  .am-cita.finalizada .am-cita-cliente,
+  .am-cita.finalizada .am-cita-servicio {
+    color: var(--wb-finalizada-text);
+  }
+
+  .am-cita.cancelada {
+    background: var(--wb-bloqueada);
+  }
+  .am-cita.cancelada .am-cita-hora,
+  .am-cita.cancelada .am-cita-cliente,
+  .am-cita.cancelada .am-cita-servicio {
+    color: var(--wb-bloqueada-text);
+  }
+
+  /* Contenido de cita - HORIZONTAL (override vertical) */
+  .am-cita-content {
+    position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1px !important;
+    min-height: 0 !important;
+    flex: 1 !important;
+    inset: auto !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    padding: 0 !important;
+    writing-mode: horizontal-tb !important;
+    transform: none !important;
+  }
+
+  .am-cita-hora {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    background: rgba(0,0,0,0.08) !important;
+    padding: 2px 4px !important;
+    border-radius: 3px !important;
+    display: inline-block !important;
+    width: fit-content !important;
+    line-height: 1 !important;
+    writing-mode: horizontal-tb !important;
+    transform: none !important;
+  }
+
+  .am-cita-cliente {
+    font-size: 9px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.2 !important;
+    max-width: 100% !important;
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+    transform: none !important;
+    max-height: none !important;
+  }
+
+  .am-cita-servicio {
+    font-size: 8px !important;
+    font-weight: 500 !important;
+    opacity: 0.8 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.2 !important;
+    max-width: 100% !important;
+    writing-mode: horizontal-tb !important;
+    text-orientation: mixed !important;
+    transform: none !important;
+    max-height: none !important;
+  }
+
+  /* ================================================================
+     ESPACIOS DISPONIBLES - Clickeables
+     ================================================================ */
+  .am-hour-slot {
+    position: absolute !important;
+    left: 2px !important;
+    right: 2px !important;
+    background: var(--wb-disponible) !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    z-index: 5 !important;
+    transition: background 0.15s ease !important;
+    pointer-events: auto !important;
+    border: 1px dashed var(--wb-border) !important;
+  }
+
+  .am-hour-slot:active {
+    background: var(--wb-border) !important;
+  }
+
+  .am-hour-slot-time {
+    display: none !important;
+  }
+
+  /* Botón + */
+  .am-hour-slot::after {
+    content: '+' !important;
+    font-size: 18px !important;
+    font-weight: 300 !important;
+    color: var(--wb-text-muted) !important;
+    pointer-events: none !important;
+  }
+
+  /* ================================================================
+     BLOQUEOS
+     ================================================================ */
+  .am-bloqueo {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    border-radius: 6px;
+    background: var(--wb-bloqueada);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 8;
+  }
+
+  .am-bloqueo-text {
+    font-size: 7px;
+    font-weight: 700;
+    color: var(--wb-bloqueada-text);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .am-bloqueo-almuerzo {
+    background: #FEF3C7;
+  }
+
+  .am-bloqueo-icon {
+    font-size: 12px;
+  }
+
+  .am-bloqueo-descanso {
+    background: repeating-linear-gradient(
+      45deg,
+      var(--wb-bloqueada),
+      var(--wb-bloqueada) 4px,
+      #D1D5DB 4px,
+      #D1D5DB 8px
+    );
+  }
+
+  .am-bloqueo-descanso .am-bloqueo-text {
+    background: var(--wb-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 8px;
+  }
+
+  /* ================================================================
+     LÍNEA DE HORA ACTUAL
+     ================================================================ */
+  .am-now-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #EF4444;
+    z-index: 50;
+    pointer-events: none;
+  }
+
+  .am-now-dot {
+    position: absolute;
+    left: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    background: #EF4444;
+    border-radius: 50%;
+  }
+
+  /* ================================================================
+     BOTTOM NAVIGATION - Estilizar la navegación existente
+     ================================================================ */
+  .dn-bottom-nav {
+    background: var(--wb-bg) !important;
+    border-top: 1px solid var(--wb-border) !important;
+  }
+
+  .dn-bottom-nav .dn-nav-item {
+    color: var(--wb-text-secondary) !important;
+  }
+
+  .dn-bottom-nav .dn-nav-item svg {
+    stroke: var(--wb-text-secondary) !important;
+  }
+
+  .dn-bottom-nav .dn-nav-item.active {
+    background: var(--wb-gold-bg) !important;
+    color: var(--wb-gold-dark) !important;
+  }
+
+  .dn-bottom-nav .dn-nav-item.active svg {
+    stroke: var(--wb-gold-dark) !important;
+  }
+
+  .dn-bottom-nav .dn-nav-item span {
+    color: inherit !important;
+  }
+
+  /* ================================================================
+     ESTADOS DE CARGA Y VACÍO
+     ================================================================ */
+  .am-loading {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+
+  .am-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--wb-border);
+    border-top-color: var(--wb-gold);
+    border-radius: 50%;
+    animation: am-spin 0.8s linear infinite;
+  }
+
+  @keyframes am-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .am-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--wb-text-muted);
+  }
+
+  .am-empty svg {
+    width: 48px;
+    height: 48px;
+    opacity: 0.3;
+    margin-bottom: 12px;
+  }
+
+  .am-empty-text {
+    font-size: 14px;
+  }
+
+  /* ================================================================
+     MODO COMPRIMIDO (MUCHOS BARBEROS)
+     ================================================================ */
+  .agenda-mobile.am-compressed .am-barbero-col-header {
+    padding: 2px 1px;
+  }
+
+  .agenda-mobile.am-compressed .am-barbero-avatar {
+    width: 26px;
+    height: 26px;
+  }
+
+  .agenda-mobile.am-compressed .am-barbero-avatar::after {
+    width: 6px;
+    height: 6px;
+  }
+
+  .agenda-mobile.am-compressed .am-barbero-name {
+    font-size: 8px;
+  }
+
+  .agenda-mobile.am-compressed .am-barbero-espacios {
+    font-size: 8px;
+  }
+
+  .agenda-mobile.am-compressed .am-cita {
+    left: 1px;
+    right: 1px;
+    padding: 2px;
+    border-radius: 4px;
+  }
+
+  .agenda-mobile.am-compressed .am-cita-hora {
+    font-size: 7px;
+    padding: 1px 2px;
+  }
+
+  .agenda-mobile.am-compressed .am-cita-cliente {
+    font-size: 7px;
+  }
+
+  .agenda-mobile.am-compressed .am-cita-servicio {
+    display: none;
+  }
+
+  .agenda-mobile.am-compressed .am-hour-slot::after {
+    font-size: 12px;
+  }
+
+  /* ================================================================
+     RESPONSIVE - PANTALLAS MUY PEQUEÑAS
+     ================================================================ */
+  @media (max-width: 360px) {
+    .am-barbero-avatar {
+      width: 28px;
+      height: 28px;
+    }
+
+    .am-barbero-name {
+      font-size: 8px;
+    }
+
+    .am-barbero-espacios {
+      font-size: 8px;
+    }
+
+    .am-cita {
+      padding: 2px;
+    }
+
+    .am-cita-hora {
+      font-size: 8px;
+    }
+
+    .am-cita-cliente {
+      font-size: 8px;
+    }
+
+    .am-cita-servicio {
+      display: none;
+    }
+  }
+
+  /* ================================================================
+     MODALES
+     ================================================================ */
+  .am-sede-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .am-sede-modal.show { display: flex; }
+
+  .am-sede-modal-content {
+    width: 100%;
+    max-width: 340px;
+    max-height: 70vh;
+    background: var(--wb-bg);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+
+  .am-sede-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 16px;
+    color: var(--wb-text);
+  }
+
+  .am-sede-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .am-sede-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: var(--wb-bg-secondary);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .am-sede-option:active {
+    background: var(--wb-border);
+  }
+
+  .am-sede-option.active {
+    background: var(--wb-gold);
+  }
+
+  .am-sede-option.active * {
+    color: #000 !important;
+  }
+
+  .am-sede-option-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--wb-text);
+  }
+
+  /* Modal de detalle de cita */
+  .am-detail-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+
+  .am-detail-modal.show { display: flex; }
+
+  .am-detail-box {
+    background: var(--wb-bg);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+
+  /* Modal overlay para detalles - con mejor contraste */
+  #amDetailModal.modal-overlay,
+  .modal-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0,0,0,0.6) !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999 !important;
+    padding: 16px !important;
+  }
+
+  #amDetailModal.modal-overlay.show,
+  .modal-overlay.show {
+    display: flex !important;
+  }
+
+  #amDetailModal .modal-box,
+  .modal-box {
+    background: #FFFFFF !important;
+    border: 1px solid var(--wb-border) !important;
+    border-radius: 20px !important;
+    padding: 24px !important;
+    width: 100% !important;
+    max-width: 390px !important;
+    max-height: 85vh !important;
+    overflow-y: auto !important;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.35) !important;
+  }
+
+  /* Textos del modal en oscuro para contraste */
+  #amDetailModal .modal-box *,
+  .modal-box * {
+    color: #1A1A1A;
+  }
+
+  #amDetailModal .modal-box .det-phone-link,
+  .modal-box .det-phone-link {
+    color: var(--wb-gold-dark) !important;
+  }
+
+  #amDetailModal .apple-btn.primary,
+  .modal-box .apple-btn.primary {
+    background: var(--wb-gold) !important;
+    color: #000 !important;
+  }
+
+  #amDetailModal .apple-btn,
+  .modal-box .apple-btn {
+    background: var(--wb-bg-secondary) !important;
+    border: 1px solid var(--wb-border) !important;
+    color: #1A1A1A !important;
+  }
+
+  #amDetailModal .det-estado-pill,
+  .modal-box .det-estado-pill {
+    background: var(--wb-bg-secondary) !important;
+    border: 1px solid var(--wb-border) !important;
+    color: var(--wb-text-secondary) !important;
+  }
+
+  /* Filas de detalle */
+  #amDetailModal .det-row,
+  .modal-box .det-row {
+    background: var(--wb-bg-secondary) !important;
+    border-radius: 12px !important;
+  }
+
+  /* ================================================================
+     MODAL NUEVA CITA - Tema claro
+     ================================================================ */
+  #newApptModal.modal-overlay {
+    background: rgba(0,0,0,0.6) !important;
+  }
+
+  #newApptModal .modal-box {
+    background: #FFFFFF !important;
+    border: 1px solid var(--wb-border) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 25px 80px rgba(0,0,0,0.35) !important;
+  }
+
+  #newApptModal .modal-title {
+    color: #1A1A1A !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+  }
+
+  #newApptModal .modal-sub {
+    color: var(--wb-text-secondary) !important;
+  }
+
+  #newApptModal .modal-close {
+    color: var(--wb-text-secondary) !important;
+  }
+
+  #newApptModal .field label {
+    color: #1A1A1A !important;
+    font-weight: 600 !important;
+  }
+
+  #newApptModal .field input,
+  #newApptModal .field select {
+    background: var(--wb-bg-secondary) !important;
+    border: 1px solid var(--wb-border) !important;
+    color: #1A1A1A !important;
+    border-radius: 12px !important;
+  }
+
+  #newApptModal .field input::placeholder {
+    color: var(--wb-text-muted) !important;
+  }
+
+  #newApptModal .field input:focus,
+  #newApptModal .field select:focus {
+    border-color: var(--wb-gold) !important;
+    outline: none !important;
+  }
+
+  #newApptModal .phone-field {
+    background: var(--wb-bg-secondary) !important;
+    border: 1px solid var(--wb-border) !important;
+    border-radius: 12px !important;
+  }
+
+  #newApptModal .phone-field .phone-prefix {
+    color: var(--wb-gold-dark) !important;
+    background: rgba(212,168,83,0.1) !important;
+    border-right: 1px solid var(--wb-border) !important;
+  }
+
+  #newApptModal .phone-field input {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  /* Chips de categorías */
+  #newApptModal .na-category-chips {
+    display: flex !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+    margin-bottom: 10px !important;
+  }
+
+  #newApptModal .na-cat-chip {
+    padding: 6px 12px !important;
+    border-radius: 20px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    background: var(--wb-bg-secondary) !important;
+    border: 1px solid var(--wb-border) !important;
+    color: var(--wb-text-secondary) !important;
+    transition: all 0.2s ease !important;
+  }
+
+  #newApptModal .na-cat-chip:hover {
+    border-color: var(--wb-gold) !important;
+  }
+
+  #newApptModal .na-cat-chip.active {
+    background: var(--wb-gold) !important;
+    border-color: var(--wb-gold) !important;
+    color: #000 !important;
+  }
+
+  /* Lista de servicios */
+  #newApptModal .na-service-list {
+    background: var(--wb-bg-secondary) !important;
+    border-radius: 12px !important;
+    padding: 8px !important;
+    max-height: 250px !important;
+    overflow-y: auto !important;
+  }
+
+  #newApptModal .na-service-item,
+  #newApptModal .service-chip {
+    background: #FFFFFF !important;
+    border: 1px solid var(--wb-border) !important;
+    color: #1A1A1A !important;
+    border-radius: 8px !important;
+  }
+
+  #newApptModal .na-service-item.selected,
+  #newApptModal .service-chip.selected {
+    background: var(--wb-gold) !important;
+    border-color: var(--wb-gold) !important;
+    color: #000 !important;
+  }
+
+  #newApptModal .na-service-item .service-name,
+  #newApptModal .service-chip .name {
+    color: inherit !important;
+  }
+
+  #newApptModal .na-service-item .service-price,
+  #newApptModal .service-chip .price {
+    color: var(--wb-gold-dark) !important;
+  }
+
+  #newApptModal .na-service-summary {
+    background: var(--wb-gold-bg) !important;
+    border: 1px solid var(--wb-gold) !important;
+    border-radius: 12px !important;
+    color: #1A1A1A !important;
+  }
+
+  /* Categorías de servicios */
+  #newApptModal .service-category,
+  #newApptModal .na-category,
+  #newApptModal .na-category-title {
+    color: #1A1A1A !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    border-bottom: 1px solid var(--wb-border) !important;
+    padding: 12px 0 8px 0 !important;
+    margin: 8px 0 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+  }
+
+  #newApptModal .na-category-title:first-child {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* Botones */
+  #newApptModal .apple-btn {
+    background: var(--wb-bg-secondary) !important;
+    border: 1px solid var(--wb-border) !important;
+    color: #1A1A1A !important;
+  }
+
+  #newApptModal .apple-btn.primary {
+    background: var(--wb-gold) !important;
+    border-color: var(--wb-gold) !important;
+    color: #000 !important;
+  }
+
+  /* Cliente encontrado pill */
+  #newApptModal .client-found-pill {
+    background: #D1FAE5 !important;
+    color: #065F46 !important;
+    border-radius: 8px !important;
+  }
+
+  /* Campos de nuevo cliente */
+  #newApptModal #naNewClientFields .field input {
+    background: var(--wb-bg-secondary) !important;
+    border: 1px solid var(--wb-border) !important;
+    color: #1A1A1A !important;
+  }
+
+  /* Vista mensual */
+  .am-month-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--wb-bg);
+    z-index: 9999;
+    flex-direction: column;
+    padding-top: env(safe-area-inset-top, 0);
+  }
+
+  .am-month-modal.show { display: flex; }
+
+  .am-month-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--wb-border);
+  }
+
+  .am-month-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--wb-text);
+  }
+
+  .am-month-close {
+    padding: 8px 12px;
+    background: var(--wb-bg-secondary);
+    border: none;
+    border-radius: 8px;
+    color: var(--wb-text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .am-month-day.selected {
+    background: var(--wb-gold);
+  }
+
+  .am-month-day.selected .am-month-day-num,
+  .am-month-day.selected .am-month-day-count {
+    color: #000;
+  }
+
+  .am-month-day.today {
+    border: 2px solid var(--wb-gold);
+  }
+}

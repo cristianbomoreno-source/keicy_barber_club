@@ -1,0 +1,1631 @@
+/* ================================================================
+   DIEGO NEIRA BARBER - Mobile Admin Redesign
+   Solo afecta pantallas <= 767px
+   Mantiene colores e identidad visual actual
+   ================================================================ */
+
+/* ================================================================
+   BARRA DE NAVEGACION INFERIOR - Premium Flotante
+   ================================================================ */
+@media (max-width: 767px) {
+  /* Ocultar la barra inferior antigua */
+  .dn-bottom-nav {
+    display: none !important;
+  }
+
+  /* Barra de navegación fija inferior */
+  .mobile-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: var(--bg);
+    border-top: 1px solid var(--divider);
+    padding: 8px 4px;
+    padding-bottom: max(10px, var(--safe-bottom));
+    z-index: 100;
+  }
+
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 6px 0;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 10px;
+    font-weight: 600;
+    gap: 3px;
+    transition: color 0.2s ease;
+  }
+
+  .mobile-nav-item svg {
+    width: 22px;
+    height: 22px;
+    stroke-width: 1.8;
+  }
+
+  .mobile-nav-item span {
+    display: block;
+  }
+
+  .mobile-nav-item.active {
+    color: var(--gold);
+  }
+
+  .mobile-nav-item.active svg {
+    color: var(--gold);
+  }
+
+  /* Ocultar sidebar en movil */
+  .sidebar {
+    display: none !important;
+  }
+
+  /* Ajustar main para movil */
+  .main {
+    padding: 16px 16px 80px !important;
+    width: 100%;
+  }
+
+  /* ================================================================
+     DASHBOARD MOVIL - Nueva estructura
+     ================================================================ */
+
+  /* Saludo */
+  .mobile-greeting-section {
+    margin-bottom: 20px;
+  }
+
+  .mobile-greeting-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .mobile-greeting-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 2px;
+  }
+
+  /* Ventas del mes */
+  .mobile-ventas-card {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mobile-ventas-info {
+    flex: 1;
+  }
+
+  .mobile-ventas-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .mobile-ventas-amount {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    margin-top: 4px;
+  }
+
+  .mobile-ventas-btn {
+    padding: 10px 16px;
+    border-radius: 12px;
+    background: var(--gold);
+    color: #141414;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  /* Progreso del mes */
+  .mobile-month-progress {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-month-progress-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .mobile-month-progress-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .mobile-month-progress-pct {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .mobile-month-progress-bar {
+    height: 8px;
+    background: var(--divider);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .mobile-month-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  /* Visitas web */
+  .mobile-web-visits {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .mobile-web-visits-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(201, 163, 91, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-web-visits-icon svg {
+    width: 22px;
+    height: 22px;
+    color: var(--gold);
+  }
+
+  .mobile-web-visits-info {
+    flex: 1;
+  }
+
+  .mobile-web-visits-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .mobile-web-visits-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 2px;
+  }
+
+  .mobile-web-visits-delta {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--success);
+  }
+
+  /* Favoritos grid - 4 en una fila */
+  .mobile-favorites-section {
+    margin-bottom: 20px;
+  }
+
+  .mobile-favorites-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  .mobile-favorites-grid {
+    display: flex;
+    gap: 8px;
+  }
+
+  .mobile-favorite-card {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    padding: 12px 8px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .mobile-favorite-header {
+    display: none;
+  }
+
+  .mobile-favorite-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--card-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  .mobile-favorite-icon svg {
+    width: 18px;
+    height: 18px;
+    color: var(--gold);
+  }
+
+  .mobile-favorite-delta {
+    font-size: 10px;
+    font-weight: 700;
+    margin-bottom: 2px;
+  }
+
+  .mobile-favorite-delta.up {
+    color: var(--success);
+  }
+
+  .mobile-favorite-delta.down {
+    color: var(--error);
+  }
+
+  .mobile-favorite-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .mobile-favorite-label {
+    font-size: 9px;
+    color: var(--text-secondary);
+    margin-top: 3px;
+    line-height: 1.2;
+  }
+
+  /* Últimas visitas */
+  .mobile-ultimas-section {
+    margin-bottom: 20px;
+  }
+
+  .mobile-ultimas-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  .mobile-ultima-card {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .mobile-ultima-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .mobile-ultima-sede {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .mobile-ultima-time {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .mobile-ultima-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mobile-ultima-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #141414;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .mobile-ultima-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-ultima-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .mobile-ultima-service {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .mobile-ultima-amount {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: right;
+  }
+
+  /* Solo mostrar #app si la página no tiene su propia vista móvil
+     Páginas con .has-mobile-view en body manejan su propio layout */
+  body:not(.has-mobile-view) #app {
+    display: block !important;
+  }
+
+  /* ================================================================
+     HEADER MOVIL
+     ================================================================ */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-top: var(--safe-top);
+  }
+
+  .mobile-header-left {
+    flex: 1;
+  }
+
+  .mobile-greeting {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .mobile-sede-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 2px;
+  }
+
+  .mobile-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mobile-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1px solid var(--divider);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .mobile-icon-btn svg {
+    width: 20px;
+    height: 20px;
+    color: var(--text);
+  }
+
+  .mobile-icon-btn .badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+  }
+
+  /* Ocultar header de escritorio */
+  .header-row {
+    display: none !important;
+  }
+
+  /* ================================================================
+     TARJETA PRINCIPAL DE VENTAS
+     ================================================================ */
+  .mobile-sales-card {
+    background: linear-gradient(135deg, var(--card) 0%, var(--card-2) 100%);
+    border: 1px solid var(--divider);
+    border-radius: 22px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-sales-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .mobile-sales-title {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  .mobile-sales-period {
+    font-size: 12px;
+    color: var(--gold);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .mobile-sales-amount {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .mobile-sales-hide-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .mobile-sales-progress {
+    margin-top: 16px;
+  }
+
+  .mobile-sales-progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+  }
+
+  .mobile-sales-progress-bar {
+    height: 6px;
+    background: var(--divider);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .mobile-sales-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  .mobile-sales-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .mobile-sales-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 14px;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+  }
+
+  .mobile-sales-btn.primary {
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: #141414;
+  }
+
+  .mobile-sales-btn.secondary {
+    background: var(--card-2);
+    color: var(--text);
+    border: 1px solid var(--divider);
+  }
+
+  /* ================================================================
+     ACCESOS RAPIDOS
+     ================================================================ */
+  .mobile-quick-access {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    padding: 0 8px;
+  }
+
+  .mobile-quick-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+  }
+
+  .mobile-quick-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: var(--card);
+    border: 1px solid var(--divider);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-quick-icon svg {
+    width: 24px;
+    height: 24px;
+    color: var(--gold);
+  }
+
+  .mobile-quick-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-align: center;
+  }
+
+  /* ================================================================
+     SELECTOR DE SEDE
+     ================================================================ */
+  .mobile-sede-selector {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 18px;
+    padding: 14px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  .mobile-sede-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: var(--card-2);
+  }
+
+  .mobile-sede-info {
+    flex: 1;
+  }
+
+  .mobile-sede-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .mobile-sede-current {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 2px;
+  }
+
+  .mobile-sede-chevron {
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-sede-selector.open .mobile-sede-chevron {
+    transform: rotate(180deg);
+  }
+
+  .mobile-sede-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    padding: 8px;
+    z-index: 200;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+  }
+
+  .mobile-sede-selector {
+    position: relative;
+    z-index: 1;
+  }
+
+  .mobile-sede-selector.open {
+    z-index: 300;
+  }
+
+  .mobile-sede-selector.open .mobile-sede-menu {
+    display: block;
+  }
+
+  .mobile-sede-menu-item {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mobile-sede-menu-item:hover {
+    background: var(--card-2);
+  }
+
+  .mobile-sede-menu-item.active {
+    color: var(--gold);
+    background: rgba(201, 163, 91, 0.1);
+  }
+
+  .mobile-sede-menu-item.active::after {
+    content: '✓';
+    font-size: 14px;
+  }
+
+  /* ================================================================
+     TARJETAS DESTACADAS
+     ================================================================ */
+  .mobile-featured-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-featured-card {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 18px;
+    padding: 16px;
+  }
+
+  .mobile-featured-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(201, 163, 91, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .mobile-featured-icon svg {
+    width: 18px;
+    height: 18px;
+    color: var(--gold);
+  }
+
+  .mobile-featured-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .mobile-featured-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .mobile-featured-link {
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 600;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ================================================================
+     METRICAS RAPIDAS (4 indicadores)
+     ================================================================ */
+  .mobile-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .mobile-metric {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 16px;
+    padding: 14px;
+  }
+
+  .mobile-metric-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .mobile-metric-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--card-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-metric-icon svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-secondary);
+  }
+
+  .mobile-metric-delta {
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .mobile-metric-delta.up {
+    color: var(--success);
+  }
+
+  .mobile-metric-delta.down {
+    color: var(--error);
+  }
+
+  .mobile-metric-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .mobile-metric-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* ================================================================
+     SECCION DE LISTA (Ultimas visitas, etc)
+     ================================================================ */
+  .mobile-section {
+    margin-bottom: 20px;
+  }
+
+  .mobile-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .mobile-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .mobile-section-link {
+    font-size: 12px;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .mobile-list-card {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .mobile-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .mobile-list-item:last-child {
+    border-bottom: none;
+  }
+
+  .mobile-list-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #141414;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .mobile-list-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-list-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-list-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .mobile-list-right {
+    text-align: right;
+  }
+
+  .mobile-list-amount {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .mobile-list-time {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* ================================================================
+     CAJA - Adaptacion movil
+     ================================================================ */
+  .summary-strip {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+    padding: 14px !important;
+  }
+
+  .sstat .v {
+    font-size: 12px !important;
+    word-break: break-word;
+  }
+
+  .sstat .l {
+    font-size: 9px !important;
+  }
+
+  /* ================================================================
+     KPI GRID - Adaptacion movil
+     ================================================================ */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .kpi-card {
+    padding: 14px !important;
+  }
+
+  .kpi-value {
+    font-size: 18px !important;
+  }
+
+  /* ================================================================
+     GRIDS - Adaptacion movil
+     ================================================================ */
+  .grid-2,
+  .grid-2b {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* ================================================================
+     PAGINA AGENDA - Movil
+     ================================================================ */
+  .mobile-agenda-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .mobile-agenda-title {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .mobile-agenda-date {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .mobile-agenda-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .mobile-agenda-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-agenda-stat {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .mobile-agenda-stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .mobile-agenda-stat-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .mobile-date-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-date-item {
+    flex-shrink: 0;
+    width: 52px;
+    padding: 10px 0;
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .mobile-date-item.active {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+
+  .mobile-date-item.active .mobile-date-day,
+  .mobile-date-item.active .mobile-date-num {
+    color: #141414;
+  }
+
+  .mobile-date-day {
+    font-size: 10px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .mobile-date-num {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 2px;
+  }
+
+  .mobile-cita-card {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+
+  .mobile-cita-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .mobile-cita-time {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .mobile-cita-status {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .mobile-cita-status.confirmada {
+    background: rgba(78, 203, 113, 0.15);
+    color: var(--success);
+  }
+
+  .mobile-cita-status.agendada {
+    background: rgba(201, 163, 91, 0.15);
+    color: var(--gold);
+  }
+
+  .mobile-cita-status.en_servicio {
+    background: rgba(96, 165, 250, 0.15);
+    color: #60a5fa;
+  }
+
+  .mobile-cita-status.finalizada {
+    background: rgba(159, 159, 159, 0.15);
+    color: var(--text-secondary);
+  }
+
+  .mobile-cita-status.cancelada {
+    background: rgba(239, 83, 80, 0.15);
+    color: var(--error);
+  }
+
+  .mobile-cita-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mobile-cita-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #141414;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .mobile-cita-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-cita-client {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .mobile-cita-service {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .mobile-cita-barber {
+    font-size: 11px;
+    color: var(--gold);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .mobile-cita-price {
+    text-align: right;
+  }
+
+  .mobile-cita-amount {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .mobile-cita-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--divider);
+  }
+
+  .mobile-cita-action {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    background: var(--card-2);
+    color: var(--text);
+  }
+
+  .mobile-cita-action.primary {
+    background: var(--gold);
+    color: #141414;
+  }
+
+  /* ================================================================
+     PAGINA CAJA - Movil
+     ================================================================ */
+  .mobile-caja-status {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-caja-status-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .mobile-caja-status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobile-caja-status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .mobile-caja-status-dot.open {
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+  }
+
+  .mobile-caja-status-dot.closed {
+    background: var(--error);
+  }
+
+  .mobile-caja-status-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .mobile-caja-balance {
+    text-align: center;
+    padding: 16px 0;
+  }
+
+  .mobile-caja-balance-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+
+  .mobile-caja-balance-amount {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .mobile-caja-meta {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-caja-meta-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .mobile-caja-meta-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .mobile-caja-meta-pct {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .mobile-caja-meta-progress {
+    height: 8px;
+    background: var(--divider);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .mobile-caja-meta-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+    border-radius: 4px;
+  }
+
+  .mobile-caja-meta-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+
+  .mobile-caja-meta-current {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .mobile-caja-meta-target {
+    color: var(--text-secondary);
+  }
+
+  /* ================================================================
+     PAGINA CLIENTES - Movil
+     ================================================================ */
+  .mobile-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+  }
+
+  .mobile-search-bar svg {
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  .mobile-search-bar input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .mobile-search-bar input::placeholder {
+    color: var(--text-secondary);
+  }
+
+  .mobile-client-card {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  .mobile-client-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #141414;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .mobile-client-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-client-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .mobile-client-phone {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .mobile-client-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .mobile-client-action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--card-2);
+    border: 1px solid var(--divider);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .mobile-client-action-btn svg {
+    width: 16px;
+    height: 16px;
+    color: var(--text);
+  }
+
+  .mobile-client-action-btn.whatsapp {
+    background: rgba(37, 211, 102, 0.15);
+    border-color: rgba(37, 211, 102, 0.3);
+  }
+
+  .mobile-client-action-btn.whatsapp svg {
+    color: #25d366;
+  }
+
+  /* ================================================================
+     PAGINA CONFIGURACION - Movil
+     ================================================================ */
+  .mobile-config-section {
+    margin-bottom: 24px;
+  }
+
+  .mobile-config-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+    padding-left: 4px;
+  }
+
+  .mobile-config-group {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .mobile-config-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    border-bottom: 1px solid var(--divider);
+    cursor: pointer;
+  }
+
+  .mobile-config-item:last-child {
+    border-bottom: none;
+  }
+
+  .mobile-config-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--card-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-config-icon svg {
+    width: 18px;
+    height: 18px;
+    color: var(--text);
+  }
+
+  .mobile-config-label {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .mobile-config-chevron {
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+  }
+
+  /* ================================================================
+     BOTON FLOTANTE DE ACCION
+     ================================================================ */
+  .mobile-fab {
+    position: fixed;
+    right: 16px;
+    bottom: 90px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 6px 24px rgba(201, 163, 91, 0.4);
+    z-index: 99;
+  }
+
+  .mobile-fab svg {
+    width: 24px;
+    height: 24px;
+    color: #141414;
+  }
+
+  /* ================================================================
+     ESTADOS VACIOS
+     ================================================================ */
+  .mobile-empty-state {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .mobile-empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  .mobile-empty-icon svg {
+    width: 28px;
+    height: 28px;
+    color: var(--text-secondary);
+  }
+
+  .mobile-empty-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .mobile-empty-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  /* ================================================================
+     SKELETON LOADING
+     ================================================================ */
+  .mobile-skeleton {
+    background: linear-gradient(90deg, var(--card) 25%, var(--card-2) 50%, var(--card) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: 8px;
+  }
+
+  @keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ================================================================
+     PULL TO REFRESH INDICATOR
+     ================================================================ */
+  .mobile-refresh-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    color: var(--text-secondary);
+    font-size: 12px;
+    gap: 8px;
+  }
+
+  .mobile-refresh-indicator svg {
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+}
+
+/* Ocultar elementos moviles en desktop */
+@media (min-width: 768px) {
+  .mobile-nav,
+  .mobile-header,
+  .mobile-sales-card,
+  .mobile-quick-access,
+  .mobile-sede-selector,
+  .mobile-featured-cards,
+  .mobile-metrics,
+  .mobile-section,
+  .mobile-agenda-header,
+  .mobile-agenda-summary,
+  .mobile-date-selector,
+  .mobile-caja-status,
+  .mobile-caja-meta,
+  .mobile-search-bar,
+  .mobile-config-section,
+  .mobile-fab,
+  .mobile-only {
+    display: none !important;
+  }
+}

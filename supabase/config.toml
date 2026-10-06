@@ -1,0 +1,22 @@
+# Configuración de Supabase Edge Functions
+
+[functions.whatsapp-webhook]
+# El webhook de Meta NO envía Authorization header
+# La seguridad se maneja con X-Hub-Signature-256 (HMAC)
+verify_jwt = false
+
+[functions.embedded-signup-page]
+# Página pública para Embedded Signup
+# CSRF protection se maneja con state/nonce en el código
+verify_jwt = false
+
+[functions.embedded-signup-callback]
+# Callback para Embedded Signup
+verify_jwt = false
+
+[functions.create-template-165]
+verify_jwt = false
+
+[functions.whatsapp-test-send]
+verify_jwt = false
+

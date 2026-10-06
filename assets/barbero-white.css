@@ -1,0 +1,1046 @@
+/**
+ * BARBERO WHITE PREMIUM - Diego Neira Barber
+ * Diseño limpio, minimalista, estilo iOS premium
+ * Fondo blanco, acentos dorados, sombras suaves
+ */
+
+/* ================================================================
+   VARIABLES TEMA CLARO
+   ================================================================ */
+:root {
+  --bw-bg: #FAFAFA;
+  --bw-bg-card: #FFFFFF;
+  --bw-bg-secondary: #F5F5F5;
+  --bw-text: #1A1A1A;
+  --bw-text-secondary: #6B7280;
+  --bw-text-muted: #9CA3AF;
+  --bw-border: #E5E7EB;
+  --bw-border-light: #F0F0F0;
+
+  /* Acentos */
+  --bw-gold: #D4A853;
+  --bw-gold-light: #F5EDD8;
+  --bw-gold-dark: #B8923A;
+  --bw-green: #22C55E;
+  --bw-green-light: #DCFCE7;
+  --bw-green-dark: #16A34A;
+  --bw-red: #EF4444;
+  --bw-red-light: #FEE2E2;
+
+  /* Sombras premium */
+  --bw-shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --bw-shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --bw-shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
+  --bw-shadow-card: 0 2px 8px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.02);
+}
+
+/* ================================================================
+   TEMA OSCURO - Variables
+   ================================================================ */
+[data-theme="dark"] {
+  --bw-bg: #0A0A0C;
+  --bw-bg-card: #16181D;
+  --bw-bg-secondary: #1C1E24;
+  --bw-text: #F5F2EA;
+  --bw-text-secondary: #9CA3AF;
+  --bw-text-muted: #6B7280;
+  --bw-border: #2A2D35;
+  --bw-border-light: #1F2128;
+
+  --bw-gold-light: rgba(212,168,83,0.15);
+  --bw-green-light: rgba(34,197,94,0.15);
+  --bw-red-light: rgba(239,68,68,0.15);
+
+  --bw-shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --bw-shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+  --bw-shadow-lg: 0 8px 30px rgba(0,0,0,0.4);
+  --bw-shadow-card: 0 2px 8px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.03);
+}
+
+/* ================================================================
+   BASE - Fondo y body
+   ================================================================ */
+body {
+  background: var(--bw-bg) !important;
+}
+
+[data-theme="dark"] body {
+  background: var(--bw-bg) !important;
+}
+
+#app {
+  background: var(--bw-bg);
+  padding-bottom: calc(140px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Swipe container - espacio para barra de navegación */
+#swipeContainer {
+  position: relative !important;
+  z-index: 10 !important;
+  margin-bottom: calc(70px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Stage - contenedor principal del contenido */
+.stage {
+  padding-bottom: calc(120px + env(safe-area-inset-bottom, 0px)) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* ================================================================
+   HERO - Cabecera con foto
+   ================================================================ */
+.hero {
+  height: calc(28vh + env(safe-area-inset-top, 0px)) !important;
+  min-height: 180px !important;
+  max-height: 260px !important;
+  border-radius: 0 0 28px 28px !important;
+  box-shadow: var(--bw-shadow-lg);
+}
+
+/* Más espacio superior para el topbar */
+.hero-topbar {
+  padding-top: calc(12px + env(safe-area-inset-top, 0px)) !important;
+  padding-bottom: 12px !important;
+}
+
+/* Contenido del hero más abajo para ver la foto */
+.hero-content {
+  bottom: 16px !important;
+}
+
+/* Logo blanco centrado */
+.hero-logo {
+  filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0,0,0,0.5)) !important;
+  height: 36px !important;
+}
+
+.hero-topbar-row {
+  justify-content: center !important;
+}
+
+.hero-overlay {
+  background: linear-gradient(180deg,
+    rgba(0,0,0,0.5) 0%,
+    rgba(0,0,0,0.1) 30%,
+    rgba(0,0,0,0.3) 70%,
+    rgba(0,0,0,0.85) 100%) !important;
+}
+
+.hero-topbar {
+  background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%) !important;
+}
+
+.hero-icon-btn {
+  background: rgba(255,255,255,0.95) !important;
+  border: none !important;
+  box-shadow: var(--bw-shadow-md);
+}
+
+.hero-icon-btn svg {
+  color: var(--bw-text) !important;
+  stroke: var(--bw-text) !important;
+}
+
+.bell-badge {
+  background: var(--bw-gold) !important;
+  color: #000 !important;
+}
+
+.hero-name {
+  color: #FFFFFF !important;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5) !important;
+}
+
+.hero-puesto {
+  background: var(--bw-gold) !important;
+  color: #000 !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  font-size: 9px !important;
+  display: inline-block !important;
+}
+
+.hdr-estado {
+  background: rgba(255,255,255,0.95) !important;
+  border: none !important;
+  color: var(--bw-green) !important;
+  box-shadow: var(--bw-shadow-sm);
+  padding: 4px 10px 4px 8px !important;
+}
+
+.hdr-estado .dot {
+  background: var(--bw-green) !important;
+}
+
+.hdr-estado.busy {
+  color: var(--bw-gold-dark) !important;
+}
+
+.hdr-estado.busy .dot {
+  background: var(--bw-gold) !important;
+}
+
+/* Hero Chips (Hoy, Tu bebida, Insumos) */
+.hero-chips {
+  gap: 8px !important;
+}
+
+.hero-chip {
+  background: rgba(255,255,255,0.95) !important;
+  border: none !important;
+  border-radius: 14px !important;
+  padding: 10px 12px !important;
+  box-shadow: var(--bw-shadow-md);
+  backdrop-filter: none !important;
+}
+
+.hero-chip-icon {
+  background: var(--bw-gold-light) !important;
+  color: var(--bw-gold-dark) !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 10px !important;
+}
+
+.hero-chip-txt .l {
+  color: var(--bw-text-secondary) !important;
+  font-size: 9px !important;
+}
+
+.hero-chip-txt .v {
+  color: var(--bw-text) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+}
+
+.hero-chip.off .hero-chip-icon {
+  background: var(--bw-bg-secondary) !important;
+  color: var(--bw-text-muted) !important;
+}
+
+.hero-chip.off .v {
+  color: var(--bw-text-muted) !important;
+}
+
+/* ================================================================
+   STAGE - Contenedor principal
+   ================================================================ */
+.stage {
+  gap: 12px !important;
+  padding-top: 16px !important;
+}
+
+/* ================================================================
+   GLASS CARDS - Tarjetas con estilo blanco premium
+   ================================================================ */
+.glass-card {
+  background: var(--bw-bg-card) !important;
+  border: 1px solid var(--bw-border) !important;
+  border-radius: 20px !important;
+  backdrop-filter: none !important;
+  box-shadow: var(--bw-shadow-card) !important;
+}
+
+/* ================================================================
+   CITA ACTUAL - Tarjeta del cliente
+   ================================================================ */
+.client-card {
+  padding: 16px !important;
+}
+
+.client-eyebrow-row svg {
+  color: var(--bw-gold) !important;
+}
+
+.client-eyebrow {
+  color: var(--bw-gold-dark) !important;
+}
+
+.client-name {
+  color: var(--bw-text) !important;
+  font-size: 20px !important;
+}
+
+.client-service {
+  background: var(--bw-gold-light) !important;
+  border: none !important;
+  color: var(--bw-gold-dark) !important;
+  padding: 4px 12px !important;
+  font-size: 12px !important;
+}
+
+.client-time {
+  color: var(--bw-text-muted) !important;
+}
+
+/* Layout de tarjeta con foto del servicio */
+.client-card-inner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 16px !important;
+}
+
+.client-card-info {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+/* Foto del servicio en la tarjeta */
+.client-service-photo {
+  width: 70px !important;
+  height: 70px !important;
+  border-radius: 14px !important;
+  object-fit: cover !important;
+  box-shadow: var(--bw-shadow-md) !important;
+  flex-shrink: 0 !important;
+}
+
+/* ================================================================
+   TIEMPO RESTANTE - Timer card
+   ================================================================ */
+.time-card {
+  padding: 16px !important;
+}
+
+.time-card-label {
+  color: var(--bw-text-secondary) !important;
+  font-size: 10px !important;
+  letter-spacing: 1.2px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.time-card-label::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 6v6l4 2'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+#timerValue {
+  color: var(--bw-text) !important;
+  font-size: 48px !important;
+  font-weight: 800 !important;
+  letter-spacing: -2px !important;
+}
+
+.time-value-lg .unit {
+  color: var(--bw-text-muted) !important;
+}
+
+/* Barra de progreso segmentada */
+.time-segbar {
+  gap: 4px !important;
+  margin-top: 16px !important;
+}
+
+.time-seg {
+  height: 8px !important;
+  border-radius: 4px !important;
+  background: var(--bw-bg-secondary) !important;
+}
+
+.time-seg.filled {
+  background: linear-gradient(90deg, var(--bw-green), #4ADE80) !important;
+}
+
+.time-seg.filled.gold {
+  background: linear-gradient(90deg, var(--bw-gold), #E6CB90) !important;
+}
+
+.time-seg.filled.red {
+  background: linear-gradient(90deg, var(--bw-red), #F87171) !important;
+}
+
+/* Anillo de porcentaje */
+.time-ring-wrap {
+  width: 70px !important;
+  height: 70px !important;
+}
+
+.time-ring-bg {
+  stroke: var(--bw-bg-secondary) !important;
+}
+
+.time-ring-pct {
+  color: var(--bw-text) !important;
+  font-size: 18px !important;
+}
+
+.time-ring-label {
+  color: var(--bw-text-muted) !important;
+}
+
+/* Dot indicador verde */
+.time-ring-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bw-green);
+  border: 2px solid var(--bw-bg-card);
+}
+
+/* Siguiente paso */
+.time-next-row {
+  border-top: 1px solid var(--bw-border) !important;
+  color: var(--bw-text-muted) !important;
+  padding-top: 12px !important;
+  margin-top: 12px !important;
+}
+
+.time-next-row b {
+  color: var(--bw-gold-dark) !important;
+}
+
+/* ================================================================
+   PROCESO DEL SERVICIO - Timeline horizontal premium
+   ================================================================ */
+.steps-card {
+  padding: 16px !important;
+}
+
+.steps-card-label {
+  color: var(--bw-text-secondary) !important;
+  font-size: 10px !important;
+  letter-spacing: 1.2px !important;
+  margin-bottom: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.steps-card-label::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+/* Grid de pasos - diseño horizontal con líneas conectoras */
+.steps-grid {
+  display: flex !important;
+  justify-content: space-between !important;
+  position: relative !important;
+  padding: 0 4px !important;
+}
+
+/* Línea conectora detrás de los pasos */
+.steps-grid::before {
+  content: '';
+  position: absolute;
+  top: 24px;
+  left: 32px;
+  right: 32px;
+  height: 2px;
+  background: var(--bw-border);
+  z-index: 0;
+}
+
+/* Cada paso */
+.step-tile {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  position: relative !important;
+  z-index: 1 !important;
+  flex: 1 !important;
+  max-width: 60px !important;
+}
+
+.step-tile.pending {
+  opacity: 1 !important;
+}
+
+/* Icono del paso */
+.step-tile-icon {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: var(--bw-bg-card) !important;
+  border: 2px solid var(--bw-border) !important;
+  color: var(--bw-text-muted) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s ease !important;
+  box-shadow: var(--bw-shadow-sm) !important;
+}
+
+.step-tile-icon svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Paso completado (done) */
+.step-tile.done .step-tile-icon {
+  background: var(--bw-gold) !important;
+  border-color: var(--bw-gold) !important;
+  color: #000 !important;
+  box-shadow: 0 4px 12px rgba(212,168,83,0.3) !important;
+}
+
+.step-tile.done .step-tile-icon svg {
+  stroke: #000 !important;
+}
+
+/* Check badge en pasos completados */
+.step-tile-check {
+  position: absolute !important;
+  right: -2px !important;
+  bottom: -2px !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background: var(--bw-green) !important;
+  border: 2px solid var(--bw-bg-card) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.step-tile-check svg {
+  width: 10px !important;
+  height: 10px !important;
+  stroke: #FFF !important;
+}
+
+/* Paso activo (siguiente a completar) */
+.step-tile.active .step-tile-icon {
+  background: var(--bw-gold-light) !important;
+  border-color: var(--bw-gold) !important;
+  border-width: 2px !important;
+  color: var(--bw-gold-dark) !important;
+  box-shadow: 0 0 0 4px rgba(212,168,83,0.15), var(--bw-shadow-md) !important;
+  animation: stepPulse 2s ease-in-out infinite !important;
+}
+
+@keyframes stepPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(212,168,83,0.15), var(--bw-shadow-md); }
+  50% { box-shadow: 0 0 0 8px rgba(212,168,83,0.1), var(--bw-shadow-md); }
+}
+
+.step-tile.active .step-tile-icon svg {
+  stroke: var(--bw-gold-dark) !important;
+}
+
+/* Paso pendiente */
+.step-tile.pending .step-tile-icon {
+  background: var(--bw-bg-secondary) !important;
+  border-color: var(--bw-border) !important;
+  color: var(--bw-text-muted) !important;
+}
+
+/* Label del paso */
+.step-tile-label {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  color: var(--bw-text-muted) !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
+}
+
+.step-tile.done .step-tile-label {
+  color: var(--bw-gold-dark) !important;
+  font-weight: 700 !important;
+}
+
+.step-tile.active .step-tile-label {
+  color: var(--bw-gold-dark) !important;
+  font-weight: 700 !important;
+}
+
+/* ================================================================
+   TOTAL Y AGREGAR SERVICIO
+   ================================================================ */
+.total-row {
+  gap: 12px !important;
+}
+
+.total-card {
+  padding: 16px !important;
+}
+
+.total-label {
+  color: var(--bw-text-secondary) !important;
+  font-size: 10px !important;
+  letter-spacing: 1px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.total-label::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+
+.total-value {
+  color: var(--bw-text) !important;
+  font-size: 28px !important;
+  font-weight: 800 !important;
+}
+
+.total-badge {
+  color: var(--bw-text-muted) !important;
+}
+
+/* Botón agregar servicio */
+.add-service-btn {
+  background: var(--bw-gold) !important;
+  border-radius: 20px !important;
+  padding: 16px !important;
+  box-shadow: 0 6px 20px rgba(212,168,83,0.25) !important;
+}
+
+.add-service-btn .plus-circle {
+  width: 32px !important;
+  height: 32px !important;
+  background: rgba(255,255,255,0.2) !important;
+}
+
+.add-service-btn svg {
+  width: 18px !important;
+  height: 18px !important;
+  stroke: #000 !important;
+}
+
+.add-service-btn span {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #000 !important;
+}
+
+/* Nota de agregar */
+.note-row {
+  margin-top: 8px;
+}
+
+.note-card {
+  padding: 14px 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  cursor: pointer !important;
+}
+
+.note-card svg {
+  color: var(--bw-text-muted) !important;
+}
+
+.note-card span {
+  color: var(--bw-text-muted) !important;
+  font-size: 13px !important;
+}
+
+/* ================================================================
+   SWIPE SLIDER - Deslizar para enviar a caja
+   ================================================================ */
+#swipeContainer {
+  display: block !important;
+  visibility: visible !important;
+  min-height: 52px !important;
+}
+
+.swipe-track {
+  display: flex !important;
+  background: var(--bw-bg-card) !important;
+  border: 1px solid var(--bw-border) !important;
+  border-radius: 24px !important;
+  height: 52px !important;
+  backdrop-filter: none !important;
+  position: relative !important;
+  visibility: visible !important;
+}
+
+.swipe-track::before {
+  display: none !important;
+}
+
+.swipe-fill {
+  background: linear-gradient(90deg, var(--bw-gold-light), transparent) !important;
+}
+
+.swipe-shimmer {
+  opacity: 0.3 !important;
+}
+
+.swipe-label .t {
+  color: var(--bw-text) !important;
+  font-size: 13px !important;
+}
+
+.swipe-label .s {
+  color: var(--bw-text-muted) !important;
+}
+
+.swipe-handle {
+  width: 46px !important;
+  height: 46px !important;
+  background: var(--bw-gold) !important;
+  box-shadow: 0 4px 12px rgba(212,168,83,0.35) !important;
+}
+
+.swipe-handle svg {
+  stroke: #000 !important;
+}
+
+.swipe-track.done {
+  border-color: var(--bw-green) !important;
+}
+
+.swipe-track.done .swipe-handle {
+  background: var(--bw-green) !important;
+  box-shadow: 0 4px 12px rgba(34,197,94,0.35) !important;
+}
+
+.swipe-pending {
+  display: flex !important;
+  background: var(--bw-bg-card) !important;
+  border: 1px solid var(--bw-border) !important;
+  border-radius: 20px !important;
+  padding: 12px 16px !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.swipe-pending svg {
+  stroke: var(--bw-text-muted) !important;
+}
+
+.swipe-pending-txt {
+  color: var(--bw-text-muted) !important;
+}
+
+.swipe-pending-txt b {
+  color: var(--bw-text-secondary) !important;
+}
+
+/* ================================================================
+   SHEETS / MODALES - Estilo blanco premium
+   ================================================================ */
+.sheet-bg {
+  background: rgba(0,0,0,0.5) !important;
+}
+
+.sheet-box {
+  background: var(--bw-bg-card) !important;
+  border: 1px solid var(--bw-border) !important;
+  box-shadow: var(--bw-shadow-lg) !important;
+}
+
+.sheet-title {
+  color: var(--bw-text) !important;
+}
+
+.sheet-sub {
+  color: var(--bw-text-secondary) !important;
+}
+
+.sheet-close {
+  background: var(--bw-bg-secondary) !important;
+}
+
+.sheet-close svg {
+  color: var(--bw-text-secondary) !important;
+}
+
+/* Opciones de bebida */
+.bebida-opt {
+  background: var(--bw-bg-secondary) !important;
+  border: 1px solid var(--bw-border) !important;
+  color: var(--bw-text) !important;
+}
+
+.bebida-opt:active {
+  background: var(--bw-border) !important;
+}
+
+.bebida-opt .ic {
+  color: var(--bw-gold) !important;
+}
+
+/* Type selector (Servicios/Productos) */
+.type-card {
+  background: var(--bw-bg-secondary) !important;
+  border: 2px solid var(--bw-border) !important;
+}
+
+.type-card .type-label {
+  color: var(--bw-text) !important;
+}
+
+.type-card.selected {
+  border-color: var(--bw-gold) !important;
+  background: var(--bw-gold-light) !important;
+}
+
+/* Categorías */
+.cat-chip {
+  background: var(--bw-bg-secondary) !important;
+  border: 1px solid var(--bw-border) !important;
+}
+
+.cat-chip .t {
+  color: var(--bw-text) !important;
+}
+
+.cat-chip.selected {
+  border-color: var(--bw-gold) !important;
+  background: var(--bw-gold-light) !important;
+}
+
+/* Variantes */
+.variant-row {
+  background: var(--bw-bg-secondary) !important;
+  border: 1px solid var(--bw-border) !important;
+}
+
+.variant-row .n {
+  color: var(--bw-text) !important;
+}
+
+.variant-row .p {
+  color: var(--bw-gold-dark) !important;
+}
+
+/* Form manual */
+.manual-form input {
+  background: var(--bw-bg-secondary) !important;
+  border: 1px solid var(--bw-border) !important;
+  color: var(--bw-text) !important;
+}
+
+.manual-form input:focus {
+  border-color: var(--bw-gold) !important;
+}
+
+.manual-form input::placeholder {
+  color: var(--bw-text-muted) !important;
+}
+
+/* Lista de items agregados */
+.added-row {
+  border-bottom-color: var(--bw-border) !important;
+  color: var(--bw-text) !important;
+}
+
+.added-row .p {
+  color: var(--bw-gold-dark) !important;
+}
+
+.order-total-row {
+  border-top-color: var(--bw-border) !important;
+}
+
+.order-total-row .l {
+  color: var(--bw-text) !important;
+}
+
+.order-total-row .v {
+  color: var(--bw-gold-dark) !important;
+}
+
+/* ================================================================
+   CONFIRMACIÓN DE ENVÍO
+   ================================================================ */
+.send-confirm {
+  background: rgba(0,0,0,0.5) !important;
+}
+
+.send-confirm-card {
+  background: var(--bw-bg-card) !important;
+  border: 1px solid var(--bw-border) !important;
+  box-shadow: var(--bw-shadow-lg) !important;
+}
+
+.send-check {
+  background: var(--bw-green-light) !important;
+  border-color: var(--bw-green) !important;
+}
+
+.send-check svg {
+  stroke: var(--bw-green) !important;
+}
+
+.send-title {
+  color: var(--bw-text) !important;
+}
+
+.send-sub {
+  color: var(--bw-text-secondary) !important;
+}
+
+/* ================================================================
+   MODAL DE GANANCIAS
+   ================================================================ */
+.ganancias-modal {
+  background: var(--bw-bg-card) !important;
+  border: 1px solid var(--bw-border) !important;
+}
+
+.ganancias-modal-title {
+  color: var(--bw-text) !important;
+}
+
+.ganancias-modal-close {
+  background: var(--bw-bg-secondary) !important;
+  color: var(--bw-text-secondary) !important;
+}
+
+.ganancias-name {
+  color: var(--bw-text) !important;
+}
+
+.ganancias-avatar {
+  background: var(--bw-gold-light) !important;
+  border-color: var(--bw-gold) !important;
+}
+
+.ganancias-row {
+  border-bottom-color: var(--bw-border) !important;
+  color: var(--bw-text-secondary) !important;
+}
+
+.ganancias-row b {
+  color: var(--bw-text) !important;
+}
+
+.ganancias-total {
+  background: var(--bw-green-light) !important;
+  border-color: var(--bw-green) !important;
+}
+
+.ganancias-total b {
+  color: var(--bw-text) !important;
+}
+
+/* ================================================================
+   ARRIVAL BANNER
+   ================================================================ */
+.arrival-banner {
+  background: var(--bw-green-light) !important;
+  border: 1px solid var(--bw-green) !important;
+  backdrop-filter: none !important;
+}
+
+.arrival-banner .txt {
+  color: var(--bw-green-dark) !important;
+}
+
+/* ================================================================
+   EMPTY STATE
+   ================================================================ */
+.empty-icon {
+  background: var(--bw-bg-secondary) !important;
+  border: 1px solid var(--bw-border) !important;
+  backdrop-filter: none !important;
+}
+
+.empty-icon svg {
+  color: var(--bw-text-muted) !important;
+}
+
+.empty-title {
+  color: var(--bw-text) !important;
+}
+
+.empty-sub {
+  color: var(--bw-text-secondary) !important;
+}
+
+/* ================================================================
+   WAITING NOTE
+   ================================================================ */
+.waiting-note {
+  color: var(--bw-text-secondary) !important;
+}
+
+/* ================================================================
+   ACTION BUTTONS
+   ================================================================ */
+.action-btn {
+  background: var(--bw-gold) !important;
+  color: #000 !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(212,168,83,0.25) !important;
+}
+
+.action-btn.secondary {
+  background: var(--bw-bg-secondary) !important;
+  color: var(--bw-text) !important;
+  border: 1px solid var(--bw-border) !important;
+  box-shadow: none !important;
+}
+
+/* ================================================================
+   SKELETON LOADERS
+   ================================================================ */
+.skel {
+  background: linear-gradient(100deg, var(--bw-bg-secondary) 30%, var(--bw-border) 50%, var(--bw-bg-secondary) 70%) !important;
+}
+
+/* ================================================================
+   ADD BACK BUTTON
+   ================================================================ */
+.add-back-btn {
+  background: var(--bw-bg-secondary) !important;
+  border: 1px solid var(--bw-border) !important;
+  color: var(--bw-text-secondary) !important;
+}
+
+.add-back-btn:active {
+  background: var(--bw-border) !important;
+}
+
+/* ================================================================
+   TEMA OSCURO - Ajustes específicos
+   ================================================================ */
+[data-theme="dark"] .hero-chip {
+  background: rgba(22,24,29,0.95) !important;
+  border: 1px solid var(--bw-border) !important;
+}
+
+[data-theme="dark"] .hero-icon-btn {
+  background: var(--bw-bg-card) !important;
+  border: 1px solid var(--bw-border) !important;
+}
+
+[data-theme="dark"] .hero-icon-btn svg {
+  color: var(--bw-text) !important;
+  stroke: var(--bw-text) !important;
+}
+
+[data-theme="dark"] .hdr-estado {
+  background: var(--bw-bg-card) !important;
+  border: 1px solid var(--bw-border) !important;
+}
+
+[data-theme="dark"] .step-tile.done .step-tile-icon svg {
+  stroke: #000 !important;
+}
+
+[data-theme="dark"] .step-tile-check {
+  border-color: var(--bw-bg-card) !important;
+}
+
+[data-theme="dark"] .time-ring-wrap::after {
+  border-color: var(--bw-bg-card) !important;
+}
+
+[data-theme="dark"] .send-confirm-card,
+[data-theme="dark"] .ganancias-modal {
+  background: var(--bw-bg-card) !important;
+}

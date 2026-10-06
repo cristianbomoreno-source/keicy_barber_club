@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon-v2.png">
+<link rel="icon" href="assets/favicon-32.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Keicy Barbería</title>
+<script src="assets/theme-manager.js"></script>
+<link rel="stylesheet" href="assets/design-system.css">
+<style>
+  body{
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; min-height:100dvh;
+    padding: var(--effective-top) var(--page-padding-x) var(--effective-bottom);
+  }
+
+  .wrap{ max-width:380px; width:100%; }
+  .logo{ height:80px; display:block; margin:0 auto 40px; border-radius:18px; }
+
+  .tabs{ display:flex; background:var(--card); border:1px solid var(--divider); border-radius:14px; padding:4px; margin-bottom:24px; }
+  .tab{ flex:1; text-align:center; padding:12px; font-size:14px; font-weight:700; border-radius:11px; cursor:pointer; color:var(--text-secondary); }
+  .tab.active{ background:var(--gold); color:#141414; }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:11.5px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:7px; }
+  .field input{
+    width:100%; height:54px; border-radius:16px; padding:0 16px;
+    background:var(--card); border:1px solid var(--divider); color:var(--text);
+    font-size:15px; outline:none; transition:border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .field input:focus{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,163,91,0.14); }
+  .field.hidden{ display:none; }
+  .field-row{ display:flex; gap:10px; }
+  .field-row .field{ flex:1; }
+
+  /* Campo de teléfono con prefijo */
+  .phone-field {
+    display:flex; align-items:center; border-radius:16px; background:var(--card); border:1px solid var(--divider);
+    overflow:hidden; height:54px;
+  }
+  .phone-field:focus-within { border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,163,91,0.14); }
+  .phone-field .phone-prefix {
+    padding:0 14px; font-size:14px; font-weight:600; color:var(--gold); background:rgba(201,163,91,0.08);
+    height:100%; display:flex; align-items:center; border-right:1px solid var(--divider);
+    white-space:nowrap;
+  }
+  .phone-field input {
+    flex:1; border:none !important; background:transparent !important; height:100%; padding:0 16px; border-radius:0;
+  }
+  .phone-field input:focus { outline:none; box-shadow:none !important; }
+
+  .error-box{
+    background:rgba(239,83,80,0.1); border:1px solid rgba(239,83,80,0.3); color:var(--error);
+    font-size:12.5px; padding:11px 14px; border-radius:12px; margin-bottom:14px; display:none;
+  }
+  .error-box.show{ display:block; }
+
+  .submit-btn{ width:100%; height:56px; font-size:15px; margin-top:8px; }
+  .submit-btn .spinner{ display:none; width:18px; height:18px; animation:spin 0.8s linear infinite; }
+  .submit-btn.loading span.label{ display:none; }
+  .submit-btn.loading .spinner{ display:inline-block; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<script src="assets/splash-screen.js"></script>
+
+<div class="wrap fade-in">
+  <img src="assets/logo-transparent.png" class="logo" alt="Keicy Barber">
+
+  <div class="tabs">
+    <div class="tab active" id="tabLogin">Iniciar sesión</div>
+    <div class="tab" id="tabSignup">Crear cuenta</div>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <form id="accessForm">
+    <!-- Campos de login -->
+    <div class="field" id="fieldUsername">
+      <label>Usuario o correo</label>
+      <input type="text" id="username" placeholder="ej. diego.neira o correo@mail.com" autocomplete="off">
+    </div>
+    <div class="field" id="fieldPassword">
+      <label>Clave <span style="font-weight:400;color:var(--text-secondary);font-size:11px;">(no necesaria para barberos)</span></label>
+      <input type="password" id="password" placeholder="Solo para admin/clientes" autocomplete="off">
+    </div>
+
+    <!-- Campos adicionales para registro (solo clientes) -->
+    <div class="field hidden" id="signupFields3">
+      <label>Celular</label>
+      <div class="phone-field">
+        <span class="phone-prefix">+57</span>
+        <input type="tel" id="phone" placeholder="300 123 4567" autocomplete="off">
+      </div>
+    </div>
+    <div class="field hidden" id="signupFields4">
+      <label>Crear contraseña</label>
+      <input type="password" id="newPassword" placeholder="Mínimo 6 caracteres" autocomplete="off">
+    </div>
+
+    <button type="submit" class="btn-gold submit-btn" id="submitBtn">
+      <span class="label" id="submitLabel">Entrar</span>
+      <svg class="spinner" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="rgba(20,20,20,0.25)" stroke-width="2.4"/>
+        <path d="M21 12a9 9 0 0 0-9-9" stroke="#141414" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+<script src="assets/supabase-client.js"></script>
+<script>
+  // Si el dispositivo ya tiene una sesión guardada, entra directo sin pedir login de nuevo.
+  (async function(){
+    const existing = dnGetSession();
+    if (existing) {
+      const isMobile = window.matchMedia('(max-width:767px)').matches;
+      let dest;
+
+      if (existing.role === 'admin_sede') {
+        // Admin sede: obtener sedes asignadas y redirigir al calendario
+        try {
+          const sedes = await dnGetSedesAsignadas();
+          if (sedes.length === 1) {
+            // Una sola sede: ir directo al calendario con esa sede
+            dnSetSedeActual(sedes[0].id);
+            dnSetTurnoSedeActual(sedes[0].id);
+            dest = 'admin/calendario.html?admin_sede=1';
+          } else if (sedes.length > 1) {
+            // Múltiples sedes: ir a seleccionar
+            dest = 'admin_sede/seleccionar-sede.html';
+          } else {
+            dest = 'admin_sede/seleccionar-sede.html';
+          }
+        } catch (e) {
+          console.error('Error obteniendo sedes:', e);
+          dest = 'admin_sede/seleccionar-sede.html';
+        }
+      } else if (existing.role === 'barbero') {
+        dest = 'barbero/home.html';
+      } else if (existing.role === 'admin') {
+        // Admin general: limpiar sede para mostrar "Todas las sedes"
+        localStorage.removeItem('dn_sede_actual');
+        dest = 'admin/dashboard.html';
+      } else {
+        dest = 'cliente/home.html';
+      }
+      window.location.href = dest;
+    }
+  })();
+</script>
+<script>
+  const tabLogin = document.getElementById('tabLogin');
+  const tabSignup = document.getElementById('tabSignup');
+  const form = document.getElementById('accessForm');
+  const errorBox = document.getElementById('errorBox');
+  const submitBtn = document.getElementById('submitBtn');
+  const submitLabel = document.getElementById('submitLabel');
+
+  // Campos de login
+  const fieldUsername = document.getElementById('fieldUsername');
+  const fieldPassword = document.getElementById('fieldPassword');
+
+  // Campos de signup
+  const signupFields3 = document.getElementById('signupFields3');
+  const signupFields4 = document.getElementById('signupFields4');
+
+  let mode = 'login';
+
+  function setMode(m){
+    mode = m;
+    tabLogin.classList.toggle('active', m === 'login');
+    tabSignup.classList.toggle('active', m === 'signup');
+    submitLabel.textContent = m === 'login' ? 'Entrar' : 'Crear cuenta';
+    errorBox.classList.remove('show');
+
+    // Mostrar/ocultar campos según el modo
+    if (m === 'login') {
+      fieldUsername.classList.remove('hidden');
+      fieldPassword.classList.remove('hidden');
+      signupFields3.classList.add('hidden');
+      signupFields4.classList.add('hidden');
+      document.getElementById('fieldUsername').querySelector('label').textContent = 'Usuario o correo';
+    } else {
+      fieldUsername.classList.add('hidden');
+      fieldPassword.classList.add('hidden');
+      signupFields3.classList.remove('hidden');
+      signupFields4.classList.remove('hidden');
+    }
+  }
+
+  tabLogin.addEventListener('click', () => setMode('login'));
+  tabSignup.addEventListener('click', () => setMode('signup'));
+
+  function showError(msg){
+    errorBox.textContent = msg;
+    errorBox.classList.add('show');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox.classList.remove('show');
+
+    submitBtn.classList.add('loading');
+    submitBtn.disabled = true;
+
+    try {
+      if (mode === 'signup') {
+        // Crear cuenta para clientes (solo celular y contraseña)
+        const phone = document.getElementById('phone').value.replace(/\D/g, '');
+        const newPassword = document.getElementById('newPassword').value;
+
+        // Validaciones
+        if (phone.length < 10) {
+          throw new Error('Ingresa un número de celular válido (10 dígitos).');
+        }
+        if (newPassword.length < 6) {
+          throw new Error('La contraseña debe tener al menos 6 caracteres.');
+        }
+
+        const fullPhone = phone.startsWith('57') ? `+${phone}` : `+57${phone}`;
+
+        // Buscar si ya existe un cliente con ese teléfono
+        const { data: existingCliente, error: searchErr } = await sb
+          .from('usuarios')
+          .select('id, username, email, phone, role, full_name, password_hash')
+          .eq('phone', fullPhone)
+          .maybeSingle();
+
+        if (searchErr) throw searchErr;
+
+        let usuario;
+
+        // Hashear la contraseña con bcrypt
+        const hashedPassword = dcodeIO.bcrypt.hashSync(newPassword, 10);
+
+        if (existingCliente) {
+          // Ya existe: verificar si ya tiene contraseña
+          if (existingCliente.password_hash && existingCliente.password_hash.length > 0) {
+            throw new Error('Ya tienes una cuenta. Usa "Iniciar sesión" con tu celular.');
+          }
+
+          // Asociar cuenta: actualizar con contraseña
+          const username = 'cliente' + phone.slice(-6) + Math.floor(Math.random() * 100);
+
+          const { data: updated, error: updateErr } = await sb
+            .from('usuarios')
+            .update({
+              username: username,
+              password_hash: hashedPassword,
+              role: 'cliente'
+            })
+            .eq('id', existingCliente.id)
+            .select('id, username, email, phone, role, full_name, avatar_url')
+            .single();
+
+          if (updateErr) throw updateErr;
+          usuario = updated;
+
+        } else {
+          // Crear nuevo usuario cliente
+          const username = 'cliente' + phone.slice(-6) + Math.floor(Math.random() * 100);
+
+          const { data: created, error: createErr } = await sb
+            .from('usuarios')
+            .insert({
+              username: username,
+              phone: fullPhone,
+              password_hash: hashedPassword,
+              role: 'cliente'
+            })
+            .select('id, username, email, phone, role, full_name, avatar_url')
+            .single();
+
+          if (createErr) throw createErr;
+          usuario = created;
+        }
+
+        // Guardar sesión
+        dnSaveSession(usuario);
+        submitBtn.classList.remove('loading');
+        window.location.href = 'cliente/home.html';
+        return;
+      }
+
+      // LOGIN
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (username.length < 3) {
+        throw new Error('Escribe un usuario válido.');
+      }
+
+      // Normalizar teléfono: quitar caracteres no numéricos y manejar prefijo +57
+      let phoneSearch = username.replace(/\D/g, '');
+      // Si ya tiene 57 al inicio (12 dígitos) o es solo el número (10 dígitos)
+      if (phoneSearch.length === 12 && phoneSearch.startsWith('57')) {
+        phoneSearch = '+' + phoneSearch; // +573001234567
+      } else if (phoneSearch.length === 10) {
+        phoneSearch = '+57' + phoneSearch; // +573001234567
+      } else {
+        phoneSearch = '+57' + phoneSearch; // fallback
+      }
+
+      console.log('[Login] Buscando usuario:', username, '| Phone normalizado:', phoneSearch);
+
+      // Login: buscar por username, email o phone (queries separadas para evitar problemas de sintaxis)
+      let usuario = null;
+      let error = null;
+
+      // Primero buscar por username exacto
+      const { data: byUsername, error: err1 } = await sb
+        .from('usuarios')
+        .select('id, username, email, phone, role, full_name, password_hash, avatar_url')
+        .eq('username', username)
+        .maybeSingle();
+
+      if (byUsername) {
+        usuario = byUsername;
+      } else {
+        // Luego buscar por email
+        const { data: byEmail, error: err2 } = await sb
+          .from('usuarios')
+          .select('id, username, email, phone, role, full_name, password_hash, avatar_url')
+          .eq('email', username)
+          .maybeSingle();
+
+        if (byEmail) {
+          usuario = byEmail;
+        } else {
+          // Finalmente buscar por teléfono
+          const { data: byPhone, error: err3 } = await sb
+            .from('usuarios')
+            .select('id, username, email, phone, role, full_name, password_hash, avatar_url')
+            .eq('phone', phoneSearch)
+            .maybeSingle();
+
+          if (byPhone) {
+            usuario = byPhone;
+          } else {
+            error = err1 || err2 || err3;
+          }
+        }
+      }
+
+      if (error) throw error;
+
+      if (!usuario) {
+        throw new Error('Usuario no encontrado.');
+      }
+
+      // BARBEROS Y ASEO: Acceso solo con usuario (sin contraseña)
+      if (usuario.role === 'barbero' || usuario.role === 'aseo') {
+        console.log('Acceso directo para barbero/aseo:', usuario.username);
+        // No verificar contraseña, acceso directo
+      } else {
+        // OTROS ROLES: Verificar contraseña
+        if (password.length < 6) {
+          throw new Error('La clave debe tener al menos 6 caracteres.');
+        }
+
+        let passwordValida = false;
+        const hashEnBD = usuario.password_hash || '';
+
+        if (hashEnBD.startsWith('$2a$') || hashEnBD.startsWith('$2b$')) {
+          try {
+            passwordValida = dcodeIO.bcrypt.compareSync(password, hashEnBD);
+          } catch (bcryptErr) {
+            console.error('Error en bcrypt.compareSync:', bcryptErr);
+            passwordValida = false;
+          }
+        } else {
+          passwordValida = (hashEnBD === password);
+        }
+
+        if (!passwordValida) {
+          throw new Error('Usuario o clave incorrectos.');
+        }
+      }
+
+      // Guardar sesión (sin avatar si es base64 para no llenar localStorage)
+      const avatarUrl = usuario.avatar_url;
+      const sessionUser = {
+        id: usuario.id,
+        username: usuario.username,
+        email: usuario.email,
+        phone: usuario.phone,
+        role: usuario.role,
+        full_name: usuario.full_name,
+        avatar_url: (avatarUrl && !avatarUrl.startsWith('data:')) ? avatarUrl : null
+      };
+
+      console.log('[Login] Usuario encontrado:', sessionUser.username, '| Rol:', sessionUser.role);
+
+      // Limpiar localStorage si está lleno
+      try {
+        localStorage.removeItem('dn_session');
+        localStorage.removeItem('dn_img_cache');
+      } catch(e) {
+        console.warn('[Login] Error limpiando localStorage:', e);
+      }
+
+      // Guardar sesión y verificar que se guardó correctamente
+      dnSaveSession(sessionUser);
+
+      // Verificar que la sesión se guardó
+      const savedSession = dnGetSession();
+      if (!savedSession || savedSession.id !== sessionUser.id) {
+        console.error('[Login] ERROR: La sesión no se guardó correctamente');
+        throw new Error('No se pudo guardar la sesión. Intenta de nuevo o usa otro navegador.');
+      }
+
+      console.log('[Login] Sesión guardada exitosamente:', savedSession.id);
+
+      submitBtn.classList.remove('loading');
+
+      let dest;
+      if (usuario.role === 'admin_sede') {
+        // Admin sede: obtener sedes asignadas y redirigir al calendario si solo hay una
+        try {
+          const sedes = await dnGetSedesAsignadas();
+          if (sedes.length === 1) {
+            dnSetSedeActual(sedes[0].id);
+            dnSetTurnoSedeActual(sedes[0].id);
+            dest = 'admin/calendario.html?admin_sede=1';
+          } else {
+            dest = 'admin_sede/seleccionar-sede.html';
+          }
+        } catch (e) {
+          dest = 'admin_sede/seleccionar-sede.html';
+        }
+      } else if (usuario.role === 'barbero') {
+        dest = 'barbero/home.html';
+      } else if (usuario.role === 'admin') {
+        // Admin general: limpiar sede para mostrar "Todas las sedes"
+        localStorage.removeItem('dn_sede_actual');
+        dest = 'admin/dashboard.html';
+      } else {
+        dest = 'cliente/home.html';
+      }
+      window.location.href = dest;
+
+    } catch (err) {
+      console.error(err);
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+      showError(err.message || 'Algo salió mal. Intenta de nuevo.');
+    }
+  });
+</script>
+
+</body>
+</html>

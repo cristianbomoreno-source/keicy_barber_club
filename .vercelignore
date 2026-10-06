@@ -1,0 +1,39 @@
+# ============================================
+# VERCEL IGNORE - Archivos excluidos del deployment
+# Esto NO elimina archivos, solo evita que se suban a Vercel
+# ============================================
+
+# Migraciones y scripts de desarrollo (no necesarios en producción)
+migrations/
+
+# Testing y reportes de pruebas
+e2e/
+playwright-report/
+test-results/
+
+# Configuración de Supabase local
+supabase/
+
+# Logs
+*.log
+
+# Archivos de entorno (seguridad)
+.env
+.env.*
+.env.local
+
+# Documentación de desarrollo
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+
+# Editor configs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

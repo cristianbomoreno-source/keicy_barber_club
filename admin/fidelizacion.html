@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Keicy Barbería · Fidelización</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/mobile-admin.css">
+<style>
+  /* Variables heredadas de design-system.css */
+  body{ overflow-x:hidden; background:var(--bg); }
+  #app{ display:flex; min-height:100vh; }
+  .main{ flex:1; min-width:0; max-width:1440px; margin:0 auto; padding:26px 30px 60px; width:100%; }
+
+  .sidebar{ width:60px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--divider); display:flex; flex-direction:column; align-items:center; padding:20px 6px; position:sticky; top:0; height:100vh; z-index:40; overflow:hidden; overflow-y:auto; transition:width .28s cubic-bezier(.4,0,.2,1), padding .28s ease; }
+  .sidebar.expanded{ width:230px; align-items:stretch; padding:22px 16px; }
+  .sidebar-logo{ display:block; cursor:pointer; margin:0 auto; }
+  .sidebar-logo-icon{ width:48px; height:48px; border-radius:12px; margin-bottom:26px; }
+  .sidebar-logo-full{ height:56px; margin-bottom:28px; display:none; border-radius:12px; }
+  .sidebar.expanded .sidebar-logo-icon{ display:none; }
+  .sidebar.expanded .sidebar-logo-full{ display:block; }
+  .nav-group{ flex:1; display:flex; flex-direction:column; gap:3px; overflow-y:auto; width:100%; min-width:0; }
+  .nav-link{ display:flex; align-items:center; gap:12px; justify-content:center; width:40px; height:40px; margin:0 auto; padding:0; border-radius:12px; font-size:13.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:background .15s ease, color .15s ease; text-decoration:none; white-space:nowrap; }
+  .sidebar.expanded .nav-link{ justify-content:flex-start; width:100%; height:auto; margin:0; padding:11px 12px; }
+  .nav-link svg{ width:22px; height:22px; flex-shrink:0; }
+  .nav-link:hover{ background:var(--card); color:var(--text); }
+  .nav-link.active{ background:var(--gold); color:#141414; }
+  .nav-link.active svg{ stroke:#141414; }
+  .nav-label{ opacity:0; max-width:0; overflow:hidden; transition:opacity .16s ease, max-width .26s ease; }
+  .sidebar.expanded .nav-label{ opacity:1; max-width:170px; }
+    .sidebar-card{ display:none; position:relative; align-items:center; gap:9px; padding:9px; border-radius:14px; background:var(--glass-2, rgba(255,255,255,0.04)); border:1px solid var(--glass-border); margin-bottom:16px; cursor:pointer; }
+  .sidebar.expanded .sidebar-card{ display:flex; }
+  .sidebar-card-avatar{ width:32px; height:32px; border-radius:50%; background:var(--gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:800; flex-shrink:0; }
+  .sidebar-card-info{ flex:1; min-width:0; }
+  .sidebar-card-name{ font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-card-sub{ font-size:10.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+  .sidebar-card-chevron{ width:14px; height:14px; color:var(--text-secondary); flex-shrink:0; }
+  .sidebar-card-menu{ display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--card, #1c1c1c); border:1px solid var(--glass-border); border-radius:12px; padding:6px; z-index:60; max-height:220px; overflow-y:auto; box-shadow:0 12px 30px rgba(0,0,0,0.4); }
+  .sidebar-card-menu.show{ display:block; }
+  .sidebar-card-menu-item{ padding:9px 10px; border-radius:8px; font-size:12px; font-weight:600; color:var(--text-secondary); cursor:pointer; }
+  .sidebar-card-menu-item:hover{ background:var(--glass-2, rgba(255,255,255,0.06)); color:var(--text); }
+  .sidebar-card-menu-item.active{ color:var(--gold); font-weight:700; }
+  .nav-section-label{ display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
+  .nav-section-label:first-of-type{ padding-top:2px; }
+  .sidebar.expanded .nav-section-label{ display:block; }
+  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0; display:none; }
+  .sidebar.expanded .plan-card{ display:block; }
+  .plan-card .label{ font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--gold); text-transform:uppercase; display:flex; align-items:center; gap:6px; }
+  .plan-card .sub{ font-size:12px; color:var(--text-secondary); margin-top:6px; }
+  .sidebar-bottom { margin-top:auto; padding-top:12px; border-top:1px solid var(--divider); display:flex; flex-direction:column; gap:8px; width:100%; }
+  .logout-btn { font-size:12px; color:#EF5350; display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; cursor:pointer; width:40px; height:40px; border-radius:10px; background:rgba(239,83,80,0.1); border:1px solid rgba(239,83,80,0.2); }
+  .sidebar.expanded .logout-btn { justify-content:flex-start; width:100%; height:auto; padding:10px 12px; margin:0; }
+  .logout-btn:hover { background:rgba(239,83,80,0.2); }
+  .logout-btn svg { width:16px; height:16px; flex-shrink:0; }
+  .logout-label { display:none; }
+  .sidebar.expanded .logout-label { display:inline; }
+  .help-link{ margin-top:14px; font-size:12.5px; color:var(--text-secondary); display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; cursor:pointer; width:100%; }
+  .sidebar.expanded .help-link{ justify-content:flex-start; }
+  .help-link:hover{ color:var(--text); }
+
+  .header-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; gap:14px; flex-wrap:wrap; }
+  .header-left{ display:flex; align-items:center; gap:14px; }
+  .header-left img{ height:40px; cursor:pointer; }
+  .header-title{ font-size:21px; font-weight:800; }
+  .header-sub{ font-size:12.5px; color:var(--text-secondary); }
+
+  .panel{
+    background:var(--glass); backdrop-filter:blur(16px); border:1px solid var(--glass-border);
+    border-radius:22px; padding:22px 24px; box-shadow:0 20px 50px rgba(0,0,0,0.3);
+  }
+  .panel-title{ font-size:16px; font-weight:800; }
+  .panel-sub{ font-size:12.5px; color:var(--text-secondary); margin-top:2px; }
+  .panel-head{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
+
+  /* ---- Dashboard ---- */
+  .dash-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+  @media (max-width:900px){ .dash-grid{ grid-template-columns:repeat(2,1fr); } }
+  .dash-card{ padding:16px 18px; }
+  .dash-card .lbl{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--text-secondary); }
+  .dash-card .val{ font-size:22px; font-weight:800; margin-top:5px; }
+  .dash-card .val.gold{ color:var(--gold); }
+
+  .split-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; align-items:start; }
+  @media (max-width:900px){ .split-grid{ grid-template-columns:1fr; } }
+
+  .rank-row{ display:flex; align-items:center; gap:12px; padding:10px 4px; border-bottom:1px solid var(--glass-border); }
+  .rank-row:last-child{ border-bottom:none; }
+  .rank-num{ width:22px; font-size:13px; font-weight:800; color:var(--gold); flex-shrink:0; }
+  .rank-mid{ flex:1; min-width:0; }
+  .rank-mid .t{ font-size:13.5px; font-weight:700; }
+  .rank-mid .s{ font-size:11px; color:var(--text-secondary); }
+  .rank-amt{ font-size:13px; font-weight:800; color:var(--gold); flex-shrink:0; }
+
+  .empty-row{ padding:24px 0; text-align:center; color:var(--text-secondary); font-size:13px; }
+
+  /* ---- Tabs de gestión ---- */
+  .tabs-row{ display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:16px; scrollbar-width:none; }
+  .tabs-row::-webkit-scrollbar{ display:none; }
+  .tab-btn{ flex-shrink:0; padding:9px 16px; border-radius:12px; font-size:13px; font-weight:700; cursor:pointer; background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text-secondary); white-space:nowrap; }
+  .tab-btn.active{ background:var(--gold); color:#141414; border-color:var(--gold); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  .item-row{ display:flex; align-items:center; gap:13px; padding:13px 4px; border-bottom:1px solid var(--glass-border); }
+  .item-row:last-child{ border-bottom:none; }
+  .item-mid{ flex:1; min-width:0; }
+  .item-mid .name{ font-size:14px; font-weight:700; }
+  .item-mid .meta{ font-size:11.5px; color:var(--text-secondary); margin-top:1px; }
+  .status-pill{ font-size:11px; font-weight:800; padding:6px 13px; border-radius:999px; white-space:nowrap; }
+  .status-pill.active{ background:rgba(78,203,113,0.16); color:#4ECB71; }
+  .status-pill.inactive{ background:var(--glass-2); color:var(--text-secondary); border:1px solid var(--glass-border); }
+  .icon-btn-sm{ width:34px; height:34px; border-radius:10px; background:var(--glass-2); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+  .icon-btn-sm svg{ width:15px; height:15px; }
+  .row-actions{ display:flex; gap:8px; flex-shrink:0; }
+
+  .add-btn{
+    display:flex; align-items:center; gap:10px; padding:12px 16px; border-radius:14px; cursor:pointer;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-weight:800; font-size:13px;
+  }
+  .add-btn:active{ transform:scale(0.98); }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:7px; }
+  .field input, .field select, .field textarea{
+    width:100%; border-radius:13px; padding:0 14px; height:48px;
+    background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text);
+    font-size:14px; outline:none; transition:border-color .2s ease; font-family:inherit;
+  }
+  .field textarea{ height:auto; padding:12px 14px; min-height:80px; resize:vertical; }
+  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--gold); }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media (max-width:520px){ .field-row{ grid-template-columns:1fr; } }
+
+  .toggle-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:var(--glass-2); border:1px solid var(--glass-border); border-radius:13px; margin-bottom:14px; }
+  .toggle-row .lbl{ font-size:13px; font-weight:700; }
+  .switch{ position:relative; width:44px; height:26px; border-radius:999px; background:var(--glass-border); cursor:pointer; transition:background .2s ease; flex-shrink:0; }
+  .switch.on{ background:#4ECB71; }
+  .switch .knob{ position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .2s ease; }
+  .switch.on .knob{ transform:translateX(18px); }
+
+  .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; z-index:120; padding:16px; }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background:rgba(26,26,26,0.9); backdrop-filter:blur(24px); border:1px solid var(--glass-border);
+    border-radius:22px; padding:26px; width:100%; max-width:440px; max-height:90vh; overflow-y:auto;
+    box-shadow:0 30px 70px rgba(0,0,0,0.5);
+  }
+  .modal-title{ font-size:17px; font-weight:800; }
+  .modal-sub{ font-size:12.5px; color:var(--text-secondary); margin-bottom:18px; }
+  .modal-close{ float:right; cursor:pointer; color:var(--text-secondary); font-size:13px; }
+  .modal-close:hover{ color:var(--text); }
+  .modal-actions{ display:flex; gap:10px; margin-top:6px; }
+  .modal-actions button{ flex:1; height:48px; border-radius:14px; font-size:13.5px; font-weight:700; cursor:pointer; }
+  .btn-cancel{ background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text); }
+  .btn-save{ background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; border:none; }
+  .btn-danger-outline{ background:transparent; border:1px solid rgba(239,83,80,0.35); color:var(--error); }
+
+  #toast{
+    position:fixed; left:50%; bottom:calc(var(--bottom-nav-total) + 16px); transform:translate(-50%, 16px);
+    background:rgba(250,250,250,0.95); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--glass-border); border-radius:14px; padding:12px 18px;
+    font-size:13px; display:flex; align-items:center; gap:8px; max-width:90%;
+    opacity:0; pointer-events:none; transition:opacity 0.3s ease, transform 0.3s ease; z-index:200;
+  }
+  #toast.show{ opacity:1; transform:translate(-50%, 0); }
+  .toast-dot{ width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0; }
+
+  @media (max-width:767px){
+    .sidebar{ display:none; }
+    .main{ padding:calc(16px + var(--safe-top)) var(--page-padding-x) calc(96px + var(--safe-bottom)); }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <script>
+    if (localStorage.getItem('dnNavExpanded') === '1' && window.innerWidth > 767) {
+      document.write('<style>@media(min-width:768px){#sidebar{width:230px!important;align-items:stretch!important;padding:22px 16px!important;}}</style>');
+    }
+  </script>
+  <div class="sidebar" id="sidebar">
+    <img src="../assets/apple-touch-icon-v2.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
+    <img src="../assets/logo-transparent.png" class="sidebar-logo sidebar-logo-full" alt="Keicy Barbería" id="sidebarLogoFull">
+    <div class="sidebar-card" id="sidebarCard" title="Cambiar de sede">
+      <div class="sidebar-card-avatar">DN</div>
+      <div class="sidebar-card-info">
+        <div class="sidebar-card-name" id="sidebarCardName">Keicy Barbería</div>
+        <div class="sidebar-card-sub" id="sidebarCardSede">—</div>
+      </div>
+      <svg class="sidebar-card-chevron" id="sidebarCardChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="sidebar-card-menu" id="sidebarCardMenu"></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-section-label">Gestionar</div>
+      <a class="nav-link" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Resumen
+      </a>
+      <a class="nav-link" href="calendario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        Agenda
+      </a>
+      <a class="nav-link" href="clientes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg>
+        Clientes
+      </a>
+      <a class="nav-link" href="caja.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        Cuadre de caja
+      </a>
+      <a class="nav-link active" href="fidelizacion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z" stroke-linejoin="round"/></svg>
+        Fidelización
+      </a>
+      <div class="nav-section-label">Desempeño</div>
+      <a class="nav-link" href="servicios.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
+        Servicios
+      </a>
+      <a class="nav-link" href="barberos.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2M14.5 14.8c2 .3 3.7 1.7 4.5 4.2" stroke-linecap="round"/></svg>
+        Colaboradores
+      </a>      <a class="nav-link" href="inventario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+        Inventario
+      </a>
+      <a class="nav-link" href="reportes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7" stroke-linecap="round"/></svg>
+        Reportes
+      </a>
+      <a class="nav-link" href="marketing.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4h4l6 5V5L7 10H3z"/></svg>
+        Marketing
+      </a>
+      <a class="nav-link" href="configuracion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="logout-label">Cerrar sesión</span>
+      </div>
+      <div class="plan-card">
+        <div class="label">👑 Plan de por vida</div>
+        <div class="sub">✓ Crisbo</div>
+      </div>
+      <div class="help-link" onclick="toast('Abriendo centro de ayuda…')">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2 1.9-2 3.5" stroke-linecap="round"/><circle cx="12" cy="16.3" r="0.6" fill="currentColor"/></svg>
+        Centro de ayuda
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="header-row fade-in">
+      <div class="header-left">
+        <img src="../assets/logo-transparent.png" alt="Keicy Barber" onclick="window.location.href='dashboard.html'">
+        <div>
+          <div class="header-title">Club de Leales</div>
+          <div class="header-sub">Gestiona membresías, beneficios y recompensas para clientes fieles.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ DASHBOARD CLUB DE LEALES ============ -->
+    <div class="dash-grid fade-in">
+      <div class="card dash-card" style="background:#1A1A1A;"><div class="lbl" style="color:#888;">Miembros Black</div><div class="val" id="dBlack" style="color:#fff;">—</div></div>
+      <div class="card dash-card"><div class="lbl">Miembros Oro</div><div class="val" id="dOro" style="color:#D4AF37;">—</div></div>
+      <div class="card dash-card"><div class="lbl">Miembros Plata</div><div class="val" id="dPlata" style="color:#707070;">—</div></div>
+      <div class="card dash-card"><div class="lbl">Miembros Bronce</div><div class="val" id="dBronce" style="color:#CD7F32;">—</div></div>
+    </div>
+
+    <div class="split-grid">
+      <div class="panel fade-in">
+        <div class="panel-title">Top Clientes Leales</div>
+        <div class="panel-sub">Top 8 por número de cortes pagados.</div>
+        <div id="topLeales" style="margin-top:12px;"><div class="empty-row">Cargando…</div></div>
+      </div>
+      <div class="panel fade-in">
+        <div class="panel-title">Clientes cerca de subir nivel</div>
+        <div class="panel-sub">Les faltan pocos cortes para el siguiente nivel.</div>
+        <div id="cercaNivel" style="margin-top:12px;"><div class="empty-row">Cargando…</div></div>
+      </div>
+    </div>
+
+    <div class="split-grid">
+      <div class="panel fade-in">
+        <div class="panel-title">Clientes cerca de completar retos</div>
+        <div class="panel-sub">Les falta 1 o 2 visitas para la meta.</div>
+        <div id="cercaRetos" style="margin-top:12px;"><div class="empty-row">Cargando…</div></div>
+      </div>
+      <div class="panel fade-in">
+        <div class="panel-title">Historial de canjes</div>
+        <div class="panel-sub">Últimos 10 canjes registrados.</div>
+        <div id="historialCanjes" style="margin-top:12px;"><div class="empty-row">Cargando…</div></div>
+      </div>
+    </div>
+
+    <!-- ============ GESTIÓN ============ -->
+    <div class="panel fade-in">
+      <div class="tabs-row" id="tabsRow">
+        <div class="tab-btn active" data-tab="miembros">Miembros Club</div>
+        <div class="tab-btn" data-tab="retos">Retos por visitas</div>
+        <div class="tab-btn" data-tab="cupones">Cupones</div>
+        <div class="tab-btn" data-tab="recompensas">Recompensas</div>
+        <div class="tab-btn" data-tab="beneficios">Beneficios Club</div>
+      </div>
+
+      <!-- Miembros Club de Leales -->
+      <div class="tab-panel active" data-panel="miembros">
+        <div class="panel-sub" style="margin-bottom:12px;">
+          Clientes agrupados por nivel de membresía del Club de Leales.
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+          <div class="categoria-filter active" data-cat="todos" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:var(--gold); color:#141414;">Todos</div>
+          <div class="categoria-filter" data-cat="black" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:#1A1A1A; color:#fff; border:1px solid #333;">Black (70+)</div>
+          <div class="categoria-filter" data-cat="oro" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:#D4AF37; color:#141414;">Oro (50+)</div>
+          <div class="categoria-filter" data-cat="plata" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:#A0A0A0; color:#141414;">Plata (30+)</div>
+          <div class="categoria-filter" data-cat="bronce" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:#CD7F32; color:#141414;">Bronce (10+)</div>
+          <div class="categoria-filter" data-cat="sin" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:var(--glass-2); color:var(--text-secondary); border:1px solid var(--glass-border);">Sin categoría</div>
+        </div>
+        <div style="margin-bottom:14px;">
+          <input type="text" id="miembrosSearch" placeholder="Buscar por nombre o teléfono..." style="width:100%; border-radius:13px; padding:0 14px; height:44px; background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text); font-size:14px; outline:none;">
+        </div>
+        <div id="miembrosStats" style="display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:16px;"></div>
+        <div id="miembrosList"><div class="empty-row">Cargando miembros...</div></div>
+      </div>
+
+      <!-- Retos -->
+      <div class="tab-panel" data-panel="retos">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <div class="add-btn" onclick="openRetoModal()">+ Nuevo reto</div>
+        </div>
+        <div id="retosList"><div class="empty-row">Cargando…</div></div>
+      </div>
+
+      <!-- Cupones -->
+      <div class="tab-panel" data-panel="cupones">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <div class="add-btn" onclick="openCuponModal()">+ Nuevo cupón</div>
+        </div>
+        <div id="cuponesList"><div class="empty-row">Cargando…</div></div>
+      </div>
+
+      <!-- Recompensas -->
+      <div class="tab-panel" data-panel="recompensas">
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <div class="add-btn" onclick="openRecompensaModal()">+ Nueva recompensa</div>
+        </div>
+        <div id="recompensasList"><div class="empty-row">Cargando…</div></div>
+      </div>
+
+      <!-- Beneficios Club de Leales -->
+      <div class="tab-panel" data-panel="beneficios">
+        <div class="panel-sub" style="margin-bottom:12px;">
+          Gestiona los beneficios del Club de Leales por categoria (Bronce, Plata, Oro, Black).
+          <a href="../cliente/login.html" target="_blank" style="color:var(--gold);">Ver pagina del club</a>
+        </div>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <div class="add-btn" onclick="openBeneficioModal()">+ Nuevo beneficio</div>
+        </div>
+        <div id="beneficiosList"><div class="empty-row">Cargando…</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal: reto -->
+<div class="modal-overlay" id="retoModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box">
+    <span class="modal-close" onclick="document.getElementById('retoModal').classList.remove('show')">✕ Cerrar</span>
+    <div class="modal-title" id="retoModalTitle">Nuevo reto</div>
+    <div class="modal-sub">Recompensa por número de visitas completadas.</div>
+    <div class="field"><label>Nombre</label><input type="text" id="rtNombre" placeholder="Ej. 5 cortes, el 6to gratis"></div>
+    <div class="field"><label>Descripción</label><textarea id="rtDescripcion" placeholder="Detalle visible para el equipo"></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Meta de visitas</label><input type="number" id="rtMeta" min="1" value="5"></div>
+      <div class="field"><label>Recompensa</label><input type="text" id="rtRecompensa" placeholder="Ej. Corte gratis"></div>
+    </div>
+    <div class="toggle-row">
+      <div class="lbl">Reto activo</div>
+      <div class="switch on" id="rtActivoSwitch" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('retoModal').classList.remove('show')">Cancelar</button>
+      <button class="btn-save" id="retoSaveBtn" onclick="saveReto()">Crear reto</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: cupón -->
+<div class="modal-overlay" id="cuponModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box">
+    <span class="modal-close" onclick="document.getElementById('cuponModal').classList.remove('show')">✕ Cerrar</span>
+    <div class="modal-title" id="cuponModalTitle">Nuevo cupón</div>
+    <div class="modal-sub">Código de descuento para reservas o pagos.</div>
+    <div class="field"><label>Código</label><input type="text" id="cpCodigo" placeholder="Ej. BIENVENIDA10" style="text-transform:uppercase;"></div>
+    <div class="field"><label>Descripción</label><input type="text" id="cpDescripcion" placeholder="Ej. 10% en la primera visita"></div>
+    <div class="field-row">
+      <div class="field"><label>Tipo de descuento</label>
+        <select id="cpTipo">
+          <option value="porcentaje">Porcentaje (%)</option>
+          <option value="monto_fijo">Monto fijo (COP)</option>
+        </select>
+      </div>
+      <div class="field"><label>Valor</label><input type="number" id="cpValor" min="0" placeholder="10"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Vigente desde</label><input type="date" id="cpInicio"></div>
+      <div class="field"><label>Vigente hasta</label><input type="date" id="cpFin"></div>
+    </div>
+    <div class="field"><label>Usos máximos (vacío = ilimitado)</label><input type="number" id="cpUsosMax" min="1" placeholder="Ilimitado"></div>
+    <div class="toggle-row">
+      <div class="lbl">Cupón activo</div>
+      <div class="switch on" id="cpActivoSwitch" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('cuponModal').classList.remove('show')">Cancelar</button>
+      <button class="btn-save" id="cuponSaveBtn" onclick="saveCupon()">Crear cupón</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: recompensa -->
+<div class="modal-overlay" id="recompensaModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box">
+    <span class="modal-close" onclick="document.getElementById('recompensaModal').classList.remove('show')">✕ Cerrar</span>
+    <div class="modal-title" id="recompensaModalTitle">Nueva recompensa</div>
+    <div class="modal-sub">Canjeable con puntos acumulados.</div>
+    <div class="field"><label>Nombre</label><input type="text" id="rwNombre" placeholder="Ej. Corte clásico gratis"></div>
+    <div class="field"><label>Descripción</label><textarea id="rwDescripcion" placeholder="Detalle visible para el cliente"></textarea></div>
+    <div class="field-row">
+      <div class="field"><label>Costo en puntos</label><input type="number" id="rwCosto" min="1" value="100"></div>
+      <div class="field"><label>Stock (vacío = ilimitado)</label><input type="number" id="rwStock" min="0" placeholder="Ilimitado"></div>
+    </div>
+    <div class="toggle-row">
+      <div class="lbl">Recompensa activa</div>
+      <div class="switch on" id="rwActivoSwitch" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('recompensaModal').classList.remove('show')">Cancelar</button>
+      <button class="btn-save" id="recompensaSaveBtn" onclick="saveRecompensa()">Crear recompensa</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: beneficio Club de Leales -->
+<div class="modal-overlay" id="beneficioModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box">
+    <span class="modal-close" onclick="document.getElementById('beneficioModal').classList.remove('show')">X Cerrar</span>
+    <div class="modal-title" id="beneficioModalTitle">Nuevo beneficio</div>
+    <div class="modal-sub">Beneficio exclusivo para el Club de Leales.</div>
+    <div class="field"><label>Titulo</label><input type="text" id="bfTitulo" placeholder="Ej. Descuento 10% en productos"></div>
+    <div class="field"><label>Descripcion</label><textarea id="bfDescripcion" placeholder="Detalle visible para el cliente"></textarea></div>
+    <div class="field"><label>Condiciones</label><input type="text" id="bfCondiciones" placeholder="Ej. No acumulable con otras promociones"></div>
+    <div class="field">
+      <label>Categorias (selecciona multiples con Ctrl/Cmd)</label>
+      <select id="bfCategorias" multiple style="height:100px;">
+        <option value="bronce">Bronce (10+ cortes)</option>
+        <option value="plata">Plata (30+ cortes)</option>
+        <option value="oro">Oro (50+ cortes)</option>
+        <option value="black">Black (70+ cortes)</option>
+      </select>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Fecha inicio</label><input type="date" id="bfFechaInicio"></div>
+      <div class="field"><label>Fecha fin (opcional)</label><input type="date" id="bfFechaFin"></div>
+    </div>
+    <div class="toggle-row">
+      <div class="lbl">Es promocion semanal destacada</div>
+      <div class="switch" id="bfPromoSwitch" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+    </div>
+    <div class="toggle-row">
+      <div class="lbl">Beneficio activo</div>
+      <div class="switch on" id="bfActivoSwitch" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('beneficioModal').classList.remove('show')">Cancelar</button>
+      <button class="btn-save" id="beneficioSaveBtn" onclick="saveBeneficio()">Crear beneficio</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"><span class="toast-dot"></span><span id="toastText"></span></div>
+
+<!-- Barra de navegación inferior — idéntica en todas las páginas del panel -->
+<div class="dn-bottom-nav">
+      <a href="calendario.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        Agenda
+      </a>
+      <a href="caja.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        Cuadre de caja
+      </a>
+      <a href="dashboard.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Resumen
+      </a>
+      <a href="configuracion.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/admin-sede-nav.js"></script>
+
+<script>
+  const toastEl = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  function toast(msg){
+    toastText.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(window._t);
+    window._t = setTimeout(() => toastEl.classList.remove('show'), 2400);
+  }
+
+  const sidebarEl = document.getElementById('sidebar');
+  document.querySelectorAll('.nav-link, .help-link').forEach(el => {
+    const lastNode = el.lastChild;
+    if (lastNode && lastNode.nodeType === 3 && lastNode.textContent.trim()) {
+      const span = document.createElement('span');
+      span.className = 'nav-label';
+      span.textContent = lastNode.textContent.trim();
+      el.replaceChild(span, lastNode);
+    }
+  });
+  function dnSetNavExpanded(exp){
+    sidebarEl.classList.toggle('expanded', exp);
+    localStorage.setItem('dnNavExpanded', exp ? '1' : '0');
+  }
+  dnSetNavExpanded(localStorage.getItem('dnNavExpanded') === '1');
+  document.getElementById('sidebarLogoIcon').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+  document.getElementById('sidebarLogoFull').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+
+  document.querySelectorAll('.modal-overlay').forEach(ov => {
+    ov.addEventListener('click', (e) => { if (e.target === ov) ov.classList.remove('show'); });
+  });
+
+  // Cerrar sesión
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    if (confirm('¿Seguro que deseas cerrar sesión?')) {
+      dnClearSession();
+      window.location.href = '../auth.html';
+    }
+  });
+
+  const user = dnRequireAdmin();
+  dnInitSidebarCard(() => {
+    // Recargar página al cambiar de sede
+    window.location.reload();
+  });
+
+  document.getElementById('tabsRow').addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab-btn');
+    if (!btn) return;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === btn.dataset.tab));
+  });
+
+  let clientes = [];
+  let retos = [];
+  let cupones = [];
+  let recompensas = [];
+  let canjes = [];
+
+  async function loadAll(){
+    try {
+      // OPTIMIZADO: Reducido LIMIT de 2000 a 100, paginación disponible
+      const [
+        { data: clientesData, error: cliErr },
+        { data: retosData, error: retErr },
+        { data: retosClientesData, error: rcErr },
+        { data: cuponesData, error: cupErr },
+        { data: recompensasData, error: recErr },
+        { data: canjesData, error: canErr }
+      ] = await Promise.all([
+        sb.from('usuarios').select('id, username, full_name, phone, total_visitas_weibook, membership_tier, avatar_url, sucursal_id').eq('role', 'cliente').gte('total_visitas_weibook', 10).order('total_visitas_weibook', { ascending: false }).limit(3000),
+        sb.from('retos').select('id, nombre, descripcion, meta_visitas, recompensa_texto, activo').order('meta_visitas', { ascending: true }),
+        sb.from('retos_clientes').select('id, cliente_id, reto_id, completado_at, canjeado').limit(500),
+        sb.from('cupones').select('id, codigo, tipo_descuento, valor, activo, fecha_fin').order('created_at', { ascending: false }).limit(50),
+        sb.from('recompensas').select('id, nombre, descripcion, costo_puntos, activo').order('costo_puntos', { ascending: true }),
+        sb.from('canjes').select('id, cliente_id, tipo, referencia_id, descripcion, puntos_gastados, created_at').order('created_at', { ascending: false }).limit(10)
+      ]);
+      if (cliErr) throw cliErr;
+      if (retErr) throw retErr;
+      if (rcErr) throw rcErr;
+      if (cupErr) throw cupErr;
+      if (recErr) throw recErr;
+      if (canErr) throw canErr;
+
+      clientes = clientesData || [];
+      retos = retosData || [];
+      cupones = cuponesData || [];
+      recompensas = recompensasData || [];
+      canjes = canjesData || [];
+
+      // visitas por cliente (para retos y "clientes activos")
+      const visitasPorCliente = {};
+      clientes.forEach(c => { visitasPorCliente[c.id] = 0; }); // Visitas se calculan aparte si es necesario
+      window._visitasPorCliente = visitasPorCliente;
+
+      const retosClientesPorReto = {};
+      (retosClientesData || []).forEach(rc => {
+        (retosClientesPorReto[rc.reto_id] ||= []).push(rc);
+      });
+      window._retosClientesPorReto = retosClientesPorReto;
+
+      renderDashboard();
+      renderRetosList();
+      renderCuponesList();
+      renderRecompensasList();
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos cargar Fidelización.');
+    }
+  }
+
+  function renderDashboard(){
+    // Contar miembros por categoría del Club de Leales
+    const categorias = { black: 0, oro: 0, plata: 0, bronce: 0 };
+    clientes.forEach(c => {
+      const cortes = c.total_visitas_weibook || 0;
+      if (cortes >= 70) categorias.black++;
+      else if (cortes >= 50) categorias.oro++;
+      else if (cortes >= 30) categorias.plata++;
+      else if (cortes >= 10) categorias.bronce++;
+    });
+
+    document.getElementById('dBlack').textContent = categorias.black;
+    document.getElementById('dOro').textContent = categorias.oro;
+    document.getElementById('dPlata').textContent = categorias.plata;
+    document.getElementById('dBronce').textContent = categorias.bronce;
+
+    // Top clientes leales (por cortes pagados)
+    const topEl = document.getElementById('topLeales');
+    const top = [...clientes].filter(c => (c.total_visitas_weibook || 0) > 0)
+      .sort((a,b) => (b.total_visitas_weibook||0) - (a.total_visitas_weibook||0)).slice(0, 8);
+    if (!top.length) { topEl.innerHTML = '<div class="empty-row">No hay clientes con cortes registrados.</div>'; }
+    else {
+      topEl.innerHTML = top.map((c, i) => {
+        const cortes = c.total_visitas_weibook || 0;
+        let nivel = 'Sin nivel';
+        let color = 'var(--text-secondary)';
+        if (cortes >= 70) { nivel = 'Black'; color = '#fff'; }
+        else if (cortes >= 50) { nivel = 'Oro'; color = '#D4AF37'; }
+        else if (cortes >= 30) { nivel = 'Plata'; color = '#A0A0A0'; }
+        else if (cortes >= 10) { nivel = 'Bronce'; color = '#CD7F32'; }
+        return `
+        <div class="rank-row">
+          <div class="rank-num">${i+1}</div>
+          <div class="rank-mid"><div class="t">${c.full_name || c.username || 'Cliente'}</div><div class="s" style="color:${color}">${nivel}</div></div>
+          <div class="rank-amt">${cortes} cortes</div>
+        </div>`;
+      }).join('');
+    }
+
+    // Clientes cerca de subir de nivel
+    const cercaEl = document.getElementById('cercaNivel');
+    const niveles = [
+      { nombre: 'Bronce', min: 10, color: '#CD7F32' },
+      { nombre: 'Plata', min: 30, color: '#A0A0A0' },
+      { nombre: 'Oro', min: 50, color: '#D4AF37' },
+      { nombre: 'Black', min: 70, color: '#fff' }
+    ];
+    const cercaNivel = [];
+    clientes.forEach(c => {
+      const cortes = c.total_visitas_weibook || 0;
+      for (const nivel of niveles) {
+        const faltan = nivel.min - cortes;
+        if (faltan > 0 && faltan <= 5) {
+          cercaNivel.push({ cliente: c, nivel, cortes, faltan });
+          break;
+        }
+      }
+    });
+    cercaNivel.sort((a,b) => a.faltan - b.faltan);
+    if (!cercaNivel.length) { cercaEl.innerHTML = '<div class="empty-row">Ningún cliente está cerca de subir de nivel.</div>'; }
+    else {
+      cercaEl.innerHTML = cercaNivel.slice(0, 8).map(x => `
+        <div class="rank-row">
+          <div class="rank-mid"><div class="t">${x.cliente.full_name || x.cliente.username}</div><div class="s">${x.cortes} cortes · próximo: <span style="color:${x.nivel.color}">${x.nivel.nombre}</span></div></div>
+          <div class="rank-amt">Falta${x.faltan===1?'':'n'} ${x.faltan}</div>
+        </div>`).join('');
+    }
+
+    // Historial de canjes
+    const histEl = document.getElementById('historialCanjes');
+    if (!canjes.length) { histEl.innerHTML = '<div class="empty-row">Sin canjes registrados todavía.</div>'; }
+    else {
+      const TIPO_LABEL = { recompensa: 'Recompensa', cupon: 'Cupón', reto: 'Reto' };
+      histEl.innerHTML = canjes.map(c => {
+        const cliente = clientes.find(cl => cl.id === c.cliente_id);
+        const nombreCliente = cliente?.full_name || cliente?.username || 'Cliente';
+        return `
+        <div class="rank-row">
+          <div class="rank-mid"><div class="t">${nombreCliente} · ${c.descripcion || 'Canje'}</div><div class="s">${TIPO_LABEL[c.tipo] || c.tipo} · ${new Date(c.created_at).toLocaleDateString('es-CO', { day:'numeric', month:'short' })}</div></div>
+          ${c.puntos_gastados ? `<div class="rank-amt">-${c.puntos_gastados} pts</div>` : ''}
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // ---- Retos ----
+  function renderRetosList(){
+    const el = document.getElementById('retosList');
+    if (!retos.length) { el.innerHTML = '<div class="empty-row">Aún no hay retos creados. Crea el primero con el botón "+".</div>'; return; }
+    el.innerHTML = retos.map(r => {
+      const completados = (window._retosClientesPorReto[r.id] || []).filter(rc => rc.completado_at).length;
+      return `
+      <div class="item-row">
+        <div class="item-mid">
+          <div class="name">${r.nombre}</div>
+          <div class="meta">Meta: ${r.meta_visitas} visitas · Recompensa: ${r.recompensa_texto || '—'} · ${completados} completado${completados===1?'':'s'}</div>
+        </div>
+        <div class="status-pill ${r.activo ? 'active' : 'inactive'}">${r.activo ? 'Activo' : 'Inactivo'}</div>
+        <div class="row-actions">
+          <div class="icon-btn-sm" onclick="openRetoModal('${r.id}')" title="Editar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  let retoEditId = null;
+  function openRetoModal(id){
+    retoEditId = id || null;
+    if (id) {
+      const r = retos.find(x => x.id === id);
+      document.getElementById('retoModalTitle').textContent = 'Editar reto';
+      document.getElementById('retoSaveBtn').textContent = 'Guardar cambios';
+      document.getElementById('rtNombre').value = r.nombre;
+      document.getElementById('rtDescripcion').value = r.descripcion || '';
+      document.getElementById('rtMeta').value = r.meta_visitas;
+      document.getElementById('rtRecompensa').value = r.recompensa_texto || '';
+      document.getElementById('rtActivoSwitch').classList.toggle('on', !!r.activo);
+    } else {
+      document.getElementById('retoModalTitle').textContent = 'Nuevo reto';
+      document.getElementById('retoSaveBtn').textContent = 'Crear reto';
+      document.getElementById('rtNombre').value = '';
+      document.getElementById('rtDescripcion').value = '';
+      document.getElementById('rtMeta').value = 5;
+      document.getElementById('rtRecompensa').value = '';
+      document.getElementById('rtActivoSwitch').classList.add('on');
+    }
+    document.getElementById('retoModal').classList.add('show');
+  }
+
+  async function saveReto(){
+    const nombre = document.getElementById('rtNombre').value.trim();
+    const descripcion = document.getElementById('rtDescripcion').value.trim() || null;
+    const meta = Number(document.getElementById('rtMeta').value) || 0;
+    const recompensa = document.getElementById('rtRecompensa').value.trim() || null;
+    const activo = document.getElementById('rtActivoSwitch').classList.contains('on');
+    if (!nombre) { toast('Escribe un nombre para el reto.'); return; }
+    if (meta <= 0) { toast('La meta debe ser al menos 1 visita.'); return; }
+
+    try {
+      if (retoEditId) {
+        const { error } = await sb.from('retos').update({ nombre, descripcion, meta_visitas: meta, recompensa_texto: recompensa, activo }).eq('id', retoEditId);
+        if (error) throw error;
+      } else {
+        const { error } = await sb.from('retos').insert({ nombre, descripcion, meta_visitas: meta, recompensa_texto: recompensa, activo });
+        if (error) throw error;
+      }
+      toast('Reto guardado.');
+      document.getElementById('retoModal').classList.remove('show');
+      loadAll();
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos guardar el reto.');
+    }
+  }
+
+  // ---- Cupones ----
+  function renderCuponesList(){
+    const el = document.getElementById('cuponesList');
+    if (!cupones.length) { el.innerHTML = '<div class="empty-row">Aún no hay cupones creados. Crea el primero con el botón "+".</div>'; return; }
+    el.innerHTML = cupones.map(c => {
+      const valorTxt = c.tipo_descuento === 'porcentaje' ? `${c.valor}%` : dnFormatCOP(c.valor);
+      const usosTxt = c.usos_maximos ? `${c.usos_actuales}/${c.usos_maximos} usos` : `${c.usos_actuales} usos · ilimitado`;
+      return `
+      <div class="item-row">
+        <div class="item-mid">
+          <div class="name">${c.codigo} <span style="color:var(--gold); font-weight:800;">· ${valorTxt}</span></div>
+          <div class="meta">${c.descripcion || 'Sin descripción'} · ${usosTxt}</div>
+        </div>
+        <div class="status-pill ${c.activo ? 'active' : 'inactive'}">${c.activo ? 'Activo' : 'Inactivo'}</div>
+        <div class="row-actions">
+          <div class="icon-btn-sm" onclick="openCuponModal('${c.id}')" title="Editar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  let cuponEditId = null;
+  function openCuponModal(id){
+    cuponEditId = id || null;
+    if (id) {
+      const c = cupones.find(x => x.id === id);
+      document.getElementById('cuponModalTitle').textContent = 'Editar cupón';
+      document.getElementById('cuponSaveBtn').textContent = 'Guardar cambios';
+      document.getElementById('cpCodigo').value = c.codigo;
+      document.getElementById('cpDescripcion').value = c.descripcion || '';
+      document.getElementById('cpTipo').value = c.tipo_descuento;
+      document.getElementById('cpValor').value = c.valor;
+      document.getElementById('cpInicio').value = c.fecha_inicio || '';
+      document.getElementById('cpFin').value = c.fecha_fin || '';
+      document.getElementById('cpUsosMax').value = c.usos_maximos || '';
+      document.getElementById('cpActivoSwitch').classList.toggle('on', !!c.activo);
+    } else {
+      document.getElementById('cuponModalTitle').textContent = 'Nuevo cupón';
+      document.getElementById('cuponSaveBtn').textContent = 'Crear cupón';
+      document.getElementById('cpCodigo').value = '';
+      document.getElementById('cpDescripcion').value = '';
+      document.getElementById('cpTipo').value = 'porcentaje';
+      document.getElementById('cpValor').value = '';
+      document.getElementById('cpInicio').value = '';
+      document.getElementById('cpFin').value = '';
+      document.getElementById('cpUsosMax').value = '';
+      document.getElementById('cpActivoSwitch').classList.add('on');
+    }
+    document.getElementById('cuponModal').classList.add('show');
+  }
+
+  async function saveCupon(){
+    const codigo = document.getElementById('cpCodigo').value.trim().toUpperCase();
+    const descripcion = document.getElementById('cpDescripcion').value.trim() || null;
+    const tipo = document.getElementById('cpTipo').value;
+    const valor = Number(document.getElementById('cpValor').value) || 0;
+    const inicio = document.getElementById('cpInicio').value || null;
+    const fin = document.getElementById('cpFin').value || null;
+    const usosMaxVal = document.getElementById('cpUsosMax').value;
+    const usosMax = usosMaxVal === '' ? null : Number(usosMaxVal);
+    const activo = document.getElementById('cpActivoSwitch').classList.contains('on');
+    if (!codigo) { toast('Escribe un código para el cupón.'); return; }
+    if (valor <= 0) { toast('El valor del descuento debe ser mayor a 0.'); return; }
+
+    try {
+      if (cuponEditId) {
+        const { error } = await sb.from('cupones').update({ codigo, descripcion, tipo_descuento: tipo, valor, fecha_inicio: inicio, fecha_fin: fin, usos_maximos: usosMax, activo }).eq('id', cuponEditId);
+        if (error) throw error;
+      } else {
+        const { error } = await sb.from('cupones').insert({ codigo, descripcion, tipo_descuento: tipo, valor, fecha_inicio: inicio, fecha_fin: fin, usos_maximos: usosMax, activo });
+        if (error) throw error;
+      }
+      toast('Cupón guardado.');
+      document.getElementById('cuponModal').classList.remove('show');
+      loadAll();
+    } catch (err) {
+      console.error(err);
+      toast(err?.message?.includes('duplicate') ? 'Ese código de cupón ya existe.' : 'No pudimos guardar el cupón.');
+    }
+  }
+
+  // ---- Recompensas ----
+  function renderRecompensasList(){
+    const el = document.getElementById('recompensasList');
+    if (!recompensas.length) { el.innerHTML = '<div class="empty-row">Aún no hay recompensas creadas. Crea la primera con el botón "+".</div>'; return; }
+    el.innerHTML = recompensas.map(r => `
+      <div class="item-row">
+        <div class="item-mid">
+          <div class="name">${r.nombre} <span style="color:var(--gold); font-weight:800;">· ${r.costo_puntos} pts</span></div>
+          <div class="meta">${r.descripcion || 'Sin descripción'} · ${r.stock !== null && r.stock !== undefined ? `${r.stock} en stock` : 'Stock ilimitado'}</div>
+        </div>
+        <div class="status-pill ${r.activo ? 'active' : 'inactive'}">${r.activo ? 'Activo' : 'Inactivo'}</div>
+        <div class="row-actions">
+          <div class="icon-btn-sm" onclick="openRecompensaModal('${r.id}')" title="Editar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  let recompensaEditId = null;
+  function openRecompensaModal(id){
+    recompensaEditId = id || null;
+    if (id) {
+      const r = recompensas.find(x => x.id === id);
+      document.getElementById('recompensaModalTitle').textContent = 'Editar recompensa';
+      document.getElementById('recompensaSaveBtn').textContent = 'Guardar cambios';
+      document.getElementById('rwNombre').value = r.nombre;
+      document.getElementById('rwDescripcion').value = r.descripcion || '';
+      document.getElementById('rwCosto').value = r.costo_puntos;
+      document.getElementById('rwStock').value = r.stock ?? '';
+      document.getElementById('rwActivoSwitch').classList.toggle('on', !!r.activo);
+    } else {
+      document.getElementById('recompensaModalTitle').textContent = 'Nueva recompensa';
+      document.getElementById('recompensaSaveBtn').textContent = 'Crear recompensa';
+      document.getElementById('rwNombre').value = '';
+      document.getElementById('rwDescripcion').value = '';
+      document.getElementById('rwCosto').value = 100;
+      document.getElementById('rwStock').value = '';
+      document.getElementById('rwActivoSwitch').classList.add('on');
+    }
+    document.getElementById('recompensaModal').classList.add('show');
+  }
+
+  async function saveRecompensa(){
+    const nombre = document.getElementById('rwNombre').value.trim();
+    const descripcion = document.getElementById('rwDescripcion').value.trim() || null;
+    const costo = Number(document.getElementById('rwCosto').value) || 0;
+    const stockVal = document.getElementById('rwStock').value;
+    const stock = stockVal === '' ? null : Number(stockVal);
+    const activo = document.getElementById('rwActivoSwitch').classList.contains('on');
+    if (!nombre) { toast('Escribe un nombre para la recompensa.'); return; }
+    if (costo <= 0) { toast('El costo en puntos debe ser mayor a 0.'); return; }
+
+    try {
+      if (recompensaEditId) {
+        const { error } = await sb.from('recompensas').update({ nombre, descripcion, costo_puntos: costo, stock, activo }).eq('id', recompensaEditId);
+        if (error) throw error;
+      } else {
+        const { error } = await sb.from('recompensas').insert({ nombre, descripcion, costo_puntos: costo, stock, activo });
+        if (error) throw error;
+      }
+      toast('Recompensa guardada.');
+      document.getElementById('recompensaModal').classList.remove('show');
+      loadAll();
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos guardar la recompensa.');
+    }
+  }
+
+  // ---- Beneficios Club de Leales ----
+  let beneficios = [];
+
+  async function loadBeneficios() {
+    try {
+      const { data, error } = await sb.from('loyalty_benefits')
+        .select('*')
+        .order('orden', { ascending: true });
+
+      if (error) throw error;
+      beneficios = data || [];
+      renderBeneficiosList();
+    } catch (err) {
+      console.error('Error cargando beneficios:', err);
+      document.getElementById('beneficiosList').innerHTML = '<div class="empty-row">Error cargando beneficios</div>';
+    }
+  }
+
+  function renderBeneficiosList() {
+    const el = document.getElementById('beneficiosList');
+    if (!beneficios.length) {
+      el.innerHTML = '<div class="empty-row">Aun no hay beneficios creados. Crea el primero con el boton "+".</div>';
+      return;
+    }
+
+    const CATEGORIA_COLORS = {
+      bronce: '#CD7F32',
+      plata: '#A0A0A0',
+      oro: '#D4AF37',
+      black: '#1A1A1A'
+    };
+
+    el.innerHTML = beneficios.map(b => {
+      const catBadges = (b.categorias || []).map(c =>
+        `<span style="display:inline-block; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:700; background:${CATEGORIA_COLORS[c] || '#888'}; color:white; margin-right:4px; text-transform:uppercase;">${c}</span>`
+      ).join('');
+
+      return `
+      <div class="item-row">
+        <div class="item-mid">
+          <div class="name">${b.titulo} ${b.es_promocion_semanal ? '<span style="color:var(--gold);">★ PROMO SEMANAL</span>' : ''}</div>
+          <div class="meta">${b.descripcion || 'Sin descripcion'}</div>
+          <div style="margin-top:6px;">${catBadges}</div>
+        </div>
+        <div class="status-pill ${b.activo ? 'active' : 'inactive'}">${b.activo ? 'Activo' : 'Inactivo'}</div>
+        <div class="row-actions">
+          <div class="icon-btn-sm" onclick="openBeneficioModal('${b.id}')" title="Editar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </div>
+          <div class="icon-btn-sm" onclick="deleteBeneficio('${b.id}')" title="Eliminar" style="background:rgba(239,83,80,0.1); border-color:rgba(239,83,80,0.2);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#EF5350" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  let beneficioEditId = null;
+  function openBeneficioModal(id) {
+    beneficioEditId = id || null;
+
+    const hoy = new Date().toISOString().split('T')[0];
+
+    if (id) {
+      const b = beneficios.find(x => x.id === id);
+      document.getElementById('beneficioModalTitle').textContent = 'Editar beneficio';
+      document.getElementById('beneficioSaveBtn').textContent = 'Guardar cambios';
+      document.getElementById('bfTitulo').value = b.titulo;
+      document.getElementById('bfDescripcion').value = b.descripcion || '';
+      document.getElementById('bfCondiciones').value = b.condiciones || '';
+      document.getElementById('bfFechaInicio').value = b.fecha_inicio || hoy;
+      document.getElementById('bfFechaFin').value = b.fecha_fin || '';
+
+      // Seleccionar categorias
+      const select = document.getElementById('bfCategorias');
+      Array.from(select.options).forEach(opt => {
+        opt.selected = (b.categorias || []).includes(opt.value);
+      });
+
+      document.getElementById('bfPromoSwitch').classList.toggle('on', !!b.es_promocion_semanal);
+      document.getElementById('bfActivoSwitch').classList.toggle('on', !!b.activo);
+    } else {
+      document.getElementById('beneficioModalTitle').textContent = 'Nuevo beneficio';
+      document.getElementById('beneficioSaveBtn').textContent = 'Crear beneficio';
+      document.getElementById('bfTitulo').value = '';
+      document.getElementById('bfDescripcion').value = '';
+      document.getElementById('bfCondiciones').value = '';
+      document.getElementById('bfFechaInicio').value = hoy;
+      document.getElementById('bfFechaFin').value = '';
+
+      // Deseleccionar todas las categorias
+      const select = document.getElementById('bfCategorias');
+      Array.from(select.options).forEach(opt => opt.selected = false);
+
+      document.getElementById('bfPromoSwitch').classList.remove('on');
+      document.getElementById('bfActivoSwitch').classList.add('on');
+    }
+
+    document.getElementById('beneficioModal').classList.add('show');
+  }
+
+  async function saveBeneficio() {
+    const titulo = document.getElementById('bfTitulo').value.trim();
+    const descripcion = document.getElementById('bfDescripcion').value.trim() || null;
+    const condiciones = document.getElementById('bfCondiciones').value.trim() || null;
+    const fechaInicio = document.getElementById('bfFechaInicio').value || new Date().toISOString().split('T')[0];
+    const fechaFin = document.getElementById('bfFechaFin').value || null;
+
+    const select = document.getElementById('bfCategorias');
+    const categorias = Array.from(select.selectedOptions).map(opt => opt.value);
+
+    const esPromocion = document.getElementById('bfPromoSwitch').classList.contains('on');
+    const activo = document.getElementById('bfActivoSwitch').classList.contains('on');
+
+    if (!titulo) { toast('Escribe un titulo para el beneficio.'); return; }
+    if (categorias.length === 0) { toast('Selecciona al menos una categoria.'); return; }
+
+    try {
+      const payload = {
+        titulo,
+        descripcion,
+        condiciones,
+        categorias,
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin,
+        es_promocion_semanal: esPromocion,
+        activo
+      };
+
+      if (beneficioEditId) {
+        const { error } = await sb.from('loyalty_benefits').update(payload).eq('id', beneficioEditId);
+        if (error) throw error;
+      } else {
+        const { error } = await sb.from('loyalty_benefits').insert(payload);
+        if (error) throw error;
+      }
+
+      toast('Beneficio guardado.');
+      document.getElementById('beneficioModal').classList.remove('show');
+      loadBeneficios();
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos guardar el beneficio.');
+    }
+  }
+
+  async function deleteBeneficio(id) {
+    if (!confirm('Deseas eliminar este beneficio?')) return;
+
+    try {
+      const { error } = await sb.from('loyalty_benefits').delete().eq('id', id);
+      if (error) throw error;
+      toast('Beneficio eliminado.');
+      loadBeneficios();
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos eliminar el beneficio.');
+    }
+  }
+
+  // ---- Miembros Club de Leales ----
+  let miembrosClub = [];
+  let miembrosFiltro = 'todos';
+
+  async function loadMiembros() {
+    try {
+      const { data, error } = await sb
+        .from('usuarios')
+        .select('id, full_name, phone, avatar_url, lealtad_info, total_visitas_weibook')
+        .eq('role', 'cliente')
+        .not('lealtad_info', 'is', null)
+        .order('total_visitas_weibook', { ascending: false })
+        .limit(1000);
+
+      if (error) throw error;
+      miembrosClub = data || [];
+      renderMiembrosStats();
+      renderMiembrosList();
+    } catch (err) {
+      console.error('Error cargando miembros:', err);
+      document.getElementById('miembrosList').innerHTML = '<div class="empty-row">Error al cargar miembros.</div>';
+    }
+  }
+
+  function renderMiembrosStats() {
+    const stats = { black: 0, oro: 0, plata: 0, bronce: 0, sin: 0 };
+    miembrosClub.forEach(m => {
+      const cat = m.lealtad_info?.categoria;
+      if (cat && stats.hasOwnProperty(cat)) stats[cat]++;
+      else stats.sin++;
+    });
+
+    document.getElementById('miembrosStats').innerHTML = `
+      <div style="background:#1A1A1A; color:#fff; padding:12px; border-radius:12px; text-align:center;">
+        <div style="font-size:20px; font-weight:800;">${stats.black}</div>
+        <div style="font-size:10px; opacity:0.7;">BLACK</div>
+      </div>
+      <div style="background:#D4AF37; color:#141414; padding:12px; border-radius:12px; text-align:center;">
+        <div style="font-size:20px; font-weight:800;">${stats.oro}</div>
+        <div style="font-size:10px; opacity:0.7;">ORO</div>
+      </div>
+      <div style="background:#A0A0A0; color:#141414; padding:12px; border-radius:12px; text-align:center;">
+        <div style="font-size:20px; font-weight:800;">${stats.plata}</div>
+        <div style="font-size:10px; opacity:0.7;">PLATA</div>
+      </div>
+      <div style="background:#CD7F32; color:#141414; padding:12px; border-radius:12px; text-align:center;">
+        <div style="font-size:20px; font-weight:800;">${stats.bronce}</div>
+        <div style="font-size:10px; opacity:0.7;">BRONCE</div>
+      </div>
+      <div style="background:var(--glass-2); padding:12px; border-radius:12px; text-align:center; border:1px solid var(--glass-border);">
+        <div style="font-size:20px; font-weight:800;">${stats.sin}</div>
+        <div style="font-size:10px; color:var(--text-secondary);">SIN CAT.</div>
+      </div>
+    `;
+  }
+
+  function renderMiembrosList() {
+    const searchVal = document.getElementById('miembrosSearch')?.value?.toLowerCase() || '';
+    let filtered = miembrosClub;
+
+    // Filtrar por categoría
+    if (miembrosFiltro !== 'todos') {
+      if (miembrosFiltro === 'sin') {
+        filtered = filtered.filter(m => !m.lealtad_info?.categoria);
+      } else {
+        filtered = filtered.filter(m => m.lealtad_info?.categoria === miembrosFiltro);
+      }
+    }
+
+    // Filtrar por búsqueda
+    if (searchVal) {
+      filtered = filtered.filter(m =>
+        (m.full_name || '').toLowerCase().includes(searchVal) ||
+        (m.phone || '').includes(searchVal)
+      );
+    }
+
+    const el = document.getElementById('miembrosList');
+    if (!filtered.length) {
+      el.innerHTML = '<div class="empty-row">No hay miembros en esta categoría.</div>';
+      return;
+    }
+
+    const CATEGORIA_COLORS = { black: '#1A1A1A', oro: '#D4AF37', plata: '#A0A0A0', bronce: '#CD7F32' };
+
+    el.innerHTML = filtered.slice(0, 100).map(m => {
+      const cat = m.lealtad_info?.categoria;
+      const cortes = m.lealtad_info?.cortes_total || m.total_visitas_weibook || 0;
+      const catColor = CATEGORIA_COLORS[cat] || 'var(--glass-2)';
+      const catLabel = cat ? cat.toUpperCase() : 'SIN CAT.';
+      const initials = (m.full_name || 'NN').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+
+      return `
+      <div class="item-row">
+        <div style="width:40px; height:40px; border-radius:50%; background:${catColor}; color:${cat === 'black' ? '#fff' : '#141414'}; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0;">
+          ${m.avatar_url ? `<img src="${m.avatar_url}" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">` : initials}
+        </div>
+        <div class="item-mid">
+          <div class="name">${m.full_name || 'Sin nombre'}</div>
+          <div class="meta">${m.phone || 'Sin teléfono'} · ${cortes} cortes</div>
+        </div>
+        <span style="padding:6px 12px; border-radius:8px; font-size:11px; font-weight:700; background:${catColor}; color:${cat === 'black' ? '#fff' : '#141414'};">${catLabel}</span>
+      </div>`;
+    }).join('') + (filtered.length > 100 ? '<div class="empty-row">Mostrando primeros 100 de ' + filtered.length + ' miembros</div>' : '');
+  }
+
+  // Event listeners para miembros
+  document.querySelectorAll('.categoria-filter').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.categoria-filter').forEach(b => {
+        b.classList.remove('active');
+        b.style.opacity = '0.6';
+      });
+      btn.classList.add('active');
+      btn.style.opacity = '1';
+      miembrosFiltro = btn.dataset.cat;
+      renderMiembrosList();
+    });
+  });
+
+  document.getElementById('miembrosSearch')?.addEventListener('input', () => {
+    renderMiembrosList();
+  });
+
+  // Cargar beneficios y miembros junto con el resto
+  const originalLoadAll = loadAll;
+  loadAll = async function() {
+    await originalLoadAll();
+    await Promise.all([loadBeneficios(), loadMiembros()]);
+  };
+
+  loadAll();
+</script>
+
+<script src="../assets/mobile-nav.js"></script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+</body>
+</html>

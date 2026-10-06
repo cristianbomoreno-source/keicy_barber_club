@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0a0a0a">
+<title>Keicy Barbería · Califica tu experiencia</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/dn-modals.css">
+<style>
+  :root {
+    --gold: #C9A35B;
+    --gold-light: #D4B06A;
+    --gold-bright: #E5C158;
+    --bg: #0a0a0a;
+    --card: #141414;
+    --card-2: #1a1a1a;
+    --border: rgba(255,255,255,0.08);
+    --divider: rgba(255,255,255,0.08);
+    --text: #ffffff;
+    --text-secondary: rgba(255,255,255,0.5);
+    --success: #4ECB71;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #app { max-width:440px; margin:0 auto; min-height:100vh; padding:24px 20px 40px; position:relative; }
+
+  /* Header */
+  .header { text-align:center; padding:20px 0 32px; }
+  .brand-logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 20px;
+    filter: brightness(0);
+    background: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+  }
+  .header-title { font-size:26px; font-weight:800; color:var(--text); margin-bottom:8px; letter-spacing:-0.5px; }
+  .header-sub { font-size:14px; color:var(--text-secondary); }
+
+  /* Card principal */
+  .review-card {
+    background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
+    border:1px solid var(--border); border-radius:24px;
+    padding:28px 24px; margin-bottom:20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  /* Info del servicio */
+  .service-info { text-align:center; padding-bottom:24px; margin-bottom:24px; border-bottom:1px solid var(--border); }
+  .service-icon { width:60px; height:60px; border-radius:16px; background:rgba(201,163,91,0.12); border:1px solid rgba(201,163,91,0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
+  .service-icon svg { width:28px; height:28px; color:var(--gold); }
+  .service-name { font-size:17px; font-weight:700; color:var(--text); margin-bottom:6px; }
+  .service-date { font-size:13px; color:var(--text-secondary); }
+  .barber-name { font-size:14px; color:var(--gold); margin-top:8px; font-weight:600; }
+
+  /* Stars */
+  .stars-section { text-align:center; margin-bottom:28px; }
+  .stars-label { font-size:14px; font-weight:600; color:var(--text-secondary); margin-bottom:16px; }
+  .stars-row { display:flex; justify-content:center; gap:10px; }
+  .star-btn {
+    width:54px; height:54px; border-radius:14px; border:2px solid var(--border);
+    background:rgba(255,255,255,0.03); cursor:pointer; transition:all 0.25s ease;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .star-btn svg { width:28px; height:28px; color:rgba(255,255,255,0.25); transition:all 0.25s ease; }
+  .star-btn:hover { border-color:var(--gold); transform:scale(1.08); background:rgba(201,163,91,0.1); }
+  .star-btn:hover svg { color:var(--gold); }
+  .star-btn.active { border-color:var(--gold); background:rgba(201,163,91,0.15); box-shadow:0 4px 15px rgba(201,163,91,0.25); }
+  .star-btn.active svg { color:var(--gold); fill:var(--gold); }
+
+  /* Comment */
+  .comment-section { margin-bottom:28px; }
+  .comment-label { font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:12px; }
+  .comment-textarea {
+    width:100%; min-height:110px; padding:16px 18px; border-radius:14px;
+    background:rgba(255,255,255,0.03); border:1px solid var(--border); color:var(--text);
+    font-family:inherit; font-size:14px; resize:vertical;
+    transition:all 0.2s ease;
+  }
+  .comment-textarea::placeholder { color:rgba(255,255,255,0.3); }
+  .comment-textarea:focus { outline:none; border-color:var(--gold); background:rgba(255,255,255,0.05); }
+
+  /* Submit */
+  .submit-btn {
+    width:100%; padding:18px 24px; border-radius:14px; border:none; cursor:pointer;
+    background:linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 50%, #B8860B 100%);
+    color:#141414; font-family:inherit; font-size:16px; font-weight:800;
+    transition:all 0.25s ease;
+    box-shadow: 0 4px 20px rgba(201,163,91,0.35);
+  }
+  .submit-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 30px rgba(201,163,91,0.5); }
+  .submit-btn:disabled { opacity:0.4; cursor:not-allowed; box-shadow:none; }
+
+  /* Success state */
+  .success-card {
+    background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
+    border:1px solid var(--border); border-radius:24px;
+    padding:44px 24px; text-align:center; display:none;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .success-card.show { display:block; }
+  .success-icon { width:80px; height:80px; border-radius:50%; background:rgba(78,203,113,0.12); border:1px solid rgba(78,203,113,0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 24px; }
+  .success-icon svg { width:40px; height:40px; color:#4ECB71; }
+  .success-title { font-size:22px; font-weight:800; color:var(--text); margin-bottom:10px; }
+  .success-message { font-size:14px; color:var(--text-secondary); line-height:1.6; margin-bottom:28px; }
+
+  /* Google Maps prompt */
+  .google-prompt {
+    background:rgba(66,133,244,0.08); border:1px solid rgba(66,133,244,0.25);
+    border-radius:16px; padding:22px; margin-top:24px;
+  }
+  .google-prompt-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+  .google-prompt-title svg { width:22px; height:22px; color:#4285F4; }
+  .google-prompt-text { font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:18px; }
+  .google-btn {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%; padding:15px 22px; border-radius:12px; border:none;
+    background:#4285F4; color:#fff; font-family:inherit; font-size:14px; font-weight:700;
+    cursor:pointer; transition:all 0.2s ease; text-decoration:none;
+  }
+  .google-btn:hover { background:#3367D6; transform:translateY(-2px); box-shadow:0 6px 20px rgba(66,133,244,0.35); }
+  .google-btn svg { width:18px; height:18px; }
+
+  /* Reservar cita button */
+  .reservar-prompt {
+    background:rgba(201,163,91,0.08); border:1px solid rgba(201,163,91,0.2);
+    border-radius:16px; padding:22px; margin-top:20px;
+  }
+  .reservar-prompt-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+  .reservar-prompt-title svg { width:22px; height:22px; color:var(--gold); }
+  .reservar-prompt-text { font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:18px; }
+  .reservar-btn {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%; padding:15px 22px; border-radius:12px; border:none;
+    background:linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%); color:#141414;
+    font-family:inherit; font-size:14px; font-weight:700;
+    cursor:pointer; transition:all 0.2s ease; text-decoration:none;
+  }
+  .reservar-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(201,163,91,0.35); }
+  .reservar-btn svg { width:18px; height:18px; }
+
+  /* WhatsApp prompt for low ratings */
+  .whatsapp-prompt {
+    background:rgba(37,211,102,0.08); border:1px solid rgba(37,211,102,0.25);
+    border-radius:16px; padding:22px; margin-top:24px;
+  }
+  .whatsapp-prompt-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:10px; display:flex; align-items:center; gap:10px; }
+  .whatsapp-prompt-title svg { width:22px; height:22px; color:#25D366; }
+  .whatsapp-prompt-text { font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:18px; }
+  .whatsapp-btn {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%; padding:15px 22px; border-radius:12px; border:none;
+    background:#25D366; color:#fff; font-family:inherit; font-size:14px; font-weight:700;
+    cursor:pointer; transition:all 0.2s ease; text-decoration:none;
+  }
+  .whatsapp-btn:hover { background:#128C7E; transform:translateY(-2px); box-shadow:0 6px 20px rgba(37,211,102,0.35); }
+  .whatsapp-btn svg { width:18px; height:18px; }
+
+  /* Error state */
+  .error-card {
+    background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
+    border:1px solid rgba(220,53,69,0.25); border-radius:24px;
+    padding:44px 24px; text-align:center; display:none;
+  }
+  .error-card.show { display:block; }
+  .error-icon { width:80px; height:80px; border-radius:50%; background:rgba(220,53,69,0.1); border:1px solid rgba(220,53,69,0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 24px; }
+  .error-icon svg { width:40px; height:40px; color:#dc3545; }
+  .error-title { font-size:22px; font-weight:800; color:var(--text); margin-bottom:10px; }
+  .error-message { font-size:14px; color:var(--text-secondary); line-height:1.6; }
+
+  /* Loading */
+  .loading { text-align:center; padding:80px 20px; }
+  .loading-spinner { width:44px; height:44px; border:3px solid var(--border); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 20px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { font-size:14px; color:var(--text-secondary); }
+
+  /* Hide states */
+  .review-card.hide, .success-card.hide, .error-card.hide { display:none; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="header">
+    <img src="../assets/logo-diego-neira.svg" alt="Keicy Barber" class="brand-logo" onerror="this.style.display='none'">
+    <div class="header-title">Califica tu experiencia</div>
+    <div class="header-sub">Tu opinión nos ayuda a mejorar</div>
+  </div>
+
+  <!-- Loading state -->
+  <div id="loadingState" class="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Cargando información...</div>
+  </div>
+
+  <!-- Review form -->
+  <div id="reviewCard" class="review-card hide">
+    <div class="service-info">
+      <div class="service-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M6 2v1m4-1v1m4-1v1m4-1v1M6 21v1m4-1v1m4-1v1m4-1v1"/>
+          <rect x="4" y="4" width="16" height="16" rx="2"/>
+          <path d="M8 8h3m-3 4h8m-8 4h5"/>
+        </svg>
+      </div>
+      <div class="service-name" id="serviceName">Servicio</div>
+      <div class="service-date" id="serviceDate">Fecha</div>
+      <div class="barber-name" id="barberName"></div>
+    </div>
+
+    <div class="stars-section">
+      <div class="stars-label">Califica del 1 al 5</div>
+      <div class="stars-row">
+        <button class="star-btn" data-rating="1" onclick="setRating(1)">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>
+        </button>
+        <button class="star-btn" data-rating="2" onclick="setRating(2)">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>
+        </button>
+        <button class="star-btn" data-rating="3" onclick="setRating(3)">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>
+        </button>
+        <button class="star-btn" data-rating="4" onclick="setRating(4)">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>
+        </button>
+        <button class="star-btn" data-rating="5" onclick="setRating(5)">
+          <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" fill="none"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="comment-section">
+      <div class="comment-label">Cuéntanos tu experiencia (opcional)</div>
+      <textarea id="commentInput" class="comment-textarea" placeholder="¿Qué te pareció el servicio? ¿Algo que podamos mejorar?"></textarea>
+    </div>
+
+    <button id="submitBtn" class="submit-btn" onclick="submitReview()" disabled>
+      Enviar calificación
+    </button>
+  </div>
+
+  <!-- Success state - Good rating (4-5 stars) -->
+  <div id="successCard" class="success-card hide">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <div class="success-title" id="successTitle">Gracias por tu opinión</div>
+    <div class="success-message" id="successMessage">Tu reseña nos ayuda a seguir mejorando.</div>
+
+    <!-- Google prompt for 4-5 stars -->
+    <div id="googlePrompt" class="google-prompt" style="display:none;">
+      <div class="google-prompt-title">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        ¡Gracias por las estrellas!
+      </div>
+      <div class="google-prompt-text">
+        Ya guardamos tu opinión. ¿Nos ayudas dejándola también en Google Maps? Solo toma 10 segundos y nos ayuda mucho a crecer.
+      </div>
+      <a id="googleMapsLink" href="#" target="_blank" class="google-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        Dejar reseña en Google Maps
+      </a>
+    </div>
+
+    <!-- WhatsApp prompt for 1-3 stars -->
+    <div id="whatsappPrompt" class="whatsapp-prompt" style="display:none;">
+      <div class="whatsapp-prompt-title">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        Queremos mejorar
+      </div>
+      <div class="whatsapp-prompt-text">
+        Lamentamos que tu experiencia no haya sido la mejor. Tu opinión es muy importante para nosotros. Si deseas contarnos más detalles para atender tu solicitud, escríbenos directamente.
+      </div>
+      <a id="whatsappLink" href="#" target="_blank" class="whatsapp-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Escríbenos por WhatsApp
+      </a>
+    </div>
+
+    <!-- Reservar próxima cita -->
+    <div id="reservarPrompt" class="reservar-prompt" style="display:none;">
+      <div class="reservar-prompt-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        ¿Quieres agendar tu próxima cita?
+      </div>
+      <div class="reservar-prompt-text">
+        Reserva ahora y asegura tu lugar con tu barbero favorito.
+      </div>
+      <a id="reservarLink" href="#" class="reservar-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Reservar próxima cita
+      </a>
+    </div>
+  </div>
+
+  <!-- Error state -->
+  <div id="errorCard" class="error-card hide">
+    <div class="error-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+    </div>
+    <div class="error-title">Enlace no válido</div>
+    <div class="error-message" id="errorMessage">Este enlace de reseña ya no está disponible o ha expirado.</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/dn-modals.js"></script>
+<script>
+  // Config
+  const GOOGLE_MAPS_LINK_DEFAULT = 'https://g.page/r/Cac1YymF3Bu0EBM/review';
+  const WHATSAPP_DEFAULT = '3212319355';
+
+  // State
+  let currentRating = 0;
+  let ticketData = null;
+  let citaData = null;
+  let sedeWhatsapp = WHATSAPP_DEFAULT;
+  let barberoId = null;
+  let barberoNombre = null;
+  let googleMapsLink = GOOGLE_MAPS_LINK_DEFAULT;
+  let sucursalNombre = '';
+  let clienteTelefono = '';
+
+  // Get params
+  const urlParams = new URLSearchParams(window.location.search);
+  const ticketId = urlParams.get('t'); // ticket ID
+  const citaId = urlParams.get('c');   // cita ID (fallback)
+  const barberoParam = urlParams.get('b'); // barbero ID (opcional)
+  const ratingParam = urlParams.get('r'); // rating pre-seleccionado (1-5)
+
+  // Set rating
+  window.setRating = function(rating) {
+    currentRating = rating;
+    document.querySelectorAll('.star-btn').forEach((btn, idx) => {
+      btn.classList.toggle('active', idx < rating);
+    });
+    document.getElementById('submitBtn').disabled = false;
+  };
+
+  // Submit review
+  window.submitReview = async function() {
+    if (currentRating === 0) return;
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    try {
+      const comentario = document.getElementById('commentInput').value.trim();
+
+      // Build review data
+      const reviewData = {
+        calificacion: currentRating,
+        comentario: comentario || null,
+        created_at: new Date().toISOString()
+      };
+
+      // Add IDs based on what we have
+      if (ticketData) {
+        reviewData.ticket_id = ticketData.id;
+        reviewData.cliente_id = ticketData.cliente_id;
+        if (ticketData.cita_id) reviewData.cita_id = ticketData.cita_id;
+      } else if (citaData) {
+        reviewData.cita_id = citaData.id;
+        reviewData.cliente_id = citaData.cliente_id;
+      }
+
+      // Add barbero if available
+      if (barberoId) {
+        reviewData.barbero_id = barberoId;
+      }
+
+      console.log('[Resena] Guardando reseña:', reviewData);
+
+      // Insert review
+      const { error } = await sb.from('resenas').insert(reviewData);
+      if (error) throw error;
+
+      // Show success
+      document.getElementById('reviewCard').classList.add('hide');
+      document.getElementById('successCard').classList.remove('hide');
+      document.getElementById('successCard').classList.add('show');
+
+      // Different messages based on rating
+      if (currentRating >= 4) {
+        // Good rating (4-5 stars) - Show Google Maps prompt
+        document.getElementById('successTitle').textContent = '¡Gracias por tu opinión!';
+        document.getElementById('successMessage').textContent = 'Nos alegra que hayas tenido una buena experiencia.';
+        if (googleMapsLink) {
+          document.getElementById('googlePrompt').style.display = 'block';
+          document.getElementById('googleMapsLink').href = googleMapsLink;
+        }
+      } else {
+        // Low rating (1-3 stars) - Show WhatsApp prompt
+        document.getElementById('successTitle').textContent = 'Gracias por tu opinión';
+        document.getElementById('successMessage').textContent = 'Tu feedback es muy importante para nosotros.';
+        document.getElementById('successCard').querySelector('.success-icon').innerHTML =
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+        document.getElementById('successCard').querySelector('.success-icon').style.background = 'rgba(255,193,7,0.15)';
+        document.getElementById('successCard').querySelector('.success-icon svg').style.color = '#ffc107';
+
+        // Show WhatsApp prompt
+        const whatsappNum = sedeWhatsapp.startsWith('57') ? sedeWhatsapp : '57' + sedeWhatsapp;
+        const mensaje = encodeURIComponent('Hola, acabo de dejar una reseña y me gustaría comentarles sobre mi experiencia.');
+        document.getElementById('whatsappPrompt').style.display = 'block';
+        document.getElementById('whatsappLink').href = `https://wa.me/${whatsappNum}?text=${mensaje}`;
+      }
+
+      // Show reservar prompt with client phone pre-filled
+      if (clienteTelefono) {
+        const reservarUrl = `${window.location.origin}/reservar/?phone=${encodeURIComponent(clienteTelefono)}`;
+        document.getElementById('reservarLink').href = reservarUrl;
+        document.getElementById('reservarPrompt').style.display = 'block';
+      }
+
+    } catch (err) {
+      console.error('Error guardando reseña:', err);
+      btn.disabled = false;
+      btn.textContent = 'Enviar calificación';
+      dnToast('Error al enviar la reseña', 'error');
+    }
+  };
+
+  // Format date
+  function formatDate(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('es-CO', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  }
+
+  // Load ticket/cita data
+  async function loadData() {
+    try {
+      if (ticketId) {
+        // Load from tickets table
+        const { data: ticket, error } = await sb
+          .from('tickets')
+          .select('*')
+          .eq('id', ticketId)
+          .maybeSingle();
+
+        console.log('[Resena] Ticket query:', { ticket, error });
+
+        if (error) {
+          console.error('[Resena] Error:', error);
+          throw new Error('Error al cargar el ticket');
+        }
+        if (!ticket) throw new Error('Ticket no encontrado');
+
+        // Check if review already exists
+        const { data: existingReview } = await sb
+          .from('resenas')
+          .select('id')
+          .eq('ticket_id', ticketId)
+          .maybeSingle();
+
+        if (existingReview) {
+          showError('Ya has calificado este servicio. Gracias.');
+          return;
+        }
+
+        ticketData = ticket;
+
+        // Get client phone
+        if (ticket.cliente_id) {
+          const { data: cliente } = await sb
+            .from('usuarios')
+            .select('phone')
+            .eq('id', ticket.cliente_id)
+            .maybeSingle();
+          if (cliente?.phone) {
+            clienteTelefono = cliente.phone.replace(/\D/g, '');
+          }
+        }
+
+        // Get service name from items
+        const items = ticket.items || [];
+        const serviceName = items.length > 0
+          ? items.map(i => i.nombre).join(', ')
+          : 'Servicio';
+
+        // Get barber from items or from URL param
+        const itemWithBarber = items.find(i => i.barbero_id || i.barbero_nombre);
+        barberoId = barberoParam || itemWithBarber?.barbero_id || null;
+        barberoNombre = itemWithBarber?.barbero_nombre || '';
+
+        // If we have barbero param but no name, try to fetch it
+        if (barberoId && !barberoNombre) {
+          const { data: barbero } = await sb
+            .from('barberos')
+            .select('usuarios(full_name)')
+            .eq('id', barberoId)
+            .maybeSingle();
+          if (barbero?.usuarios?.full_name) {
+            barberoNombre = barbero.usuarios.full_name;
+          }
+        }
+
+        // Get sucursal info, Google Maps link and WhatsApp
+        if (ticket.sucursal_id) {
+          const { data: sucursal } = await sb
+            .from('sucursales')
+            .select('nombre, google_maps_link, whatsapp')
+            .eq('id', ticket.sucursal_id)
+            .maybeSingle();
+          if (sucursal) {
+            if (sucursal.whatsapp) {
+              sedeWhatsapp = sucursal.whatsapp.replace(/\D/g, '');
+            }
+            sucursalNombre = sucursal.nombre || '';
+            if (sucursal.google_maps_link) {
+              googleMapsLink = sucursal.google_maps_link;
+            }
+          }
+        }
+
+        // Update UI
+        document.getElementById('serviceName').textContent = serviceName;
+        document.getElementById('serviceDate').textContent = formatDate(ticket.created_at);
+        if (barberoNombre) {
+          document.getElementById('barberName').textContent = `Atendido por ${barberoNombre}`;
+        }
+
+      } else if (citaId) {
+        // Load from citas table (fallback)
+        const { data: cita, error } = await sb
+          .from('citas')
+          .select('*, servicios(nombre), barberos(id, usuarios!barberos_id_fkey(full_name)), sucursales(nombre, google_maps_link, whatsapp), usuarios!citas_cliente_id_fkey(phone)')
+          .eq('id', citaId)
+          .single();
+
+        if (error || !cita) throw new Error('Cita no encontrada');
+
+        // Check if review already exists
+        const { data: existingReview } = await sb
+          .from('resenas')
+          .select('id')
+          .eq('cita_id', citaId)
+          .maybeSingle();
+
+        if (existingReview) {
+          showError('Ya has calificado este servicio. Gracias.');
+          return;
+        }
+
+        citaData = cita;
+
+        // Get client phone
+        if (cita.usuarios?.phone) {
+          clienteTelefono = cita.usuarios.phone.replace(/\D/g, '');
+        }
+
+        // Get barber info
+        barberoId = barberoParam || cita.barbero_id || cita.barberos?.id || null;
+        barberoNombre = cita.barberos?.usuarios?.full_name || '';
+
+        // Get sucursal info
+        if (cita.sucursales) {
+          sucursalNombre = cita.sucursales.nombre || '';
+          if (cita.sucursales.google_maps_link) {
+            googleMapsLink = cita.sucursales.google_maps_link;
+          }
+          if (cita.sucursales.whatsapp) {
+            sedeWhatsapp = cita.sucursales.whatsapp.replace(/\D/g, '');
+          }
+        }
+
+        // Update UI
+        const serviceName = cita.servicios?.nombre || 'Servicio';
+
+        document.getElementById('serviceName').textContent = serviceName;
+        document.getElementById('serviceDate').textContent = formatDate(cita.fecha);
+        if (barberoNombre) {
+          document.getElementById('barberName').textContent = `Atendido por ${barberoNombre}`;
+        }
+
+      } else {
+        throw new Error('No se encontró información del servicio');
+      }
+
+      // Show review form
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('reviewCard').classList.remove('hide');
+
+      // Pre-select rating if provided in URL
+      if (ratingParam) {
+        const rating = parseInt(ratingParam);
+        if (rating >= 1 && rating <= 5) {
+          setRating(rating);
+        }
+      }
+
+    } catch (err) {
+      console.error('Error cargando datos:', err);
+      showError(err.message || 'No pudimos cargar la información del servicio.');
+    }
+  }
+
+  function showError(message) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('reviewCard').classList.add('hide');
+    document.getElementById('errorMessage').textContent = message;
+    document.getElementById('errorCard').classList.remove('hide');
+    document.getElementById('errorCard').classList.add('show');
+  }
+
+  // Init
+  loadData();
+</script>
+</body>
+</html>

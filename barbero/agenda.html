@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://zzmtnjlfrlqmouijfste.supabase.co" crossorigin>
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" as="script">
+<link rel="dns-prefetch" href="https://zzmtnjlfrlqmouijfste.supabase.co">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Keicy Barbería · Mi agenda</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/barbero-nav.css">
+<style>
+  /* Variables heredadas de design-system.css */
+  html, body{ height:100%; overflow-x:hidden; }
+  body{
+    overflow:hidden; overflow-x:hidden; overscroll-behavior:none; -webkit-font-smoothing:antialiased;
+    background:var(--bg);
+  }
+  [data-theme="dark"] body{
+    background:
+      radial-gradient(ellipse 120% 60% at 50% -10%, rgba(217,184,114,0.08), transparent 60%),
+      radial-gradient(ellipse 100% 50% at 90% 110%, rgba(255,255,255,0.035), transparent 55%),
+      #000000;
+  }
+  [data-theme="light"] body{
+    background:#FAFAFA;
+  }
+  * { -webkit-tap-highlight-color: transparent; }
+
+  #app{
+    max-width:480px; margin:0 auto; height:100dvh;
+    display:flex; flex-direction:column;
+    padding:var(--effective-top) var(--page-padding-x) calc(var(--nav-height, 56px) + var(--safe-bottom, 0px) + 16px);
+    box-sizing:border-box; overflow:hidden;
+  }
+
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+  .fade-in{ animation:fadeUp 0.42s var(--ease-ios) both; }
+
+  /* ---- Header (idéntico a home.html) ---- */
+  .hdr-clock{ text-align:center; font-size:10.5px; font-weight:600; color:var(--text-muted); letter-spacing:0.5px; flex-shrink:0; padding-bottom:2px; }
+  .hdr-main{ display:flex; align-items:center; justify-content:space-between; flex-shrink:0; padding:2px 0 10px; }
+  .hdr-barber{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; cursor:pointer; }
+  .hdr-avatar-wrap{ position:relative; flex-shrink:0; width:44px; height:44px; }
+  .hdr-avatar{ width:44px; height:44px; border-radius:50%; object-fit:cover; display:block; }
+  .hdr-avatar-fallback{ width:44px; height:44px; font-size:14px; }
+  .hdr-avatar-ring{ position:absolute; inset:-2px; border-radius:50%; border:1.5px solid rgba(217,184,114,0.55); pointer-events:none; }
+  .hdr-textcol{ min-width:0; }
+  .hdr-name{ font-size:15px; font-weight:700; line-height:1.2; letter-spacing:-0.1px; color:var(--text); }
+  .hdr-puesto{ font-size:10.5px; color:var(--text-muted); font-weight:500; margin-top:1px; }
+  .hdr-estado{
+    display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:700; margin-top:5px;
+    padding:3.5px 9px 3.5px 7px; border-radius:999px; letter-spacing:0.2px;
+    background:rgba(52,211,153,0.14); border:1px solid rgba(52,211,153,0.25); color:#5EEAB2;
+  }
+  .hdr-estado.busy{ background:rgba(217,184,114,0.15); border-color:rgba(217,184,114,0.3); color:var(--ring-gold); }
+  .hdr-estado .dot{ width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; }
+  .hdr-logo{ height:32px; border-radius:8px; flex-shrink:0; margin:0 8px; opacity:0.96; filter:drop-shadow(0 0 12px rgba(217,184,114,0.18)); }
+  .bell-btn{
+    width:40px; height:40px; border-radius:14px; position:relative; cursor:pointer; flex-shrink:0;
+    background:var(--glass-card-2); border:1px solid var(--glass-border);
+    backdrop-filter:blur(20px) saturate(160%);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform .16s var(--ease-ios), background .16s ease;
+  }
+  .bell-btn:active{ transform:scale(0.9); background:var(--glass-card); }
+  .bell-btn svg{ width:17px; height:17px; opacity:0.92; }
+  .bell-badge{
+    position:absolute; top:-3px; right:-3px; min-width:15px; height:15px; padding:0 3px; border-radius:8px;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-size:9px; font-weight:800;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .glass-card{
+    background:var(--glass-card); border:1px solid var(--glass-border); border-radius:26px;
+    backdrop-filter:blur(24px) saturate(160%);
+    box-shadow:0 1px 0 rgba(255,255,255,0.04) inset, 0 12px 30px rgba(0,0,0,0.35);
+  }
+
+  .page-title-row{ flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding-bottom:6px; }
+  .page-title{ font-size:21px; font-weight:800; letter-spacing:-0.4px; color:var(--text); }
+  .page-sub{ font-size:12px; color:var(--text-muted); margin-top:1px; }
+  .today-btn{
+    font-size:11.5px; font-weight:700; color:var(--gold); background:rgba(217,184,114,0.12);
+    border:1px solid rgba(217,184,114,0.3); padding:7px 13px; border-radius:12px; cursor:pointer;
+    transition:transform .14s var(--ease-ios);
+  }
+  .today-btn:active{ transform:scale(0.93); }
+
+  /* ---- Selector de vista ---- */
+  .view-tabs{ flex-shrink:0; display:flex; gap:4px; padding:4px; background:var(--glass-card-2); border-radius:14px; margin-bottom:10px; }
+  .view-tab{
+    flex:1; padding:8px 12px; border-radius:10px; text-align:center; cursor:pointer;
+    font-size:12px; font-weight:700; color:var(--text-muted);
+    transition:all .2s ease;
+  }
+  .view-tab:active{ transform:scale(0.95); }
+  .view-tab.active{ background:linear-gradient(165deg, var(--gold-bright), var(--gold)); color:#111111; }
+
+  /* ---- Vista Semanal (tarjetas por día con scroll horizontal) ---- */
+  .week-header-row{
+    display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; flex-shrink:0;
+  }
+  .week-nav-arrows{ display:flex; align-items:center; gap:6px; }
+  .week-range-label{ font-size:14px; font-weight:700; color:var(--text); text-align:center; flex:1; }
+  .week-today-btn{
+    font-size:11px; font-weight:700; color:var(--gold); background:rgba(217,184,114,0.12);
+    border:1px solid rgba(217,184,114,0.3); padding:6px 10px; border-radius:10px; cursor:pointer;
+    transition:transform .14s var(--ease-ios);
+  }
+  .week-today-btn:active{ transform:scale(0.93); }
+
+  .week-scroll-container{
+    flex:1; min-height:0; overflow-x:auto; overflow-y:hidden;
+    -webkit-overflow-scrolling:touch; scroll-snap-type:x mandatory;
+    scrollbar-width:none; -ms-overflow-style:none;
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+  }
+  .week-scroll-container::-webkit-scrollbar{ display:none; }
+
+  .week-cards-wrapper{
+    display:flex; gap:10px; min-width:max-content; padding:0 4px 20px;
+  }
+
+  .week-day-card{
+    flex:0 0 calc((100vw - 72px) / 3); min-width:100px; max-width:140px;
+    background:var(--glass-card); backdrop-filter:blur(14px);
+    border:1px solid var(--glass-border); border-radius:18px;
+    padding:12px; display:flex; flex-direction:column;
+    scroll-snap-align:start; transition:border-color .2s ease;
+  }
+  .week-day-card.is-today{ border-color:var(--gold); }
+  .week-day-card.is-today .week-day-head{ background:linear-gradient(165deg, var(--gold-bright), var(--gold)); border-radius:10px; padding:6px 8px; margin:-4px -4px 6px; }
+  .week-day-card.is-today .week-day-head .dname,
+  .week-day-card.is-today .week-day-head .dnum{ color:#111111 !important; }
+
+  .week-day-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px; flex-shrink:0; }
+  .week-day-head .dname{ font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:.4px; }
+  .week-day-head .dnum{ font-size:18px; font-weight:800; color:var(--text); }
+
+  .week-day-disp{ font-size:10px; color:var(--gold); font-weight:700; margin-bottom:8px; flex-shrink:0; }
+
+  .week-day-scroll{ flex:1; overflow-y:auto; max-height:calc(100vh - 340px); }
+  .week-day-scroll::-webkit-scrollbar{ width:0; }
+
+  .week-slot{
+    font-size:10.5px; padding:8px 10px; border-radius:12px; margin-bottom:6px;
+    cursor:pointer; transition:background .15s ease, transform .12s ease; border:1px solid transparent;
+  }
+  .week-slot:active{ transform:scale(0.97); }
+  .week-slot .ws-time{ font-weight:800; color:var(--gold); font-size:11px; }
+  .week-slot .ws-name{ font-weight:600; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
+  .week-slot .ws-service{ font-size:9.5px; color:var(--text-secondary); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* Estados de citas */
+  .week-slot.st-agendada{ background:rgba(78,140,203,0.18); border-color:rgba(78,140,203,0.35); }
+  .week-slot.st-espera{ background:rgba(242,201,76,0.18); border-color:rgba(242,201,76,0.4); }
+  .week-slot.st-servicio{ background:rgba(155,111,224,0.2); border-color:rgba(155,111,224,0.45); }
+  .week-slot.st-pago{ background:rgba(242,153,74,0.18); border-color:rgba(242,153,74,0.4); }
+  .week-slot.st-fin{ background:rgba(78,203,113,0.15); border-color:rgba(78,203,113,0.35); }
+  .week-slot.st-nueva{ background:rgba(159,159,159,0.14); border-color:rgba(159,159,159,0.35); }
+
+  /* Slot libre */
+  .week-slot.libre{ background:var(--glass-card-2); border:1px dashed var(--divider); }
+  .week-slot.libre .ws-time{ color:var(--text-muted); }
+  .week-slot.libre .ws-name{ color:var(--text-muted); font-weight:500; }
+
+  /* Bloqueo */
+  .week-slot.bloqueado{ background:rgba(255,107,94,0.08); border:1px dashed rgba(255,107,94,0.25); }
+  .week-slot.bloqueado .ws-time{ color:rgba(255,107,94,0.6); }
+  .week-slot.bloqueado .ws-name{ color:rgba(255,255,255,0.4); display:flex; align-items:center; gap:4px; }
+
+  /* Día de descanso */
+  .week-day-card.dia-cerrado{ opacity:0.6; }
+  .week-day-card.dia-cerrado .week-day-scroll{
+    display:flex; align-items:center; justify-content:center; min-height:120px;
+  }
+  .week-slot.descanso{
+    background:rgba(100,100,120,0.1); border:1px dashed rgba(255,255,255,0.15);
+    text-align:center; padding:16px 8px;
+  }
+  .week-slot.descanso .ws-name{ justify-content:center; font-size:11px; }
+
+  .week-empty-msg{ font-size:10.5px; color:var(--text-muted); text-align:center; padding:12px 4px; }
+
+  /* Responsive */
+  @media (max-width: 380px) {
+    .week-day-card{ flex:0 0 calc((100vw - 56px) / 2.5); min-width:90px; padding:10px; }
+    .week-slot{ padding:6px 8px; font-size:10px; }
+  }
+  @media (min-width: 500px) {
+    .week-day-card{ flex:0 0 calc((100vw - 80px) / 4); max-width:130px; }
+  }
+  @media (min-width: 768px) {
+    .week-day-card{ flex:0 0 calc((100% - 84px) / 7); max-width:none; }
+  }
+
+  /* ---- Vista Mensual ---- */
+  .month-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .month-label{ font-size:16px; font-weight:800; color:var(--text); }
+  .month-grid-header{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px; }
+  .month-grid-header span{ text-align:center; font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; }
+  .month-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+  .month-day{
+    aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border-radius:12px; background:var(--glass-card-2); cursor:pointer; position:relative;
+    transition:transform .12s var(--ease-ios), background .15s ease;
+  }
+  .month-day:active{ transform:scale(0.9); }
+  .month-day.other-month{ opacity:0.3; }
+  .month-day.today{ border:1.5px solid var(--gold); }
+  .month-day.selected{ background:rgba(217,184,114,0.2); }
+  .month-day .d{ font-size:13px; font-weight:700; color:var(--text); }
+  .month-day .s{
+    position:absolute; bottom:3px; font-size:8px; font-weight:700;
+    padding:1px 4px; border-radius:4px; background:rgba(52,211,153,0.2); color:#5EEAB2;
+  }
+  .month-day .s.busy{ background:rgba(255,107,94,0.2); color:#FF8A7E; }
+  .month-day .s.some{ background:rgba(242,201,76,0.2); color:#F5D373; }
+  .month-day.cerrado{ opacity:0.5; }
+  .month-day.cerrado .s{ background:rgba(100,100,120,0.2); color:rgba(255,255,255,0.5); font-size:10px; }
+
+  /* ---- Tira de días ---- */
+  .day-strip-row{ flex-shrink:0; display:flex; align-items:center; gap:6px; margin-bottom:10px; }
+  .day-nav-btn{
+    width:34px; height:34px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    background:var(--glass-card-2); border:1px solid var(--glass-border); cursor:pointer;
+    transition:transform .14s var(--ease-ios); color:var(--text);
+  }
+  .day-nav-btn:active{ transform:scale(0.88); }
+  .day-nav-btn svg{ width:14px; height:14px; }
+  .day-strip{ flex:1; display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; }
+  .day-strip::-webkit-scrollbar{ display:none; }
+  .day-chip{
+    flex-shrink:0; width:46px; display:flex; flex-direction:column; align-items:center; gap:2px;
+    padding:8px 4px; border-radius:16px; cursor:pointer; background:var(--glass-card-2);
+    border:1px solid var(--glass-border-soft); transition:transform .14s var(--ease-ios), background .15s ease, border-color .15s ease;
+  }
+  .day-chip:active{ transform:scale(0.92); }
+  .day-chip .dow{ font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.3px; }
+  .day-chip .num{ font-size:15px; font-weight:800; margin-top:1px; color:var(--text); }
+  .day-chip.today .num{ color:var(--gold); }
+  .day-chip.selected{ background:linear-gradient(165deg, var(--gold-bright), var(--gold)); border-color:transparent; }
+  .day-chip.selected .dow, .day-chip.selected .num{ color:#111111; }
+  .cal-btn{
+    width:34px; height:34px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    background:var(--glass-card-2); border:1px solid var(--glass-border); cursor:pointer; position:relative;
+  }
+  .cal-btn svg{ width:15px; height:15px; }
+  #jumpDateInput{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+
+  /* ---- Resumen del día ---- */
+  .day-kpis{ flex-shrink:0; display:flex; gap:9px; margin-bottom:10px; }
+  .day-kpi{ flex:1; padding:11px 14px; }
+  .day-kpi .l{ font-size:9.5px; font-weight:700; letter-spacing:0.5px; color:var(--text-muted); text-transform:uppercase; }
+  .day-kpi .v{ font-size:17px; font-weight:800; margin-top:3px; color:var(--text); }
+  .day-kpi .v.gold{ color:var(--gold); }
+
+  /* ---- Timeline (mismo lenguaje visual que admin/calendario.html) ---- */
+  .agenda-list-wrap{ flex:1; min-height:0; overflow-y:auto; padding-bottom:90px; position:relative; }
+  .tl-inner{ display:grid; grid-template-columns:38px 1fr; position:relative; }
+  .tl-gutter{ position:relative; }
+  .tl-hmark{ position:absolute; left:0; right:4px; font-size:9.5px; color:var(--text-muted); font-weight:700; text-align:right; transform:translateY(-7px); }
+  .tl-track{
+    position:relative; border-left:1px solid var(--divider); margin-left:6px;
+    background-image:repeating-linear-gradient(to bottom, var(--divider) 0, var(--divider) 1px, transparent 1px, transparent var(--tl-hour-px));
+  }
+  .tl-libre{ position:absolute; left:8px; right:8px; text-align:center; font-size:10px; color:var(--text-muted); font-weight:700; letter-spacing:.3px; pointer-events:none; }
+  .tl-block{
+    position:absolute; left:8px; right:8px; border-radius:14px; padding:6px 10px; overflow:hidden; cursor:pointer;
+    border:1px solid transparent; box-shadow:0 3px 10px rgba(0,0,0,0.2); transition:transform .14s var(--ease-ios);
+  }
+  .tl-block:active{ transform:scale(0.97); }
+  .tl-block .row1{ display:flex; align-items:center; justify-content:space-between; gap:6px; }
+  .tl-block .t{ font-size:10.5px; font-weight:800; opacity:.92; }
+  .tl-block .dur{ font-size:8.5px; font-weight:700; opacity:.75; background:rgba(0,0,0,0.2); padding:1px 6px; border-radius:6px; }
+  .tl-block .n{ font-size:12.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+  .tl-block .s{ font-size:10px; opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+  .tl-block .price{ font-size:9.5px; font-weight:700; color:var(--gold); margin-top:2px; }
+  .tl-block .pagada-badge{ display:inline-flex; align-items:center; gap:3px; font-size:9px; font-weight:700; color:#10B981; background:rgba(16,185,129,0.15); padding:2px 6px; border-radius:6px; margin-top:3px; }
+  .tl-block .pagada-badge svg{ width:10px; height:10px; }
+  .tl-block.st-nueva{ background:rgba(159,159,159,0.18); border-color:rgba(159,159,159,0.4); color:#C7C7C7; }
+  .tl-block.st-agendada{ background:rgba(78,140,203,0.24); border-color:rgba(78,140,203,0.45); color:#9FCBFA; }
+  .tl-block.st-espera{ background:rgba(242,201,76,0.24); border-color:rgba(242,201,76,0.45); color:#F5D373; }
+  .tl-block.st-servicio{ background:rgba(155,111,224,0.26); border-color:rgba(155,111,224,0.5); color:#CDB0F5; }
+  .tl-block.st-pago{ background:rgba(242,153,74,0.24); border-color:rgba(242,153,74,0.45); color:#F7B67D; }
+  .tl-block.st-fin{ background:rgba(78,203,113,0.20); border-color:rgba(78,203,113,0.4); color:#8FE3A8; }
+  .tl-now-line{ position:absolute; left:0; right:0; height:2px; background:#FF5449; z-index:8; pointer-events:none; box-shadow:0 0 8px rgba(255,84,73,0.5); }
+  .tl-now-dot{ position:absolute; left:30px; top:-5px; width:10px; height:10px; border-radius:50%; background:#FF5449; box-shadow:0 0 0 4px rgba(255,84,73,0.2); }
+  .tl-now-time{
+    position:absolute; left:46px; top:-10px; font-size:9px; font-weight:800; color:#111111; background:#FF5449;
+    padding:2px 6px; border-radius:999px; white-space:nowrap;
+  }
+
+  .empty-state{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; }
+  .empty-icon{
+    width:60px; height:60px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:var(--glass-card-2); border:1px solid var(--glass-border);
+  }
+  .empty-icon svg{ width:24px; height:24px; }
+  .empty-title{ font-size:16px; font-weight:700; }
+  .empty-sub{ font-size:12.5px; color:var(--text-muted); max-width:250px; }
+
+  .skel{ background:linear-gradient(100deg, rgba(255,255,255,0.045) 30%, rgba(255,255,255,0.09) 50%, rgba(255,255,255,0.045) 70%); background-size:220% 100%; animation:skelShine 1.5s ease-in-out infinite; border-radius:18px; }
+  @keyframes skelShine{ 0%{ background-position:120% 0; } 100%{ background-position:-20% 0; } }
+  .skel-row{ height:64px; border-radius:22px; margin-bottom:8px; }
+
+  /* Sheets, Toast y Tab-bar estilos centralizados en barbero-nav.css */
+
+  /* ========== RESPONSIVE ========== */
+  @media (min-width: 768px) {
+    #app {
+      max-width: 600px;
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+    .hdr-avatar, .hdr-avatar-fallback { width: 52px; height: 52px; }
+    .hdr-avatar-wrap { width: 52px; height: 52px; }
+    .hdr-name { font-size: 17px; }
+    .page-title { font-size: 24px; }
+    .day-chip { min-width: 50px; padding: 10px 8px; }
+    .slot-row { padding: 14px 18px; }
+    .slot-client-name { font-size: 15px; }
+    .slot-price { font-size: 15px; }
+  }
+
+  @media (min-width: 1024px) {
+    body { display: flex; justify-content: center; align-items: flex-start; padding-top: 40px; }
+    #app {
+      max-width: 700px;
+      background: rgba(20,20,20,0.6);
+      border-radius: 32px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      height: auto;
+      min-height: 85vh;
+      margin: 0 auto;
+    }
+  }
+
+  @media (max-height: 640px) {
+    .hdr-avatar, .hdr-avatar-fallback { width: 38px; height: 38px; }
+    .hdr-avatar-wrap { width: 38px; height: 38px; }
+    .hdr-name { font-size: 14px; }
+    .page-title { font-size: 18px; }
+    .slot-row { padding: 10px 14px; }
+    .day-chip { min-width: 38px; padding: 8px 6px; }
+  }
+
+  /* ========== TEMA CLARO ========== */
+  [data-theme="light"] .glass-card {
+    background:rgba(255,255,255,0.95);
+    border:1px solid rgba(0,0,0,0.08);
+    box-shadow:0 2px 12px rgba(0,0,0,0.06);
+  }
+  [data-theme="light"] .hdr-estado {
+    background:rgba(52,211,153,0.12);
+    border-color:rgba(52,211,153,0.3);
+    color:#059669;
+  }
+  [data-theme="light"] .hdr-estado.busy {
+    background:rgba(212,175,85,0.12);
+    border-color:rgba(212,175,85,0.35);
+    color:#B8860B;
+  }
+  [data-theme="light"] .view-tabs {
+    background:rgba(0,0,0,0.04);
+  }
+  [data-theme="light"] .day-chip {
+    background:rgba(0,0,0,0.03);
+    border-color:rgba(0,0,0,0.08);
+  }
+  [data-theme="light"] .day-chip.today .num { color:#B8860B; }
+  [data-theme="light"] .day-nav-btn,
+  [data-theme="light"] .cal-btn,
+  [data-theme="light"] .bell-btn {
+    background:rgba(0,0,0,0.04);
+    border-color:rgba(0,0,0,0.08);
+  }
+  [data-theme="light"] .bell-btn svg,
+  [data-theme="light"] .day-nav-btn svg { stroke:var(--text); }
+
+  /* Timeline tema claro */
+  [data-theme="light"] .tl-track {
+    border-left-color:rgba(0,0,0,0.1);
+    background-image:repeating-linear-gradient(to bottom, rgba(0,0,0,0.06) 0, rgba(0,0,0,0.06) 1px, transparent 1px, transparent var(--tl-hour-px));
+  }
+  [data-theme="light"] .tl-block {
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+  }
+  [data-theme="light"] .tl-block.st-nueva { background:rgba(159,159,159,0.15); border-color:rgba(159,159,159,0.35); color:#555; }
+  [data-theme="light"] .tl-block.st-agendada { background:rgba(78,140,203,0.15); border-color:rgba(78,140,203,0.4); color:#2563EB; }
+  [data-theme="light"] .tl-block.st-espera { background:rgba(242,201,76,0.18); border-color:rgba(242,201,76,0.5); color:#B8860B; }
+  [data-theme="light"] .tl-block.st-servicio { background:rgba(155,111,224,0.15); border-color:rgba(155,111,224,0.4); color:#7C3AED; }
+  [data-theme="light"] .tl-block.st-pago { background:rgba(242,153,74,0.15); border-color:rgba(242,153,74,0.4); color:#D97706; }
+  [data-theme="light"] .tl-block.st-fin { background:rgba(78,203,113,0.12); border-color:rgba(78,203,113,0.35); color:#059669; }
+  [data-theme="light"] .tl-block .dur { background:rgba(0,0,0,0.08); }
+  [data-theme="light"] .tl-libre { color:var(--text-muted); }
+
+  /* Vista semanal tema claro */
+  [data-theme="light"] .week-day-card {
+    background:rgba(255,255,255,0.95);
+    border-color:rgba(0,0,0,0.08);
+  }
+  [data-theme="light"] .week-day-card.is-today { border-color:var(--gold); }
+  [data-theme="light"] .week-slot.st-agendada { background:rgba(78,140,203,0.12); border-color:rgba(78,140,203,0.3); }
+  [data-theme="light"] .week-slot.st-espera { background:rgba(242,201,76,0.15); border-color:rgba(242,201,76,0.35); }
+  [data-theme="light"] .week-slot.st-servicio { background:rgba(155,111,224,0.12); border-color:rgba(155,111,224,0.3); }
+  [data-theme="light"] .week-slot.st-pago { background:rgba(242,153,74,0.12); border-color:rgba(242,153,74,0.3); }
+  [data-theme="light"] .week-slot.st-fin { background:rgba(78,203,113,0.1); border-color:rgba(78,203,113,0.25); }
+  [data-theme="light"] .week-slot.st-nueva { background:rgba(159,159,159,0.1); border-color:rgba(159,159,159,0.25); }
+  [data-theme="light"] .week-slot.libre { background:rgba(0,0,0,0.02); border-color:rgba(0,0,0,0.12); }
+  [data-theme="light"] .week-slot.bloqueado { background:rgba(239,68,68,0.06); border-color:rgba(239,68,68,0.2); }
+  [data-theme="light"] .week-slot.bloqueado .ws-time { color:rgba(239,68,68,0.6); }
+  [data-theme="light"] .week-slot.bloqueado .ws-name { color:rgba(0,0,0,0.45); }
+  [data-theme="light"] .week-slot.descanso { background:rgba(0,0,0,0.03); border-color:rgba(0,0,0,0.1); }
+
+  /* Vista mensual tema claro */
+  [data-theme="light"] .month-day {
+    background:rgba(0,0,0,0.02);
+  }
+  [data-theme="light"] .month-day.today { border-color:var(--gold); }
+  [data-theme="light"] .month-day.selected { background:rgba(212,175,85,0.15); }
+  [data-theme="light"] .month-day .s { background:rgba(52,211,153,0.15); color:#059669; }
+  [data-theme="light"] .month-day .s.busy { background:rgba(239,68,68,0.12); color:#DC2626; }
+  [data-theme="light"] .month-day .s.some { background:rgba(245,158,11,0.15); color:#D97706; }
+
+  /* Sheets tema claro */
+  [data-theme="light"] .sheet-box {
+    background:#FFFFFF;
+    border-color:rgba(0,0,0,0.08);
+  }
+  [data-theme="light"] .sheet-close svg { stroke:var(--text); }
+
+  /* Empty state tema claro */
+  [data-theme="light"] .empty-icon {
+    background:rgba(0,0,0,0.03);
+    border-color:rgba(0,0,0,0.08);
+  }
+
+  @media (min-width: 1024px) {
+    [data-theme="light"] #app {
+      background:rgba(255,255,255,0.9);
+      border-color:rgba(0,0,0,0.08);
+      box-shadow:0 20px 60px rgba(0,0,0,0.08);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <div class="hdr-clock" id="hdrClock">—</div>
+
+  <div class="hdr-main fade-in">
+    <div class="hdr-barber" onclick="openAccountSheet()">
+      <div class="hdr-avatar-wrap">
+        <img id="hdrAvatarImg" class="hdr-avatar" style="opacity:0;" alt="" loading="eager">
+        <div id="hdrAvatarFallback" class="avatar hdr-avatar-fallback">--</div>
+        <div class="hdr-avatar-ring"></div>
+      </div>
+      <div class="hdr-textcol">
+        <div class="hdr-name" id="hdrName">—</div>
+        <div class="hdr-puesto" id="hdrPuesto">Barbero</div>
+        <div class="hdr-estado" id="hdrEstado"><span class="dot"></span>Cargando…</div>
+      </div>
+    </div>
+    <img src="../assets/logo-transparent.png" class="hdr-logo" alt="Keicy Barbería">
+    <div class="bell-btn" onclick="openAlertsSheet()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      <span class="bell-badge" id="bellBadge" style="display:none;">0</span>
+    </div>
+  </div>
+
+  <div class="page-title-row fade-in">
+    <div>
+      <div class="page-title">Mi agenda</div>
+      <div class="page-sub" id="pageSub">—</div>
+    </div>
+    <div class="today-btn" onclick="jumpToday()">Hoy</div>
+  </div>
+
+  <div class="view-tabs fade-in" id="viewTabs">
+    <div class="view-tab active" data-view="day" onclick="switchView('day')">Día</div>
+    <div class="view-tab" data-view="week" onclick="switchView('week')">Semana</div>
+    <div class="view-tab" data-view="month" onclick="switchView('month')">Mes</div>
+  </div>
+
+  <div class="day-strip-row fade-in" id="dayStripRow">
+    <div class="day-nav-btn" onclick="shiftWindow(-7)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="day-strip" id="dayStrip"></div>
+    <div class="day-nav-btn" onclick="shiftWindow(7)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="cal-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg>
+      <input type="date" id="jumpDateInput">
+    </div>
+  </div>
+
+  <div class="day-kpis fade-in">
+    <div class="glass-card day-kpi"><div class="l">Citas</div><div class="v" id="dkCitas">—</div></div>
+    <div class="glass-card day-kpi"><div class="l">Finalizadas</div><div class="v" id="dkFinalizadas">—</div></div>
+    <div class="glass-card day-kpi"><div class="l">Estimado</div><div class="v gold" id="dkTotal">—</div></div>
+  </div>
+
+  <div class="agenda-list-wrap" id="agendaList">
+    <div class="skel skel-row"></div>
+    <div class="skel skel-row"></div>
+    <div class="skel skel-row"></div>
+  </div>
+
+  <div class="tab-bar fade-in">
+    <div class="tab-item" onclick="location.href='home.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11.5 12 4l9 7.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v9.5a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Inicio</span>
+    </div>
+    <div class="tab-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="4"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg>
+      <span>Agenda</span>
+    </div>
+    <div class="tab-item" onclick="location.href='perfil.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg>
+      <span>Perfil</span>
+    </div>
+  </div>
+
+  <div id="toast"><span class="toast-dot"></span><span id="toastText"></span></div>
+</div>
+
+<!-- Sheet: Alertas -->
+<div class="sheet-bg" id="alertsSheetBg" onclick="if(event.target===this) closeAlertsSheet()">
+  <div class="sheet-box">
+    <div class="sheet-handle"></div>
+    <div class="sheet-close" onclick="closeAlertsSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg></div>
+    <div class="sheet-title">Notificaciones</div>
+    <div id="alertsList" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- Sheet: Mi cuenta / cerrar sesión -->
+<div class="sheet-bg" id="accountSheetBg" onclick="if(event.target===this) closeAccountSheet()">
+  <div class="sheet-box">
+    <div class="sheet-handle"></div>
+    <div class="sheet-close" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg></div>
+    <div class="sheet-title">Mi cuenta</div>
+    <div class="sheet-sub" id="accountSheetName">—</div>
+    <div style="margin-top:18px; padding:16px; border-radius:18px; background:rgba(255,107,94,0.1); border:1px solid rgba(255,107,94,0.3); display:flex; align-items:center; justify-content:space-between; cursor:pointer;" onclick="logoutBarbero()">
+      <span style="font-size:14.5px; font-weight:700; color:var(--ring-red);">Cerrar sesión</span>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FF6B5E" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-linecap="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/mobile-nav.js"></script>
+<script>
+  const toastEl = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  function toast(msg){
+    toastText.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(window._t);
+    window._t = setTimeout(() => toastEl.classList.remove('show'), 2400);
+  }
+  function vibrate(pattern){ if (navigator.vibrate) navigator.vibrate(pattern); }
+
+  const user = dnRequireBarbero();
+
+  let clockInterval = null;
+  let nowLineInterval = null;
+  function tickClock(){
+    const now = new Date();
+    let h = now.getHours(); const ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+    document.getElementById('hdrClock').textContent = `${h}:${String(now.getMinutes()).padStart(2,'0')} ${ampm}`;
+  }
+  tickClock();
+  clockInterval = setInterval(tickClock, 15000);
+
+  async function loadBarberProfile(){
+    const { data } = await sb.from('barberos').select('puesto, especialidad, comision_pct, usuarios!barberos_id_fkey(full_name, username, avatar_url)').eq('id', user.id).maybeSingle();
+    const name = data?.usuarios?.full_name || data?.usuarios?.username || user.full_name || user.username;
+    document.getElementById('hdrName').textContent = name;
+    document.getElementById('hdrPuesto').textContent = data?.puesto ? `Puesto ${data.puesto}` : (data?.especialidad || 'Barbero');
+    // Guardar comisión del barbero
+    if (data?.comision_pct != null) barberoComisionPct = Number(data.comision_pct);
+    const avatarUrl = data?.usuarios?.avatar_url;
+    const img = document.getElementById('hdrAvatarImg');
+    const fallback = document.getElementById('hdrAvatarFallback');
+    if (avatarUrl) { img.src = avatarUrl; img.style.opacity = '1'; fallback.style.display = 'none'; }
+    else { fallback.textContent = dnInitials(name); fallback.style.display = 'flex'; img.style.opacity = '0'; }
+  }
+
+  async function checkEstadoHoy(){
+    const { data } = await sb.from('citas').select('estado').eq('barbero_id', user.id).eq('fecha', dnTodayISO()).eq('estado', 'en_servicio').maybeSingle();
+    const el = document.getElementById('hdrEstado');
+    if (data) { el.classList.add('busy'); el.innerHTML = '<span class="dot"></span>En servicio'; }
+    else { el.classList.remove('busy'); el.innerHTML = '<span class="dot"></span>Libre'; }
+  }
+
+  let alertsCache = [];
+  let barberoComisionPct = 40; // default 40%
+
+  async function loadAlerts(){
+    const { data } = await sb.from('alertas_barbero').select('id, tipo, mensaje, leida, created_at').eq('barbero_id', user.id).order('created_at', { ascending:false }).limit(20);
+    alertsCache = data || [];
+    const unread = alertsCache.filter(a => !a.leida).length;
+    const badge = document.getElementById('bellBadge');
+    badge.textContent = unread;
+    badge.style.display = unread ? 'flex' : 'none';
+  }
+  function openAlertsSheet(){
+    vibrate(8);
+    const list = document.getElementById('alertsList');
+    list.innerHTML = alertsCache.length ? alertsCache.map(a => {
+      const mins = Math.max(1, Math.round((Date.now() - new Date(a.created_at))/60000));
+      const timeLabel = mins < 60 ? `Hace ${mins} min` : `Hace ${Math.round(mins/60)} h`;
+      return `<div style="padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; gap:10px; align-items:flex-start;">
+        <div style="width:7px; height:7px; border-radius:50%; margin-top:5px; flex-shrink:0; background:${a.leida ? 'rgba(255,255,255,0.18)' : 'var(--gold)'};"></div>
+        <div style="flex:1;"><div style="font-size:12.5px; font-weight:600;">${a.mensaje}</div><div style="font-size:10.5px; color:rgba(255,255,255,0.36); margin-top:2px;">${timeLabel}</div></div>
+      </div>`;
+    }).join('') : '<div class="waiting-note">Sin notificaciones.</div>';
+    document.getElementById('alertsSheetBg').classList.add('show');
+    const unreadIds = alertsCache.filter(a => !a.leida).map(a => a.id);
+    if (unreadIds.length) sb.from('alertas_barbero').update({ leida:true }).in('id', unreadIds).then(() => loadAlerts());
+  }
+  function closeAlertsSheet(){ document.getElementById('alertsSheetBg').classList.remove('show'); }
+
+  function openAccountSheet(){
+    vibrate(8);
+    document.getElementById('accountSheetName').textContent = document.getElementById('hdrName').textContent + ' · ' + document.getElementById('hdrPuesto').textContent;
+    document.getElementById('accountSheetBg').classList.add('show');
+  }
+  function closeAccountSheet(){ document.getElementById('accountSheetBg').classList.remove('show'); }
+  function logoutBarbero(){
+    if (!confirm('¿Cerrar sesión?')) return;
+    dnClearSession();
+    window.location.href = '../auth.html';
+  }
+
+  // ---- Fechas ----
+  function isoFromDate(d){ return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+  function dateFromIso(iso){ const [y,m,d] = iso.split('-').map(Number); return new Date(y, m-1, d); }
+  const DOW = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+  const DOW_FULL = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+  let selectedIso = dnTodayISO();
+  let windowStartIso = selectedIso; // primer día visible en la tira
+
+  function renderDayStrip(){
+    const el = document.getElementById('dayStrip');
+    const todayIso = dnTodayISO();
+    const start = dateFromIso(windowStartIso);
+    let html = '';
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start); d.setDate(d.getDate() + i);
+      const iso = isoFromDate(d);
+      const isToday = iso === todayIso;
+      const isSel = iso === selectedIso;
+      html += `<div class="day-chip ${isToday ? 'today' : ''} ${isSel ? 'selected' : ''}" onclick="selectDay('${iso}')">
+        <div class="dow">${DOW[d.getDay()]}</div>
+        <div class="num">${d.getDate()}</div>
+      </div>`;
+    }
+    el.innerHTML = html;
+  }
+
+  function selectDay(iso){
+    vibrate(8);
+    selectedIso = iso;
+    renderDayStrip();
+    loadAgenda();
+  }
+
+  function shiftWindow(days){
+    vibrate(6);
+    const d = dateFromIso(windowStartIso);
+    d.setDate(d.getDate() + days);
+    windowStartIso = isoFromDate(d);
+    renderDayStrip();
+  }
+
+  function jumpToday(){
+    vibrate(8);
+    selectedIso = dnTodayISO();
+    windowStartIso = selectedIso;
+    weekStartIso = dnTodayISO();
+    monthViewDate = new Date();
+
+    if (currentView === 'day') {
+      renderDayStrip();
+      loadAgenda();
+    } else if (currentView === 'week') {
+      loadWeekView();
+    } else if (currentView === 'month') {
+      loadMonthView();
+    }
+  }
+
+  document.getElementById('jumpDateInput').addEventListener('change', (e) => {
+    if (!e.target.value) return;
+    selectedIso = e.target.value;
+    windowStartIso = selectedIso;
+    renderDayStrip();
+    loadAgenda();
+  });
+
+  function fmtTime(hhmmss){
+    let [h,m] = hhmmss.split(':');
+    let hour = parseInt(h,10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12;
+    return { h: `${hour}:${m}`, a: ampm };
+  }
+
+  const ESTADO_LABEL = {
+    agendada:'Agendada', confirmada:'Confirmada', cancelada:'Cancelada', reprogramada:'Reprogramada',
+    sin_respuesta:'Sin respuesta', sala_espera:'En espera', en_servicio:'En servicio',
+    pendiente_pago:'Por cobrar', finalizada:'Finalizada'
+  };
+  const ESTADO_CLASS = {
+    agendada:'st-nueva', confirmada:'st-agendada', sala_espera:'st-espera', en_servicio:'st-servicio',
+    pendiente_pago:'st-pago', finalizada:'st-fin'
+  };
+
+  // Horario dinámico según sede del barbero
+  let TL_START_MIN = 8*60, TL_END_MIN = 21*60;
+  const TL_PX_PER_MIN = 1.3;
+  const TL_HOUR_PX = 60 * TL_PX_PER_MIN;
+  let TL_TRACK_H = (TL_END_MIN - TL_START_MIN) * TL_PX_PER_MIN;
+  let horarioSedeBarbero = null;
+  let diaDescansobarbero = null; // 0=domingo, 1=lunes, ..., 6=sábado
+  const DIAS_SEMANA_BARBERO = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+
+  async function cargarHorarioSedeBarbero() {
+    try {
+      // Obtener sucursal_id y dia_descanso del barbero
+      const { data: barbero } = await sb.from('barberos').select('sucursal_id, dia_descanso').eq('id', user.id).single();
+      if (!barbero) return;
+
+      // Guardar día de descanso del barbero (0=domingo, 1=lunes, etc.)
+      if (barbero.dia_descanso !== null && barbero.dia_descanso !== undefined) {
+        diaDescansobarbero = Number(barbero.dia_descanso);
+      }
+
+      if (!barbero.sucursal_id) return;
+      // Cargar horario de la sede
+      const { data: sede } = await sb.from('sucursales').select('horario').eq('id', barbero.sucursal_id).single();
+      if (sede?.horario) horarioSedeBarbero = sede.horario;
+    } catch (e) { console.error('Error cargando horario sede:', e); }
+  }
+
+  function actualizarHorarioDia() {
+    if (!horarioSedeBarbero) return;
+    const fecha = new Date(selectedIso + 'T12:00:00');
+    const diaSemana = DIAS_SEMANA_BARBERO[fecha.getDay()];
+    const h = horarioSedeBarbero[diaSemana];
+    // Día abierto si h existe y no está cerrado
+    if (h && h.cerrado !== true) {
+      const [abreH, abreM] = (h.abre || h.apertura || '08:00').split(':').map(Number);
+      const [cierraH, cierraM] = (h.cierra || h.cierre || '21:00').split(':').map(Number);
+      TL_START_MIN = abreH * 60 + (abreM || 0);
+      TL_END_MIN = cierraH * 60 + (cierraM || 0);
+      TL_TRACK_H = (TL_END_MIN - TL_START_MIN) * TL_PX_PER_MIN;
+    }
+  }
+
+  function toMin(hhmmss){ const [h,m] = hhmmss.split(':').map(Number); return h*60+m; }
+
+  async function loadAgenda(){
+    // Cargar horario de sede si no está cargado
+    if (!horarioSedeBarbero) await cargarHorarioSedeBarbero();
+    actualizarHorarioDia();
+
+    const d = dateFromIso(selectedIso);
+    const sub = `${DOW_FULL[d.getDay()]} ${d.getDate()} de ${MESES[d.getMonth()]}`;
+    document.getElementById('pageSub').textContent = sub.charAt(0).toUpperCase() + sub.slice(1);
+
+    const el = document.getElementById('agendaList');
+    el.innerHTML = `<div class="skel skel-row"></div><div class="skel skel-row"></div><div class="skel skel-row"></div>`;
+
+    try {
+      const { data, error } = await sb.from('citas')
+        .select('id, hora_inicio, hora_fin, estado, precio, pagada_at, usuarios!citas_cliente_id_fkey(full_name, username), servicios(nombre, duracion_min)')
+        .eq('barbero_id', user.id)
+        .eq('fecha', selectedIso)
+        .neq('estado', 'cancelada')
+        .order('hora_inicio', { ascending: true });
+      if (error) throw error;
+
+      const citas = data || [];
+      currentCitas = citas;
+      const finalizadas = citas.filter(c => c.estado === 'finalizada');
+      const totalServicios = citas.reduce((s,c) => s + (Number(c.precio)||0), 0);
+      const comisionBarbero = Math.round(totalServicios * barberoComisionPct / 100);
+      document.getElementById('dkCitas').textContent = citas.length;
+      document.getElementById('dkFinalizadas').textContent = finalizadas.length;
+      document.getElementById('dkTotal').textContent = dnFormatCOP(comisionBarbero);
+
+      if (!citas.length) {
+        el.innerHTML = `<div class="empty-state fade-in">
+          <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.6"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg></div>
+          <div class="empty-title">Sin citas este día</div>
+          <div class="empty-sub">No tienes servicios agendados para esta fecha.</div>
+        </div>`;
+        return;
+      }
+
+      renderTimeline(citas);
+      renderNowLine();
+    } catch (err) {
+      console.error(err);
+      el.innerHTML = '<div class="empty-state"><div class="empty-title">No pudimos cargar tu agenda</div><div class="empty-sub">Verifica tu conexión e intenta de nuevo.</div></div>';
+    }
+  }
+
+  let currentCitas = [];
+
+  function renderTimeline(citas){
+    const el = document.getElementById('agendaList');
+    let hourMarks = '';
+    for (let m = TL_START_MIN; m <= TL_END_MIN; m += 60) {
+      const h = Math.floor(m/60);
+      hourMarks += `<div class="tl-hmark" style="top:${(m-TL_START_MIN)*TL_PX_PER_MIN}px;">${String(h).padStart(2,'0')}:00</div>`;
+    }
+
+    const intervals = citas.map(c => {
+      const start = toMin(c.hora_inicio);
+      const dur = c.hora_fin ? (toMin(c.hora_fin) - start) : (c.servicios?.duracion_min || 30);
+      return [start, start + dur];
+    });
+
+    let blocks = '';
+    let cursorBottom = 0;
+    citas.forEach((c, i) => {
+      const [start, end] = intervals[i];
+      const dur = end - start;
+      let top = Math.max(0, (start - TL_START_MIN) * TL_PX_PER_MIN);
+      if (top < cursorBottom) top = cursorBottom; // si se solapa con la anterior, la baja para que no se encimen
+      const height = Math.max(34, dur * TL_PX_PER_MIN - 2);
+      cursorBottom = top + height + 4;
+      const cls = ESTADO_CLASS[c.estado] || 'st-agendada';
+      const name = c.usuarios?.full_name || c.usuarios?.username || 'Cliente';
+      const precioStr = c.precio ? dnFormatCOP(c.precio) : '';
+      const yaPagada = !!c.pagada_at;
+      const pagadaBadge = yaPagada ? `<div class="pagada-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Pagada</div>` : '';
+      blocks += `
+        <div class="tl-block ${cls} fade-in" style="top:${top}px; height:${height}px;" onclick="showApptInfo('${c.id}')">
+          <div class="row1"><span class="t">${fmtTime(c.hora_inicio).h} ${fmtTime(c.hora_inicio).a}</span><span class="dur">${dur}m</span></div>
+          <div class="n">${name}</div>
+          <div class="s">${c.servicios?.nombre || 'Servicio'} · ${ESTADO_LABEL[c.estado] || c.estado}</div>
+          ${precioStr ? `<div class="price">${precioStr}</div>` : ''}
+          ${pagadaBadge}
+        </div>`;
+    });
+    const trackH = Math.max(TL_TRACK_H, cursorBottom + 16);
+
+    let libres = '';
+    for (let m = TL_START_MIN; m < TL_END_MIN; m += 60) {
+      const covered = intervals.some(([s,e]) => m < e && (m+60) > s);
+      if (!covered) libres += `<div class="tl-libre" style="top:${(m - TL_START_MIN) * TL_PX_PER_MIN + TL_HOUR_PX/2 - 7}px;">Libre</div>`;
+    }
+
+    el.innerHTML = `<div class="tl-inner" style="--tl-hour-px:${TL_HOUR_PX}px;">
+      <div class="tl-gutter" style="height:${trackH}px;">${hourMarks}</div>
+      <div class="tl-track" id="tlTrack" style="height:${trackH}px;">${blocks}${libres}</div>
+    </div>`;
+  }
+
+  function showApptInfo(citaId){
+    vibrate(8);
+    const c = currentCitas.find(x => x.id === citaId);
+    if (!c) return;
+    const name = c.usuarios?.full_name || c.usuarios?.username || 'Cliente';
+    const precioStr = c.precio ? ` · ${dnFormatCOP(c.precio)}` : '';
+    const yaPagada = !!c.pagada_at;
+
+    if (yaPagada) {
+      toast(`✓ PAGADA · ${name} · ${c.servicios?.nombre || 'Servicio'} · Solo finalizar servicio`);
+    } else {
+      toast(`${fmtTime(c.hora_inicio).h} ${fmtTime(c.hora_inicio).a} · ${name} · ${c.servicios?.nombre || 'Servicio'}${precioStr} · ${ESTADO_LABEL[c.estado] || c.estado}`);
+    }
+  }
+
+  function renderNowLine(){
+    const track = document.getElementById('tlTrack');
+    if (!track) return;
+    document.getElementById('tlNowLine')?.remove();
+    const now = new Date();
+    const isToday = selectedIso === dnTodayISO();
+    const curMin = now.getHours()*60 + now.getMinutes();
+    if (!isToday || curMin < TL_START_MIN || curMin > TL_END_MIN) return;
+    const line = document.createElement('div');
+    line.id = 'tlNowLine';
+    line.className = 'tl-now-line';
+    line.style.top = ((curMin - TL_START_MIN) * TL_PX_PER_MIN) + 'px';
+    line.innerHTML = `<span class="tl-now-dot"></span><span class="tl-now-time">${fmtTime(now.toTimeString().slice(0,8)).h} ${fmtTime(now.toTimeString().slice(0,8)).a}</span>`;
+    track.appendChild(line);
+  }
+
+  nowLineInterval = setInterval(renderNowLine, 60000);
+
+  // ---- Sistema de vistas ----
+  let currentView = 'day'; // 'day' | 'week' | 'month'
+  let weekStartIso = dnTodayISO();
+  let monthViewDate = new Date();
+
+  function switchView(view){
+    vibrate(8);
+    currentView = view;
+    // Actualizar tabs
+    document.querySelectorAll('.view-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+    // Mostrar/ocultar elementos según vista
+    const dayStripRow = document.getElementById('dayStripRow');
+    const dayKpis = document.querySelector('.day-kpis');
+    if (view === 'day') {
+      dayStripRow.style.display = 'flex';
+      dayKpis.style.display = 'flex';
+      loadAgenda();
+    } else {
+      dayStripRow.style.display = 'none';
+      dayKpis.style.display = 'none';
+      if (view === 'week') loadWeekView();
+      else if (view === 'month') loadMonthView();
+    }
+  }
+
+  // ---- Vista Semanal (tarjetas por día con 9 slots) ----
+  const TOTAL_SLOTS_DIA = 9; // 9 espacios por día
+  const ALMUERZO_HORA = 13; // Almuerzo a las 13:00
+  let weekCitasCache = [];
+  let weekScrollTouchStartX = 0;
+  let weekScrollAtEnd = false;
+  let weekScrollAtStart = false;
+
+  async function loadWeekView(){
+    const el = document.getElementById('agendaList');
+    el.innerHTML = '<div class="skel skel-row"></div><div class="skel skel-row"></div>';
+
+    // Cargar horario de sede si no está cargado
+    if (!horarioSedeBarbero) await cargarHorarioSedeBarbero();
+
+    // Calcular inicio de semana (lunes)
+    const baseDate = dateFromIso(weekStartIso);
+    const baseDow = baseDate.getDay();
+    const baseDiff = baseDow === 0 ? -6 : 1 - baseDow;
+    baseDate.setDate(baseDate.getDate() + baseDiff);
+
+    const todayIso = dnTodayISO();
+    const days = [];
+    for (let i = 0; i < 7; i++){
+      const d = new Date(baseDate);
+      d.setDate(d.getDate() + i);
+      days.push({ date: d, iso: isoFromDate(d) });
+    }
+
+    const weekStart = days[0].iso;
+    const weekEnd = days[6].iso;
+
+    try {
+      // Cargar citas y bloqueos de la semana
+      const [citasRes, bloqueosRes] = await Promise.all([
+        sb.from('citas')
+          .select('id, fecha, hora_inicio, hora_fin, estado, precio, usuarios!citas_cliente_id_fkey(full_name, username), servicios(nombre, duracion_min)')
+          .eq('barbero_id', user.id)
+          .gte('fecha', weekStart)
+          .lte('fecha', weekEnd)
+          .neq('estado', 'cancelada')
+          .order('hora_inicio', { ascending: true }),
+        sb.from('bloqueos_barbero')
+          .select('id, fecha, hora_inicio, hora_fin, motivo')
+          .eq('barbero_id', user.id)
+          .gte('fecha', weekStart)
+          .lte('fecha', weekEnd)
+      ]);
+
+      const citas = citasRes.data || [];
+      const bloqueos = bloqueosRes.data || [];
+      weekCitasCache = citas;
+
+      // Agrupar por día
+      const citasPorDia = {};
+      const bloqueosPorDia = {};
+      citas.forEach(c => {
+        if (!citasPorDia[c.fecha]) citasPorDia[c.fecha] = [];
+        citasPorDia[c.fecha].push(c);
+      });
+      bloqueos.forEach(b => {
+        if (!bloqueosPorDia[b.fecha]) bloqueosPorDia[b.fecha] = [];
+        bloqueosPorDia[b.fecha].push(b);
+      });
+
+      const weekLabel = `${days[0].date.getDate()} – ${days[6].date.getDate()} de ${MESES[days[6].date.getMonth()]}`;
+      document.getElementById('pageSub').textContent = `Semana del ${weekLabel}`;
+
+      // Renderizar HTML
+      el.innerHTML = `
+        <div class="week-header-row">
+          <div class="week-nav-arrows">
+            <div class="day-nav-btn" onclick="shiftWeek(-1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="week-range-label">${weekLabel}</div>
+          <div class="week-nav-arrows">
+            <div class="day-nav-btn" onclick="shiftWeek(1)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="week-today-btn" onclick="jumpWeekToday()">Hoy</div>
+          </div>
+        </div>
+        <div class="week-scroll-container" id="weekScrollContainer">
+          <div class="week-cards-wrapper">
+            ${days.map(({ date, iso }) => {
+              const isToday = iso === todayIso;
+              const dayCitas = citasPorDia[iso] || [];
+              const dayBloqueos = bloqueosPorDia[iso] || [];
+
+              // Obtener horario del día
+              const diaSemana = DIAS_SEMANA_BARBERO[date.getDay()];
+              let abreMin = 10*60, cierraMin = 19*60; // Default 10:00 - 19:00 (9 horas = 9 slots)
+              let diaCerrado = false;
+
+              // Verificar día de descanso del barbero (0=domingo, 1=lunes, etc.)
+              const dayOfWeek = date.getDay();
+              if (diaDescansobarbero !== null && diaDescansobarbero === dayOfWeek) {
+                diaCerrado = true;
+              }
+
+              // Verificar horario de la sede
+              if (!diaCerrado && horarioSedeBarbero) {
+                const h = horarioSedeBarbero[diaSemana];
+                // Día cerrado si: h es null, undefined, o tiene cerrado:true
+                if (!h || h.cerrado === true) {
+                  diaCerrado = true;
+                } else {
+                  const [aH, aM] = (h.abre || h.apertura || '10:00').split(':').map(Number);
+                  const [cH, cM] = (h.cierra || h.cierre || '19:00').split(':').map(Number);
+                  abreMin = aH*60 + (aM||0);
+                  cierraMin = cH*60 + (cM||0);
+                }
+              }
+
+              // Generar los 9 slots (1 hora cada uno)
+              const slotsHtml = generarSlotsDelDia(abreMin, cierraMin, dayCitas, dayBloqueos, iso, diaCerrado);
+
+              // Calcular disponibles
+              const disponibles = calcularDisponiblesDelDia(abreMin, dayCitas, dayBloqueos, diaCerrado);
+
+              return `
+                <div class="week-day-card ${isToday ? 'is-today' : ''} ${diaCerrado ? 'dia-cerrado' : ''}" data-iso="${iso}">
+                  <div class="week-day-head">
+                    <span class="dname">${DOW[date.getDay()]}</span>
+                    <span class="dnum">${date.getDate()}</span>
+                  </div>
+                  <div class="week-day-disp">${diaCerrado ? 'Cerrado' : `${disponibles}/${TOTAL_SLOTS_DIA} disp.`}</div>
+                  <div class="week-day-scroll">
+                    ${slotsHtml}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      // Posicionar scroll para mostrar el día actual al centro
+      positionWeekScrollToToday(days, todayIso);
+
+      // Agregar listeners para cambio de semana al hacer swipe al final
+      setupWeekSwipeNavigation();
+
+    } catch (err) {
+      console.error(err);
+      el.innerHTML = '<div class="empty-state"><div class="empty-title">Error cargando semana</div></div>';
+    }
+  }
+
+  function setupWeekSwipeNavigation(){
+    const container = document.getElementById('weekScrollContainer');
+    if (!container) return;
+
+    // Touch start
+    container.addEventListener('touchstart', (e) => {
+      weekScrollTouchStartX = e.touches[0].clientX;
+      // Verificar si estamos al inicio o final del scroll
+      const maxScroll = container.scrollWidth - container.clientWidth;
+      weekScrollAtEnd = container.scrollLeft >= maxScroll - 10;
+      weekScrollAtStart = container.scrollLeft <= 10;
+    }, { passive: true });
+
+    // Touch end
+    container.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].clientX;
+      const diff = weekScrollTouchStartX - touchEndX;
+      const threshold = 50; // Mínimo de píxeles para considerar swipe
+
+      // Si estamos al final y se desliza hacia la izquierda → siguiente semana
+      if (weekScrollAtEnd && diff > threshold) {
+        vibrate(10);
+        shiftWeek(1);
+      }
+      // Si estamos al inicio y se desliza hacia la derecha → semana anterior
+      else if (weekScrollAtStart && diff < -threshold) {
+        vibrate(10);
+        shiftWeek(-1);
+      }
+    }, { passive: true });
+  }
+
+  function generarSlotsDelDia(abreMin, cierraMin, citas, bloqueos, iso, diaCerrado){
+    if (diaCerrado) {
+      return `
+        <div class="week-slot descanso">
+          <div class="ws-name">😴 Día de descanso</div>
+        </div>
+      `;
+    }
+
+    let html = '';
+    // Generar exactamente 9 slots de 1 hora cada uno
+    for (let i = 0; i < TOTAL_SLOTS_DIA; i++) {
+      const slotMin = abreMin + (i * 60);
+      const slotHora = Math.floor(slotMin / 60);
+      const slotTimeStr = `${String(slotHora).padStart(2,'0')}:00`;
+      const slotEnd = slotMin + 60;
+
+      // Verificar si es hora de almuerzo (13:00 - 14:00)
+      const esAlmuerzo = slotHora === ALMUERZO_HORA;
+
+      // Buscar si hay cita en este slot
+      const cita = citas.find(c => {
+        const citaStart = toMin(c.hora_inicio);
+        return citaStart >= slotMin && citaStart < slotEnd;
+      });
+
+      // Buscar si hay bloqueo personalizado en este slot
+      const bloqueo = bloqueos.find(b => {
+        const bStart = toMin(b.hora_inicio);
+        const bEnd = b.hora_fin ? toMin(b.hora_fin) : bStart + 60;
+        return (bStart < slotEnd && bEnd > slotMin);
+      });
+
+      if (esAlmuerzo) {
+        // Mostrar almuerzo siempre como bloqueado
+        html += `
+          <div class="week-slot bloqueado">
+            <div class="ws-time">${slotTimeStr}</div>
+            <div class="ws-name">🍽️ Almuerzo</div>
+          </div>
+        `;
+      } else if (cita) {
+        const cls = ESTADO_CLASS[cita.estado] || 'st-agendada';
+        const name = cita.usuarios?.full_name || cita.usuarios?.username || 'Cliente';
+        const timeDisplay = fmtTime(cita.hora_inicio);
+        html += `
+          <div class="week-slot ${cls}" onclick="handleWeekSlotClick('${cita.id}', '${iso}')">
+            <div class="ws-time">${timeDisplay.h} ${timeDisplay.a}</div>
+            <div class="ws-name">${name}</div>
+            <div class="ws-service">${cita.servicios?.nombre || 'Servicio'}</div>
+          </div>
+        `;
+      } else if (bloqueo) {
+        const icon = bloqueo.motivo?.toLowerCase().includes('descanso') ? '☕' : '🚫';
+        html += `
+          <div class="week-slot bloqueado">
+            <div class="ws-time">${slotTimeStr}</div>
+            <div class="ws-name">${icon} ${bloqueo.motivo || 'Bloqueado'}</div>
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="week-slot libre" onclick="selectDayFromWeek('${iso}')">
+            <div class="ws-time">${slotTimeStr}</div>
+            <div class="ws-name">Disponible</div>
+          </div>
+        `;
+      }
+    }
+    return html;
+  }
+
+  function calcularDisponiblesDelDia(abreMin, citas, bloqueos, diaCerrado){
+    if (diaCerrado) return 0;
+
+    let disponibles = TOTAL_SLOTS_DIA;
+
+    for (let i = 0; i < TOTAL_SLOTS_DIA; i++) {
+      const slotMin = abreMin + (i * 60);
+      const slotHora = Math.floor(slotMin / 60);
+      const slotEnd = slotMin + 60;
+
+      // El almuerzo (13:00) siempre está bloqueado
+      if (slotHora === ALMUERZO_HORA) {
+        disponibles--;
+        continue;
+      }
+
+      // Verificar si hay cita
+      const tieneCita = citas.some(c => {
+        const citaStart = toMin(c.hora_inicio);
+        return citaStart >= slotMin && citaStart < slotEnd;
+      });
+
+      // Verificar si hay bloqueo
+      const tieneBloqueo = bloqueos.some(b => {
+        const bStart = toMin(b.hora_inicio);
+        const bEnd = b.hora_fin ? toMin(b.hora_fin) : bStart + 60;
+        return (bStart < slotEnd && bEnd > slotMin);
+      });
+
+      if (tieneCita || tieneBloqueo) disponibles--;
+    }
+
+    return disponibles;
+  }
+
+  function positionWeekScrollToToday(days, todayIso){
+    const todayIdx = days.findIndex(d => d.iso === todayIso);
+    if (todayIdx === -1) return;
+
+    const scrollContainer = document.getElementById('weekScrollContainer');
+    if (!scrollContainer) return;
+
+    // Calcular posición para mostrar día actual visible (no necesariamente centrado)
+    const cardWidth = 110; // ancho aproximado de cada tarjeta + gap
+    const visibleCards = 3;
+    const targetScroll = Math.max(0, (todayIdx - 1) * cardWidth);
+
+    setTimeout(() => {
+      scrollContainer.scrollLeft = targetScroll;
+    }, 50);
+  }
+
+  function shiftWeek(dir){
+    vibrate(6);
+    const d = dateFromIso(weekStartIso);
+    d.setDate(d.getDate() + (dir * 7));
+    weekStartIso = isoFromDate(d);
+    loadWeekView();
+  }
+
+  function jumpWeekToday(){
+    vibrate(8);
+    weekStartIso = dnTodayISO();
+    loadWeekView();
+  }
+
+  function handleWeekSlotClick(citaId, iso){
+    vibrate(8);
+    const c = weekCitasCache.find(x => x.id === citaId);
+    if (!c) return;
+    const name = c.usuarios?.full_name || c.usuarios?.username || 'Cliente';
+    const precioStr = c.precio ? ` · ${dnFormatCOP(c.precio)}` : '';
+    toast(`${fmtTime(c.hora_inicio).h} · ${name} · ${c.servicios?.nombre || 'Servicio'}${precioStr}`);
+  }
+
+  function selectDayFromWeek(iso){
+    vibrate(8);
+    selectedIso = iso;
+    windowStartIso = iso;
+    switchView('day');
+  }
+
+  // ---- Vista Mensual ----
+  async function loadMonthView(){
+    const el = document.getElementById('agendaList');
+    el.innerHTML = '<div class="skel skel-row"></div>';
+
+    const year = monthViewDate.getFullYear();
+    const month = monthViewDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const todayIso = dnTodayISO();
+
+    // Días del mes anterior para completar primera semana
+    const startDow = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Lunes = 0
+    const prevMonthDays = [];
+    for (let i = startDow - 1; i >= 0; i--){
+      const d = new Date(year, month, -i);
+      prevMonthDays.push({ date: d, iso: isoFromDate(d), otherMonth: true });
+    }
+
+    // Días del mes actual
+    const currentMonthDays = [];
+    for (let i = 1; i <= lastDay.getDate(); i++){
+      const d = new Date(year, month, i);
+      currentMonthDays.push({ date: d, iso: isoFromDate(d), otherMonth: false });
+    }
+
+    // Días del siguiente mes para completar última semana
+    const totalDays = prevMonthDays.length + currentMonthDays.length;
+    const nextMonthDays = [];
+    const remaining = (7 - (totalDays % 7)) % 7;
+    for (let i = 1; i <= remaining; i++){
+      const d = new Date(year, month + 1, i);
+      nextMonthDays.push({ date: d, iso: isoFromDate(d), otherMonth: true });
+    }
+
+    const allDays = [...prevMonthDays, ...currentMonthDays, ...nextMonthDays];
+    const monthStart = allDays[0].iso;
+    const monthEnd = allDays[allDays.length - 1].iso;
+
+    try {
+      const { data: citas } = await sb.from('citas')
+        .select('fecha, hora_inicio, hora_fin, servicios(duracion_min)')
+        .eq('barbero_id', user.id)
+        .gte('fecha', monthStart)
+        .lte('fecha', monthEnd)
+        .neq('estado', 'cancelada');
+
+      const citasPorDia = {};
+      (citas || []).forEach(c => {
+        if (!citasPorDia[c.fecha]) citasPorDia[c.fecha] = [];
+        citasPorDia[c.fecha].push(c);
+      });
+
+      const daysWithSlots = allDays.map(day => {
+        const dayCitas = citasPorDia[day.iso] || [];
+        const slots = calcularSlotsDisponibles(day.date, dayCitas);
+        return { ...day, ...slots, citasCount: dayCitas.length };
+      });
+
+      document.getElementById('pageSub').textContent = `${MESES[month].charAt(0).toUpperCase() + MESES[month].slice(1)} ${year}`;
+
+      el.innerHTML = `
+        <div class="month-nav">
+          <div class="day-nav-btn" onclick="shiftMonth(-1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="month-label">${MESES[month].charAt(0).toUpperCase() + MESES[month].slice(1)} ${year}</div>
+          <div class="day-nav-btn" onclick="shiftMonth(1)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+        <div class="month-grid-header">
+          <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+        </div>
+        <div class="month-grid">
+          ${daysWithSlots.map(d => {
+            const isToday = d.iso === todayIso;
+            const isSel = d.iso === selectedIso;
+            const slotClass = d.cerrado ? 'busy' : (d.disponibles === 0 ? 'busy' : (d.disponibles <= 2 ? 'some' : ''));
+            const slotText = d.cerrado ? '😴' : `${d.disponibles}/${d.total}`;
+            return `
+              <div class="month-day ${d.otherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''} ${isSel ? 'selected' : ''} ${d.cerrado ? 'cerrado' : ''}"
+                   onclick="selectDayFromMonth('${d.iso}')">
+                <div class="d">${d.date.getDate()}</div>
+                ${!d.otherMonth ? `<div class="s ${slotClass}">${slotText}</div>` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    } catch (err) {
+      console.error(err);
+      el.innerHTML = '<div class="empty-state"><div class="empty-title">Error cargando mes</div></div>';
+    }
+  }
+
+  function shiftMonth(dir){
+    vibrate(6);
+    monthViewDate.setMonth(monthViewDate.getMonth() + dir);
+    loadMonthView();
+  }
+
+  function selectDayFromMonth(iso){
+    vibrate(8);
+    selectedIso = iso;
+    windowStartIso = iso;
+    switchView('day');
+  }
+
+  // ---- Calcular slots disponibles (9 slots por día) ----
+  function calcularSlotsDisponibles(date, citas){
+    const diaSemana = DIAS_SEMANA_BARBERO[date.getDay()];
+    const dayOfWeek = date.getDay();
+
+    // Verificar día de descanso del barbero
+    if (diaDescansobarbero !== null && diaDescansobarbero === dayOfWeek) {
+      return { disponibles: 0, total: TOTAL_SLOTS_DIA, cerrado: true };
+    }
+
+    // Verificar si el día está cerrado por horario de sede
+    if (horarioSedeBarbero) {
+      const h = horarioSedeBarbero[diaSemana];
+      // Día cerrado si: h es null, undefined, o tiene cerrado:true
+      if (!h || h.cerrado === true) {
+        return { disponibles: 0, total: TOTAL_SLOTS_DIA, cerrado: true };
+      }
+    }
+
+    // Obtener hora de apertura para calcular los slots
+    let abreMin = 10 * 60; // Default 10:00
+    if (horarioSedeBarbero && horarioSedeBarbero[diaSemana]) {
+      const h = horarioSedeBarbero[diaSemana];
+      const [aH, aM] = (h.abre || h.apertura || '10:00').split(':').map(Number);
+      abreMin = aH * 60 + (aM || 0);
+    }
+
+    // Siempre 9 slots
+    let disponibles = TOTAL_SLOTS_DIA;
+
+    // Descontar el almuerzo (13:00)
+    disponibles--;
+
+    // Calcular slots ocupados por citas
+    for (let i = 0; i < TOTAL_SLOTS_DIA; i++) {
+      const slotMin = abreMin + (i * 60);
+      const slotHora = Math.floor(slotMin / 60);
+      const slotEnd = slotMin + 60;
+
+      // Saltar el almuerzo (ya descontado)
+      if (slotHora === ALMUERZO_HORA) continue;
+
+      // Verificar si hay cita en este slot
+      const tieneCita = citas.some(c => {
+        const citaStart = toMin(c.hora_inicio);
+        return citaStart >= slotMin && citaStart < slotEnd;
+      });
+
+      if (tieneCita) disponibles--;
+    }
+
+    return { disponibles: Math.max(0, disponibles), total: TOTAL_SLOTS_DIA, cerrado: false };
+  }
+
+  async function init(){
+    if (!user) return;
+    await loadBarberProfile(); // Esperar para tener comision_pct
+    await cargarHorarioSedeBarbero(); // Cargar horario para calcular slots
+    checkEstadoHoy();
+    loadAlerts();
+    renderDayStrip();
+    loadAgenda();
+  }
+
+  // Cleanup al salir
+  window.addEventListener('beforeunload', () => {
+    if (clockInterval) clearInterval(clockInterval);
+    if (nowLineInterval) clearInterval(nowLineInterval);
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      clearInterval(clockInterval);
+      clearInterval(nowLineInterval);
+    } else {
+      tickClock();
+      renderNowLine();
+      clockInterval = setInterval(tickClock, 15000);
+      nowLineInterval = setInterval(renderNowLine, 60000);
+    }
+  });
+
+  init();
+</script>
+<script src="../assets/citas-estados.js"></script>
+</body>
+</html>

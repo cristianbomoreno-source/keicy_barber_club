@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#FFFFFF">
+<title>Mi Perfil | Keicy Barbería</title>
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --surface: #F8F8F8;
+    --card: #FFFFFF;
+    --text: #1A1A1A;
+    --text-secondary: #666666;
+    --gold: #C9A35B;
+    --gold-bright: #D4B06A;
+    --divider: rgba(0,0,0,0.08);
+    --error: #E53935;
+    --success: #43A047;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #app {
+    max-width: 520px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+
+  /* Header */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    padding: max(16px, var(--safe-top)) 20px 14px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .header-back {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-right: 16px;
+  }
+
+  .header-back svg { width: 20px; height: 20px; }
+
+  .header-title {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  /* Avatar Section */
+  .avatar-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 20px;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+  }
+
+  .avatar-wrapper {
+    position: relative;
+    margin-bottom: 16px;
+  }
+
+  .avatar {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+    color: #1A1A1A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    font-weight: 800;
+    overflow: hidden;
+    border: 4px solid var(--bg);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  }
+
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-edit {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 3px solid var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(201,163,91,0.4);
+  }
+
+  .avatar-edit svg { width: 16px; height: 16px; }
+
+  .avatar-edit input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .user-name {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .user-phone {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  .member-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(201,163,91,0.15);
+    color: var(--gold);
+  }
+
+  /* Form */
+  .form-section {
+    padding: 0 20px;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 24px 0 12px;
+  }
+
+  .form-card {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--divider);
+    overflow: hidden;
+  }
+
+  .form-row {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .form-row:last-child {
+    border-bottom: none;
+  }
+
+  .form-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 14px;
+    flex-shrink: 0;
+  }
+
+  .form-icon svg { width: 20px; height: 20px; stroke: var(--gold); }
+
+  .form-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .form-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+  }
+
+  .form-input {
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    outline: none;
+  }
+
+  .form-input::placeholder {
+    color: #BBBBBB;
+    font-weight: 400;
+  }
+
+  .form-input:disabled {
+    color: var(--text-secondary);
+    -webkit-text-fill-color: var(--text-secondary);
+    opacity: 1;
+  }
+
+  .form-value {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .form-arrow {
+    color: #CCCCCC;
+    margin-left: 8px;
+  }
+
+  /* Stats */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding: 20px;
+    background: var(--surface);
+    border-radius: 16px;
+    margin-top: 12px;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* Save Button */
+  .save-section {
+    padding: 24px 20px;
+    padding-bottom: max(24px, var(--safe-bottom));
+  }
+
+  .btn-save {
+    width: 100%;
+    height: 54px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color: #1A1A1A;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 16px rgba(201,163,91,0.35);
+    transition: all 0.2s ease;
+  }
+
+  .btn-save:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(201,163,91,0.45);
+  }
+
+  .btn-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(26,26,26,0.2);
+    border-top-color: #1A1A1A;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Logout */
+  .logout-section {
+    padding: 0 20px 20px;
+  }
+
+  .btn-logout {
+    width: 100%;
+    height: 48px;
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    background: transparent;
+    color: var(--error);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-logout svg { width: 18px; height: 18px; }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 100px;
+    transform: translate(-50%, 16px);
+    background: rgba(26,26,26,0.95);
+    backdrop-filter: blur(14px);
+    border-radius: 14px;
+    padding: 14px 20px;
+    font-size: 14px;
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 60;
+    max-width: 90%;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  #toast.success { background: var(--success); }
+  #toast.error { background: var(--error); }
+
+  /* Bottom nav - igual que club.html */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,0.98);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--divider);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 16px;
+    padding-bottom: max(10px, var(--safe-bottom));
+    max-width: 520px;
+    margin: 0 auto;
+    z-index: 40;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .nav-item svg { width: 22px; height: 22px; }
+  .nav-item.active { color: var(--gold); background: rgba(201, 163, 91, 0.1); }
+  .nav-item:hover { background: rgba(0,0,0,0.04); }
+
+  /* Responsive */
+  @media (min-width: 768px) {
+    #app {
+      max-width: 600px;
+      padding: 0 24px;
+      padding-bottom: 120px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="header">
+    <button class="header-back" onclick="history.back()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <h1 class="header-title">Mi Perfil</h1>
+  </div>
+
+  <div class="avatar-section">
+    <div class="avatar-wrapper">
+      <div class="avatar" id="avatarDisplay">--</div>
+      <label class="avatar-edit" title="Cambiar foto">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <input type="file" id="avatarInput" accept="image/*" onchange="handleAvatarChange(event)">
+      </label>
+    </div>
+    <div class="user-name" id="userName">Cargando...</div>
+    <div class="user-phone" id="userPhone">...</div>
+    <div class="member-badge" id="memberBadge" style="display:none;">
+      <span id="badgeIcon">⭐</span>
+      <span id="badgeText">Miembro</span>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <div class="section-title">Información Personal</div>
+    <div class="form-card">
+      <div class="form-row">
+        <div class="form-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+            <circle cx="12" cy="8" r="4"/>
+            <path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/>
+          </svg>
+        </div>
+        <div class="form-content">
+          <div class="form-label">Nombre completo</div>
+          <input type="text" class="form-input" id="inputName" placeholder="Tu nombre">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+            <rect x="2" y="4" width="20" height="16" rx="3"/>
+            <path d="M2 8l10 6 10-6"/>
+          </svg>
+        </div>
+        <div class="form-content">
+          <div class="form-label">Correo electrónico</div>
+          <input type="email" class="form-input" id="inputEmail" placeholder="tu@email.com">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+            <rect x="3" y="3" width="18" height="18" rx="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="form-content">
+          <div class="form-label">Instagram</div>
+          <input type="text" class="form-input" id="inputInstagram" placeholder="@tu_usuario">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+            <rect x="5" y="2" width="14" height="20" rx="3"/>
+            <path d="M12 18h.01"/>
+          </svg>
+        </div>
+        <div class="form-content">
+          <div class="form-label">Teléfono</div>
+          <input type="tel" class="form-input" id="inputPhone" disabled>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+            <rect x="3" y="4" width="18" height="18" rx="3"/>
+            <path d="M16 2v4M8 2v4M3 10h18"/>
+          </svg>
+        </div>
+        <div class="form-content">
+          <div class="form-label">Fecha de nacimiento</div>
+          <input type="date" class="form-input" id="inputBirthdate">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Estadísticas</div>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-value" id="statVisitas">0</div>
+        <div class="stat-label">Visitas</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statGastado">$0</div>
+        <div class="stat-label">Total gastado</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value" id="statMiembro">--</div>
+        <div class="stat-label">Cliente desde</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="save-section">
+    <button class="btn-save" id="btnSave" onclick="saveProfile()">
+      Guardar cambios
+    </button>
+  </div>
+
+  <div class="logout-section">
+    <button class="btn-logout" onclick="logout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Cerrar sesión
+    </button>
+  </div>
+
+  <div class="bottom-nav">
+    <a class="nav-item" href="club.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z" stroke-linejoin="round"/></svg>
+      <span>Club</span>
+    </a>
+    <a class="nav-item" href="club.html?view=reservas">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2" stroke-linecap="round"/></svg>
+      <span>Reservar</span>
+    </a>
+    <a class="nav-item active" href="home.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+      <span>Perfil</span>
+    </a>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+  let currentUser = null;
+  let newAvatarFile = null;
+
+  // Toast
+  function toast(msg, type = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'show ' + type;
+    clearTimeout(window._t);
+    window._t = setTimeout(() => el.className = '', 3000);
+  }
+
+  // Get initials
+  function getInitials(name) {
+    if (!name) return '??';
+    const parts = name.trim().split(/\s+/);
+    return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+  }
+
+  // Format currency
+  function formatCOP(n) {
+    const num = Number(n) || 0;
+    if (num >= 1000000) return '$' + (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return '$' + Math.round(num / 1000) + 'K';
+    return '$' + num.toLocaleString('es-CO');
+  }
+
+  // Load profile
+  async function loadProfile() {
+    // Try lealtad session first
+    let session = dnGetLealtadSession();
+
+    if (session) {
+      currentUser = session;
+
+      // Load full data from DB (datos frescos)
+      const { data, error } = await sb
+        .from('usuarios')
+        .select('*')
+        .eq('id', session.id)
+        .single();
+
+      if (data) {
+        currentUser = { ...session, ...data };
+
+        // Actualizar sesión local con datos frescos
+        dnSaveLealtadSession({
+          ...session,
+          full_name: data.full_name,
+          total_visitas: data.total_visitas,
+          total_visitas_weibook: data.total_visitas_weibook,
+          total_gastado: data.total_gastado,
+          total_gastado_weibook: data.total_gastado_weibook,
+          ultima_visita: data.ultima_visita,
+          lealtad_info: data.lealtad_info,
+          membership_tier: data.membership_tier
+        });
+      }
+    } else {
+      // Try regular session
+      session = dnGetSession();
+      if (!session) {
+        window.location.href = 'login.html';
+        return;
+      }
+      currentUser = session;
+    }
+
+    // Display data
+    displayProfile();
+  }
+
+  function displayProfile() {
+    if (!currentUser) return;
+
+    // Avatar
+    const avatarEl = document.getElementById('avatarDisplay');
+    if (currentUser.avatar_url) {
+      avatarEl.innerHTML = `<img src="${currentUser.avatar_url}" alt="Avatar">`;
+    } else {
+      avatarEl.textContent = getInitials(currentUser.full_name);
+    }
+
+    // Name and phone
+    document.getElementById('userName').textContent = currentUser.full_name || 'Sin nombre';
+    document.getElementById('userPhone').textContent = currentUser.phone || '';
+
+    // Form fields
+    document.getElementById('inputName').value = currentUser.full_name || '';
+    document.getElementById('inputEmail').value = currentUser.email || '';
+    document.getElementById('inputInstagram').value = currentUser.instagram || '';
+    document.getElementById('inputPhone').value = currentUser.phone || '';
+    document.getElementById('inputBirthdate').value = currentUser.fecha_nacimiento || '';
+
+    // Badge - usar membership_tier directamente
+    const badge = document.getElementById('memberBadge');
+    // Priorizar membership_tier de la base de datos
+    const cat = currentUser.membership_tier || (currentUser.lealtad_info && currentUser.lealtad_info.categoria);
+
+    if (cat) {
+      badge.style.display = 'inline-flex';
+      const icons = { bronce: '🥉', plata: '🥈', oro: '🥇', black: '🏆' };
+      const colors = {
+        bronce: 'rgba(205,127,50,0.15)',
+        plata: 'rgba(160,160,160,0.15)',
+        oro: 'rgba(212,175,55,0.15)',
+        black: 'rgba(26,26,26,0.9)'
+      };
+      const textColors = { bronce: '#CD7F32', plata: '#808080', oro: '#D4AF37', black: '#FFFFFF' };
+
+      document.getElementById('badgeIcon').textContent = icons[cat] || '⭐';
+      document.getElementById('badgeText').textContent = cat.toUpperCase();
+      badge.style.background = colors[cat] || colors.bronce;
+      badge.style.color = textColors[cat] || textColors.bronce;
+    } else {
+      badge.style.display = 'none';
+    }
+
+    // Stats
+    document.getElementById('statVisitas').textContent = currentUser.total_visitas_weibook || currentUser.total_visitas || 0;
+    document.getElementById('statGastado').textContent = formatCOP(currentUser.total_gastado_weibook || currentUser.total_gastado || 0);
+
+    const createdAt = currentUser.created_at || currentUser.cliente_desde;
+    if (createdAt) {
+      const year = new Date(createdAt).getFullYear();
+      document.getElementById('statMiembro').textContent = year;
+    }
+  }
+
+  // Handle avatar change
+  function handleAvatarChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate
+    if (!file.type.startsWith('image/')) {
+      toast('Por favor selecciona una imagen', 'error');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast('La imagen es muy grande (max 5MB)', 'error');
+      return;
+    }
+
+    newAvatarFile = file;
+
+    // Preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      document.getElementById('avatarDisplay').innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+    };
+    reader.readAsDataURL(file);
+
+    toast('Foto seleccionada. Guarda para aplicar cambios.');
+  }
+
+  // Save profile using RPC function
+  async function saveProfile() {
+    const btn = document.getElementById('btnSave');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Guardando...';
+
+    try {
+      let avatarUrl = null;
+
+      // Upload avatar if changed
+      if (newAvatarFile) {
+        const fileExt = newAvatarFile.name.split('.').pop();
+        const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
+
+        const { error: uploadError } = await sb.storage
+          .from('avatars')
+          .upload(fileName, newAvatarFile, { upsert: true });
+
+        if (uploadError) {
+          console.error('Error uploading avatar:', uploadError);
+          toast('Error al subir la foto', 'error');
+        } else {
+          const { data: urlData } = sb.storage.from('avatars').getPublicUrl(fileName);
+          avatarUrl = urlData.publicUrl;
+        }
+      }
+
+      // Get form values
+      const fullName = document.getElementById('inputName').value.trim();
+      const email = document.getElementById('inputEmail').value.trim();
+      const instagram = document.getElementById('inputInstagram').value.trim();
+      const birthdate = document.getElementById('inputBirthdate').value;
+
+      // Call RPC function to update profile
+      const { data, error } = await sb.rpc('actualizar_perfil_cliente', {
+        p_cliente_id: currentUser.id,
+        p_full_name: fullName || null,
+        p_email: email || null,
+        p_instagram: instagram || null,
+        p_fecha_nacimiento: birthdate || null,
+        p_avatar_url: avatarUrl
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || 'Error al actualizar');
+      }
+
+      // Update local data with response
+      const updatedUser = data.usuario;
+      currentUser = { ...currentUser, ...updatedUser };
+
+      // Update lealtad session if exists
+      const lealtadSession = dnGetLealtadSession();
+      if (lealtadSession && lealtadSession.id === currentUser.id) {
+        dnSaveLealtadSession({
+          ...lealtadSession,
+          full_name: updatedUser.full_name,
+          email: updatedUser.email,
+          avatar_url: updatedUser.avatar_url || lealtadSession.avatar_url
+        });
+      }
+
+      newAvatarFile = null;
+      displayProfile();
+      toast('Perfil actualizado', 'success');
+
+    } catch (err) {
+      console.error('Error saving profile:', err);
+      toast('Error al guardar. Intenta de nuevo.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar cambios';
+    }
+  }
+
+  // Logout
+  function logout() {
+    if (confirm('¿Deseas cerrar sesión?')) {
+      dnClearLealtadSession();
+      dnClearSession();
+      window.location.href = 'login.html';
+    }
+  }
+
+  // Init
+  loadProfile();
+</script>
+
+</body>
+</html>

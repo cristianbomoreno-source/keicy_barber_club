@@ -1,0 +1,54 @@
+# ============================================
+# ARCHIVOS DE MIGRACIÓN (SENSIBLES)
+# ============================================
+
+# Variables de entorno (NUNCA subir)
+migrations/weibook/.env
+.env
+.env.local
+.env.*.local
+
+# Reportes y exportaciones de migración
+migrations/weibook/output/
+migrations/weibook/logs/
+migrations/weibook/reports/
+migrations/**/output/
+*.weibook-*.json
+*.weibook-*.csv
+weibook-*.json
+weibook-*.csv
+
+# Dependencias de Node
+migrations/weibook/node_modules/
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# ============================================
+# SISTEMA OPERATIVO
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+
+# ============================================
+# EDITORES
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ============================================
+# ARCHIVOS TEMPORALES
+# ============================================
+*.tmp
+*.temp
+.cache/
+.vercel

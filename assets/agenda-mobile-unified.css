@@ -1,0 +1,1240 @@
+/**
+ * AGENDA MÓVIL UNIFICADA - Diego Neira Barber
+ * Timeline profesional para Admin Sede y Admin General
+ * Optimizado para iPhone (Dynamic Island, notch, PWA)
+ */
+
+/* ===== CONTENEDOR PRINCIPAL ===== */
+.agenda-mobile {
+  display: none;
+  flex-direction: column;
+  height: calc(100dvh - var(--bottom-nav-total, 70px));
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg, #0D0D0D);
+  padding-top: 0;
+}
+
+@media (max-width: 767px) {
+  .agenda-mobile { display: flex; }
+  .board-wrap, .kpi-strip, .date-nav, .header-row { display: none !important; }
+  .mobile-view { display: none !important; }
+  .sidebar { display: none !important; }
+
+  /* Ajustar main para agenda móvil */
+  .main {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+}
+
+/* ===== HEADER ===== */
+.am-header {
+  flex-shrink: 0;
+  padding: 2px 12px 2px;
+  padding-top: calc(2px + env(safe-area-inset-top, 0));
+  background: var(--bg);
+}
+
+.am-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.am-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.am-logo {
+  height: 24px;
+}
+
+.am-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.am-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--glass-2, rgba(255,255,255,0.04));
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.08));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text, #fff);
+  cursor: pointer;
+}
+
+.am-icon-btn svg { width: 16px; height: 16px; }
+
+.am-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--gold, #D4AF55);
+  color: #141414;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ===== TABS DE SEDES ===== */
+.am-sede-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 2px 0;
+  margin-left: 8px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
+}
+.am-sede-tabs::-webkit-scrollbar { display: none; }
+
+.am-sede-tab {
+  padding: 5px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--text-secondary);
+  background: var(--glass-2, rgba(255,255,255,0.04));
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.08));
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all .15s ease;
+}
+.am-sede-tab:active { transform: scale(0.95); }
+.am-sede-tab.active {
+  background: linear-gradient(135deg, var(--gold, #D4AF55), var(--gold-bright, #E8C66A));
+  color: #0A0A0C;
+  font-weight: 700;
+  border-color: transparent;
+}
+
+/* Legacy selector (hidden) */
+.am-sede-selector { display: none; }
+.am-sede-icon { display: none; }
+.am-sede-info { display: none; }
+.am-sede-chevron { display: none; }
+
+/* ===== NAVEGACIÓN DE FECHA ===== */
+.am-date-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.am-date-arrow {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--glass-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.am-date-arrow svg { width: 14px; height: 14px; color: var(--text); }
+
+.am-date-current {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.am-today-btn {
+  padding: 5px 10px;
+  background: var(--gold);
+  color: #141414;
+  border: none;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ===== SELECTOR SEMANAL ===== */
+.am-week-selector {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px 4px;
+  gap: 2px;
+}
+
+.am-day-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4px 2px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.am-day-item:hover { background: var(--glass-2); }
+
+.am-day-item.active {
+  background: var(--gold);
+}
+
+.am-day-item.active .am-day-name,
+.am-day-item.active .am-day-num {
+  color: #141414;
+}
+
+.am-day-name {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.am-day-num {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.am-day-item.today:not(.active) .am-day-num {
+  color: var(--gold);
+}
+
+/* ===== CONTENEDOR DE AGENDA ===== */
+.am-agenda-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ===== CABECERA DE BARBEROS ===== */
+.am-barberos-header {
+  display: flex;
+  flex-shrink: 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--glass-border);
+  z-index: 10;
+  position: relative;
+  padding-bottom: 14px;
+}
+
+.am-time-gutter-header {
+  display: none;
+}
+
+.am-barberos-scroll {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.am-barbero-col-header {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 2px;
+  text-align: center;
+  border-right: 1px solid var(--glass-border);
+  box-sizing: border-box;
+}
+
+.am-barbero-col-header:last-of-type {
+  border-right: none;
+}
+
+.am-barbero-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--glass-2);
+  margin: 0 auto 3px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.am-barbero-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.am-barbero-avatar-initials {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.am-barbero-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.am-barbero-espacios {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-top: 2px;
+}
+
+.am-barbero-espacios.am-espacios-pocos {
+  color: #f39c12;
+}
+
+.am-barbero-espacios.am-espacios-lleno {
+  color: #e74c3c;
+}
+
+/* Indicadores de página */
+.am-page-indicator {
+  position: absolute;
+  bottom: 4px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  height: 10px;
+  pointer-events: none;
+}
+
+.am-page-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transition: background 0.2s ease;
+}
+
+.am-page-dot.active {
+  background: var(--gold);
+  width: 8px;
+  height: 8px;
+}
+
+/* ===== GRID DE AGENDA ===== */
+.am-grid-wrap {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+.am-time-gutter {
+  display: none;
+}
+
+.am-time-slot {
+  height: var(--slot-height, 180px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 8px 8px 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transform: translateY(-6px);
+}
+
+.am-grid-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+.am-grid {
+  display: flex;
+  position: relative;
+  height: 100%;
+}
+
+.am-barbero-col {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  border-right: 1px solid var(--glass-border);
+  box-sizing: border-box;
+}
+
+.am-barbero-col:last-of-type {
+  border-right: none;
+}
+
+/* Líneas de hora */
+.am-hour-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--glass-border);
+  pointer-events: none;
+}
+
+/* ===== MODO COMPRIMIDO (TODAS LAS SEDES) ===== */
+.agenda-mobile.am-compressed .am-barbero-col-header {
+  padding: 4px 1px;
+}
+
+.agenda-mobile.am-compressed .am-barbero-avatar {
+  width: 20px;
+  height: 20px;
+  margin-bottom: 2px;
+}
+
+.agenda-mobile.am-compressed .am-barbero-avatar-initials {
+  font-size: 8px;
+}
+
+.agenda-mobile.am-compressed .am-barbero-name {
+  font-size: 8px;
+  max-width: 100%;
+}
+
+.agenda-mobile.am-compressed .am-barbero-espacios {
+  display: none;
+}
+
+.agenda-mobile.am-compressed .am-cita {
+  left: 0;
+  right: 0;
+  padding: 2px;
+  border-radius: 0;
+  border-left-width: 0;
+  border-bottom: 1px solid rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agenda-mobile.am-compressed .am-cita-cliente,
+.agenda-mobile.am-compressed .am-cita-servicio {
+  display: none;
+}
+/* Hora siempre visible incluso en modo comprimido */
+.agenda-mobile.am-compressed .am-cita-hora {
+  display: block;
+  position: static;
+  background: transparent;
+  padding: 0;
+  font-size: 7px;
+  text-shadow: none;
+}
+
+/* Colores sólidos en modo comprimido - unificados con versión web */
+.agenda-mobile.am-compressed .am-cita.agendada { background: #9f9f9f; }
+.agenda-mobile.am-compressed .am-cita.confirmada { background: #60A5FA; }
+.agenda-mobile.am-compressed .am-cita.sala_espera { background: #FBBF24; }
+.agenda-mobile.am-compressed .am-cita.en_servicio { background: #A78BFA; }
+.agenda-mobile.am-compressed .am-cita.pendiente_pago { background: #FB923C; }
+.agenda-mobile.am-compressed .am-cita.finalizada { background: #34D399; }
+.agenda-mobile.am-compressed .am-cita.cancelada { background: #EF4444; }
+
+.agenda-mobile.am-compressed .am-hour-slot {
+  display: flex;
+  justify-content: center;
+  border: none;
+  background: transparent;
+}
+.agenda-mobile.am-compressed .am-hour-slot-time {
+  font-size: 7px;
+  opacity: 0.7;
+}
+
+.agenda-mobile.am-compressed .am-bloqueo {
+  left: 0;
+  right: 0;
+}
+
+.agenda-mobile.am-compressed .am-bloqueo-text {
+  font-size: 6px;
+}
+
+.agenda-mobile.am-compressed .am-bloqueo-icon {
+  font-size: 8px;
+}
+
+/* ===== CITAS ===== */
+.am-cita {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: 0;
+  padding: 8px 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+  border: none;
+  border-bottom: 1px solid rgba(0,0,0,0.15);
+  z-index: 10;
+}
+
+.am-cita:hover {
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.2);
+}
+
+/* Estados - Colores unificados con versión web */
+.am-cita.agendada { background: rgba(159,159,159,0.25); color: #B8B8B8; border: 1px solid rgba(159,159,159,0.4); }
+.am-cita.confirmada { background: rgba(96,165,250,0.25); color: #93C5FD; border: 1px solid rgba(96,165,250,0.4); }
+.am-cita.sala_espera { background: rgba(251,191,36,0.25); color: #FCD34D; border: 1px solid rgba(251,191,36,0.4); }
+.am-cita.en_servicio { background: rgba(167,139,250,0.25); color: #C4B5FD; border: 1px solid rgba(167,139,250,0.4); }
+.am-cita.pendiente_pago { background: rgba(251,146,60,0.25); color: #FDBA74; border: 1px solid rgba(251,146,60,0.4); }
+.am-cita.finalizada { background: rgba(52,211,153,0.25); color: #6EE7B7; border: 1px solid rgba(52,211,153,0.4); }
+.am-cita.cancelada { background: rgba(239,68,68,0.25); color: #FCA5A5; border: 1px solid rgba(239,68,68,0.4); }
+
+.am-cita-hora,
+.am-cita-cliente,
+.am-cita-servicio {
+  pointer-events: none;
+}
+
+.am-cita-hora {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: inherit;
+  background: rgba(0,0,0,0.25);
+  padding: 3px 6px;
+  border-radius: 4px;
+  z-index: 2;
+}
+
+.am-cita-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 4px;
+  gap: 4px;
+}
+
+.am-cita-cliente {
+  font-size: 11px;
+  font-weight: 700;
+  color: inherit;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  max-height: 90%;
+  overflow: hidden;
+  line-height: 1.2;
+}
+
+.am-cita-servicio {
+  font-size: 9px;
+  color: inherit;
+  opacity: 0.8;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  max-height: 90%;
+  overflow: hidden;
+}
+
+/* ===== BLOQUEOS ===== */
+.am-bloqueo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(239,83,80,0.1),
+    rgba(239,83,80,0.1) 4px,
+    rgba(239,83,80,0.2) 4px,
+    rgba(239,83,80,0.2) 8px
+  );
+  border: none;
+  border-bottom: 1px solid rgba(239,83,80,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.am-bloqueo-text {
+  font-size: 8px;
+  font-weight: 700;
+  color: #EF5350;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.am-bloqueo-almuerzo {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255,193,7,0.08),
+    rgba(255,193,7,0.08) 4px,
+    rgba(255,193,7,0.15) 4px,
+    rgba(255,193,7,0.15) 8px
+  );
+  border: none;
+  border-bottom: 1px solid rgba(255,193,7,0.3);
+}
+
+.am-bloqueo-icon {
+  font-size: 12px;
+}
+
+.am-bloqueo-descanso {
+  background: rgba(30, 30, 30, 0.95);
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(100,100,100,0.15),
+    rgba(100,100,100,0.15) 4px,
+    rgba(80,80,80,0.25) 4px,
+    rgba(80,80,80,0.25) 8px
+  );
+  border: 2px solid rgba(150, 150, 150, 0.4);
+  z-index: 50 !important;
+}
+
+.am-bloqueo-descanso .am-bloqueo-text {
+  color: #888;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* Barbero que descansa */
+.am-header-descansa {
+  opacity: 0.6;
+}
+
+.am-avatar-descansa {
+  filter: grayscale(100%);
+}
+
+.am-col-descansa {
+  background: rgba(100,100,100,0.05);
+}
+
+/* ===== LÍNEA DE HORA ACTUAL ===== */
+.am-now-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gold);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.am-now-line::before {
+  content: attr(data-time);
+  position: absolute;
+  left: -48px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--gold);
+  background: var(--bg);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.am-now-dot {
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+
+/* ===== BOTÓN NUEVA CITA (oculto) ===== */
+.am-fab {
+  display: none;
+}
+
+/* ===== ESTADO VACÍO ===== */
+.am-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+.am-empty svg { width: 48px; height: 48px; opacity: 0.3; margin-bottom: 12px; }
+.am-empty-text { font-size: 14px; }
+
+/* ===== LOADING ===== */
+.am-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13,13,13,0.8);
+  z-index: 20;
+}
+
+.am-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--glass-border);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: am-spin 0.8s linear infinite;
+}
+
+@keyframes am-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== VISTA DE MES ===== */
+.am-month-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg, #0D0D0D);
+  z-index: 9999;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+.am-month-modal.show { display: flex; }
+
+.am-month-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.am-month-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+.am-month-close {
+  padding: 8px 12px;
+  background: var(--glass-2);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.am-month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px;
+}
+
+.am-month-nav-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--glass-2);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.am-month-nav-arrow svg { width: 18px; height: 18px; }
+
+.am-month-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  text-transform: capitalize;
+  min-width: 150px;
+  text-align: center;
+}
+
+.am-month-grid {
+  flex: 1;
+  padding: 8px 12px;
+  overflow-y: auto;
+}
+
+.am-month-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.am-month-weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  padding: 8px 0;
+}
+
+.am-month-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.am-month-day {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--glass-2);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  position: relative;
+}
+
+.am-month-day:hover { background: var(--glass-3); }
+
+.am-month-day.other-month {
+  opacity: 0.3;
+}
+
+.am-month-day.today {
+  border: 2px solid var(--gold);
+}
+
+.am-month-day.selected {
+  background: var(--gold);
+}
+
+.am-month-day.selected .am-month-day-num,
+.am-month-day.selected .am-month-day-count {
+  color: #141414;
+}
+
+.am-month-day-num {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.am-month-day-count {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-top: 2px;
+}
+
+.am-month-day-count.has-citas {
+  background: var(--gold);
+  color: #141414;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 9px;
+}
+
+/* ===== MODAL SELECTOR DE SEDE ===== */
+.am-sede-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.am-sede-modal.show { display: flex; }
+
+.am-sede-modal-content {
+  width: 100%;
+  max-width: 340px;
+  max-height: 70vh;
+  background: var(--card, #1c1c1c);
+  border-radius: 20px;
+  padding: 20px;
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+}
+
+.am-sede-modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
+.am-sede-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.am-sede-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--glass-2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.am-sede-option:hover { background: var(--glass-3); }
+.am-sede-option.active { background: var(--gold); }
+.am-sede-option.active * { color: #141414 !important; }
+
+.am-sede-option-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--glass-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.am-sede-option.active .am-sede-option-icon { background: rgba(0,0,0,0.15); }
+
+.am-sede-option-name { font-size: 14px; font-weight: 600; }
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+@media (max-width: 390px) {
+  .am-barbero-avatar { width: 24px; height: 24px; }
+  .am-barbero-avatar-initials { font-size: 9px; }
+  .am-barbero-name { font-size: 9px; }
+  .am-barbero-espacios { font-size: 8px; }
+  .am-cita { padding: 4px 6px; }
+  .am-cita-hora { font-size: 8px; padding: 2px 5px; top: 3px; right: 3px; }
+  .am-cita-cliente { font-size: 10px; margin-top: 12px; }
+  .am-cita-servicio { font-size: 9px; }
+}
+
+/* ===== PWA STANDALONE ===== */
+/* Safe area ya incluido en .am-header */
+
+/* ===== MODAL DETALLE CITA MÓVIL ===== */
+.am-detail-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 99999;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.am-detail-modal.show {
+  display: flex;
+}
+
+.am-detail-box {
+  background: var(--card, #1a1a1a);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+}
+
+.am-detail-close {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.am-detail-close button {
+  background: var(--glass-2);
+  border: none;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.am-detail-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.am-detail-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.am-detail-phone {
+  font-size: 14px;
+  color: var(--gold);
+  cursor: pointer;
+}
+
+.am-detail-status {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.am-detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.am-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: var(--glass-2);
+  border-radius: 12px;
+}
+
+.am-detail-row span {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.am-detail-row b {
+  color: var(--text);
+  font-size: 14px;
+}
+
+.am-detail-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.am-detail-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.am-detail-btn.primary {
+  background: var(--gold);
+  color: #141414;
+}
+
+.am-detail-btn.success {
+  background: rgba(78,203,113,0.15);
+  color: var(--success);
+}
+
+.am-detail-btn.whatsapp {
+  background: rgba(37,211,102,0.15);
+  color: #25D366;
+}
+
+.am-detail-btn.danger {
+  background: rgba(239,83,80,0.15);
+  color: #EF5350;
+}
+
+.am-detail-btn.secondary {
+  background: var(--glass-2);
+  color: var(--text-secondary);
+}
+
+/* ===== MODAL WEB EN AGENDA MÓVIL ===== */
+/* El modal #amDetailModal usa clases del web para diseño consistente */
+#amDetailModal.modal-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0,0,0,0.75) !important;
+  backdrop-filter: blur(6px) !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 99999 !important;
+  padding: 16px !important;
+}
+
+#amDetailModal.modal-overlay.show {
+  display: flex !important;
+}
+
+#amDetailModal .modal-box {
+  background: rgba(26,26,26,0.95) !important;
+  backdrop-filter: blur(24px) !important;
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.1)) !important;
+  border-radius: 22px !important;
+  padding: 24px !important;
+  width: 100% !important;
+  max-width: 390px !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.5) !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+#amDetailModal .modal-close {
+  float: right !important;
+  cursor: pointer !important;
+  color: var(--text-secondary) !important;
+  font-size: 13px !important;
+  padding: 4px 8px !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+#amDetailModal .modal-close:active {
+  color: var(--text) !important;
+  background: var(--glass-2) !important;
+  border-radius: 6px !important;
+}
+
+#amDetailModal .det-phone-link {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+#amDetailModal .det-phone-link:active {
+  opacity: 0.7 !important;
+}
+
+#amDetailModal .det-estado-toggle {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+#amDetailModal .det-estado-toggle:active {
+  opacity: 0.7 !important;
+}
+
+#amDetailModal .det-estado-pill {
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  padding: 7px 12px !important;
+  border-radius: 999px !important;
+  cursor: pointer !important;
+  border: 1px solid var(--glass-border) !important;
+  background: var(--glass-2) !important;
+  color: var(--text-secondary) !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+#amDetailModal .det-estado-pill:active {
+  background: var(--card) !important;
+  color: var(--text) !important;
+}
+
+#amDetailModal .det-estado-pill.current {
+  opacity: 0.4 !important;
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+#amDetailModal .apple-btn {
+  -webkit-tap-highlight-color: transparent !important;
+  touch-action: manipulation !important;
+}
+
+#amDetailModal .apple-btn:active {
+  transform: scale(0.98) !important;
+  opacity: 0.9 !important;
+}
+
+#amDetailModal .apple-btn.primary {
+  background: var(--gold, #D4AF55) !important;
+  color: #141414 !important;
+  border: none !important;
+  font-weight: 600 !important;
+}
+
+#amDetailModal .apple-btn.btn-cancel-danger {
+  background: rgba(239,83,80,0.15) !important;
+  color: #EF5350 !important;
+  border: none !important;
+}
+
+/* ===== SLOTS DE HORA DISPONIBLE ===== */
+.am-hour-slot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  background: rgba(255,255,255,0.02);
+  border: none;
+  border-bottom: 1px dashed rgba(255,255,255,0.08);
+  cursor: pointer;
+  transition: background 0.15s ease;
+  z-index: 1;
+}
+
+.am-hour-slot:hover,
+.am-hour-slot:active {
+  background: rgba(201,163,91,0.1);
+  border-color: rgba(201,163,91,0.4);
+}
+
+.am-hour-slot-time {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  opacity: 0.8;
+}
+
+.am-hour-slot:hover .am-hour-slot-time,
+.am-hour-slot:active .am-hour-slot-time {
+  color: var(--gold);
+  opacity: 1;
+}

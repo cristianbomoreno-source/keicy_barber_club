@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#111111">
+<title>Configuración · Admin Sede</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/mobile-admin.css">
+<style>
+  body { background: var(--bg); min-height: 100vh; overflow-x: hidden; }
+
+  #app { display: flex; min-height: 100vh; min-height: 100dvh; }
+
+  /* Sidebar */
+  .sidebar {
+    width:60px; flex-shrink:0;
+    background:#FAFAFA;
+    border-right:1px solid var(--divider);
+    display:flex; flex-direction:column; align-items:center;
+    padding:20px 6px;
+    padding-top: calc(20px + var(--safe-top));
+    position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden; overflow-y:auto;
+    transition:width 0.28s cubic-bezier(.4,0,.2,1), padding 0.28s ease;
+  }
+  .sidebar.expanded { width:230px; align-items:stretch; padding:22px 16px; }
+  .sidebar-logo { display:block; cursor:pointer; margin:0 auto; }
+  .sidebar-logo-icon{ width:40px; height:40px; border-radius:11px; margin-bottom:26px; }
+  .sidebar-logo-full{ height:48px; margin-bottom:28px; display:none; }
+  .sidebar.expanded .sidebar-logo-icon { display:none; }
+  .sidebar.expanded .sidebar-logo-full { display:block; }
+  .nav-group { flex:1; display:flex; flex-direction:column; gap:3px; width:100%; min-width:0; }
+  .nav-link {
+    display:flex; align-items:center; gap:11px; justify-content:center;
+    width:40px; height:40px; margin:0 auto; padding:0; border-radius:11px;
+    font-size:13px; font-weight:600; color:#9F9F9F;
+    cursor:pointer; transition:background 0.15s ease, color 0.15s ease;
+    text-decoration:none; white-space:nowrap;
+  }
+  .sidebar.expanded .nav-link { justify-content:flex-start; width:100%; height:auto; margin:0; padding:9.5px 12px; }
+  .nav-link svg { width:22px; height:22px; flex-shrink:0; }
+  .nav-link:hover { background:var(--card); color:#111111; }
+  .nav-link.active { background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; }
+  .nav-link.active svg { stroke:#141414; }
+  .nav-link { position:relative; }
+  .nav-badge { display:none; background:#e74c3c; color:#111111; font-size:10px; font-weight:700; min-width:18px; height:18px; line-height:18px; text-align:center; padding:0 5px; border-radius:10px; margin-left:auto; }
+  .nav-badge.has-orders { display:inline-block; }
+  .sidebar:not(.expanded) .nav-badge.has-orders { position:absolute; top:2px; right:2px; min-width:8px; width:8px; height:8px; padding:0; font-size:0; border-radius:50%; }
+  .help-link { margin-top:8px; }
+  .nav-label { opacity:0; max-width:0; overflow:hidden; transition:opacity 0.16s ease, max-width 0.26s ease; }
+  .sidebar.expanded .nav-label { opacity:1; max-width:170px; }
+  .nav-section-label { display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
+  .sidebar.expanded .nav-section-label { display:block; }
+  .sidebar-card { display:none; position:relative; align-items:center; gap:9px; padding:9px; border-radius:14px; background:var(--glass-2); border:1px solid var(--glass-border); margin-bottom:8px; transition:background 0.15s ease; }
+  .sidebar-card:hover { background:var(--glass-3); }
+  .sidebar.expanded .sidebar-card { display:flex; }
+  .sidebar-card-icon { width:32px; height:32px; border-radius:8px; background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .sidebar-card-info { flex:1; min-width:0; }
+  .sidebar-card-name { font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-card-sub { font-size:10.5px; color:var(--text-secondary); }
+  .sede-selector { display:none; background:var(--card); border:1px solid var(--divider); border-radius:12px; margin-bottom:12px; overflow:hidden; }
+  .sidebar.expanded .sede-selector.show { display:block; }
+  .sede-selector-title { font-size:10px; font-weight:700; color:var(--text-secondary); padding:10px 12px 6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .sede-selector-list { max-height:200px; overflow-y:auto; }
+  .sede-option { display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer; transition:background 0.15s ease; }
+  .sede-option:hover { background:rgba(255,255,255,0.05); }
+  .sede-option.active { background:var(--gold); color:#141414; }
+  .sede-option-dot { width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0; }
+  .sede-option-name { font-size:12px; font-weight:600; }
+  .sidebar-bottom {
+    margin-top:auto; padding-top:12px; border-top:1px solid var(--divider);
+    display:flex; flex-direction:column; gap:8px; width:100%;
+  }
+  .logout-btn {
+    font-size:12px; color:#EF5350; display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px; cursor:pointer; width:40px; height:40px; border-radius:10px; background:rgba(239,83,80,0.1);
+    border:1px solid rgba(239,83,80,0.2); transition:all 0.25s ease; margin:0 auto;
+  }
+  .sidebar.expanded .logout-btn { justify-content:flex-start; width:100%; height:auto; padding:10px 12px; margin:0; }
+  .logout-btn:hover { background:rgba(239,83,80,0.2); }
+  .logout-btn svg { width:18px; height:18px; flex-shrink:0; }
+  .logout-label { display:none; }
+  .sidebar.expanded .logout-label { display:inline; }
+
+  .main { flex: 1; min-width: 0; padding: 26px 32px 100px; max-width: 900px; }
+
+  .header-row { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .back-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 1px solid var(--divider); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); text-decoration: none; flex-shrink: 0; }
+  .back-btn svg { width: 20px; height: 20px; }
+  .header-text .title { font-size: 22px; font-weight: 800; }
+  .header-text .sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* Secciones */
+  .config-section { margin-bottom: 28px; }
+  .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gold); margin-bottom: 12px; padding-left: 4px; }
+
+  .config-card { background: var(--card); border: 1px solid var(--divider); border-radius: 16px; overflow: hidden; }
+
+  .config-item { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-bottom: 1px solid var(--divider); cursor: pointer; transition: background 0.15s; text-decoration: none; color: var(--text); }
+  .config-item:last-child { border-bottom: none; }
+  .config-item:hover { background: var(--card-2); }
+  .config-item.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+  .config-item.disabled:hover { background: transparent; }
+
+  .config-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(201,163,91,0.12); color: var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .config-icon svg { width: 20px; height: 20px; }
+  .config-icon.purple { background: rgba(168,85,247,0.12); color: #a855f7; }
+  .config-icon.blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+  .config-icon.green { background: rgba(34,197,94,0.12); color: #22c55e; }
+  .config-icon.red { background: rgba(239,68,68,0.12); color: #ef4444; }
+  .config-icon.orange { background: rgba(249,115,22,0.12); color: #f97316; }
+
+  .config-info { flex: 1; min-width: 0; }
+  .config-name { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .config-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  .config-arrow { width: 18px; height: 18px; color: var(--text-secondary); flex-shrink: 0; }
+
+  .badge-soon { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 3px 8px; border-radius: 20px; background: rgba(201,163,91,0.15); color: var(--gold); }
+
+  /* Theme toggle */
+  .theme-toggle { display: flex; gap: 6px; background: var(--card-2); border-radius: 12px; padding: 4px; }
+  .theme-option { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-secondary); transition: all 0.2s ease; }
+  .theme-option svg { width: 16px; height: 16px; }
+  .theme-option.active { background: var(--gold); color: #141414; }
+  .theme-option.active svg { stroke: #141414; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: var(--card); border: 1px solid var(--divider); border-radius: 20px; width: 100%; max-width: 500px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+  .modal-header { padding: 20px; border-bottom: 1px solid var(--divider); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .modal-title { font-size: 18px; font-weight: 700; }
+  .modal-close { width: 36px; height: 36px; border-radius: 10px; background: var(--card-2); border: 1px solid var(--divider); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .modal-close svg { width: 18px; height: 18px; }
+  .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 16px 20px; border-top: 1px solid var(--divider); display: flex; gap: 10px; flex-shrink: 0; }
+  .modal-footer .btn { flex: 1; }
+
+  /* Form fields */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-secondary); margin-bottom: 8px; }
+  .field input, .field select, .field textarea { width: 100%; height: 48px; border-radius: 12px; padding: 0 14px; background: var(--card-2); border: 1px solid var(--divider); color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s; font-family: inherit; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--gold); }
+  .field textarea { height: 100px; padding: 12px 14px; resize: vertical; }
+
+  .field-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+  /* Toggle switch */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--divider); }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-info { flex: 1; }
+  .toggle-label { font-size: 14px; font-weight: 600; }
+  .toggle-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .switch { position: relative; width: 48px; height: 28px; border-radius: 999px; background: var(--divider); cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .switch.on { background: var(--success); }
+  .switch .knob { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform 0.2s; }
+  .switch.on .knob { transform: translateX(20px); }
+
+  /* Toast */
+  #toast { position: fixed; left: 50%; bottom: calc(var(--bottom-nav-total, 56px) + 20px); transform: translate(-50%, 20px); background: rgba(32,32,32,0.95); backdrop-filter: blur(14px); border: 1px solid var(--divider); border-radius: 14px; padding: 12px 18px; font-size: 13px; display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: all 0.3s ease; z-index: 200; }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast-icon { width: 20px; height: 20px; color: var(--success); }
+
+  /* Ocultar logout móvil en escritorio */
+  .mobile-logout-section { display: none; }
+
+  @media (max-width: 1023px) {
+    .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); z-index: 70; }
+    .sidebar.open { transform: translateX(0); }
+    .main { padding: 18px 18px 120px; }
+    /* Mostrar logout en móvil/tablet */
+    .mobile-logout-section { display: block; margin-top: 20px; }
+  }
+  @media (max-width: 767px) {
+    .main { padding: calc(16px + var(--safe-top)) var(--page-padding-x) calc(100px + var(--safe-bottom)); }
+    .field-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="sidebar" id="sidebar"></div>
+
+  <div class="main">
+    <div class="header-row">
+      <a href="ventas.html" class="back-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </a>
+      <div class="header-text">
+        <div class="title">Configuración</div>
+        <div class="sub">Ajustes de la sede</div>
+      </div>
+    </div>
+
+    <!-- Gestión del Negocio -->
+    <div class="config-section">
+      <div class="section-title">Gestión del negocio</div>
+      <div class="config-card">
+        <a class="config-item" href="#" onclick="openModal('miInfo'); return false;">
+          <div class="config-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Mi información</div>
+            <div class="config-desc">Datos de la sede y contacto</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="../admin/servicios.html?admin_sede=1">
+          <div class="config-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Servicios</div>
+            <div class="config-desc">Administrar servicios y precios</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="../admin/inventario.html?admin_sede=1">
+          <div class="config-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Inventario</div>
+            <div class="config-desc">Productos y stock</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('sucursales'); return false;">
+          <div class="config-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-5 9 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Sucursales</div>
+            <div class="config-desc">Ver otras sedes</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="../admin/barberos.html?admin_sede=1">
+          <div class="config-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Colaboradores</div>
+            <div class="config-desc">Equipo de trabajo</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('accesos'); return false;">
+          <div class="config-icon red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Configurar accesos</div>
+            <div class="config-desc">Permisos de módulos</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('configGeneral'); return false;">
+          <div class="config-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Configuración general</div>
+            <div class="config-desc">Ajustes básicos de la sede</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Operación Diaria -->
+    <div class="config-section">
+      <div class="section-title">Operación diaria</div>
+      <div class="config-card">
+        <a class="config-item" href="#" onclick="openModal('configCitas'); return false;">
+          <div class="config-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Configuración de citas</div>
+            <div class="config-desc">Horarios, duración, intervalos</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <div class="config-item disabled">
+          <div class="config-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Precios por demanda <span class="badge-soon">Próximamente</span></div>
+            <div class="config-desc">Precios dinámicos según horario</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+        <a class="config-item" href="#" onclick="openModal('tiposGastos'); return false;">
+          <div class="config-icon red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 5l-7 7-4-4-7 7"/><path d="M19 5v6h-6"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Tipos de gastos</div>
+            <div class="config-desc">Categorías para gastos operativos</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('impuestos'); return false;">
+          <div class="config-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Impuestos</div>
+            <div class="config-desc">Configurar IVA y retenciones</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('pagarColabs'); return false;">
+          <div class="config-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/><circle cx="14" cy="14" r="2"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Pagar a colaboradores</div>
+            <div class="config-desc">Realizar pagos y liquidaciones</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Dinero y Cobros -->
+    <div class="config-section">
+      <div class="section-title">Dinero y cobros</div>
+      <div class="config-card">
+        <a class="config-item" href="#" onclick="openModal('metodosPago'); return false;">
+          <div class="config-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Métodos de pago</div>
+            <div class="config-desc">Efectivo, tarjeta, transferencia</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <div class="config-item disabled">
+          <div class="config-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Numeración factura <span class="badge-soon">Próximamente</span></div>
+            <div class="config-desc">Configurar consecutivos</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+        <div class="config-item disabled">
+          <div class="config-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Facturación electrónica <span class="badge-soon">Próximamente</span></div>
+            <div class="config-desc">DIAN y resolución</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+        <a class="config-item" href="#" onclick="openModal('wallet'); return false;">
+          <div class="config-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 100 4 2 2 0 000-4z"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Wallet</div>
+            <div class="config-desc">Saldo y monedero de clientes</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('tarjetasRegalo'); return false;">
+          <div class="config-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 8v12M3 12h18M7 8c0-1.5 1.5-3 3-3 1.5 0 2 1.5 2 3M14 8c0-1.5.5-3 2-3s3 1.5 3 3"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Tarjetas de regalo</div>
+            <div class="config-desc">Crear y administrar gift cards</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Marketing y Crecimiento -->
+    <div class="config-section">
+      <div class="section-title">Marketing y crecimiento</div>
+      <div class="config-card">
+        <a class="config-item" href="#" onclick="openModal('personalizacion'); return false;">
+          <div class="config-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Personalización</div>
+            <div class="config-desc">Logo, colores, marca</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <div class="config-item disabled">
+          <div class="config-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Marketing <span class="badge-soon">Próximamente</span></div>
+            <div class="config-desc">Campañas y promociones</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+        <a class="config-item" href="../admin/fidelizacion.html?admin_sede=1">
+          <div class="config-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Fidelización</div>
+            <div class="config-desc">Programa de puntos y recompensas</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('retos'); return false;">
+          <div class="config-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9H4.5a2.5 2.5 0 010-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 000-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 1012 0V2z"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Retos por visitas</div>
+            <div class="config-desc">Incentivos por frecuencia</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('cupones'); return false;">
+          <div class="config-icon red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 9a3 3 0 013-3h14a3 3 0 110 6 3 3 0 110 6H5a3 3 0 01-3-3V9z"/><path d="M13 6v2m0 8v2"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Cupones</div>
+            <div class="config-desc">Códigos de descuento</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Datos e Integraciones -->
+    <div class="config-section">
+      <div class="section-title">Datos e integraciones</div>
+      <div class="config-card">
+        <a class="config-item" href="#" onclick="openModal('importar'); return false;">
+          <div class="config-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Importar datos</div>
+            <div class="config-desc">Clientes, productos, servicios</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <div class="config-item disabled">
+          <div class="config-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Historia clínica <span class="badge-soon">Próximamente</span></div>
+            <div class="config-desc">Fichas de clientes</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+        <div class="config-item disabled">
+          <div class="config-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Configuración píxeles <span class="badge-soon">Próximamente</span></div>
+            <div class="config-desc">Facebook, Google Analytics</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+        <a class="config-item" href="#" onclick="openModal('impresion'); return false;">
+          <div class="config-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Impresión de recibos</div>
+            <div class="config-desc">Configurar impresora térmica</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('papelera'); return false;">
+          <div class="config-icon red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Papelera</div>
+            <div class="config-desc">Elementos eliminados</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Apariencia -->
+    <div class="config-section">
+      <div class="section-title">Apariencia</div>
+      <div class="config-card">
+        <div class="config-item" style="cursor:default;">
+          <div class="config-icon" style="background:linear-gradient(135deg, #FFD700, #1a1a1a);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </div>
+          <div class="config-info" style="flex:1;">
+            <div class="config-name">Tema de la app</div>
+            <div class="config-desc">Elige entre tema claro u oscuro</div>
+          </div>
+          <div class="theme-toggle" id="themeToggle" onclick="toggleThemeOption()">
+            <div class="theme-option" data-theme="light">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              <span>Claro</span>
+            </div>
+            <div class="theme-option" data-theme="dark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <span>Oscuro</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cerrar sesión (visible en móvil) -->
+    <div class="config-section mobile-logout-section">
+      <div class="config-card">
+        <div class="config-item" onclick="cerrarSesionMobile()" style="cursor:pointer;">
+          <div class="config-icon red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name" style="color:#ef4444;">Cerrar sesión</div>
+            <div class="config-desc">Salir de la cuenta actual</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal genérico -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Configuración</div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast">
+  <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+  <span id="toastMsg">Guardado correctamente</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/mobile-nav.js"></script>
+<script>
+(async function() {
+  const user = dnGetSession();
+  if (!user || user.role !== 'admin_sede') {
+    window.location.replace('../index.html');
+    return;
+  }
+
+  const sedeId = dnGetTurnoSedeActual();
+  if (!sedeId) {
+    window.location.replace('seleccionar-sede.html');
+    return;
+  }
+
+  // Cargar info de la sede
+  let sedeInfo = null;
+  try {
+    const { data } = await sb.from('sucursales').select('*').eq('id', sedeId).single();
+    sedeInfo = data;
+  } catch (e) {}
+
+  // Funciones de modal
+  window.openModal = async function(tipo) {
+    const overlay = document.getElementById('modalOverlay');
+    const title = document.getElementById('modalTitle');
+    const body = document.getElementById('modalBody');
+    const footer = document.getElementById('modalFooter');
+
+    switch(tipo) {
+      case 'miInfo':
+        title.textContent = 'Mi información';
+        body.innerHTML = `
+          <div class="field">
+            <label>Nombre de la sede</label>
+            <input type="text" id="sedeNombre" value="${sedeInfo?.nombre || ''}" placeholder="Ej: Sede Norte">
+          </div>
+          <div class="field">
+            <label>Dirección</label>
+            <input type="text" id="sedeDireccion" value="${sedeInfo?.direccion || ''}" placeholder="Calle 123 #45-67">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Teléfono</label>
+              <input type="tel" id="sedeTelefono" value="${sedeInfo?.telefono || ''}" placeholder="300 123 4567">
+            </div>
+            <div class="field">
+              <label>WhatsApp</label>
+              <input type="tel" id="sedeWhatsapp" value="${sedeInfo?.whatsapp || ''}" placeholder="57 300 123 4567">
+            </div>
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="sedeEmail" value="${sedeInfo?.email || ''}" placeholder="sede@ejemplo.com">
+          </div>
+          <div class="field">
+            <label>Link de Google Maps (para reseñas)</label>
+            <input type="url" id="sedeGoogleMaps" value="${sedeInfo?.google_maps_link || ''}" placeholder="https://maps.app.goo.gl/...">
+          </div>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="guardarMiInfo()">Guardar</button>
+        `;
+        break;
+
+      case 'configCitas':
+        title.textContent = 'Configuración de citas';
+        body.innerHTML = `
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Permitir reservas online</div>
+              <div class="toggle-desc">Los clientes pueden agendar desde la web</div>
+            </div>
+            <div class="switch ${sedeInfo?.reservas_online ? 'on' : ''}" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Confirmar citas automáticamente</div>
+              <div class="toggle-desc">Sin necesidad de aprobación manual</div>
+            </div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Enviar recordatorio por WhatsApp</div>
+              <div class="toggle-desc">24 horas antes de la cita</div>
+            </div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="field" style="margin-top:16px;">
+            <label>Duración mínima de cita (minutos)</label>
+            <select>
+              <option value="15">15 minutos</option>
+              <option value="30" selected>30 minutos</option>
+              <option value="45">45 minutos</option>
+              <option value="60">60 minutos</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Anticipo para reservar</label>
+            <input type="number" placeholder="0 = Sin anticipo" value="0">
+          </div>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="showToast('Configuración guardada'); closeModal();">Guardar</button>
+        `;
+        break;
+
+      case 'metodosPago':
+        title.textContent = 'Métodos de pago';
+        body.innerHTML = `<p style="font-size:13px; color:var(--text-secondary);">Cargando...</p>`;
+        footer.innerHTML = `<button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>`;
+        // Cargar métodos de pago dinámicamente
+        loadMetodosPagoModal();
+        break;
+
+      case 'tiposGastos':
+        title.textContent = 'Tipos de gastos';
+        body.innerHTML = `
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">Categorías disponibles para registrar gastos operativos.</p>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Servicios públicos</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Arriendo</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Nómina</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Insumos</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Mantenimiento</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Marketing</div></div>
+            <div class="switch" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Otros</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
+          <button class="btn btn-primary" onclick="showToast('Categorías actualizadas'); closeModal();">Guardar</button>
+        `;
+        break;
+
+      case 'sucursales':
+        title.textContent = 'Sucursales';
+        body.innerHTML = `<p style="font-size:13px; color:var(--text-secondary);">Cargando sedes...</p>`;
+        footer.innerHTML = `<button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>`;
+        // Cargar sedes
+        const { data: sedes } = await sb.from('sucursales').select('id, nombre, direccion, activa').order('nombre');
+        if (sedes && sedes.length > 0) {
+          body.innerHTML = sedes.map(s => `
+            <div style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--divider);">
+              <div style="flex:1;">
+                <div style="font-size:14px; font-weight:600;">${s.nombre}</div>
+                <div style="font-size:12px; color:var(--text-secondary);">${s.direccion || 'Sin dirección'}</div>
+              </div>
+              <span style="font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; background:${s.activa ? 'rgba(78,203,113,0.15)' : 'rgba(239,83,80,0.15)'}; color:${s.activa ? 'var(--success)' : 'var(--error)'};">${s.activa ? 'Activa' : 'Inactiva'}</span>
+            </div>
+          `).join('');
+        } else {
+          body.innerHTML = '<p style="font-size:13px; color:var(--text-secondary);">No hay otras sedes.</p>';
+        }
+        break;
+
+      case 'accesos':
+        title.textContent = 'Configurar accesos';
+        body.innerHTML = `
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">Módulos habilitados para esta sede.</p>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Ventas</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Agenda</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Caja</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Clientes</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Inventario</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Historial</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info"><div class="toggle-label">Estadísticas</div></div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="showToast('Accesos actualizados'); closeModal();">Guardar</button>
+        `;
+        break;
+
+      case 'configGeneral':
+        title.textContent = 'Configuración general';
+        body.innerHTML = `
+          <div class="field">
+            <label>Moneda</label>
+            <select>
+              <option value="COP" selected>COP - Peso colombiano</option>
+              <option value="USD">USD - Dólar</option>
+              <option value="MXN">MXN - Peso mexicano</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Zona horaria</label>
+            <select>
+              <option value="America/Bogota" selected>Bogotá (GMT-5)</option>
+              <option value="America/Mexico_City">Ciudad de México (GMT-6)</option>
+            </select>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Modo oscuro</div>
+              <div class="toggle-desc">Usar tema oscuro en la app</div>
+            </div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="showToast('Configuración guardada'); closeModal();">Guardar</button>
+        `;
+        break;
+
+      case 'impuestos':
+        title.textContent = 'Impuestos';
+        body.innerHTML = `
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Aplicar IVA</div>
+              <div class="toggle-desc">19% sobre ventas</div>
+            </div>
+            <div class="switch" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="field" style="margin-top:16px;">
+            <label>Porcentaje IVA</label>
+            <input type="number" value="19" placeholder="19">
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">IVA incluido en precio</div>
+              <div class="toggle-desc">El precio ya incluye el impuesto</div>
+            </div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="showToast('Impuestos actualizados'); closeModal();">Guardar</button>
+        `;
+        break;
+
+      case 'pagarColabs':
+        title.textContent = 'Pagar a colaboradores';
+        body.innerHTML = `<p style="font-size:13px; color:var(--text-secondary);">Cargando colaboradores...</p>`;
+        footer.innerHTML = `<button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>`;
+        // Cargar colaboradores
+        const { data: colabs } = await sb.from('usuarios').select('id, full_name, saldo_pendiente').eq('sucursal_id', sedeId).in('role', ['barbero', 'colaborador']);
+        if (colabs && colabs.length > 0) {
+          body.innerHTML = colabs.map(c => `
+            <div style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--divider);">
+              <div style="flex:1;">
+                <div style="font-size:14px; font-weight:600;">${c.full_name}</div>
+                <div style="font-size:12px; color:${(c.saldo_pendiente || 0) >= 0 ? 'var(--success)' : 'var(--error)'};">Saldo: $${Math.abs(c.saldo_pendiente || 0).toLocaleString()}</div>
+              </div>
+              <button class="btn btn-sm btn-secondary" onclick="alert('Función de pago próximamente')">Pagar</button>
+            </div>
+          `).join('');
+        } else {
+          body.innerHTML = '<p style="font-size:13px; color:var(--text-secondary);">No hay colaboradores.</p>';
+        }
+        break;
+
+      case 'wallet':
+        title.textContent = 'Wallet';
+        body.innerHTML = `
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Habilitar wallet de clientes</div>
+              <div class="toggle-desc">Los clientes pueden tener saldo a favor</div>
+            </div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Permitir recargas</div>
+              <div class="toggle-desc">Clientes pueden añadir saldo</div>
+            </div>
+            <div class="switch" onclick="this.classList.toggle('on')"></div>
+          </div>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="showToast('Wallet configurado'); closeModal();">Guardar</button>
+        `;
+        break;
+
+      case 'tarjetasRegalo':
+        title.textContent = 'Tarjetas de regalo';
+        body.innerHTML = `
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Habilitar tarjetas de regalo</div>
+              <div class="toggle-desc">Vender gift cards</div>
+            </div>
+            <div class="switch" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <p style="font-size:13px; color:var(--text-secondary); margin-top:16px;">Configura los montos disponibles y diseños de tarjetas.</p>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
+        `;
+        break;
+
+      case 'personalizacion':
+        title.textContent = 'Personalización';
+        body.innerHTML = `
+          <div class="field">
+            <label>Logo de la sede</label>
+            <input type="file" accept="image/*">
+          </div>
+          <div class="field">
+            <label>Color principal</label>
+            <input type="color" value="#C9A35B" style="height:48px; padding:8px;">
+          </div>
+          <div class="field">
+            <label>Slogan</label>
+            <input type="text" placeholder="Tu mejor versión">
+          </div>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="showToast('Personalización guardada'); closeModal();">Guardar</button>
+        `;
+        break;
+
+      case 'retos':
+        title.textContent = 'Retos por visitas';
+        body.innerHTML = `
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Activar retos</div>
+              <div class="toggle-desc">Premios por frecuencia de visitas</div>
+            </div>
+            <div class="switch" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <p style="font-size:13px; color:var(--text-secondary); margin-top:16px;">Configura premios por cantidad de visitas (ej: 5ta visita gratis).</p>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
+        `;
+        break;
+
+      case 'cupones':
+        title.textContent = 'Cupones';
+        body.innerHTML = `
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">Crea códigos de descuento para tus clientes.</p>
+          <div class="field">
+            <label>Código del cupón</label>
+            <input type="text" placeholder="Ej: DESCUENTO20">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label>Tipo</label>
+              <select>
+                <option value="porcentaje">Porcentaje</option>
+                <option value="fijo">Monto fijo</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Valor</label>
+              <input type="number" placeholder="20">
+            </div>
+          </div>
+          <div class="field">
+            <label>Fecha de vencimiento</label>
+            <input type="date">
+          </div>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="showToast('Cupón creado'); closeModal();">Crear cupón</button>
+        `;
+        break;
+
+      case 'importar':
+        title.textContent = 'Importar datos';
+        body.innerHTML = `
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">Importa información desde archivos Excel o CSV.</p>
+          <div class="field">
+            <label>Tipo de datos</label>
+            <select>
+              <option value="clientes">Clientes</option>
+              <option value="productos">Productos</option>
+              <option value="servicios">Servicios</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Archivo</label>
+            <input type="file" accept=".xlsx,.csv">
+          </div>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="showToast('Importación iniciada'); closeModal();">Importar</button>
+        `;
+        break;
+
+      case 'impresion':
+        title.textContent = 'Impresión de recibos';
+        body.innerHTML = `
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Imprimir automáticamente</div>
+              <div class="toggle-desc">Al completar cada venta</div>
+            </div>
+            <div class="switch" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="field" style="margin-top:16px;">
+            <label>Ancho del recibo</label>
+            <select>
+              <option value="58">58mm (térmico pequeño)</option>
+              <option value="80" selected>80mm (térmico estándar)</option>
+            </select>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <div class="toggle-label">Mostrar logo en recibo</div>
+            </div>
+            <div class="switch on" onclick="this.classList.toggle('on')"></div>
+          </div>
+        `;
+        footer.innerHTML = `
+          <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+          <button class="btn btn-primary" onclick="showToast('Configuración guardada'); closeModal();">Guardar</button>
+        `;
+        break;
+
+      case 'papelera':
+        title.textContent = 'Papelera';
+        body.innerHTML = `
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:16px;">Los elementos eliminados se mantienen por 30 días antes de borrarse permanentemente.</p>
+          <div class="empty-state" style="padding:40px 0;">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.5;"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>
+            <div style="margin-top:12px;">La papelera está vacía</div>
+          </div>
+        `;
+        footer.innerHTML = `<button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>`;
+        break;
+
+      default:
+        title.textContent = 'Configuración';
+        body.innerHTML = '<p>Contenido no disponible.</p>';
+        footer.innerHTML = `<button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>`;
+    }
+
+    overlay.classList.add('show');
+  };
+
+  window.closeModal = function() {
+    document.getElementById('modalOverlay').classList.remove('show');
+  };
+
+  window.guardarMiInfo = async function() {
+    const nombre = document.getElementById('sedeNombre').value;
+    const direccion = document.getElementById('sedeDireccion').value;
+    const telefono = document.getElementById('sedeTelefono').value;
+    const whatsapp = document.getElementById('sedeWhatsapp').value;
+    const email = document.getElementById('sedeEmail').value;
+    const google_maps_link = document.getElementById('sedeGoogleMaps').value;
+
+    try {
+      await sb.from('sucursales').update({
+        nombre, direccion, telefono, whatsapp, email, google_maps_link
+      }).eq('id', sedeId);
+
+      showToast('Información actualizada');
+      closeModal();
+    } catch (e) {
+      alert('Error al guardar: ' + e.message);
+    }
+  };
+
+  window.showToast = function(msg) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  };
+
+  // ---- Métodos de Pago ----
+  const PAY_METHODS_BASE = [
+    { id: 'efectivo', label: '💵 Efectivo' },
+    { id: 'tarjeta', label: '💳 Tarjeta' },
+    { id: 'nequi', label: '📱 Nequi' },
+    { id: 'qr', label: '📷 QR Transferencia' }
+  ];
+  let metodosPagoActivos = [];
+  let metodosPagoCustom = [];
+
+  window.loadMetodosPagoModal = async function() {
+    const body = document.getElementById('modalBody');
+    const footer = document.getElementById('modalFooter');
+
+    try {
+      const { data, error } = await sb.from('configuracion_negocio').select('metodos_pago, metodos_pago_custom').limit(1).single();
+      if (error) throw error;
+
+      metodosPagoActivos = data?.metodos_pago || [];
+      metodosPagoCustom = data?.metodos_pago_custom || [];
+
+      renderMetodosPagoModal();
+
+      footer.innerHTML = `
+        <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarMetodosPago()">Guardar</button>
+      `;
+    } catch (err) {
+      console.error(err);
+      body.innerHTML = '<p style="color:var(--error);">Error al cargar métodos de pago</p>';
+    }
+  };
+
+  function renderMetodosPagoModal() {
+    const body = document.getElementById('modalBody');
+
+    let html = '<p style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">Activa los métodos que aceptas en tu negocio.</p>';
+
+    // Métodos base
+    PAY_METHODS_BASE.forEach(m => {
+      const isActive = metodosPagoActivos.includes(m.id);
+      html += `
+        <div class="toggle-row" style="padding:10px 0; border-bottom:1px solid var(--divider);">
+          <div class="toggle-info">
+            <div class="toggle-label">${m.label}</div>
+          </div>
+          <div class="switch ${isActive ? 'on' : ''}" data-method="${m.id}" onclick="this.classList.toggle('on')"></div>
+        </div>
+      `;
+    });
+
+    // Métodos personalizados
+    metodosPagoCustom.forEach(m => {
+      const isActive = metodosPagoActivos.includes(m.id);
+      html += `
+        <div class="toggle-row" style="padding:10px 0; border-bottom:1px solid var(--divider);">
+          <div class="toggle-info" style="flex:1;">
+            <div class="toggle-label">${m.icono} ${m.nombre}</div>
+          </div>
+          <div class="switch ${isActive ? 'on' : ''}" data-method="${m.id}" onclick="this.classList.toggle('on')"></div>
+          <button onclick="eliminarMetodoPago('${m.id}')" style="margin-left:8px; padding:4px 8px; border-radius:6px; border:1px solid rgba(239,83,80,0.3); background:rgba(239,83,80,0.1); color:#EF5350; font-size:11px; cursor:pointer;">✕</button>
+        </div>
+      `;
+    });
+
+    // Botón agregar
+    html += `
+      <button onclick="mostrarFormNuevoMetodo()" style="margin-top:16px; padding:10px 16px; border-radius:10px; border:1px dashed var(--divider); background:transparent; color:var(--gold); font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; width:100%; justify-content:center;">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        Agregar método de pago
+      </button>
+      <div id="formNuevoMetodo" style="display:none; margin-top:12px; padding:12px; background:var(--surface); border-radius:10px; border:1px solid var(--divider);">
+        <div style="margin-bottom:10px;">
+          <label style="font-size:11px; color:var(--text-secondary);">Nombre</label>
+          <input type="text" id="nuevoMetodoNombre" placeholder="Ej: Bancolombia" style="width:100%; padding:8px; border-radius:8px; border:1px solid var(--divider); background:var(--card); color:var(--text); font-size:13px; margin-top:4px;">
+        </div>
+        <div style="margin-bottom:10px;">
+          <label style="font-size:11px; color:var(--text-secondary);">Icono (emoji)</label>
+          <input type="text" id="nuevoMetodoIcono" placeholder="💳" maxlength="2" style="width:60px; padding:8px; border-radius:8px; border:1px solid var(--divider); background:var(--card); color:var(--text); font-size:18px; text-align:center; margin-top:4px;">
+        </div>
+        <button onclick="agregarNuevoMetodo()" style="width:100%; padding:10px; border-radius:8px; border:none; background:var(--gold); color:#141414; font-weight:700; cursor:pointer;">Agregar</button>
+      </div>
+    `;
+
+    body.innerHTML = html;
+  }
+
+  window.mostrarFormNuevoMetodo = function() {
+    document.getElementById('formNuevoMetodo').style.display = 'block';
+    document.getElementById('nuevoMetodoNombre').focus();
+  };
+
+  window.agregarNuevoMetodo = async function() {
+    console.log('[AgregarMetodo] Iniciando...');
+    const nombre = document.getElementById('nuevoMetodoNombre').value.trim();
+    const icono = document.getElementById('nuevoMetodoIcono').value.trim() || '💳';
+    console.log('[AgregarMetodo] Nombre:', nombre, 'Icono:', icono);
+
+    if (!nombre) { showToast('Escribe un nombre'); return; }
+
+    const id = 'custom_' + nombre.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    console.log('[AgregarMetodo] ID generado:', id);
+
+    if (PAY_METHODS_BASE.some(m => m.id === id) || metodosPagoCustom.some(m => m.id === id)) {
+      showToast('Ya existe ese método'); return;
+    }
+
+    metodosPagoCustom.push({ id, nombre, icono });
+    metodosPagoActivos.push(id);
+
+    try {
+      console.log('[AgregarMetodo] Guardando en BD...', { metodosPagoActivos, metodosPagoCustom });
+      const { data, error } = await sb.from('configuracion_negocio').update({
+        metodos_pago: metodosPagoActivos,
+        metodos_pago_custom: metodosPagoCustom,
+        updated_at: new Date().toISOString()
+      }).eq('id', true).select();
+
+      console.log('[AgregarMetodo] Resultado:', { data, error });
+      if (error) throw error;
+
+      renderMetodosPagoModal();
+      showToast('Método agregado');
+    } catch (err) {
+      console.error('[AgregarMetodo] Error:', err);
+      showToast('Error al guardar: ' + err.message);
+    }
+  };
+
+  window.eliminarMetodoPago = async function(id) {
+    if (!confirm('¿Eliminar este método de pago?')) return;
+
+    metodosPagoCustom = metodosPagoCustom.filter(m => m.id !== id);
+    metodosPagoActivos = metodosPagoActivos.filter(m => m !== id);
+
+    try {
+      await sb.from('configuracion_negocio').update({
+        metodos_pago: metodosPagoActivos,
+        metodos_pago_custom: metodosPagoCustom,
+        updated_at: new Date().toISOString()
+      }).eq('id', true);
+
+      renderMetodosPagoModal();
+      showToast('Método eliminado');
+    } catch (err) {
+      console.error(err);
+      showToast('Error al eliminar');
+    }
+  };
+
+  window.guardarMetodosPago = async function() {
+    const switches = document.querySelectorAll('#modalBody .switch[data-method]');
+    metodosPagoActivos = [];
+
+    switches.forEach(sw => {
+      if (sw.classList.contains('on')) {
+        metodosPagoActivos.push(sw.dataset.method);
+      }
+    });
+
+    try {
+      await sb.from('configuracion_negocio').update({
+        metodos_pago: metodosPagoActivos,
+        updated_at: new Date().toISOString()
+      }).eq('id', true);
+
+      showToast('Métodos de pago guardados');
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      showToast('Error al guardar');
+    }
+  };
+
+  // Theme toggle
+  function initThemeToggle() {
+    const currentTheme = window.dnGetTheme ? window.dnGetTheme() : 'light';
+    const toggle = document.getElementById('themeToggle');
+    if (!toggle) return;
+    toggle.querySelectorAll('.theme-option').forEach(opt => {
+      opt.classList.toggle('active', opt.dataset.theme === currentTheme);
+    });
+  }
+
+  window.toggleThemeOption = function() {
+    const currentTheme = window.dnGetTheme ? window.dnGetTheme() : 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    if (window.dnSetTheme) window.dnSetTheme(newTheme);
+    document.querySelectorAll('.theme-option').forEach(opt => {
+      opt.classList.toggle('active', opt.dataset.theme === newTheme);
+    });
+    showToast(`Tema ${newTheme === 'dark' ? 'oscuro' : 'claro'} activado`);
+  };
+
+  // Cerrar sesión móvil
+  window.cerrarSesionMobile = function() {
+    if (confirm('¿Seguro que deseas cerrar sesión?')) {
+      dnClearSession();
+      dnClearTurnoSede();
+      window.location.href = '../auth.html';
+    }
+  };
+
+  initThemeToggle();
+})();
+</script>
+</body>
+</html>

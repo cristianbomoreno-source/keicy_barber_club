@@ -1,0 +1,1068 @@
+/* ================================================================
+   DIEGO NEIRA BARBER - Premium Mobile Dashboard Redesign
+   Solo afecta pantallas <= 767px
+   Paleta: blanco cálido, negro, gris suave, dorado/champaña
+   ================================================================ */
+
+@media (max-width: 767px) {
+  /* ================================================================
+     VARIABLES DE TEMA PREMIUM - TEMA CLARO (default)
+     ================================================================ */
+  :root {
+    --premium-bg: #FAFAF8;
+    --premium-surface: #FFFFFF;
+    --premium-card: #FFFFFF;
+    --premium-text: #111111;
+    --premium-text-secondary: #6F6F6F;
+    --premium-text-muted: #9A9A9A;
+    --premium-border: #EAE8E3;
+    --premium-gold: #D6AE4A;
+    --premium-gold-soft: #F7F1E4;
+    --premium-gold-dark: #C49B35;
+    --premium-success: #34C759;
+    --premium-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    --premium-shadow-md: 0 4px 20px rgba(0,0,0,0.08);
+    --premium-logo-bg: #111111;
+  }
+
+  /* ================================================================
+     VARIABLES DE TEMA PREMIUM - TEMA OSCURO
+     ================================================================ */
+  [data-theme="dark"] {
+    --premium-bg: #0A0A0C;
+    --premium-surface: #16181D;
+    --premium-card: #1C1E24;
+    --premium-text: #F5F2EA;
+    --premium-text-secondary: #A0A0A0;
+    --premium-text-muted: #6B6B6B;
+    --premium-border: #2A2D35;
+    --premium-gold: #D9B872;
+    --premium-gold-soft: rgba(217, 184, 114, 0.12);
+    --premium-gold-dark: #C9A55A;
+    --premium-success: #34C759;
+    --premium-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    --premium-shadow-md: 0 4px 20px rgba(0,0,0,0.3);
+    --premium-logo-bg: #F5F2EA;
+  }
+
+  /* Aliases para compatibilidad */
+  :root, [data-theme="dark"] {
+    --premium-white: var(--premium-card);
+    --premium-black: var(--premium-text);
+    --premium-gray: var(--premium-text-secondary);
+    --premium-gray-light: var(--premium-text-muted);
+  }
+
+  /* Override de fondo según tema */
+  body, .main, #app {
+    background: var(--premium-bg) !important;
+  }
+
+  .main {
+    padding: 0 16px calc(90px + env(safe-area-inset-bottom, 0)) !important;
+    padding-top: calc(env(safe-area-inset-top, 20px) + 8px) !important;
+  }
+
+  /* ================================================================
+     HEADER PREMIUM
+     ================================================================ */
+  .premium-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .premium-header-left {
+    flex: 1;
+  }
+
+  .premium-greeting-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--premium-text-secondary);
+    margin-bottom: 4px;
+  }
+
+  .premium-greeting-name {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--premium-text);
+    line-height: 1.1;
+  }
+
+  .premium-notif-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--premium-card);
+    border: 1px solid var(--premium-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    box-shadow: var(--premium-shadow);
+  }
+
+  .premium-notif-btn svg {
+    width: 20px;
+    height: 20px;
+    color: var(--premium-text);
+    stroke-width: 1.8;
+  }
+
+  .premium-notif-dot {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 8px;
+    height: 8px;
+    background: var(--premium-gold);
+    border-radius: 50%;
+    border: 2px solid var(--premium-card);
+  }
+
+  /* ================================================================
+     TARJETA PRINCIPAL DE VENTAS - Con imagen de fondo
+     ================================================================ */
+  .premium-sales-card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    min-height: 200px;
+  }
+
+  .premium-sales-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-color: #1a1a1a;
+    background-image: url('barbershop-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  /* Tema oscuro: misma imagen */
+  [data-theme="dark"] .premium-sales-bg {
+    background-color: #0a0a0a;
+    background-image: url('barbershop-bg.jpg');
+  }
+
+  .premium-sales-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(135deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.5) 100%);
+  }
+
+  .premium-sales-content {
+    position: relative;
+    z-index: 2;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+  }
+
+  .premium-sales-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 8px;
+  }
+
+  .premium-sales-amount {
+    font-size: 38px;
+    font-weight: 800;
+    color: #FFFFFF;
+    line-height: 1;
+    margin-bottom: 8px;
+    font-feature-settings: 'tnum';
+  }
+
+  .premium-sales-delta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    margin-bottom: auto;
+  }
+
+  .premium-sales-delta-value {
+    color: var(--premium-success);
+    font-weight: 700;
+  }
+
+  .premium-sales-delta-label {
+    color: rgba(255,255,255,0.6);
+    font-weight: 500;
+  }
+
+  .premium-sales-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 20px;
+    background: var(--premium-gold);
+    color: var(--premium-text);
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 12px;
+    text-decoration: none;
+    width: fit-content;
+    margin-top: 16px;
+    transition: transform 0.15s ease;
+  }
+
+  .premium-sales-btn:active {
+    transform: scale(0.97);
+  }
+
+  .premium-sales-logo {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 80px;
+    opacity: 0.25;
+  }
+
+  /* ================================================================
+     TARJETA DE PROGRESO DEL MES
+     ================================================================ */
+  .premium-progress-card {
+    background: var(--premium-card);
+    border: 1px solid var(--premium-border);
+    border-radius: 20px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    box-shadow: var(--premium-shadow);
+  }
+
+  .premium-progress-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .premium-progress-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--premium-gold-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .premium-progress-icon svg {
+    width: 22px;
+    height: 22px;
+    color: var(--premium-gold-dark);
+  }
+
+  .premium-progress-info {
+    flex: 1;
+  }
+
+  .premium-progress-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--premium-text);
+  }
+
+  .premium-progress-subtitle {
+    font-size: 13px;
+    color: var(--premium-text-secondary);
+    margin-top: 2px;
+  }
+
+  .premium-progress-pct {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--premium-gold);
+  }
+
+  .premium-progress-bar {
+    height: 6px;
+    background: var(--premium-border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 14px;
+  }
+
+  .premium-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--premium-gold), var(--premium-gold-dark));
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+
+  /* ================================================================
+     SELECTOR DE SEDE
+     ================================================================ */
+  .premium-sede-card {
+    position: relative;
+    z-index: 10;
+    background: var(--premium-card);
+    border: 1px solid var(--premium-border);
+    border-radius: 20px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    box-shadow: var(--premium-shadow);
+    position: relative;
+    transition: border-color 0.2s ease;
+  }
+
+  .premium-sede-card:active {
+    border-color: var(--premium-gold);
+  }
+
+  /* Tema claro: fondo negro, logo blanco */
+  .premium-sede-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: #111111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 10px;
+  }
+
+  .premium-sede-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  /* Tema oscuro: fondo blanco, logo negro */
+  [data-theme="dark"] .premium-sede-logo {
+    background: #FFFFFF;
+  }
+
+  [data-theme="dark"] .premium-sede-logo img {
+    filter: brightness(0);
+  }
+
+  .premium-sede-info {
+    flex: 1;
+  }
+
+  .premium-sede-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--premium-text-secondary);
+  }
+
+  .premium-sede-current {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--premium-text);
+    margin-top: 2px;
+  }
+
+  .premium-sede-chevron {
+    width: 20px;
+    height: 20px;
+    color: var(--premium-text-secondary);
+    transition: transform 0.2s ease;
+  }
+
+  .premium-sede-card.open .premium-sede-chevron {
+    transform: rotate(180deg);
+  }
+
+  .premium-sede-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background: var(--premium-card);
+    border: 1px solid var(--premium-border);
+    border-radius: 16px;
+    padding: 8px;
+    z-index: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  }
+
+  .premium-sede-card.open .premium-sede-menu {
+    display: block;
+  }
+
+  .premium-sede-card.open {
+    z-index: 500;
+  }
+
+  .premium-sede-menu-item {
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--premium-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.15s ease;
+  }
+
+  .premium-sede-menu-item:hover,
+  .premium-sede-menu-item:active {
+    background: var(--premium-gold-soft);
+  }
+
+  .premium-sede-menu-item.active {
+    color: var(--premium-gold);
+    background: var(--premium-gold-soft);
+  }
+
+  .premium-sede-menu-item.active::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--premium-gold);
+    border-radius: 50%;
+  }
+
+  /* ================================================================
+     GRID DE METRICAS 2x2
+     ================================================================ */
+  .premium-metrics-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .premium-metric-card {
+    background: var(--premium-card);
+    border: 1px solid var(--premium-border);
+    border-radius: 22px;
+    padding: 18px;
+    box-shadow: var(--premium-shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .premium-metric-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--premium-gold-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  .premium-metric-icon svg {
+    width: 20px;
+    height: 20px;
+    color: var(--premium-gold-dark);
+  }
+
+  .premium-metric-label {
+    font-size: 12px;
+    color: var(--premium-text-secondary);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+
+  .premium-metric-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--premium-text);
+    line-height: 1.1;
+  }
+
+  .premium-metric-delta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  .premium-metric-delta.up {
+    color: var(--premium-success);
+  }
+
+  .premium-metric-delta.down {
+    color: #EF4444;
+  }
+
+  .premium-metric-delta-text {
+    color: var(--premium-text-muted);
+    font-weight: 500;
+  }
+
+  .premium-metric-bars {
+    position: absolute;
+    right: 14px;
+    bottom: 18px;
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 32px;
+  }
+
+  .premium-metric-bar {
+    width: 4px;
+    background: var(--premium-gold-soft);
+    border-radius: 2px;
+  }
+
+  /* ================================================================
+     TARJETA DE CITAS DE HOY (NUEVO)
+     ================================================================ */
+  .premium-today-card {
+    background: var(--premium-card);
+    border: 1px solid var(--premium-border);
+    border-radius: 22px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: var(--premium-shadow);
+  }
+
+  .premium-today-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+
+  .premium-today-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--premium-gold) 0%, var(--premium-gold-dark) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .premium-today-icon svg {
+    width: 26px;
+    height: 26px;
+    color: #FFFFFF;
+  }
+
+  .premium-today-info {
+    flex: 1;
+  }
+
+  .premium-today-count {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--premium-text);
+    line-height: 1;
+  }
+
+  .premium-today-label {
+    font-size: 13px;
+    color: var(--premium-text-secondary);
+    margin-top: 4px;
+  }
+
+  .premium-today-badge {
+    background: var(--premium-gold-soft);
+    color: var(--premium-gold-dark);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+
+  .premium-today-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--premium-border);
+  }
+
+  .premium-today-stat {
+    text-align: center;
+    padding: 14px 8px;
+    background: var(--premium-bg);
+    border-radius: 14px;
+  }
+
+  .premium-today-stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--premium-text);
+    line-height: 1;
+  }
+
+  .premium-today-stat-label {
+    font-size: 11px;
+    color: var(--premium-text-secondary);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+
+  /* Meta del día - barra de progreso */
+  .premium-today-goal {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--premium-border);
+  }
+
+  .premium-today-goal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .premium-today-goal-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--premium-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .premium-today-goal-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--premium-text);
+  }
+
+  .premium-today-goal-bar {
+    height: 8px;
+    background: var(--premium-border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .premium-today-goal-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--premium-gold), var(--premium-gold-dark));
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+
+  /* ================================================================
+     ACCESOS RAPIDOS (NUEVO)
+     ================================================================ */
+  .premium-shortcuts {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding: 4px 0;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .premium-shortcuts::-webkit-scrollbar {
+    display: none;
+  }
+
+  .premium-shortcut {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px;
+    background: var(--premium-card);
+    border: 1px solid var(--premium-border);
+    border-radius: 18px;
+    min-width: 76px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    box-shadow: var(--premium-shadow);
+    position: relative;
+  }
+
+  .premium-shortcut:active {
+    transform: scale(0.96);
+    background: var(--premium-gold-soft);
+  }
+
+  .premium-shortcut-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: var(--premium-gold-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .premium-shortcut-icon svg {
+    width: 22px;
+    height: 22px;
+    color: var(--premium-gold-dark);
+  }
+
+  .premium-shortcut-icon.purple { background: rgba(168, 85, 247, 0.12); }
+  .premium-shortcut-icon.purple svg { color: #A855F7; }
+
+  .premium-shortcut-icon.blue { background: rgba(59, 130, 246, 0.12); }
+  .premium-shortcut-icon.blue svg { color: #3B82F6; }
+
+  .premium-shortcut-icon.green { background: rgba(34, 197, 94, 0.12); }
+  .premium-shortcut-icon.green svg { color: #22C55E; }
+
+  .premium-shortcut-icon.orange { background: rgba(249, 115, 22, 0.12); }
+  .premium-shortcut-icon.orange svg { color: #F97316; }
+
+  .premium-shortcut-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--premium-text-secondary);
+    text-align: center;
+  }
+
+  .premium-shortcut-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    min-width: 18px;
+    height: 18px;
+    background: #EF4444;
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+  }
+
+  /* ================================================================
+     TARJETA DE GASTOS (NUEVO)
+     ================================================================ */
+  .premium-expenses-card {
+    background: var(--premium-card);
+    border: 1px solid var(--premium-border);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 20px;
+    box-shadow: var(--premium-shadow);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .premium-expenses-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(239, 68, 68, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .premium-expenses-icon svg {
+    width: 22px;
+    height: 22px;
+    color: #EF4444;
+  }
+
+  .premium-expenses-info {
+    flex: 1;
+  }
+
+  .premium-expenses-label {
+    font-size: 12px;
+    color: var(--premium-text-secondary);
+    font-weight: 500;
+  }
+
+  .premium-expenses-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--premium-text);
+    line-height: 1.1;
+    margin-top: 2px;
+  }
+
+  .premium-expenses-delta {
+    font-size: 13px;
+    font-weight: 600;
+    color: #EF4444;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .premium-expenses-delta.down {
+    color: var(--premium-success);
+  }
+
+  .premium-expenses-chevron {
+    width: 20px;
+    height: 20px;
+    color: var(--premium-text-muted);
+    flex-shrink: 0;
+  }
+
+  /* ================================================================
+     SECCION ULTIMAS VISITAS
+     ================================================================ */
+  .premium-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .premium-section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--premium-text);
+  }
+
+  .premium-section-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--premium-gold);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    text-decoration: none;
+  }
+
+  .premium-visits-card {
+    background: var(--premium-card);
+    border: 1px solid var(--premium-border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--premium-shadow);
+    margin-bottom: 24px;
+  }
+
+  .premium-visit-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--premium-border);
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .premium-visit-item:last-child {
+    border-bottom: none;
+  }
+
+  .premium-visit-item:active {
+    background: var(--premium-gold-soft);
+  }
+
+  .premium-visit-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--premium-gold) 0%, var(--premium-gold-dark) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+  }
+
+  .premium-visit-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .premium-visit-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--premium-text);
+    margin-bottom: 2px;
+  }
+
+  .premium-visit-sede {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--premium-text-secondary);
+  }
+
+  .premium-visit-time {
+    font-size: 12px;
+    color: var(--premium-text-muted);
+    margin-top: 2px;
+  }
+
+  .premium-visit-chevron {
+    width: 20px;
+    height: 20px;
+    color: var(--premium-text-muted);
+    flex-shrink: 0;
+  }
+
+  /* ================================================================
+     NAVEGACION INFERIOR
+     ================================================================ */
+  .premium-bottom-nav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--premium-card);
+    border-top: 1px solid var(--premium-border);
+    display: flex;
+    align-items: stretch;
+    justify-content: space-around;
+    padding: 8px 0;
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
+    z-index: 100;
+  }
+
+  .premium-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 8px 0;
+    text-decoration: none;
+    color: var(--premium-text-secondary);
+    font-size: 10px;
+    font-weight: 600;
+    gap: 4px;
+    transition: color 0.2s ease;
+  }
+
+  .premium-nav-item svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 1.6;
+  }
+
+  .premium-nav-item.active {
+    color: var(--premium-gold);
+  }
+
+  .premium-nav-item.active svg {
+    stroke-width: 2;
+  }
+
+  /* ================================================================
+     ESTADO VACIO
+     ================================================================ */
+  .premium-empty {
+    text-align: center;
+    padding: 32px 20px;
+    color: var(--premium-text-secondary);
+    font-size: 14px;
+  }
+
+  /* ================================================================
+     OCULTAR ELEMENTOS ANTERIORES EN MOVIL
+     ================================================================ */
+  .mobile-only,
+  .mobile-header-row,
+  .mobile-ventas-card,
+  .mobile-month-progress,
+  .mobile-sede-selector,
+  .mobile-web-visits,
+  .mobile-favorites-section,
+  .mobile-ultimas-section,
+  .mobile-nav,
+  .dn-bottom-nav {
+    display: none !important;
+  }
+
+  /* Mostrar nuevos elementos premium */
+  .premium-mobile-view {
+    display: block !important;
+  }
+
+  /* Asegurar que la navegación premium se muestre */
+  .premium-bottom-nav {
+    display: flex !important;
+  }
+
+  /* Sincronizar variables premium con variables del sistema */
+  .premium-mobile-view,
+  .premium-mobile-view * {
+    --text: var(--premium-text);
+    --text-secondary: var(--premium-text-secondary);
+    --gold: var(--premium-gold);
+    --card: var(--premium-card);
+    --divider: var(--premium-border);
+    --bg: var(--premium-bg);
+  }
+
+  /* Ajuste de padding para evitar que contenido quede oculto */
+  .main {
+    padding-bottom: calc(90px + env(safe-area-inset-bottom, 0)) !important;
+  }
+
+  /* Animación suave de entrada */
+  .premium-mobile-view > * {
+    animation: premiumFadeIn 0.3s ease forwards;
+    opacity: 0;
+  }
+
+  .premium-mobile-view > *:nth-child(1) { animation-delay: 0s; }
+  .premium-mobile-view > *:nth-child(2) { animation-delay: 0.03s; }
+  .premium-mobile-view > *:nth-child(3) { animation-delay: 0.06s; }
+  .premium-mobile-view > *:nth-child(4) { animation-delay: 0.09s; }
+  .premium-mobile-view > *:nth-child(5) { animation-delay: 0.12s; }
+  .premium-mobile-view > *:nth-child(6) { animation-delay: 0.15s; }
+  .premium-mobile-view > *:nth-child(7) { animation-delay: 0.18s; }
+  .premium-mobile-view > *:nth-child(8) { animation-delay: 0.21s; }
+  .premium-mobile-view > *:nth-child(9) { animation-delay: 0.24s; }
+  .premium-mobile-view > *:nth-child(10) { animation-delay: 0.27s; }
+  .premium-mobile-view > *:nth-child(11) { animation-delay: 0.30s; }
+
+  @keyframes premiumFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Ocultar elementos premium en desktop */
+@media (min-width: 768px) {
+  .premium-mobile-view,
+  .premium-bottom-nav {
+    display: none !important;
+  }
+}

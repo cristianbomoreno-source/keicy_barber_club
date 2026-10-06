@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Acceso Admin · Keicy Barber</title>
+<style>
+  :root{
+    --bg:#0A0A0C;
+    --surface:#101112;
+    --card:#16181D;
+    --gold:#D4AF55;
+    --gold-bright:#E8C66A;
+    --text:#FFFFFF;
+    --text-secondary:#8A8780;
+    --divider:#2B2B2B;
+    --success:#4ECB71;
+    --error:#EF5350;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+
+  html, body{
+    height:100%;
+    background:var(--bg);
+    font-family:-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+    color:var(--text);
+  }
+
+  #app{
+    width:100%;
+    min-height:100vh;
+    min-height:100dvh;
+    max-width:420px;
+    margin:0 auto;
+    padding:0 28px;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .login-top{
+    flex:0 0 auto;
+    padding-top:max(60px, var(--safe-top));
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  .login-logo{
+    width:96px;
+    height:auto;
+    margin-bottom:22px;
+  }
+
+  .login-heading{
+    font-size:22px;
+    font-weight:600;
+    text-align:center;
+  }
+
+  .login-sub{
+    margin-top:8px;
+    font-size:14px;
+    color:var(--text-secondary);
+    text-align:center;
+    line-height:1.5;
+  }
+
+  .login-form{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:16px;
+    padding-bottom:40px;
+  }
+
+  .field label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:0.6px;
+    text-transform:uppercase;
+    color:var(--text-secondary);
+    margin-bottom:8px;
+  }
+
+  .field-input{
+    display:flex;
+    align-items:center;
+    background:var(--card);
+    border:1px solid var(--divider);
+    border-radius:18px;
+    height:58px;
+    padding:0 16px;
+    transition:border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .field-input:focus-within{
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(201,163,91,0.14);
+  }
+
+  .field-input.error{
+    border-color:var(--error);
+  }
+
+  .field-input input{
+    flex:1;
+    background:transparent;
+    border:none;
+    outline:none;
+    color:var(--text);
+    font-size:16px;
+    font-weight:500;
+  }
+
+  .field-input input::placeholder{
+    color:#5A5852;
+    font-weight:400;
+  }
+
+  .field-icon{
+    width:20px;
+    height:20px;
+    flex-shrink:0;
+    opacity:0.55;
+    margin-right:12px;
+  }
+
+  .error-msg{
+    font-size:12px;
+    color:var(--error);
+    margin-top:6px;
+    margin-left:4px;
+    min-height:14px;
+    opacity:0;
+    transition:opacity 0.2s ease;
+  }
+
+  .error-msg.show{ opacity:1; }
+
+  .cta{
+    margin-top:8px;
+    height:56px;
+    border-radius:18px;
+    border:none;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#141414;
+    font-size:16px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    cursor:pointer;
+    transition:transform 0.15s ease, opacity 0.25s ease;
+  }
+
+  .cta:active{ transform:scale(0.98); }
+
+  .cta[disabled]{
+    opacity:0.4;
+    pointer-events:none;
+  }
+
+  .cta .spinner{
+    width:18px; height:18px;
+    display:none;
+    animation:spin 0.8s linear infinite;
+  }
+
+  .cta.loading span.label{ display:none; }
+  .cta.loading .spinner{ display:inline-block; }
+
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .back-link{
+    display:block;
+    text-align:center;
+    margin-top:20px;
+    font-size:13px;
+    color:var(--text-secondary);
+    text-decoration:none;
+  }
+
+  .back-link:hover{ color:var(--gold); }
+
+  #toast{
+    position:fixed;
+    left:50%;
+    bottom:36px;
+    transform:translate(-50%, 16px);
+    background:rgba(250,250,250,0.92);
+    backdrop-filter:blur(14px);
+    border:1px solid var(--divider);
+    border-radius:14px;
+    padding:12px 18px;
+    font-size:13px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s ease, transform 0.3s ease;
+    z-index:40;
+  }
+
+  #toast.show{
+    opacity:1;
+    transform:translate(-50%, 0);
+  }
+
+  .toast-dot{
+    width:8px; height:8px; border-radius:50%;
+    flex-shrink:0;
+  }
+
+  .toast-dot.error{ background:var(--error); }
+  .toast-dot.success{ background:var(--success); }
+
+  /* ========== RESPONSIVE ========== */
+  @media (min-width: 768px) {
+    #app {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    .login-card {
+      padding: 32px 40px;
+      border-radius: 24px;
+    }
+    .login-title { font-size: 22px; }
+    .input { padding: 16px 18px; font-size: 15px; }
+    .btn-login { padding: 18px; font-size: 15px; }
+  }
+
+  @media (min-width: 1024px) {
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    #app {
+      max-width: 420px;
+      background: rgba(20,20,20,0.8);
+      border-radius: 32px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+      padding: 48px;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .login-card { padding: 20px 16px; }
+    .input { padding: 14px 16px; font-size: 14px; }
+    .btn-login { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="login-top">
+    <img src="../index.htmllogo.png" alt="Keicy Barber" class="login-logo">
+    <div class="login-heading">Acceso Administrador</div>
+    <div class="login-sub">Ingresa con tu usuario y contraseña</div>
+  </div>
+
+  <form class="login-form" id="loginForm" novalidate>
+    <div class="field">
+      <label>Usuario o Email</label>
+      <div class="field-input" id="userWrap">
+        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="#8A8780" stroke-width="1.6">
+          <circle cx="12" cy="8" r="3.4"/>
+          <path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/>
+        </svg>
+        <input type="text" id="userInput" placeholder="usuario o email" autocomplete="username" autocapitalize="off">
+      </div>
+      <div class="error-msg" id="userError"></div>
+    </div>
+
+    <div class="field">
+      <label>Contraseña</label>
+      <div class="field-input" id="passWrap">
+        <svg class="field-icon" viewBox="0 0 24 24" fill="none" stroke="#8A8780" stroke-width="1.6">
+          <rect x="5" y="11" width="14" height="10" rx="2"/>
+          <path d="M8 11V7a4 4 0 018 0v4" stroke-linecap="round"/>
+        </svg>
+        <input type="password" id="passInput" placeholder="********" autocomplete="current-password">
+      </div>
+      <div class="error-msg" id="passError"></div>
+    </div>
+
+    <button type="submit" class="cta" id="submitBtn">
+      <span class="label">Ingresar</span>
+      <svg class="spinner" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="rgba(20,20,20,0.25)" stroke-width="2.4"/>
+        <path d="M21 12a9 9 0 0 0-9-9" stroke="#141414" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+    </button>
+
+    <a href="../index.html" class="back-link">Volver al inicio</a>
+  </form>
+</div>
+
+<div id="toast">
+  <span class="toast-dot" id="toastDot"></span>
+  <span id="toastText"></span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+// Si ya hay sesión de admin, redirigir
+(function(){
+  const existing = dnGetSession();
+  if (existing && (existing.role === 'admin' || existing.role === 'admin_sede')) {
+    const isMobile = window.matchMedia('(max-width:767px)').matches;
+    if (existing.role === 'admin_sede') {
+      window.location.href = '../admin_sede/seleccionar-sede.html';
+    } else {
+      window.location.href = isMobile ? 'calendario.html' : 'dashboard.html';
+    }
+  }
+})();
+
+const form = document.getElementById('loginForm');
+const userInput = document.getElementById('userInput');
+const passInput = document.getElementById('passInput');
+const userWrap = document.getElementById('userWrap');
+const passWrap = document.getElementById('passWrap');
+const userError = document.getElementById('userError');
+const passError = document.getElementById('passError');
+const submitBtn = document.getElementById('submitBtn');
+const toast = document.getElementById('toast');
+const toastDot = document.getElementById('toastDot');
+const toastText = document.getElementById('toastText');
+
+function showToast(msg, type = 'error') {
+  toastDot.className = 'toast-dot ' + type;
+  toastText.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+function clearErrors() {
+  userWrap.classList.remove('error');
+  passWrap.classList.remove('error');
+  userError.classList.remove('show');
+  passError.classList.remove('show');
+}
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearErrors();
+
+  const user = userInput.value.trim();
+  const pass = passInput.value;
+
+  if (!user) {
+    userWrap.classList.add('error');
+    userError.textContent = 'Ingresa tu usuario o email';
+    userError.classList.add('show');
+    return;
+  }
+
+  if (!pass) {
+    passWrap.classList.add('error');
+    passError.textContent = 'Ingresa tu contraseña';
+    passError.classList.add('show');
+    return;
+  }
+
+  submitBtn.classList.add('loading');
+  submitBtn.disabled = true;
+
+  try {
+    // Buscar por username o email
+    const { data: usuario, error } = await sb
+      .from('usuarios')
+      .select('id, username, email, phone, role, full_name, password_hash, avatar_url')
+      .or(`username.eq.${user},email.eq.${user}`)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!usuario) {
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+      userWrap.classList.add('error');
+      userError.textContent = 'Usuario no encontrado';
+      userError.classList.add('show');
+      return;
+    }
+
+    // Solo admins y admin_sede pueden entrar aquí
+    if (usuario.role !== 'admin' && usuario.role !== 'admin_sede') {
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+      showToast('Este acceso es solo para administradores');
+      return;
+    }
+
+    // Verificar contraseña (comparación directa por ahora)
+    if (usuario.password_hash !== pass) {
+      submitBtn.classList.remove('loading');
+      submitBtn.disabled = false;
+      passWrap.classList.add('error');
+      passError.textContent = 'Contraseña incorrecta';
+      passError.classList.add('show');
+      return;
+    }
+
+    // Login exitoso
+    const session = {
+      id: usuario.id,
+      username: usuario.username,
+      email: usuario.email,
+      phone: usuario.phone,
+      role: usuario.role,
+      full_name: usuario.full_name,
+      avatar_url: usuario.avatar_url
+    };
+    dnSaveSession(session);
+
+    showToast('Acceso correcto', 'success');
+
+    setTimeout(() => {
+      const isMobile = window.matchMedia('(max-width:767px)').matches;
+      if (usuario.role === 'admin_sede') {
+        window.location.href = '../admin_sede/seleccionar-sede.html';
+      } else {
+        window.location.href = isMobile ? 'calendario.html' : 'dashboard.html';
+      }
+    }, 800);
+
+  } catch (err) {
+    console.error(err);
+    submitBtn.classList.remove('loading');
+    submitBtn.disabled = false;
+    showToast('Error de conexión. Intenta de nuevo.');
+  }
+});
+</script>
+
+<script src="../assets/admin-sede-sidebar.js"></script>
+</body>
+</html>

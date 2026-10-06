@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Keicy Barbería · Servicios</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/mobile-admin.css">
+<style>
+  body{ overflow-x:hidden; }
+  #app{ display:flex; min-height:100vh; }
+
+  /* ---- Sidebar: barra de íconos colapsable, se expande al tocar el logo ---- */
+  .sidebar{ width:60px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--divider); display:flex; flex-direction:column; align-items:center; padding:20px 6px; position:sticky; top:0; height:100vh; z-index:40; overflow:hidden; overflow-y:auto; transition:width 0.28s cubic-bezier(.4,0,.2,1), padding 0.28s ease; }
+  .sidebar.expanded{ width:230px; align-items:stretch; padding:22px 16px; }
+  .sidebar-toggle-btn{ width:40px; height:40px; border-radius:12px; background:var(--card); border:1px solid var(--divider); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+  .sidebar-toggle-btn svg{ width:18px; height:18px; }
+  .sidebar-logo{ display:block; cursor:pointer; margin:0 auto; }
+  .sidebar-logo-icon{ width:48px; height:48px; border-radius:12px; margin-bottom:26px; }
+  .sidebar-logo-full{ height:56px; margin-bottom:28px; display:none; border-radius:12px; }
+  .sidebar.expanded .sidebar-logo-icon{ display:none; }
+  .sidebar.expanded .sidebar-logo-full{ display:block; }
+  .nav-group{ flex:1; display:flex; flex-direction:column; gap:3px; overflow-y:auto; width:100%; min-width:0; }
+  .nav-link{ display:flex; align-items:center; gap:12px; justify-content:center; width:40px; height:40px; margin:0 auto; padding:0; border-radius:12px; font-size:13.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:background 0.15s ease, color 0.15s ease; text-decoration:none; white-space:nowrap; }
+  .sidebar.expanded .nav-link{ justify-content:flex-start; width:100%; height:auto; margin:0; padding:11px 12px; }
+  .nav-link svg{ width:22px; height:22px; flex-shrink:0; }
+  .nav-link:hover{ background:var(--card); color:var(--text); }
+  .nav-link.active{ background:var(--gold); color:#141414; }
+  .nav-link.active svg{ stroke:#141414; }
+  .nav-label{ opacity:0; max-width:0; overflow:hidden; transition:opacity .16s ease, max-width .26s ease; }
+  .sidebar.expanded .nav-label{ opacity:1; max-width:170px; }
+    .sidebar-card{ display:none; position:relative; align-items:center; gap:9px; padding:9px; border-radius:14px; background:var(--glass-2, rgba(255,255,255,0.04)); border:1px solid var(--glass-border); margin-bottom:16px; cursor:pointer; }
+  .sidebar.expanded .sidebar-card{ display:flex; }
+  .sidebar-card-avatar{ width:32px; height:32px; border-radius:50%; background:var(--gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:800; flex-shrink:0; }
+  .sidebar-card-info{ flex:1; min-width:0; }
+  .sidebar-card-name{ font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-card-sub{ font-size:10.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+  .sidebar-card-chevron{ width:14px; height:14px; color:var(--text-secondary); flex-shrink:0; }
+  .sidebar-card-menu{ display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--card, #1c1c1c); border:1px solid var(--glass-border); border-radius:12px; padding:6px; z-index:60; max-height:220px; overflow-y:auto; box-shadow:0 12px 30px rgba(0,0,0,0.4); }
+  .sidebar-card-menu.show{ display:block; }
+  .sidebar-card-menu-item{ padding:9px 10px; border-radius:8px; font-size:12px; font-weight:600; color:var(--text-secondary); cursor:pointer; }
+  .sidebar-card-menu-item:hover{ background:var(--glass-2, rgba(255,255,255,0.06)); color:var(--text); }
+  .sidebar-card-menu-item.active{ color:var(--gold); font-weight:700; }
+  .nav-section-label{ display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
+  .nav-section-label:first-of-type{ padding-top:2px; }
+  .sidebar.expanded .nav-section-label{ display:block; }
+  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0; display:none; }
+  .sidebar.expanded .plan-card{ display:block; }
+  .plan-card .label{ font-size:11px; font-weight:700; letter-spacing:0.5px; color:var(--gold); text-transform:uppercase; }
+  .plan-card .sub{ font-size:12px; color:var(--text-secondary); margin-top:6px; }
+  .sidebar-bottom { margin-top:auto; padding-top:12px; border-top:1px solid var(--divider); display:flex; flex-direction:column; gap:8px; width:100%; }
+  .logout-btn { font-size:12px; color:#EF5350; display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; cursor:pointer; width:40px; height:40px; border-radius:10px; background:rgba(239,83,80,0.1); border:1px solid rgba(239,83,80,0.2); }
+  .sidebar.expanded .logout-btn { justify-content:flex-start; width:100%; height:auto; padding:10px 12px; margin:0; }
+  .logout-btn:hover { background:rgba(239,83,80,0.2); }
+  .logout-btn svg { width:16px; height:16px; flex-shrink:0; }
+  .logout-label { display:none; }
+  .sidebar.expanded .logout-label { display:inline; }
+
+  /* ---- Main ---- */
+  .main{ flex:1; min-width:0; padding:26px 32px 60px; }
+  .header-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; gap:14px; flex-wrap:wrap; }
+  .header-left{ display:flex; align-items:center; gap:14px; }
+  .header-icon{ width:42px; height:42px; border-radius:13px; background:var(--card); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .header-icon svg{ width:20px; height:20px; }
+  .header-title{ font-size:20px; font-weight:700; }
+  .header-sub{ font-size:12.5px; color:var(--text-secondary); margin-top:2px; }
+  .user-chip{ display:flex; align-items:center; gap:10px; }
+  .user-chip .name{ font-size:13px; font-weight:700; }
+  .user-chip .role{ font-size:11px; color:var(--text-secondary); }
+
+  .cat-block{ margin-bottom:30px; }
+  .cat-head{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .cat-title{ font-size:15px; font-weight:700; }
+  .cat-count{ font-size:11.5px; color:var(--text-secondary); background:var(--card); border:1px solid var(--divider); padding:3px 10px; border-radius:999px; }
+
+  .svc-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:14px; }
+
+  .svc-card{ padding:16px 18px; display:flex; flex-direction:column; gap:8px; transition:border-color 0.15s ease; }
+  .svc-card:hover{ border-color:var(--gold); }
+  .svc-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+  .svc-name{ font-size:13.5px; font-weight:700; line-height:1.3; }
+  .svc-menu{ width:26px; height:26px; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-secondary); flex-shrink:0; }
+  .svc-menu:hover{ background:var(--card-2); color:var(--text); }
+  .svc-price{ font-size:17px; font-weight:800; color:var(--gold); }
+  .svc-meta{ display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--text-secondary); }
+  .svc-dur{ display:flex; align-items:center; gap:4px; }
+  .svc-dur svg{ width:12px; height:12px; }
+  .svc-actions{ display:flex; gap:6px; margin-top:4px; }
+  .svc-actions button{ flex:1; font-size:11.5px; font-weight:700; padding:7px 0; border-radius:9px; cursor:pointer; border:1px solid var(--divider); background:var(--card-2); color:var(--text); }
+  .svc-actions button:hover{ border-color:var(--gold); }
+  .svc-actions button.danger:hover{ border-color:var(--error); color:var(--error); }
+  .svc-actions button[title="Subir"], .svc-actions button[title="Bajar"]{ flex:0 0 30px; }
+  .svc-actions button:disabled{ opacity:0.3; cursor:default; }
+  .svc-actions button:disabled:hover{ border-color:var(--divider); }
+
+  .cat-manage-bar{ display:flex; justify-content:flex-end; margin-bottom:18px; }
+  .cat-add-btn{ font-size:12px; font-weight:700; color:var(--gold); background:rgba(201,163,91,0.1); border:1px solid var(--gold); border-radius:10px; padding:8px 14px; cursor:pointer; }
+  .cat-manage{ display:flex; gap:10px; margin-left:auto; }
+  .cat-manage span{ font-size:13px; color:var(--text-secondary); cursor:pointer; user-select:none; }
+  .cat-manage span:hover{ color:var(--gold); }
+  .cat-manage span.danger:hover{ color:var(--error); }
+  .cat-manage span.disabled{ opacity:0.25; pointer-events:none; }
+
+  .svc-card.add-card{
+    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px;
+    border-style:dashed; border-color:var(--divider); cursor:pointer; color:var(--text-secondary); min-height:132px;
+  }
+  .svc-card.add-card:hover{ border-color:var(--gold); color:var(--gold); background:rgba(201,163,91,0.05); }
+  .add-card .plus{ width:38px; height:38px; border-radius:50%; background:var(--card-2); display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; }
+  .add-card .lbl{ font-size:12.5px; font-weight:700; }
+
+  /* ---- Modal (crear/editar servicio) ---- */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.6); display:none; align-items:center; justify-content:center; z-index:80; padding:20px; }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{ background:var(--surface); border:1px solid var(--divider); border-radius:20px; padding:24px; width:100%; max-width:420px; max-height:88vh; overflow-y:auto; }
+  .modal-title{ font-size:16px; font-weight:700; margin-bottom:18px; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:11.5px; font-weight:700; color:var(--text-secondary); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.4px; }
+  .field input, .field select{
+    width:100%; height:44px; border-radius:12px; background:var(--card); border:1px solid var(--divider);
+    color:var(--text); padding:0 14px; font-size:13.5px; font-family:inherit;
+  }
+  .field input:focus, .field select:focus{ outline:none; border-color:var(--gold); }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .field-check{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--text-secondary); margin-top:-6px; margin-bottom:14px; }
+  .modal-actions{ display:flex; gap:10px; margin-top:6px; }
+  .modal-actions button{ flex:1; height:46px; }
+
+  #toast{ position:fixed; left:50%; bottom:calc(var(--bottom-nav-total) + 16px); transform:translate(-50%, 16px); background:rgba(250,250,250,0.95); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1px solid var(--divider); border-radius:14px; padding:12px 18px; font-size:13px; display:flex; align-items:center; gap:8px; opacity:0; pointer-events:none; transition:opacity 0.3s ease, transform 0.3s ease; z-index:200; max-width:90%; }
+  #toast.show{ opacity:1; transform:translate(-50%, 0); }
+  .toast-dot{ width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0; }
+
+  @media (max-width:1023px){
+    .main{ padding:18px 18px 40px; }
+    .field-row{ grid-template-columns:1fr; }
+  }
+  @media (max-width:767px){
+    .sidebar{ display:none; }
+    .main{ padding:calc(16px + var(--safe-top)) var(--page-padding-x) calc(96px + var(--safe-bottom)); }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <script>
+    if (localStorage.getItem('dnNavExpanded') === '1' && window.innerWidth > 767) {
+      document.write('<style>@media(min-width:768px){#sidebar{width:230px!important;align-items:stretch!important;padding:22px 16px!important;}}</style>');
+    }
+  </script>
+  <div class="sidebar" id="sidebar">
+    <img src="../assets/apple-touch-icon-v2.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
+    <img src="../assets/logo-transparent.png" class="sidebar-logo sidebar-logo-full" alt="Keicy Barbería" id="sidebarLogoFull">
+    <div class="sidebar-card" id="sidebarCard" title="Cambiar de sede">
+      <div class="sidebar-card-avatar">DN</div>
+      <div class="sidebar-card-info">
+        <div class="sidebar-card-name" id="sidebarCardName">Keicy Barbería</div>
+        <div class="sidebar-card-sub" id="sidebarCardSede">—</div>
+      </div>
+      <svg class="sidebar-card-chevron" id="sidebarCardChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="sidebar-card-menu" id="sidebarCardMenu"></div>
+    </div>
+        <div class="nav-group">
+      <div class="nav-section-label">Gestionar</div>
+      <a class="nav-link" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Resumen
+      </a>
+      <a class="nav-link" href="calendario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        Agenda
+      </a>
+      <a class="nav-link" href="clientes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg>
+        Clientes
+      </a>
+      <a class="nav-link" href="caja.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        Cuadre de caja
+      </a>
+      <a class="nav-link" href="fidelizacion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z" stroke-linejoin="round"/></svg>
+        Fidelización
+      </a>
+      <div class="nav-section-label">Desempeño</div>
+      <a class="nav-link active" href="servicios.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
+        Servicios
+      </a>
+      <a class="nav-link" href="barberos.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2M14.5 14.8c2 .3 3.7 1.7 4.5 4.2" stroke-linecap="round"/></svg>
+        Colaboradores
+      </a>      <a class="nav-link" href="inventario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+        Inventario
+      </a>
+      <a class="nav-link" href="reportes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7" stroke-linecap="round"/></svg>
+        Reportes
+      </a>
+      <a class="nav-link" href="marketing.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4h4l6 5V5L7 10H3z"/></svg>
+        Marketing
+      </a>
+      <a class="nav-link" href="configuracion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="logout-label">Cerrar sesión</span>
+      </div>
+      <div class="plan-card">
+        <div class="label">👑 Plan de por vida</div>
+        <div class="sub">✓ Crisbo</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="header-row fade-in">
+      <div class="header-left">
+        <div class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Mostrar/ocultar menú">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
+        </div>
+        <div class="header-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D4AF55" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg></div>
+        <div>
+          <div class="header-title">Servicios</div>
+          <div class="header-sub" id="svcCountLabel">Cargando…</div>
+        </div>
+      </div>
+      <div class="user-chip">
+        <div class="avatar" id="userAvatar" style="width:36px;height:36px;font-size:12px;">--</div>
+        <div><div class="name" id="userName">—</div><div class="role">Administrador</div></div>
+      </div>
+    </div>
+
+    <div id="catalog" class="fade-in">
+      <div class="cat-block"><div class="cat-head"><div class="cat-title">Cargando servicios…</div></div></div>
+    </div>
+
+    <!-- Barra de navegación inferior — idéntica en todas las páginas del panel -->
+    <div class="dn-bottom-nav">
+      <a href="calendario.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        Agenda
+      </a>
+      <a href="caja.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        Cuadre de caja
+      </a>
+      <a href="dashboard.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Resumen
+      </a>
+      <a href="configuracion.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="svcModal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-box">
+      <div class="modal-title" id="svcModalTitle">Nuevo servicio</div>
+      <input type="hidden" id="fId">
+      <div class="field">
+        <label>Nombre del servicio</label>
+        <input type="text" id="fNombre" placeholder="Ej. Corte y Barba">
+      </div>
+      <div class="field">
+        <label>Categoría</label>
+        <select id="fCategoria"></select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Precio (COP)</label>
+          <input type="number" id="fPrecio" placeholder="35000" min="0">
+        </div>
+        <div class="field">
+          <label>Duración (min)</label>
+          <input type="number" id="fDuracion" placeholder="60" min="0">
+        </div>
+      </div>
+      <div class="field-check">
+        <input type="checkbox" id="fDesde" style="width:16px;height:16px;">
+        <label for="fDesde" style="text-transform:none; font-weight:600; margin:0;">Precio "desde" (según valoración)</label>
+      </div>
+      <div class="field">
+        <label>Descripción</label>
+        <textarea id="fDescripcion" rows="4" placeholder="Qué incluye este servicio…" style="width:100%; background:var(--card-2); border:1px solid var(--divider); border-radius:11px; padding:10px 12px; color:#111111; font-size:12.5px; font-family:inherit; resize:vertical;"></textarea>
+        <div style="font-size:10.5px; color:var(--text-secondary); margin-top:5px;">Se muestra en la tarjeta del servicio en la reserva pública.</div>
+      </div>
+      <div class="field">
+        <label>Foto del servicio</label>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div id="fFotoPreview" style="width:64px; height:64px; border-radius:14px; background:var(--card-2); border:1px solid var(--divider); display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0; color:var(--text-secondary);">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 8l10 10M8 16l10-10"/></svg>
+          </div>
+          <label style="font-size:12.5px; font-weight:700; color:var(--gold); cursor:pointer;">Subir foto
+            <input type="file" accept="image/*" style="display:none;" id="fFotoInput">
+          </label>
+          <span style="font-size:12.5px; font-weight:700; color:var(--text-secondary); cursor:pointer;" onclick="clearServiceFoto()">Quitar</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-ghost" id="svcCancelBtn">Cancelar</button>
+        <button class="btn-gold" id="svcSaveBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"><span class="toast-dot"></span><span id="toastText"></span></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/admin-sede-nav.js"></script>
+
+<script>
+  const sidebarEl = document.getElementById('sidebar');
+  document.querySelectorAll('.nav-link, .help-link').forEach(el => {
+    const lastNode = el.lastChild;
+    if (lastNode && lastNode.nodeType === 3 && lastNode.textContent.trim()) {
+      const span = document.createElement('span');
+      span.className = 'nav-label';
+      span.textContent = lastNode.textContent.trim();
+      el.replaceChild(span, lastNode);
+    }
+  });
+  function dnSetNavExpanded(exp){
+    sidebarEl.classList.toggle('expanded', exp);
+    localStorage.setItem('dnNavExpanded', exp ? '1' : '0');
+  }
+  dnSetNavExpanded(localStorage.getItem('dnNavExpanded') === '1');
+  document.getElementById('sidebarLogoIcon').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+  document.getElementById('sidebarLogoFull').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+  document.getElementById('sidebarToggleBtn').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+
+  const toastEl = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  function toast(msg){
+    toastText.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(window._t);
+    window._t = setTimeout(() => toastEl.classList.remove('show'), 2400);
+  }
+
+  // Cerrar sesión
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    if (confirm('¿Seguro que deseas cerrar sesión?')) {
+      dnClearSession();
+      window.location.href = '../auth.html';
+    }
+  });
+
+  const user = dnRequireAdmin();
+  dnInitSidebarCard();
+  document.getElementById('userName').textContent = user?.full_name || user?.username || '—';
+  document.getElementById('userAvatar').textContent = dnInitials(user?.full_name || user?.username);
+
+  const durIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2" stroke-linecap="round"/></svg>';
+
+  let categorias = [];
+  let servicios = [];
+
+  function priceLabel(s){
+    const val = dnFormatCOP(s.precio);
+    return s.precio_desde ? `Desde ${val}` : val;
+  }
+
+  async function loadCatalog(){
+    try {
+      const [catRes, svcRes] = await Promise.all([
+        sb.from('categorias_servicio').select('id, nombre, orden').order('orden'),
+        sb.from('servicios_publicos').select('id, categoria_id, nombre, precio, precio_desde, duracion_min, descripcion, activo, orden, foto_url').eq('activo', true).order('orden')
+      ]);
+      if (catRes.error) throw catRes.error;
+      if (svcRes.error) throw svcRes.error;
+      categorias = catRes.data || [];
+      servicios = svcRes.data || [];
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos cargar los servicios.');
+      return;
+    }
+    document.getElementById('svcCountLabel').textContent = `${servicios.length} servicios en ${categorias.length} categorías`;
+    populateCategorySelect();
+    renderCatalog();
+  }
+
+  function populateCategorySelect(){
+    document.getElementById('fCategoria').innerHTML = categorias.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+  }
+
+  function renderCatalog(){
+    const el = document.getElementById('catalog');
+    el.innerHTML = `
+      <div class="cat-manage-bar"><button class="cat-add-btn" onclick="addCategoria()">+ Nueva categoría</button></div>
+    ` + categorias.map((cat, ci) => {
+      const items = servicios.filter(s => s.categoria_id === cat.id);
+      const cards = items.map((s, si) => `
+        <div class="card svc-card">
+          <div class="svc-top">
+            ${s.foto_url ? `<img src="${s.foto_url}" style="width:34px;height:34px;border-radius:9px;object-fit:cover;flex-shrink:0;margin-right:8px;">` : ''}
+            <div class="svc-name">${s.nombre}</div>
+            <div class="svc-menu" onclick="openEdit('${s.id}')" title="Editar">✎</div>
+          </div>
+          <div class="svc-price">${priceLabel(s)}</div>
+          <div class="svc-meta">
+            ${s.duracion_min ? `<span class="svc-dur">${durIcon} ${s.duracion_min} min</span>` : '<span class="svc-dur">Sin duración fija</span>'}
+          </div>
+          <div class="svc-actions">
+            <button onclick="moveServicio('${s.id}',-1)" ${si===0?'disabled':''} title="Subir">↑</button>
+            <button onclick="moveServicio('${s.id}',1)" ${si===items.length-1?'disabled':''} title="Bajar">↓</button>
+            <button onclick="openEdit('${s.id}')">Editar</button>
+            <button class="danger" onclick="deleteService('${s.id}','${s.nombre.replace(/'/g,"")}')">Eliminar</button>
+          </div>
+        </div>`).join('');
+
+      return `
+        <div class="cat-block">
+          <div class="cat-head">
+            <div class="cat-title">${cat.nombre}</div>
+            <div class="cat-count">${items.length}</div>
+            <div class="cat-manage">
+              <span onclick="moveCategoria('${cat.id}',-1)" title="Subir categoría" class="${ci===0?'disabled':''}">↑</span>
+              <span onclick="moveCategoria('${cat.id}',1)" title="Bajar categoría" class="${ci===categorias.length-1?'disabled':''}">↓</span>
+              <span onclick="renameCategoria('${cat.id}','${cat.nombre.replace(/'/g,"")}')" title="Renombrar">✎</span>
+              <span onclick="deleteCategoria('${cat.id}','${cat.nombre.replace(/'/g,"")}')" title="Eliminar" class="danger">🗑</span>
+            </div>
+          </div>
+          <div class="svc-grid">
+            ${cards}
+            <div class="card svc-card add-card" onclick="openCreate('${cat.id}')">
+              <div class="plus">+</div>
+              <div class="lbl">Agregar servicio</div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function addCategoria(){
+    const nombre = prompt('Nombre de la nueva categoría:');
+    if (!nombre || !nombre.trim()) return;
+    try {
+      const { error } = await sb.from('categorias_servicio').insert({ nombre: nombre.trim(), orden: categorias.length });
+      if (error) throw error;
+      toast('Categoría creada.');
+      loadCatalog();
+    } catch (err) { console.error(err); toast('No pudimos crear la categoría.'); }
+  }
+
+  async function renameCategoria(id, nombreActual){
+    const nombre = prompt('Nuevo nombre de la categoría:', nombreActual);
+    if (!nombre || !nombre.trim() || nombre.trim() === nombreActual) return;
+    try {
+      const { error } = await sb.from('categorias_servicio').update({ nombre: nombre.trim() }).eq('id', id);
+      if (error) throw error;
+      toast('Categoría renombrada.');
+      loadCatalog();
+    } catch (err) { console.error(err); toast('No pudimos renombrar la categoría.'); }
+  }
+
+  async function deleteCategoria(id, nombre){
+    const enUso = servicios.some(s => s.categoria_id === id);
+    if (enUso) { toast(`"${nombre}" tiene servicios adentro — muévelos o elimínalos primero.`); return; }
+    if (!confirm(`¿Eliminar la categoría "${nombre}"?`)) return;
+    try {
+      const { error } = await sb.from('categorias_servicio').delete().eq('id', id);
+      if (error) throw error;
+      toast('Categoría eliminada.');
+      loadCatalog();
+    } catch (err) { console.error(err); toast('No pudimos eliminar la categoría.'); }
+  }
+
+  async function moveCategoria(id, dir){
+    const idx = categorias.findIndex(c => c.id === id);
+    const swapIdx = idx + dir;
+    if (swapIdx < 0 || swapIdx >= categorias.length) return;
+    const a = categorias[idx], b = categorias[swapIdx];
+    try {
+      await Promise.all([
+        sb.from('categorias_servicio').update({ orden: b.orden }).eq('id', a.id),
+        sb.from('categorias_servicio').update({ orden: a.orden }).eq('id', b.id)
+      ]);
+      loadCatalog();
+    } catch (err) { console.error(err); toast('No pudimos reordenar las categorías.'); }
+  }
+
+  async function moveServicio(id, dir){
+    const s = servicios.find(x => x.id === id);
+    if (!s) return;
+    const sameCat = servicios.filter(x => x.categoria_id === s.categoria_id);
+    const idx = sameCat.findIndex(x => x.id === id);
+    const swapIdx = idx + dir;
+    if (swapIdx < 0 || swapIdx >= sameCat.length) return;
+    const a = sameCat[idx], b = sameCat[swapIdx];
+    try {
+      await Promise.all([
+        sb.from('servicios').update({ orden: b.orden }).eq('id', a.id),
+        sb.from('servicios').update({ orden: a.orden }).eq('id', b.id)
+      ]);
+      loadCatalog();
+    } catch (err) { console.error(err); toast('No pudimos reordenar los servicios.'); }
+  }
+
+  let fotoServicioDataUrl = null;
+  function renderServiceFotoPreview(){
+    document.getElementById('fFotoPreview').innerHTML = fotoServicioDataUrl
+      ? `<img src="${fotoServicioDataUrl}" style="width:100%;height:100%;object-fit:cover;">`
+      : `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 8l10 10M8 16l10-10"/></svg>`;
+  }
+  document.getElementById('fFotoInput').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      fotoServicioDataUrl = await dnReadImageAsDataURL(file, 3);
+      renderServiceFotoPreview();
+    } catch (err) {
+      toast(err.message === 'too-large' ? 'La imagen debe pesar menos de 3MB.' : 'No pudimos leer esa imagen.');
+    }
+  });
+  function clearServiceFoto(){ fotoServicioDataUrl = null; renderServiceFotoPreview(); }
+
+  // ---- Create / edit modal ----
+  const svcModal = document.getElementById('svcModal');
+  function openCreate(categoriaId){
+    document.getElementById('svcModalTitle').textContent = 'Nuevo servicio';
+    document.getElementById('fId').value = '';
+    document.getElementById('fNombre').value = '';
+    document.getElementById('fCategoria').value = categoriaId || (categorias[0]?.id || '');
+    document.getElementById('fPrecio').value = '';
+    document.getElementById('fDuracion').value = '';
+    document.getElementById('fDesde').checked = false;
+    document.getElementById('fDescripcion').value = '';
+    fotoServicioDataUrl = null;
+    renderServiceFotoPreview();
+    svcModal.classList.add('show');
+  }
+
+  async function openEdit(id){
+    const s = servicios.find(x => x.id === id);
+    if (!s) return;
+    document.getElementById('svcModalTitle').textContent = 'Editar servicio';
+    document.getElementById('fId').value = s.id;
+    document.getElementById('fNombre').value = s.nombre;
+    document.getElementById('fCategoria').value = s.categoria_id;
+    document.getElementById('fPrecio').value = s.precio;
+    document.getElementById('fDuracion').value = s.duracion_min || '';
+    document.getElementById('fDesde').checked = !!s.precio_desde;
+    document.getElementById('fDescripcion').value = s.descripcion || '';
+    fotoServicioDataUrl = s.foto_url || null;
+    renderServiceFotoPreview();
+    svcModal.classList.add('show');
+
+    // El listado usa la vista "servicios_publicos", que oculta fotos muy pesadas
+    // para no repetir el problema de traer 20+ fotos grandes de una sola vez.
+    // Si esta foto en particular viene oculta, se trae puntualmente (una sola fila).
+    if (!s.foto_url) {
+      try {
+        const { data } = await sb.from('servicios').select('foto_url').eq('id', id).maybeSingle();
+        if (data?.foto_url && document.getElementById('fId').value === id) {
+          fotoServicioDataUrl = data.foto_url;
+          renderServiceFotoPreview();
+        }
+      } catch (err) { console.error(err); }
+    }
+  }
+
+  document.getElementById('svcCancelBtn').addEventListener('click', () => svcModal.classList.remove('show'));
+
+  document.getElementById('svcSaveBtn').addEventListener('click', async () => {
+    const id = document.getElementById('fId').value;
+    const nombre = document.getElementById('fNombre').value.trim();
+    const categoria_id = document.getElementById('fCategoria').value;
+    const precio = Number(document.getElementById('fPrecio').value) || 0;
+    const duracion_min = document.getElementById('fDuracion').value ? Number(document.getElementById('fDuracion').value) : null;
+    const precio_desde = document.getElementById('fDesde').checked;
+    const descripcion = document.getElementById('fDescripcion').value.trim() || null;
+
+    if (!nombre || !categoria_id) { toast('Completa nombre y categoría.'); return; }
+
+    try {
+      if (id) {
+        const { error } = await sb.from('servicios').update({ nombre, categoria_id, precio, duracion_min, precio_desde, descripcion, foto_url: fotoServicioDataUrl }).eq('id', id);
+        if (error) throw error;
+        toast('Servicio actualizado.');
+      } else {
+        const { error } = await sb.from('servicios').insert({ nombre, categoria_id, precio, duracion_min, precio_desde, descripcion, foto_url: fotoServicioDataUrl, activo:true });
+        if (error) throw error;
+        toast('Servicio agregado.');
+      }
+      svcModal.classList.remove('show');
+      loadCatalog();
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos guardar el servicio.');
+    }
+  });
+
+  async function deleteService(id, nombre){
+    if (!confirm(`¿Eliminar "${nombre}"?`)) return;
+    try {
+      const { error } = await sb.from('servicios').update({ activo:false }).eq('id', id);
+      if (error) throw error;
+      toast('Servicio eliminado.');
+      loadCatalog();
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos eliminar el servicio.');
+    }
+  }
+
+  loadCatalog();
+</script>
+
+<script src="../assets/mobile-nav.js"></script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+</body>
+</html>

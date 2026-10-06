@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#111111">
+<title>Estadísticas · Admin Sede</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/mobile-admin.css">
+<style>
+  body { background: var(--bg); min-height: 100vh; overflow-x: hidden; }
+
+  #app { display: flex; min-height: 100vh; min-height: 100dvh; }
+
+  /* Sidebar */
+  .sidebar {
+    width:60px; flex-shrink:0;
+    background:#FAFAFA;
+    border-right:1px solid var(--divider);
+    display:flex; flex-direction:column; align-items:center;
+    padding:20px 6px;
+    padding-top: calc(20px + var(--safe-top));
+    position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden; overflow-y:auto;
+    transition:width 0.28s cubic-bezier(.4,0,.2,1), padding 0.28s ease;
+  }
+  .sidebar.expanded { width:230px; align-items:stretch; padding:22px 16px; }
+  .sidebar-logo { display:block; cursor:pointer; margin:0 auto; }
+  .sidebar-logo-icon{ width:40px; height:40px; border-radius:11px; margin-bottom:26px; }
+  .sidebar-logo-full{ height:48px; margin-bottom:28px; display:none; }
+  .sidebar.expanded .sidebar-logo-icon { display:none; }
+  .sidebar.expanded .sidebar-logo-full { display:block; }
+  .nav-group { flex:1; display:flex; flex-direction:column; gap:3px; width:100%; min-width:0; }
+  .nav-link {
+    display:flex; align-items:center; gap:11px; justify-content:center;
+    width:40px; height:40px; margin:0 auto; padding:0; border-radius:11px;
+    font-size:13px; font-weight:600; color:#9F9F9F;
+    cursor:pointer; transition:background 0.15s ease, color 0.15s ease;
+    text-decoration:none; white-space:nowrap;
+  }
+  .sidebar.expanded .nav-link { justify-content:flex-start; width:100%; height:auto; margin:0; padding:9.5px 12px; }
+  .nav-link svg { width:22px; height:22px; flex-shrink:0; }
+  .nav-link:hover { background:var(--card); color:#111111; }
+  .nav-link.active { background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; }
+  .nav-link.active svg { stroke:#141414; }
+  .nav-link { position:relative; }
+  .nav-badge { display:none; background:#e74c3c; color:#111111; font-size:10px; font-weight:700; min-width:18px; height:18px; line-height:18px; text-align:center; padding:0 5px; border-radius:10px; margin-left:auto; }
+  .nav-badge.has-orders { display:inline-block; }
+  .sidebar:not(.expanded) .nav-badge.has-orders { position:absolute; top:2px; right:2px; min-width:8px; width:8px; height:8px; padding:0; font-size:0; border-radius:50%; }
+  .help-link { margin-top:8px; }
+  .nav-label { opacity:0; max-width:0; overflow:hidden; transition:opacity 0.16s ease, max-width 0.26s ease; }
+  .sidebar.expanded .nav-label { opacity:1; max-width:170px; }
+  .nav-section-label { display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
+  .sidebar.expanded .nav-section-label { display:block; }
+  .sidebar-card { display:none; position:relative; align-items:center; gap:9px; padding:9px; border-radius:14px; background:var(--glass-2); border:1px solid var(--glass-border); margin-bottom:8px; transition:background 0.15s ease; }
+  .sidebar-card:hover { background:var(--glass-3); }
+  .sidebar.expanded .sidebar-card { display:flex; }
+  .sidebar-card-icon { width:32px; height:32px; border-radius:8px; background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .sidebar-card-info { flex:1; min-width:0; }
+  .sidebar-card-name { font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-card-sub { font-size:10.5px; color:var(--text-secondary); }
+  .sede-selector { display:none; background:var(--card); border:1px solid var(--divider); border-radius:12px; margin-bottom:12px; overflow:hidden; }
+  .sidebar.expanded .sede-selector.show { display:block; }
+  .sede-selector-title { font-size:10px; font-weight:700; color:var(--text-secondary); padding:10px 12px 6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .sede-selector-list { max-height:200px; overflow-y:auto; }
+  .sede-option { display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer; transition:background 0.15s ease; }
+  .sede-option:hover { background:rgba(255,255,255,0.05); }
+  .sede-option.active { background:var(--gold); color:#141414; }
+  .sede-option-dot { width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0; }
+  .sede-option-name { font-size:12px; font-weight:600; }
+  .sidebar-bottom {
+    margin-top:auto; padding-top:12px; border-top:1px solid var(--divider);
+    display:flex; flex-direction:column; gap:8px; width:100%;
+  }
+  .logout-btn {
+    font-size:12px; color:#EF5350; display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px; cursor:pointer; width:40px; height:40px; border-radius:10px; background:rgba(239,83,80,0.1);
+    border:1px solid rgba(239,83,80,0.2); transition:all 0.25s ease; margin:0 auto;
+  }
+  .sidebar.expanded .logout-btn { justify-content:flex-start; width:100%; height:auto; padding:10px 12px; margin:0; }
+  .logout-btn:hover { background:rgba(239,83,80,0.2); }
+  .logout-btn svg { width:18px; height:18px; flex-shrink:0; }
+  .logout-label { display:none; }
+  .sidebar.expanded .logout-label { display:inline; }
+
+  .main { flex: 1; min-width: 0; padding: 26px 32px 100px; max-width: 1100px; }
+
+  .header-row { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .back-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 1px solid var(--divider); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); text-decoration: none; flex-shrink: 0; }
+  .back-btn svg { width: 20px; height: 20px; }
+  .header-text .title { font-size: 22px; font-weight: 800; }
+  .header-text .sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+  .filters-row { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+  .filter-select { padding: 12px 16px; border-radius: 12px; background: var(--card); border: 1px solid var(--divider); color: var(--text); font-size: 14px; min-width: 150px; }
+  .filter-select:focus { outline: none; border-color: var(--gold); }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 4px; background: var(--card); border-radius: 14px; padding: 4px; margin-bottom: 24px; overflow-x: auto; }
+  .tab { padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; color: var(--text-secondary); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { background: var(--gold); color: #141414; }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* KPIs */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .kpi-card { background: var(--card); border: 1px solid var(--divider); border-radius: 16px; padding: 20px; }
+  .kpi-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .kpi-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(201,163,91,0.12); color: var(--gold); display: flex; align-items: center; justify-content: center; }
+  .kpi-icon svg { width: 20px; height: 20px; }
+  .kpi-delta { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+  .kpi-delta.up { background: rgba(78,203,113,0.15); color: var(--success); }
+  .kpi-delta.down { background: rgba(239,83,80,0.15); color: var(--error); }
+  .kpi-value { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+  .kpi-label { font-size: 13px; color: var(--text-secondary); }
+
+  /* Charts */
+  .chart-card { background: var(--card); border: 1px solid var(--divider); border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+  .chart-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .chart-title svg { width: 18px; height: 18px; color: var(--gold); }
+
+  .chart-container { position: relative; height: 250px; }
+
+  /* Bar chart simple */
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 200px; padding-top: 20px; }
+  .bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .bar { width: 100%; background: linear-gradient(180deg, var(--gold-bright), var(--gold)); border-radius: 6px 6px 0 0; min-height: 4px; transition: height 0.5s ease; }
+  .bar-label { font-size: 11px; color: var(--text-secondary); text-align: center; }
+  .bar-value { font-size: 12px; font-weight: 700; }
+
+  /* Donut chart simple */
+  .donut-container { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+  .donut-chart { width: 160px; height: 160px; position: relative; flex-shrink: 0; }
+  .donut-chart svg { transform: rotate(-90deg); }
+  .donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .donut-center-value { font-size: 24px; font-weight: 800; }
+  .donut-center-label { font-size: 11px; color: var(--text-secondary); }
+  .donut-legend { flex: 1; min-width: 200px; }
+  .legend-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--divider); }
+  .legend-item:last-child { border-bottom: none; }
+  .legend-left { display: flex; align-items: center; gap: 10px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-name { font-size: 13px; color: var(--text-secondary); }
+  .legend-value { font-size: 14px; font-weight: 700; }
+
+  /* Heatmap semanal */
+  .heatmap { display: grid; grid-template-columns: 60px repeat(7, 1fr); gap: 4px; }
+  .heatmap-header { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-align: center; padding: 8px 4px; }
+  .heatmap-row-label { font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; padding-right: 8px; }
+  .heatmap-cell { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
+  .heatmap-cell.level-0 { background: var(--card-2); color: var(--text-muted); }
+  .heatmap-cell.level-1 { background: rgba(201,163,91,0.2); color: var(--gold); }
+  .heatmap-cell.level-2 { background: rgba(201,163,91,0.4); color: var(--gold); }
+  .heatmap-cell.level-3 { background: rgba(201,163,91,0.6); color: #141414; }
+  .heatmap-cell.level-4 { background: var(--gold); color: #141414; }
+
+  /* Rankings */
+  .ranking-list { display: flex; flex-direction: column; gap: 8px; }
+  .ranking-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: var(--card-2); }
+  .ranking-pos { width: 28px; height: 28px; border-radius: 8px; background: var(--card); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+  .ranking-pos.gold { background: var(--gold); color: #141414; }
+  .ranking-info { flex: 1; min-width: 0; }
+  .ranking-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ranking-sub { font-size: 12px; color: var(--text-secondary); }
+  .ranking-value { font-size: 15px; font-weight: 700; text-align: right; }
+
+  /* Grid layouts */
+  .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .stats-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+
+  /* Birthday list */
+  .birthday-list { display: flex; flex-direction: column; gap: 8px; }
+  .birthday-item { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: var(--card-2); }
+  .birthday-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--gold); color: #141414; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+  .birthday-info { flex: 1; }
+  .birthday-name { font-size: 14px; font-weight: 600; }
+  .birthday-date { font-size: 12px; color: var(--text-secondary); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
+  .empty-state svg { width: 40px; height: 40px; margin-bottom: 12px; opacity: 0.5; }
+
+  @media (max-width: 1023px) {
+    .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); z-index: 70; }
+    .sidebar.open { transform: translateX(0); }
+    .main { padding: 18px 18px 120px; }
+    .stats-grid, .stats-grid-3 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 767px) {
+    .main { padding: calc(16px + var(--safe-top)) var(--page-padding-x) calc(100px + var(--safe-bottom)); }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .tabs { gap: 2px; }
+    .tab { padding: 10px 14px; font-size: 12px; }
+    .donut-container { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="sidebar" id="sidebar"></div>
+
+  <div class="main">
+    <div class="header-row">
+      <a href="ventas.html" class="back-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </a>
+      <div class="header-text">
+        <div class="title">Estadísticas</div>
+        <div class="sub">Análisis de desempeño de la sede</div>
+      </div>
+    </div>
+
+    <div class="filters-row">
+      <select class="filter-select" id="filterPeriodo">
+        <option value="7">Últimos 7 días</option>
+        <option value="30" selected>Últimos 30 días</option>
+        <option value="90">Últimos 90 días</option>
+      </select>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('ventas')">Análisis de Ventas</div>
+      <div class="tab" onclick="switchTab('reservas')">Análisis de Reservas</div>
+      <div class="tab" onclick="switchTab('clientes')">Análisis de Clientes</div>
+    </div>
+
+    <!-- Tab: Análisis de Ventas -->
+    <div class="tab-content active" id="tab-ventas">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            </div>
+            <span class="kpi-delta up" id="ventasDelta">+0%</span>
+          </div>
+          <div class="kpi-value" id="totalVentas">$0</div>
+          <div class="kpi-label">Total Ventas</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="numVentas">0</div>
+          <div class="kpi-label">Transacciones</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="ticketPromedio">$0</div>
+          <div class="kpi-label">Ticket Promedio</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="comisionesTotal">$0</div>
+          <div class="kpi-label">Comisiones</div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="chart-card">
+          <div class="chart-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            Ventas por día
+          </div>
+          <div class="bar-chart" id="ventasDiarias"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/></svg>
+            Ventas por categoría
+          </div>
+          <div class="donut-container" id="ventasCategorias"></div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="chart-card">
+          <div class="chart-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
+            Top Servicios
+          </div>
+          <div class="ranking-list" id="topServicios"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2"/></svg>
+            Comisiones por Colaborador
+          </div>
+          <div class="ranking-list" id="comisionesBarberos"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Análisis de Reservas -->
+    <div class="tab-content" id="tab-reservas">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="totalReservas">0</div>
+          <div class="kpi-label">Total Reservas</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="completadas">0</div>
+          <div class="kpi-label">Completadas</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="canceladas">0</div>
+          <div class="kpi-label">Canceladas</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="noShows">0</div>
+          <div class="kpi-label">No asistieron</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16"/></svg>
+          Reservas por día de la semana
+        </div>
+        <div class="heatmap" id="heatmapReservas">
+          <div class="heatmap-header"></div>
+          <div class="heatmap-header">Lun</div>
+          <div class="heatmap-header">Mar</div>
+          <div class="heatmap-header">Mié</div>
+          <div class="heatmap-header">Jue</div>
+          <div class="heatmap-header">Vie</div>
+          <div class="heatmap-header">Sáb</div>
+          <div class="heatmap-header">Dom</div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="chart-card">
+          <div class="chart-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/></svg>
+            Estado de Reservas
+          </div>
+          <div class="donut-container" id="estadosReservas"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+            Fuente de Reservas
+          </div>
+          <div class="donut-container" id="fuenteReservas"></div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2"/></svg>
+          Reservas por Colaborador
+        </div>
+        <div class="ranking-list" id="reservasBarberos"></div>
+      </div>
+    </div>
+
+    <!-- Tab: Análisis de Clientes -->
+    <div class="tab-content" id="tab-clientes">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="totalClientes">0</div>
+          <div class="kpi-label">Clientes Atendidos</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="clientesNuevos">0</div>
+          <div class="kpi-label">Clientes Nuevos</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="clientesRecurrentes">0</div>
+          <div class="kpi-label">Recurrentes</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <div class="kpi-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z"/></svg>
+            </div>
+          </div>
+          <div class="kpi-value" id="calificacionPromedio">0.0</div>
+          <div class="kpi-label">Calificación Promedio</div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="chart-card">
+          <div class="chart-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z"/></svg>
+            Top 10 Clientes Recurrentes
+          </div>
+          <div class="ranking-list" id="topClientes"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+            Clientes que no asistieron
+          </div>
+          <div class="ranking-list" id="clientesNoShow"></div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Cumpleaños este mes
+        </div>
+        <div class="birthday-list" id="cumpleanos"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/mobile-nav.js"></script>
+<script>
+(async function() {
+  const user = dnGetSession();
+  if (!user || user.role !== 'admin_sede') {
+    window.location.replace('../index.html');
+    return;
+  }
+
+  const sedeId = dnGetTurnoSedeActual();
+  if (!sedeId) {
+    window.location.replace('seleccionar-sede.html');
+    return;
+  }
+
+  const filterPeriodo = document.getElementById('filterPeriodo');
+
+  // Helpers
+  function formatMoney(n) {
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(n || 0);
+  }
+
+  function getDateRange() {
+    const dias = parseInt(filterPeriodo.value);
+    const fin = new Date();
+    const inicio = new Date();
+    inicio.setDate(inicio.getDate() - dias);
+    return {
+      inicio: inicio.toISOString().split('T')[0],
+      fin: fin.toISOString().split('T')[0]
+    };
+  }
+
+  // Tab switching
+  window.switchTab = function(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`.tab[onclick*="${tab}"]`).classList.add('active');
+    document.getElementById('tab-' + tab).classList.add('active');
+  };
+
+  // Cargar estadísticas de ventas
+  async function loadVentasStats() {
+    const { inicio, fin } = getDateRange();
+
+    // Total ventas
+    const { data: ventas } = await sb
+      .from('ventas')
+      .select('total, created_at')
+      .eq('sucursal_id', sedeId)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59');
+
+    const totalVentas = (ventas || []).reduce((sum, v) => sum + (v.total || 0), 0);
+    const numVentas = (ventas || []).length;
+    const ticketPromedio = numVentas > 0 ? totalVentas / numVentas : 0;
+
+    document.getElementById('totalVentas').textContent = formatMoney(totalVentas);
+    document.getElementById('numVentas').textContent = numVentas;
+    document.getElementById('ticketPromedio').textContent = formatMoney(ticketPromedio);
+
+    // Comisiones
+    const { data: comisiones } = await sb
+      .from('comisiones')
+      .select('monto')
+      .eq('sucursal_id', sedeId)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59');
+
+    const totalComisiones = (comisiones || []).reduce((sum, c) => sum + (c.monto || 0), 0);
+    document.getElementById('comisionesTotal').textContent = formatMoney(totalComisiones);
+
+    // Ventas por día (bar chart)
+    const ventasPorDia = {};
+    const dias = parseInt(filterPeriodo.value);
+    for (let i = dias - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().split('T')[0];
+      ventasPorDia[key] = 0;
+    }
+    (ventas || []).forEach(v => {
+      const key = v.created_at.split('T')[0];
+      if (ventasPorDia[key] !== undefined) {
+        ventasPorDia[key] += v.total || 0;
+      }
+    });
+
+    const maxVenta = Math.max(...Object.values(ventasPorDia), 1);
+    const barChart = document.getElementById('ventasDiarias');
+    const entries = Object.entries(ventasPorDia).slice(-7); // últimos 7 días
+    barChart.innerHTML = entries.map(([fecha, total]) => {
+      const d = new Date(fecha + 'T12:00:00');
+      const label = d.toLocaleDateString('es-CO', { weekday: 'short' });
+      const height = (total / maxVenta * 150) + 10;
+      return `
+        <div class="bar-item">
+          <div class="bar-value">${formatMoney(total)}</div>
+          <div class="bar" style="height: ${height}px"></div>
+          <div class="bar-label">${label}</div>
+        </div>
+      `;
+    }).join('');
+
+    // Ventas por categoría (servicios vs productos)
+    const { data: detalles } = await sb
+      .from('venta_items')
+      .select('tipo, subtotal')
+      .eq('sucursal_id', sedeId)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59');
+
+    const categorias = { servicios: 0, productos: 0 };
+    (detalles || []).forEach(d => {
+      if (d.tipo === 'servicio') categorias.servicios += d.subtotal || 0;
+      else categorias.productos += d.subtotal || 0;
+    });
+
+    const totalCat = categorias.servicios + categorias.productos || 1;
+    const pctServicios = Math.round(categorias.servicios / totalCat * 100);
+    const pctProductos = 100 - pctServicios;
+
+    document.getElementById('ventasCategorias').innerHTML = `
+      <div class="donut-chart">
+        <svg viewBox="0 0 42 42">
+          <circle cx="21" cy="21" r="15.91549" fill="none" stroke="var(--gold)" stroke-width="4" stroke-dasharray="${pctServicios} ${100 - pctServicios}" stroke-dashoffset="25"/>
+          <circle cx="21" cy="21" r="15.91549" fill="none" stroke="var(--card-2)" stroke-width="4" stroke-dasharray="${pctProductos} ${100 - pctProductos}" stroke-dashoffset="${25 - pctServicios}"/>
+        </svg>
+        <div class="donut-center">
+          <div class="donut-center-value">${formatMoney(totalCat)}</div>
+          <div class="donut-center-label">Total</div>
+        </div>
+      </div>
+      <div class="donut-legend">
+        <div class="legend-item">
+          <div class="legend-left">
+            <div class="legend-dot" style="background: var(--gold)"></div>
+            <span class="legend-name">Servicios</span>
+          </div>
+          <span class="legend-value">${formatMoney(categorias.servicios)}</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-left">
+            <div class="legend-dot" style="background: var(--card-2)"></div>
+            <span class="legend-name">Productos</span>
+          </div>
+          <span class="legend-value">${formatMoney(categorias.productos)}</span>
+        </div>
+      </div>
+    `;
+
+    // Top servicios
+    const { data: serviciosVendidos } = await sb
+      .from('venta_items')
+      .select('servicio_id, servicios(nombre), subtotal')
+      .eq('sucursal_id', sedeId)
+      .eq('tipo', 'servicio')
+      .not('servicio_id', 'is', null)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59');
+
+    const serviciosMap = {};
+    (serviciosVendidos || []).forEach(s => {
+      const nombre = s.servicios?.nombre || 'Servicio';
+      serviciosMap[nombre] = (serviciosMap[nombre] || 0) + (s.subtotal || 0);
+    });
+
+    const topServicios = Object.entries(serviciosMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    document.getElementById('topServicios').innerHTML = topServicios.length > 0
+      ? topServicios.map(([nombre, total], i) => `
+        <div class="ranking-item">
+          <div class="ranking-pos ${i === 0 ? 'gold' : ''}">${i + 1}</div>
+          <div class="ranking-info">
+            <div class="ranking-name">${nombre}</div>
+          </div>
+          <div class="ranking-value">${formatMoney(total)}</div>
+        </div>
+      `).join('')
+      : '<div class="empty-state"><div>No hay datos de servicios</div></div>';
+
+    // Comisiones por barbero
+    const { data: comisionesBarbero } = await sb
+      .from('comisiones')
+      .select('usuario_id, usuarios(full_name), monto')
+      .eq('sucursal_id', sedeId)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59');
+
+    const barberosMap = {};
+    (comisionesBarbero || []).forEach(c => {
+      const nombre = c.usuarios?.full_name || 'Colaborador';
+      barberosMap[nombre] = (barberosMap[nombre] || 0) + (c.monto || 0);
+    });
+
+    const topBarberos = Object.entries(barberosMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    document.getElementById('comisionesBarberos').innerHTML = topBarberos.length > 0
+      ? topBarberos.map(([nombre, total], i) => `
+        <div class="ranking-item">
+          <div class="ranking-pos ${i === 0 ? 'gold' : ''}">${i + 1}</div>
+          <div class="ranking-info">
+            <div class="ranking-name">${nombre}</div>
+          </div>
+          <div class="ranking-value">${formatMoney(total)}</div>
+        </div>
+      `).join('')
+      : '<div class="empty-state"><div>No hay datos de comisiones</div></div>';
+  }
+
+  // Cargar estadísticas de reservas
+  async function loadReservasStats() {
+    const { inicio, fin } = getDateRange();
+
+    const { data: citas } = await sb
+      .from('citas')
+      .select('estado, fecha, hora, origen, barbero_id, usuarios(full_name)')
+      .eq('sucursal_id', sedeId)
+      .gte('fecha', inicio)
+      .lte('fecha', fin);
+
+    const total = (citas || []).length;
+    const completadas = (citas || []).filter(c => c.estado === 'completada' || c.estado === 'pagada').length;
+    const canceladas = (citas || []).filter(c => c.estado === 'cancelada').length;
+    const noShows = (citas || []).filter(c => c.estado === 'no_asistio').length;
+
+    document.getElementById('totalReservas').textContent = total;
+    document.getElementById('completadas').textContent = completadas;
+    document.getElementById('canceladas').textContent = canceladas;
+    document.getElementById('noShows').textContent = noShows;
+
+    // Heatmap por día y hora
+    const heatmapData = {};
+    const horas = ['8-10', '10-12', '12-14', '14-16', '16-18', '18-20'];
+    horas.forEach(h => {
+      heatmapData[h] = [0, 0, 0, 0, 0, 0, 0];
+    });
+
+    (citas || []).forEach(c => {
+      const d = new Date(c.fecha + 'T12:00:00');
+      const dia = (d.getDay() + 6) % 7; // Lunes = 0
+      const hora = parseInt(c.hora?.split(':')[0] || 0);
+      let franja;
+      if (hora < 10) franja = '8-10';
+      else if (hora < 12) franja = '10-12';
+      else if (hora < 14) franja = '12-14';
+      else if (hora < 16) franja = '14-16';
+      else if (hora < 18) franja = '16-18';
+      else franja = '18-20';
+
+      if (heatmapData[franja]) {
+        heatmapData[franja][dia]++;
+      }
+    });
+
+    const maxHeat = Math.max(...Object.values(heatmapData).flat(), 1);
+    const heatmapContainer = document.getElementById('heatmapReservas');
+    heatmapContainer.innerHTML = `
+      <div class="heatmap-header"></div>
+      <div class="heatmap-header">Lun</div>
+      <div class="heatmap-header">Mar</div>
+      <div class="heatmap-header">Mié</div>
+      <div class="heatmap-header">Jue</div>
+      <div class="heatmap-header">Vie</div>
+      <div class="heatmap-header">Sáb</div>
+      <div class="heatmap-header">Dom</div>
+    `;
+    horas.forEach(h => {
+      heatmapContainer.innerHTML += `<div class="heatmap-row-label">${h}</div>`;
+      heatmapData[h].forEach(count => {
+        const level = Math.min(4, Math.floor(count / maxHeat * 5));
+        heatmapContainer.innerHTML += `<div class="heatmap-cell level-${level}">${count || ''}</div>`;
+      });
+    });
+
+    // Estado de reservas (donut)
+    const estados = {
+      Completadas: completadas,
+      Canceladas: canceladas,
+      'No asistió': noShows,
+      Pendientes: total - completadas - canceladas - noShows
+    };
+    const colores = ['var(--success)', 'var(--error)', 'var(--warning)', 'var(--text-secondary)'];
+
+    let offset = 25;
+    const donutPaths = [];
+    const legendItems = [];
+    Object.entries(estados).forEach(([nombre, count], i) => {
+      const pct = total > 0 ? count / total * 100 : 0;
+      donutPaths.push(`<circle cx="21" cy="21" r="15.91549" fill="none" stroke="${colores[i]}" stroke-width="4" stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${offset}"/>`);
+      offset -= pct;
+      legendItems.push(`
+        <div class="legend-item">
+          <div class="legend-left">
+            <div class="legend-dot" style="background: ${colores[i]}"></div>
+            <span class="legend-name">${nombre}</span>
+          </div>
+          <span class="legend-value">${count}</span>
+        </div>
+      `);
+    });
+
+    document.getElementById('estadosReservas').innerHTML = `
+      <div class="donut-chart">
+        <svg viewBox="0 0 42 42">${donutPaths.join('')}</svg>
+        <div class="donut-center">
+          <div class="donut-center-value">${total}</div>
+          <div class="donut-center-label">Total</div>
+        </div>
+      </div>
+      <div class="donut-legend">${legendItems.join('')}</div>
+    `;
+
+    // Fuente de reservas
+    const fuentes = { Manual: 0, Web: 0, App: 0 };
+    (citas || []).forEach(c => {
+      if (c.origen === 'web') fuentes.Web++;
+      else if (c.origen === 'app') fuentes.App++;
+      else fuentes.Manual++;
+    });
+
+    const coloresFuente = ['var(--gold)', 'var(--success)', 'var(--warning)'];
+    let offsetF = 25;
+    const donutFuente = [];
+    const legendFuente = [];
+    Object.entries(fuentes).forEach(([nombre, count], i) => {
+      const pct = total > 0 ? count / total * 100 : 0;
+      donutFuente.push(`<circle cx="21" cy="21" r="15.91549" fill="none" stroke="${coloresFuente[i]}" stroke-width="4" stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="${offsetF}"/>`);
+      offsetF -= pct;
+      legendFuente.push(`
+        <div class="legend-item">
+          <div class="legend-left">
+            <div class="legend-dot" style="background: ${coloresFuente[i]}"></div>
+            <span class="legend-name">${nombre}</span>
+          </div>
+          <span class="legend-value">${count}</span>
+        </div>
+      `);
+    });
+
+    document.getElementById('fuenteReservas').innerHTML = `
+      <div class="donut-chart">
+        <svg viewBox="0 0 42 42">${donutFuente.join('')}</svg>
+        <div class="donut-center">
+          <div class="donut-center-value">${total}</div>
+          <div class="donut-center-label">Total</div>
+        </div>
+      </div>
+      <div class="donut-legend">${legendFuente.join('')}</div>
+    `;
+
+    // Reservas por barbero
+    const barberosCitas = {};
+    (citas || []).forEach(c => {
+      const nombre = c.usuarios?.full_name || 'Sin asignar';
+      barberosCitas[nombre] = (barberosCitas[nombre] || 0) + 1;
+    });
+
+    const topBarb = Object.entries(barberosCitas)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    document.getElementById('reservasBarberos').innerHTML = topBarb.length > 0
+      ? topBarb.map(([nombre, count], i) => `
+        <div class="ranking-item">
+          <div class="ranking-pos ${i === 0 ? 'gold' : ''}">${i + 1}</div>
+          <div class="ranking-info">
+            <div class="ranking-name">${nombre}</div>
+            <div class="ranking-sub">${count} citas</div>
+          </div>
+        </div>
+      `).join('')
+      : '<div class="empty-state"><div>No hay datos</div></div>';
+  }
+
+  // Cargar estadísticas de clientes
+  async function loadClientesStats() {
+    const { inicio, fin } = getDateRange();
+
+    // Clientes atendidos
+    const { data: citas } = await sb
+      .from('citas')
+      .select('cliente_id, estado, clientes(nombre)')
+      .eq('sucursal_id', sedeId)
+      .in('estado', ['completada', 'pagada'])
+      .gte('fecha', inicio)
+      .lte('fecha', fin);
+
+    const clientesUnicos = new Set((citas || []).map(c => c.cliente_id).filter(Boolean));
+    document.getElementById('totalClientes').textContent = clientesUnicos.size;
+
+    // Clientes nuevos (primera visita en el período)
+    const { data: clientesNuevos } = await sb
+      .from('clientes')
+      .select('id')
+      .eq('sucursal_id', sedeId)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59');
+
+    document.getElementById('clientesNuevos').textContent = (clientesNuevos || []).length;
+
+    // Clientes recurrentes (más de 1 visita)
+    const visitasPorCliente = {};
+    (citas || []).forEach(c => {
+      if (c.cliente_id) {
+        visitasPorCliente[c.cliente_id] = (visitasPorCliente[c.cliente_id] || 0) + 1;
+      }
+    });
+    const recurrentes = Object.values(visitasPorCliente).filter(v => v > 1).length;
+    document.getElementById('clientesRecurrentes').textContent = recurrentes;
+
+    // Calificación promedio
+    const { data: resenas } = await sb
+      .from('resenas')
+      .select('calificacion')
+      .eq('sucursal_id', sedeId)
+      .gte('created_at', inicio)
+      .lte('created_at', fin + 'T23:59:59');
+
+    const promedio = (resenas || []).length > 0
+      ? ((resenas || []).reduce((sum, r) => sum + (r.calificacion || 0), 0) / resenas.length).toFixed(1)
+      : '0.0';
+    document.getElementById('calificacionPromedio').textContent = promedio + ' ★';
+
+    // Top 10 clientes
+    const clientesData = {};
+    (citas || []).forEach(c => {
+      if (c.cliente_id && c.clientes) {
+        if (!clientesData[c.cliente_id]) {
+          clientesData[c.cliente_id] = { nombre: c.clientes.nombre, visitas: 0 };
+        }
+        clientesData[c.cliente_id].visitas++;
+      }
+    });
+
+    const topClientes = Object.entries(clientesData)
+      .sort((a, b) => b[1].visitas - a[1].visitas)
+      .slice(0, 10);
+
+    document.getElementById('topClientes').innerHTML = topClientes.length > 0
+      ? topClientes.map(([id, data], i) => `
+        <div class="ranking-item">
+          <div class="ranking-pos ${i === 0 ? 'gold' : ''}">${i + 1}</div>
+          <div class="ranking-info">
+            <div class="ranking-name">${data.nombre}</div>
+            <div class="ranking-sub">${data.visitas} visitas</div>
+          </div>
+        </div>
+      `).join('')
+      : '<div class="empty-state"><div>No hay datos</div></div>';
+
+    // Clientes no show
+    const { data: noShows } = await sb
+      .from('citas')
+      .select('cliente_id, clientes(nombre)')
+      .eq('sucursal_id', sedeId)
+      .eq('estado', 'no_asistio')
+      .gte('fecha', inicio)
+      .lte('fecha', fin);
+
+    const noShowsMap = {};
+    (noShows || []).forEach(c => {
+      if (c.cliente_id && c.clientes) {
+        if (!noShowsMap[c.cliente_id]) {
+          noShowsMap[c.cliente_id] = { nombre: c.clientes.nombre, count: 0 };
+        }
+        noShowsMap[c.cliente_id].count++;
+      }
+    });
+
+    const topNoShows = Object.entries(noShowsMap)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, 5);
+
+    document.getElementById('clientesNoShow').innerHTML = topNoShows.length > 0
+      ? topNoShows.map(([id, data], i) => `
+        <div class="ranking-item">
+          <div class="ranking-pos">${i + 1}</div>
+          <div class="ranking-info">
+            <div class="ranking-name">${data.nombre}</div>
+            <div class="ranking-sub">${data.count} inasistencias</div>
+          </div>
+        </div>
+      `).join('')
+      : '<div class="empty-state"><div>No hay inasistencias registradas</div></div>';
+
+    // Cumpleaños este mes
+    const hoy = new Date();
+    const mesActual = String(hoy.getMonth() + 1).padStart(2, '0');
+    const { data: cumpleanos } = await sb
+      .from('clientes')
+      .select('id, nombre, fecha_nacimiento')
+      .eq('sucursal_id', sedeId)
+      .not('fecha_nacimiento', 'is', null);
+
+    const cumpleanosEsteMes = (cumpleanos || [])
+      .filter(c => {
+        if (!c.fecha_nacimiento) return false;
+        const mes = c.fecha_nacimiento.split('-')[1];
+        return mes === mesActual;
+      })
+      .sort((a, b) => {
+        const diaA = parseInt(a.fecha_nacimiento.split('-')[2]);
+        const diaB = parseInt(b.fecha_nacimiento.split('-')[2]);
+        return diaA - diaB;
+      })
+      .slice(0, 10);
+
+    document.getElementById('cumpleanos').innerHTML = cumpleanosEsteMes.length > 0
+      ? cumpleanosEsteMes.map(c => {
+        const [, , dia] = c.fecha_nacimiento.split('-');
+        const iniciales = c.nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+        return `
+          <div class="birthday-item">
+            <div class="birthday-avatar">${iniciales}</div>
+            <div class="birthday-info">
+              <div class="birthday-name">${c.nombre}</div>
+              <div class="birthday-date">${dia} de este mes</div>
+            </div>
+          </div>
+        `;
+      }).join('')
+      : '<div class="empty-state"><div>No hay cumpleaños este mes</div></div>';
+  }
+
+  // Cargar todo
+  async function loadAll() {
+    await Promise.all([
+      loadVentasStats(),
+      loadReservasStats(),
+      loadClientesStats()
+    ]);
+  }
+
+  filterPeriodo.addEventListener('change', loadAll);
+
+  loadAll();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,3969 @@
+<!DOCTYPE html>
+<!-- VERSIÓN: 2026-09-07-v4 - Log barbero al guardar -->
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#F6F6F4">
+<title>Keicy Barbería · Reservar cita</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<style>
+  /* TEMA CLARO PREMIUM MONOCROMÁTICO */
+  :root{
+    /* Fondos claros elegantes */
+    --bg:#F6F6F4;
+    --bg-deep:#F3F3F1;
+    --surface:#FFFFFF;
+    --bg-card:#FFFFFF;
+    --card:#FFFFFF;
+    --bg-elevated:#FFFFFF;
+    --card-2:#F8F8F6;
+    --bg-hover:#F0F0EE;
+
+    /* Dorados Premium (mantener) */
+    --gold:#C9A227;
+    --gold-primary:#C9A227;
+    --gold-bright:#D4AF37;
+    --gold-dark:#A68523;
+    --gold-glow:rgba(201,162,39,0.15);
+    --accent:var(--gold);
+    --accent-bright:var(--gold-bright);
+
+    /* Texto oscuro elegante */
+    --text:#1A1A1A;
+    --text-primary:#1A1A1A;
+    --text-secondary:#5A5A5A;
+    --text-muted:#888888;
+
+    /* Bordes para tema claro */
+    --divider:rgba(0,0,0,0.08);
+    --border:rgba(0,0,0,0.08);
+    --border-subtle:rgba(0,0,0,0.06);
+    --border-light:rgba(0,0,0,0.12);
+    --border-gold:rgba(201,162,39,0.4);
+
+    /* Glass effects para tema claro */
+    --glass:rgba(255,255,255,0.92);
+    --glass-2:rgba(0,0,0,0.02);
+    --glass-card:rgba(255,255,255,0.95);
+    --glass-card-2:rgba(0,0,0,0.03);
+    --glass-border:rgba(0,0,0,0.08);
+
+    /* Layout */
+    --content-padding:16px;
+    --footer-height:70px;
+    --header-height:100px;
+    --safe-top:env(safe-area-inset-top, 0px);
+    --safe-bottom:env(safe-area-inset-bottom, 0px);
+  }
+  html{
+    height:100%;
+    overflow:hidden;
+  }
+  body{
+    height:100%;
+    overflow:hidden;
+    background:var(--bg);
+    margin:0;
+    padding:0;
+  }
+  #app{
+    max-width:500px;
+    margin:0 auto;
+    height:100dvh;
+    height:100vh;
+    height:-webkit-fill-available;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    box-sizing:border-box;
+    padding:var(--safe-top, 0) var(--content-padding) 0;
+    padding-bottom:calc(var(--footer-height) + var(--safe-bottom, 0));
+  }
+  @supports (height: 100dvh){ #app{ height:100dvh; } }
+
+  /* ---- Top bar ---- */
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding:8px 0 6px; flex-shrink:0; }
+  .back-btn{
+    width:38px; height:38px; border-radius:12px; border:1.3px solid rgba(201,163,91,0.45);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .back-btn:hover{ background:rgba(201,163,91,0.08); }
+  .back-btn.hidden{ visibility:hidden; }
+  .brand-logo{ height:32px; border-radius:8px; }
+  .topbar-spacer{ width:38px; flex-shrink:0; }
+
+  /* ---- Step dots ---- */
+  .steps{ display:flex; align-items:center; justify-content:center; gap:0; margin-bottom:16px; }
+  .step-node{ display:flex; flex-direction:column; align-items:center; gap:5px; }
+  .step-circle{
+    width:28px; height:28px; border-radius:50%; border:1.5px solid var(--divider); color:var(--text-secondary);
+    display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700;
+    transition:background .3s ease, border-color .3s ease, color .3s ease;
+  }
+  .step-node.done .step-circle{ background:var(--gold); border-color:var(--gold); color:#141414; }
+  .step-node.current .step-circle{ background:var(--gold); border-color:var(--gold); color:#141414; box-shadow:0 0 0 3px rgba(201,163,91,0.18); }
+  .step-label{ font-size:9px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--text-secondary); }
+  .step-node.current .step-label{ color:var(--gold); }
+  .step-line{ flex:1; height:1.5px; background:var(--divider); margin:0 5px 16px; max-width:38px; }
+  .step-line.done{ background:var(--gold); }
+
+  .step{ display:none; overflow:hidden; flex-direction:column; }
+  .step.active{ display:flex; flex:1; min-height:0; animation:stepIn .32s cubic-bezier(.22,1,.36,1); overflow:hidden; }
+  /* Solo step1 (servicios) permite scroll vertical en todo el contenido */
+  #step1.active{ overflow-y:auto; }
+  /* Hero del step1 con imagen de barbería difuminada */
+  #step1 .hero-card{ position:relative; }
+  #step1 .hero-card::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background-image:url('../assets/barbershop-bg.jpg');
+    background-size:cover;
+    background-position:center;
+    filter:blur(3px);
+    z-index:0;
+  }
+  #step1 .hero-card img{ display:none; }
+  #step1 .hero-pattern{ z-index:1; }
+  #step1 .hero-overlay{ z-index:2; background:linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.8) 100%); }
+  #step1 .hero-content{ z-index:3; }
+  /* Step0 (sedes) - sin scroll, todo visible */
+  #step0.active{ overflow:hidden; }
+  #step0 .sede-title-block{ flex-shrink:0; }
+  #step0 .sede-benefits{ display:none; }
+  #step0 #sedeChoiceList{ flex:1; display:flex; flex-direction:column; justify-content:center; min-height:0; padding:0; }
+  /* Step3 (fecha/hora) - scroll interno en horarios */
+  #step3.active{ overflow:hidden; }
+  #step3 .hero-card{ flex-shrink:0; height:140px; margin-bottom:12px; }
+  #step3 .section-eyebrow{ flex-shrink:0; }
+  #step3 .carousel-wrap{ flex-shrink:0; }
+  #step3 .demand-legend{ flex-shrink:0; }
+  #step3 #timeSlots{ flex:1; overflow-y:auto; min-height:0; padding-bottom:10px; }
+  /* Step2 (barberos) - carrusel ocupa espacio disponible */
+  #step2.active{ overflow:hidden; }
+  .step2-title{
+    font-size:20px; font-weight:800; color:#1a1a1a; text-align:center;
+    margin-bottom:8px; flex-shrink:0;
+  }
+  #step2 .carousel-wrap{ flex:1; display:flex; flex-direction:column; min-height:0; overflow:visible; }
+  #step2 .barber-carousel{ flex:1; min-height:0; }
+  #step2 .carousel-dots{ flex-shrink:0; margin:8px 0; }
+  /* Step4 (confirmación) - scroll completo */
+  #step4.active{ overflow-y:auto; }
+  /* StepCliente - pantalla completa sin scroll */
+  #stepCliente.active{
+    overflow:hidden;
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:#F5F5F5;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:max(12px, var(--safe-top, 0)) clamp(16px,5vw,24px) max(12px, var(--safe-bottom, 0)) !important;
+  }
+  /* Ocultar topbar y steps cuando stepCliente está activo */
+  body:has(#stepCliente.active) .topbar,
+  body:has(#stepCliente.active) .steps{ display:none !important; }
+  @keyframes stepIn{ from{ opacity:0; transform:translateX(14px); } to{ opacity:1; transform:translateX(0); } }
+
+  /* ---- Hero ---- */
+  .hero-card{
+    position:relative; border-radius:20px; overflow:hidden; height:140px; margin-bottom:12px; flex-shrink:0;
+    background:linear-gradient(135deg, #FAFAFA 0%, #F0F0F0 100%);
+    box-shadow:0 4px 20px rgba(0,0,0,0.08);
+  }
+  .hero-card img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 20%; }
+  .hero-pattern{ position:absolute; inset:0; opacity:.3; background-image:radial-gradient(rgba(201,163,91,0.15) 1px, transparent 1.2px); background-size:14px 14px; }
+  .hero-overlay{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0.75) 100%); }
+  .hero-content{ position:absolute; left:0; right:0; bottom:0; padding:14px 16px; }
+  .hero-eyebrow{ font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--gold-bright); display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+  .hero-title{ font-size:20px; font-weight:800; color:#FFFFFF; line-height:1.15; text-shadow:0 2px 6px rgba(0,0,0,0.5); }
+  .hero-sub{ font-size:12px; color:rgba(255,255,255,0.85); margin-top:4px; max-width:88%; }
+
+  /* ---- Category chips (step 1) ---- */
+  .cat-scroll{
+    display:flex !important;
+    gap:10px;
+    overflow-x:auto;
+    overflow-y:visible;
+    margin:0 0 16px 0;
+    padding:10px 4px 14px 4px;
+    scrollbar-width:none;
+    touch-action:pan-x;
+    position:relative;
+    z-index:50;
+    background:transparent;
+    min-height:75px;
+  }
+  .cat-scroll::-webkit-scrollbar{ display:none; }
+  .cat-chip{
+    flex:0 0 auto;
+    min-width:72px;
+    height:auto;
+    display:flex !important;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:12px 10px;
+    border-radius:16px;
+    background:#FFFFFF !important;
+    border:1.5px solid rgba(0,0,0,0.12) !important;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
+    cursor:pointer;
+    transition:border-color .2s ease, background .2s ease, transform .2s ease;
+    position:relative;
+    z-index:51;
+  }
+  .cat-chip.active{ border-color:var(--gold) !important; background:rgba(201,163,91,0.15) !important; }
+  .cat-chip:active{ transform:scale(0.96); }
+  .cat-chip svg{ width:20px; height:20px; color:var(--gold); flex-shrink:0; display:block !important; }
+  .cat-chip span{ font-size:10px; font-weight:700; color:#1a1a1a; white-space:nowrap; display:block !important; }
+  .cat-chip.active span{ color:#1a1a1a; }
+
+  .list-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:10px; position:relative; z-index:0; }
+  .list-head h3{ font-size:12px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--gold); }
+  .list-head span{ font-size:11.5px; color:var(--text-secondary); }
+
+  /* ---- Service cards ---- */
+  .svc-card{
+    position:relative; z-index:0; margin-bottom:12px; border-radius:20px; overflow:hidden; cursor:pointer;
+    background:var(--bg); border:1.5px solid var(--divider);
+    transition:border-color .25s ease, box-shadow .25s ease, transform .2s ease;
+  }
+  .svc-card:active{ transform:scale(0.985); }
+  .svc-card.selected{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,163,91,0.2), 0 8px 24px rgba(0,0,0,0.12); }
+
+  .svc-photo-wrap{ position:relative; width:100%; height:150px; overflow:hidden; }
+  .svc-photo{ width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s cubic-bezier(.22,1,.36,1); }
+  .svc-card.selected .svc-photo{ transform:scale(1.06); }
+  .svc-photo-fallback{ width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:linear-gradient(160deg, rgba(201,163,91,0.22), rgba(201,163,91,0.05)); color:var(--gold); }
+  .svc-photo-fallback svg{ width:28px; height:28px; }
+  .svc-photo-overlay{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,0.5) 68%, rgba(0,0,0,0.85) 100%); pointer-events:none; }
+  .svc-badge{ position:absolute; top:12px; left:12px; font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.3px; color:#111111; background:var(--gold); padding:4px 9px; border-radius:999px; box-shadow:0 2px 8px rgba(0,0,0,0.15); }
+  .svc-check{
+    position:absolute; top:10px; right:10px; width:26px; height:26px; border-radius:50%;
+    background:rgba(0,0,0,0.5); backdrop-filter:blur(6px); border:1.5px solid rgba(255,255,255,0.4);
+    display:flex; align-items:center; justify-content:center; transition:background .2s ease, border-color .2s ease;
+  }
+  .svc-card.selected .svc-check{ background:var(--gold); border-color:var(--gold); }
+  .svc-check::after{ content:''; width:12px; height:12px; }
+  .svc-card.selected .svc-check::after{
+    content:'✓'; display:flex; align-items:center; justify-content:center; width:auto; height:auto;
+    font-size:12px; font-weight:800; color:#141414;
+  }
+  .svc-name{ position:absolute; left:14px; right:14px; bottom:12px; font-size:17px; font-weight:600; color:#FFFFFF; line-height:1.2; text-shadow:0 2px 4px rgba(0,0,0,0.7); }
+
+  .svc-body{ padding:12px 14px 14px; }
+  .svc-desc{ font-size:11.5px; color:var(--text-secondary); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; margin-bottom:10px; }
+  .svc-bottom-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .svc-price{ font-size:18px; font-weight:800; color:var(--gold); white-space:nowrap; }
+  .svc-price .desde{ font-size:10px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; margin-right:3px; }
+  .svc-duration-pill{ display:flex; align-items:center; gap:4px; padding:5px 10px; border-radius:999px; background:var(--card-2); border:1px solid var(--divider); font-size:11px; font-weight:700; color:var(--text-secondary); flex-shrink:0; }
+  .svc-duration-pill svg{ width:11px; height:11px; color:var(--gold); flex-shrink:0; }
+
+  .expand-btn{
+    width:100%; padding:12px 0; text-align:center; border-radius:14px; background:var(--card-2); border:1px solid var(--divider);
+    color:var(--text-secondary); font-size:12px; font-weight:700; cursor:pointer; margin-bottom:6px;
+  }
+
+  /* ---- Barber carousel (step 2) ---- */
+  .sede-pill-wrap{ display:flex; justify-content:center; margin-bottom:16px; }
+  .sede-pill{ position:relative; display:flex; align-items:center; gap:7px; padding:8px 16px; border-radius:999px; background:var(--card); border:1px solid var(--divider); }
+  .sede-pill svg{ width:14px; height:14px; color:var(--gold); }
+  .sede-pill span{ font-size:12px; font-weight:700; }
+  .sede-pill select{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+  .sede-pill-readonly{ cursor:default; }
+
+  /* =============================================
+     SPLASH PREMIUM - Bienvenida elegante
+     Duración total: ~5 segundos
+     Se muestra cada vez que se recarga la página
+     ============================================= */
+  .splash{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:9999;
+    width:100%;
+    height:100%;
+    height:100dvh;
+    background:radial-gradient(circle at 50% 50%, #FFFFFF 0%, #FAFAF8 35%, #F6F6F4 70%, #F3F3F1 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    padding-top:env(safe-area-inset-top, 0px);
+    padding-bottom:env(safe-area-inset-bottom, 0px);
+    padding-left:env(safe-area-inset-left, 0px);
+    padding-right:env(safe-area-inset-right, 0px);
+    box-sizing:border-box;
+  }
+  .splash.hidden{
+    display:none;
+    pointer-events:none;
+  }
+  .splash.leaving{
+    animation:splashFadeOut 800ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  .splash-content{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    width:100%;
+    transform:translateY(-28px);
+  }
+  .splash-logo-wrap{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+  }
+  .splash-logo{
+    width:clamp(190px, 58vw, 280px);
+    height:auto;
+    opacity:0;
+    transform:scale(0.94) translateY(8px);
+    display:block;
+  }
+  .splash-logo.animate{
+    animation:logoReveal 1000ms cubic-bezier(0.16, 1, 0.3, 1) 200ms forwards;
+  }
+  .splash-logo.leaving{
+    animation:logoExit 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+    .splash-label{
+    margin-top:36px;
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:0.35em;
+    text-transform:uppercase;
+    color:#8D8D89;
+    opacity:0;
+    transform:translateY(10px);
+  }
+  .splash-label.animate{
+    animation:labelReveal 800ms cubic-bezier(0.16, 1, 0.3, 1) 2200ms forwards;
+  }
+  .splash-label.leaving{
+    animation:labelExit 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  /* Animaciones del splash - Simple y limpia */
+  @keyframes logoReveal{
+    0%{
+      opacity:0;
+      transform:scale(0.94) translateY(8px);
+    }
+    100%{
+      opacity:1;
+      transform:scale(1) translateY(0);
+    }
+  }
+  @keyframes logoExit{
+    0%{ opacity:1; transform:scale(1) translateY(0); }
+    100%{ opacity:0; transform:scale(0.98) translateY(-8px); }
+  }
+  @keyframes labelReveal{
+    0%{ opacity:0; transform:translateY(10px); }
+    100%{ opacity:1; transform:translateY(0); }
+  }
+  @keyframes labelExit{
+    0%{ opacity:1; transform:translateY(0); }
+    100%{ opacity:0; transform:translateY(-6px); }
+  }
+  @keyframes splashFadeOut{
+    0%{ opacity:1; }
+    100%{ opacity:0; visibility:hidden; }
+  }
+
+  /* Transición del contenido principal - solo fade simple */
+  #app{
+    opacity:0;
+    transition:none;
+  }
+  #app.ready{
+    opacity:1;
+    transition:opacity 600ms ease;
+  }
+  #app.no-splash{
+    opacity:1;
+  }
+
+  /* Accesibilidad: reduced motion */
+  @media (prefers-reduced-motion: reduce){
+    .splash-logo{
+      opacity:0;
+      transform:none;
+      filter:drop-shadow(0 20px 40px rgba(0,0,0,0.04));
+    }
+    .splash-logo.animate{
+      animation:logoSimpleFade 500ms ease 100ms forwards;
+    }
+    .splash-logo.leaving{
+      animation:logoSimpleFadeOut 400ms ease forwards;
+    }
+    .splash-shine, .splash-shine::after{
+      display:none;
+    }
+    .splash-label.animate{
+      animation:labelSimpleFade 400ms ease 400ms forwards;
+    }
+    .splash.leaving{
+      animation:splashFadeOut 400ms ease forwards;
+    }
+    #app.ready{
+      transition:opacity 500ms ease;
+    }
+    @keyframes logoSimpleFade{
+      0%{ opacity:0; }
+      100%{ opacity:1; }
+    }
+    @keyframes logoSimpleFadeOut{
+      0%{ opacity:1; }
+      100%{ opacity:0; }
+    }
+    @keyframes labelSimpleFade{
+      0%{ opacity:0; }
+      100%{ opacity:1; }
+    }
+  }
+
+  /* Desktop: logo más grande */
+  @media (min-width: 768px){
+    .splash-logo{
+      width:clamp(200px, 30vw, 260px);
+    }
+  }
+
+  .sede-title-block{ padding-top:8px; margin-bottom:20px; position:relative; z-index:10; }
+  .sede-hero-title{ font-size:24px; font-weight:800; color:#111111; line-height:1.18; }
+  .sede-hero-title .gold{ color:var(--gold); }
+  .sede-hero-sub{ font-size:13px; color:#666666; margin-top:8px; }
+
+  .sede-benefits{ display:flex; justify-content:space-between; gap:6px; padding:16px 0; }
+  .sede-benefit{ flex:1; display:flex; flex-direction:column; align-items:center; text-align:center; gap:5px; }
+  .sede-benefit-icon{ width:32px; height:32px; border-radius:50%; border:1.3px solid rgba(201,163,91,0.5); color:var(--gold); display:flex; align-items:center; justify-content:center; }
+  .sede-benefit-icon svg{ width:14px; height:14px; }
+  .sede-benefit b{ display:block; font-size:10.5px; font-weight:700; }
+  .sede-benefit span{ display:block; font-size:9px; color:var(--text-secondary); margin-top:1px; }
+
+  .sede-cards-wrap{ position:relative; }
+  .sede-choice-card{
+    position:relative; display:flex; gap:0; padding:0; border-radius:20px; min-height:140px;
+    background:var(--bg); border:1.5px solid var(--divider); cursor:pointer; overflow:hidden;
+    transition:border-color .25s ease, background .25s ease, transform .2s ease, box-shadow .25s ease;
+  }
+  .sede-choice-card:active{ transform:scale(0.985); }
+  .sede-choice-card.selected{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,163,91,0.15), 0 6px 20px rgba(0,0,0,0.1); }
+  .sede-choice-photo{ transition:transform .5s cubic-bezier(.22,1,.36,1), filter .4s ease; filter:grayscale(100%); }
+  .sede-choice-card.selected .sede-choice-photo{ transform:scale(1.09); filter:grayscale(0%); }
+  .sede-choice-card.is-first{ border-radius:20px 20px 36px 36px; margin-bottom:0; }
+  .sede-choice-card.is-last{ border-radius:36px 36px 20px 20px; }
+
+  .sede-seam{ display:flex; justify-content:center; position:relative; z-index:6; margin:-28px 0; pointer-events:none; }
+  .sede-seam-logo{
+    width:56px; height:56px; border-radius:50%; background:#FFFFFF; border:3px solid var(--gold);
+    display:flex; align-items:center; justify-content:center; box-shadow:0 4px 18px rgba(0,0,0,0.2);
+  }
+  .sede-seam-logo img{ width:36px; height:36px; object-fit:contain; filter:brightness(0) invert(1); }
+
+  .sede-choice-info{ flex:1; min-width:0; display:flex; flex-direction:column; padding:12px; }
+  .sede-choice-card.is-first .sede-choice-info{ padding-bottom:28px; }
+  .sede-choice-card.is-last .sede-choice-info{ padding-top:28px; }
+  .sede-choice-name{ font-size:15px; font-weight:800; line-height:1.2; }
+  .sede-choice-addr{ display:flex; align-items:flex-start; gap:4px; font-size:11px; color:var(--text-secondary); margin-top:6px; }
+  .sede-choice-addr svg{ width:12px; height:12px; flex-shrink:0; margin-top:1px; }
+  .sede-choice-distance{ display:flex; align-items:center; gap:4px; font-size:11px; color:var(--gold); font-weight:700; margin-top:5px; }
+  .sede-choice-distance svg{ width:11px; height:11px; flex-shrink:0; }
+  .sede-choice-features{ display:flex; gap:12px; margin-top:auto; padding-top:10px; }
+  .sede-choice-feature{ display:flex; flex-direction:column; align-items:center; gap:4px; text-align:center; }
+  .sede-choice-feature-icon{ width:24px; height:24px; border-radius:50%; border:1.3px solid rgba(201,163,91,0.5); color:var(--gold); display:flex; align-items:center; justify-content:center; }
+  .sede-choice-feature-icon svg{ width:11px; height:11px; }
+  .sede-choice-feature span{ font-size:8px; color:var(--text-secondary); line-height:1.2; }
+
+  .sede-choice-photo-wrap{ position:relative; width:44%; flex-shrink:0; overflow:hidden; }
+  .sede-choice-photo-wrap::before{
+    content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:linear-gradient(90deg,
+      rgba(0,0,0,0.7) 0%,
+      rgba(0,0,0,0.5) 20%,
+      rgba(0,0,0,0.25) 40%,
+      rgba(0,0,0,0.1) 60%,
+      rgba(0,0,0,0) 80%);
+  }
+  .sede-choice-photo{ width:100%; height:100%; object-fit:cover; display:block; }
+  .sede-choice-photo-fallback{ width:100%; height:100%; min-height:180px; display:flex; align-items:center; justify-content:center; background:linear-gradient(160deg, rgba(201,163,91,0.22), rgba(201,163,91,0.05)); color:var(--gold); }
+  .sede-choice-photo-fallback svg{ width:24px; height:24px; }
+  .sede-choice-rating{ position:absolute; right:10px; bottom:10px; z-index:2; display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:10px; background:rgba(0,0,0,0.6); backdrop-filter:blur(6px); font-size:10px; font-weight:700; color:#111111; }
+  .sede-choice-rating svg{ width:10px; height:10px; color:var(--gold); flex-shrink:0; }
+  .sede-choice-check{ position:absolute; top:10px; right:10px; width:26px; height:26px; border-radius:50%; background:var(--gold); display:none; align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,0.15); z-index:2; }
+  .sede-choice-card.selected .sede-choice-check{ display:flex; animation:checkPop .3s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes checkPop{ from{ transform:scale(0.4); opacity:0; } to{ transform:scale(1); opacity:1; } }
+
+  @media (max-width:400px){
+    .sede-choice-card{ flex-direction:column; min-height:auto; }
+    .sede-choice-photo-wrap{ width:100%; height:130px; order:-1; }
+    .sede-choice-photo-wrap::before{ background:linear-gradient(180deg,
+      rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.4) 20%, rgba(0,0,0,0.2) 40%,
+      rgba(0,0,0,0.05) 60%, rgba(0,0,0,0) 80%); }
+    .sede-choice-features{ margin-top:10px; }
+  }
+
+
+  .barber-carousel{
+    display:flex;
+    gap:12px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    margin:0;
+    padding:4px 0 4px var(--content-padding);
+    scrollbar-width:none;
+    touch-action:pan-x;
+    box-sizing:border-box;
+    height:100%;
+    align-items:stretch;
+  }
+/* Flechas de navegación para web */
+.carousel-nav{ display:none; position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.95); border:1px solid rgba(0,0,0,0.08); cursor:pointer; z-index:10; align-items:center; justify-content:center; box-shadow:0 2px 8px rgba(0,0,0,0.15); transition:all .2s ease; }
+.carousel-nav:hover{ background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.2); transform:translateY(-50%) scale(1.05); }
+.carousel-nav:active{ transform:translateY(-50%) scale(0.95); }
+.carousel-nav.prev{ left:8px; }
+.carousel-nav.next{ right:8px; }
+.carousel-nav svg{ width:20px; height:20px; stroke:#141414; stroke-width:2.5; fill:none; }
+.carousel-nav:disabled{ opacity:0.4; }
+.carousel-wrap{ position:relative; overflow:hidden; }
+.scroll-nav{ display:none; position:absolute; top:50%; transform:translateY(-50%); width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.9); border:1px solid rgba(0,0,0,0.1); cursor:pointer; z-index:10; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.1); transition:all .15s ease; }
+.scroll-nav:hover{ background:#fff; box-shadow:0 3px 10px rgba(0,0,0,0.15); }
+.scroll-nav.prev{ left:-16px; }
+.scroll-nav.next{ right:-16px; }
+.scroll-nav svg{ width:16px; height:16px; stroke:#141414; stroke-width:2.5; fill:none; }
+@media (min-width: 768px) {
+  .carousel-nav, .scroll-nav { display:flex; }
+  .barber-carousel{ padding:4px 0 4px 60px; }
+  .cat-scroll{ padding:8px 0 12px 0; margin:0 0 14px 0; }
+  .day-scroll{ padding:2px 30px 4px; margin:0 -30px 18px; }
+  #app{ max-width:640px; padding-top:32px; }
+  .hero-card{ height:260px; border-radius:32px; }
+  .svc-card{ transition:transform .15s ease, box-shadow .15s ease; }
+  .svc-card:hover{ transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.3); }
+  .barber-card{ transition:transform .15s ease; }
+  .barber-card:hover{ transform:scale(1.02); }
+  .time-chip:not(.taken){ transition:transform .1s ease; cursor:pointer; }
+  .time-chip:not(.taken):hover{ transform:scale(1.05); }
+  .day-chip{ transition:transform .1s ease; cursor:pointer; }
+  .day-chip:hover{ transform:scale(1.05); }
+}
+@media (min-width: 1024px) {
+  #app{ max-width:720px; }
+  .hero-card{ height:280px; }
+}
+  .barber-carousel::-webkit-scrollbar{ display:none; }
+
+  /* Tarjeta de barbero */
+  .barber-card{
+    flex:0 0 calc(100% - 50px);
+    min-width:0;
+    scroll-snap-align:center;
+    position:relative;
+    border-radius:20px;
+    overflow:hidden;
+    background:linear-gradient(165deg, #FFFFFF, #F8F8F8);
+    border:1.5px solid rgba(0,0,0,0.1);
+    transition:border-color .25s ease, box-shadow .25s ease;
+    cursor:pointer;
+    box-sizing:border-box;
+    height:100%;
+    min-height:320px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.08);
+  }
+  .barber-card.selected{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,163,91,0.15), 0 4px 20px rgba(0,0,0,0.1); }
+  .barber-card img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:inherit;
+  }
+  .barber-card .avatar-fallback{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:74px;
+    font-weight:800;
+    color:rgba(201,163,91,0.22);
+  }
+  .barber-overlay{
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg, rgba(0,0,0,0) 45%, rgba(0,0,0,0.6) 75%, rgba(0,0,0,0.9) 100%);
+    border-radius:inherit;
+  }
+  .barber-rating{
+    position:absolute;
+    top:14px;
+    left:14px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    background:rgba(0,0,0,0.6);
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(201,163,91,0.5);
+    border-radius:999px;
+    padding:5px 11px;
+    font-size:12px;
+    font-weight:700;
+    color:var(--gold-bright);
+    z-index:3;
+  }
+  .barber-rating svg{ width:12px; height:12px; flex-shrink:0; }
+  .barber-selected-badge{
+    position:absolute;
+    top:14px;
+    right:14px;
+    width:28px;
+    height:28px;
+    border-radius:50%;
+    background:var(--gold);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:4;
+  }
+  .barber-card.selected .barber-selected-badge{ display:flex; }
+  .barber-instagram{
+    position:absolute;
+    top:14px;
+    right:14px;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    background:linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#111111;
+    text-decoration:none;
+    transition:transform 0.2s, box-shadow 0.2s;
+    z-index:5;
+  }
+  .barber-instagram:hover{ transform:scale(1.1); box-shadow:0 4px 12px rgba(225,48,108,0.4); }
+  .barber-card.selected .barber-instagram{ right:50px; }
+
+  /* Info del barbero en la parte inferior */
+  .barber-info{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    padding:14px 16px;
+    box-sizing:border-box;
+  }
+  .barber-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+  .barber-name{
+    font-size:18px;
+    font-weight:800;
+    color:#FFFFFF;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    line-height:1.2;
+    min-width:0;
+    flex-shrink:1;
+    text-shadow:0 2px 4px rgba(0,0,0,0.7);
+  }
+  .barber-name svg{ width:16px; height:16px; color:var(--gold); flex-shrink:0; }
+
+  /* Botón ver reseñas - en línea con el nombre */
+  .barber-reviews-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:5px 10px;
+    border-radius:14px;
+    background:rgba(0,0,0,0.4);
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(201,163,91,0.5);
+    color:var(--gold-bright);
+    font-size:11px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.2s ease;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .barber-reviews-btn:hover{ background:rgba(201,163,91,0.3); border-color:var(--gold); }
+  .barber-reviews-btn svg{ width:11px; height:11px; fill:var(--gold); flex-shrink:0; }
+
+  /* Estadísticas: 3 columnas iguales */
+  .barber-stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:6px;
+    padding-top:10px;
+    border-top:1px solid rgba(255,255,255,0.15);
+  }
+  .barber-stat{
+    min-width:0;
+    text-align:center;
+  }
+  .barber-stat b{
+    display:block;
+    font-size:15px;
+    font-weight:800;
+    color:#FFFFFF;
+    text-shadow:0 1px 3px rgba(0,0,0,0.5);
+  }
+  .barber-stat span{
+    display:block;
+    font-size:10px;
+    color:rgba(255,255,255,0.7);
+    text-transform:uppercase;
+    letter-spacing:.2px;
+  }
+
+  /* Reseñas expandibles en tarjeta */
+  .barber-reviews-section{
+    display:none;
+    flex-direction:column;
+    gap:8px;
+    padding-top:10px;
+    margin-top:10px;
+    border-top:1px solid rgba(255,255,255,0.12);
+    max-height:150px;
+    overflow-y:auto;
+  }
+  .barber-card.reviews-expanded .barber-reviews-section{ display:flex; }
+  .barber-card.reviews-expanded{ height:auto !important; max-height:none !important; min-height:auto !important; }
+  .barber-review-item{
+    display:flex;
+    gap:8px;
+    padding:8px;
+    background:rgba(0,0,0,0.3);
+    border-radius:10px;
+  }
+  .barber-review-avatar{
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    background:rgba(201,163,91,0.2); color:var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; font-weight:700;
+  }
+  .barber-review-content{ flex:1; min-width:0; }
+  .barber-review-header{ display:flex; justify-content:space-between; align-items:center; gap:6px; }
+  .barber-review-name{ font-size:11px; font-weight:700; color:#111111; }
+  .barber-review-stars{ font-size:9px; color:var(--gold); }
+  .barber-review-text{ font-size:10px; color:rgba(255,255,255,0.75); margin:4px 0 0; line-height:1.3; }
+  .barber-no-reviews{ font-size:11px; color:rgba(255,255,255,0.6); text-align:center; padding:10px 0; margin:0; }
+
+  /* Modal de reseñas */
+  .reviews-modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.4); backdrop-filter:blur(8px);
+    z-index:1000; display:none; align-items:flex-end; justify-content:center;
+  }
+  .reviews-modal-overlay.show{ display:flex; }
+  .reviews-modal{
+    background:#FFFFFF; border-radius:24px 24px 0 0; width:100%; max-width:500px;
+    max-height:85vh; overflow:hidden; animation:slideUp 0.3s ease;
+    box-shadow:0 -10px 40px rgba(0,0,0,0.15);
+  }
+  @keyframes slideUp{ from{ transform:translateY(100%); } to{ transform:translateY(0); } }
+  .reviews-modal-header{
+    padding:20px; border-bottom:1px solid var(--divider);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .reviews-modal-title{ font-size:18px; font-weight:800; }
+  .reviews-modal-subtitle{ font-size:12px; color:var(--text-secondary); margin-top:2px; }
+  .reviews-modal-close{
+    width:36px; height:36px; border-radius:50%; background:var(--card);
+    border:1px solid var(--divider); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .reviews-modal-close:hover{ background:var(--card-2); }
+  .reviews-modal-close svg{ width:18px; height:18px; color:var(--text-secondary); }
+  .reviews-modal-body{ padding:16px 20px; overflow-y:auto; max-height:calc(85vh - 100px); }
+  .reviews-modal-stats{
+    display:flex; gap:16px; padding:16px; background:var(--card); border-radius:16px; margin-bottom:16px;
+  }
+  .reviews-stat-main{ text-align:center; padding-right:16px; border-right:1px solid var(--divider); }
+  .reviews-stat-main .num{ font-size:36px; font-weight:800; color:var(--gold); }
+  .reviews-stat-main .stars{ display:flex; gap:2px; justify-content:center; margin-top:4px; }
+  .reviews-stat-main .stars svg{ width:14px; height:14px; color:var(--gold); }
+  .reviews-stat-main .count{ font-size:11px; color:var(--text-secondary); margin-top:4px; }
+  .reviews-stat-bars{ flex:1; display:flex; flex-direction:column; gap:6px; justify-content:center; }
+  .reviews-bar-row{ display:flex; align-items:center; gap:8px; font-size:11px; }
+  .reviews-bar-row span:first-child{ width:12px; color:var(--text-secondary); }
+  .reviews-bar{ flex:1; height:6px; background:var(--divider); border-radius:3px; overflow:hidden; }
+  .reviews-bar-fill{ height:100%; background:var(--gold); border-radius:3px; }
+  .reviews-bar-row span:last-child{ width:24px; text-align:right; color:var(--text-secondary); }
+
+  .review-item{
+    padding:16px; background:var(--card); border-radius:16px; margin-bottom:12px;
+    border:1px solid var(--divider);
+  }
+  .review-header{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .review-avatar{
+    width:40px; height:40px; border-radius:50%; background:var(--card-2);
+    display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:var(--gold);
+  }
+  .review-meta{ flex:1; }
+  .review-name{ font-size:14px; font-weight:700; }
+  .review-date{ font-size:11px; color:var(--text-secondary); }
+  .review-stars{ display:flex; gap:2px; }
+  .review-stars svg{ width:14px; height:14px; }
+  .review-stars svg.filled{ color:var(--gold); fill:var(--gold); }
+  .review-stars svg.empty{ color:var(--divider); }
+  .review-text{ font-size:13px; color:var(--text-secondary); line-height:1.5; }
+  .reviews-empty{ text-align:center; padding:40px 20px; color:var(--text-secondary); }
+  .reviews-empty svg{ width:48px; height:48px; color:var(--divider); margin-bottom:12px; }
+
+  /* Tarjeta de máxima disponibilidad */
+  .any-barber-card{ background:linear-gradient(165deg, #2a2419, #1a1510); border-color:rgba(201,163,91,0.3); }
+  .any-barber-card:hover{ border-color:var(--gold); }
+  .any-barber-bg{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  .any-barber-bg svg{ width:140px; height:140px; stroke:rgba(201,163,91,0.15); margin-top:-60px; }
+  /* Collage de fotos para máxima disponibilidad */
+  .any-barber-collage{
+    position:absolute; inset:0; display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(2,1fr); gap:2px;
+  }
+  .any-barber-collage img{
+    width:100%; height:100%; object-fit:cover; opacity:0.85;
+  }
+  .any-barber-collage .collage-item{
+    overflow:hidden; position:relative;
+  }
+  .any-barber-collage .collage-item:first-child{ border-radius:20px 0 0 0; }
+  .any-barber-collage .collage-item:nth-child(3){ border-radius:0 20px 0 0; }
+  .any-barber-collage .collage-item:nth-child(4){ border-radius:0 0 0 20px; }
+  .any-barber-collage .collage-item:last-child{ border-radius:0 0 20px 0; }
+  .any-barber-collage .collage-fallback{
+    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(160deg, rgba(201,163,91,0.3), rgba(201,163,91,0.1));
+    font-size:28px; font-weight:800; color:var(--gold);
+  }
+
+  .carousel-dots{ display:flex; justify-content:center; gap:6px; margin-bottom:18px; }
+  .carousel-dots .d{ width:6px; height:6px; border-radius:50%; background:var(--divider); transition:background .2s ease, width .2s ease; }
+  .carousel-dots .d.active{ background:var(--gold); width:18px; border-radius:3px; }
+
+  .any-barber-row{
+    display:flex; align-items:center; gap:14px; padding:16px; border-radius:20px; background:var(--card); border:1.5px solid var(--divider);
+    cursor:pointer; margin-bottom:8px; transition:border-color .2s ease;
+  }
+  .any-barber-row.selected{ border-color:var(--gold); background:rgba(201,163,91,0.07); }
+  .any-barber-icon{ width:44px; height:44px; border-radius:13px; background:rgba(201,163,91,0.12); color:var(--gold); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .any-barber-icon svg{ width:21px; height:21px; }
+  .any-barber-mid{ flex:1; }
+  .any-barber-mid .t{ font-size:14px; font-weight:700; }
+  .any-barber-mid .s{ font-size:11.5px; color:var(--text-secondary); margin-top:2px; }
+  .any-barber-radio{ width:22px; height:22px; border-radius:50%; border:1.6px solid var(--divider); flex-shrink:0; position:relative; }
+  .any-barber-row.selected .any-barber-radio{ border-color:var(--gold); }
+  .any-barber-row.selected .any-barber-radio::after{ content:''; position:absolute; inset:4px; border-radius:50%; background:var(--gold); }
+
+  /* ---- Day scroller + time grid (step 3) ---- */
+  .section-eyebrow{ font-size:10px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--gold); margin-bottom:10px; }
+  .day-scroll{ display:flex; gap:8px; overflow-x:auto; margin:0 calc(-1 * var(--content-padding)) 18px; padding:2px var(--content-padding) 4px; scrollbar-width:none; touch-action:pan-x; }
+  .day-scroll::-webkit-scrollbar{ display:none; }
+  .day-chip{
+    flex:0 0 auto; width:56px; padding:10px 0 8px; border-radius:14px; text-align:center; cursor:pointer;
+    background:var(--card); border:1.3px solid var(--divider); transition:border-color .2s ease, background .2s ease;
+  }
+  .day-chip.selected{ background:var(--gold); border-color:var(--gold); }
+  .day-chip.selected .dow, .day-chip.selected .dom, .day-chip.selected .mon{ color:#141414; }
+  .day-chip .dow{ font-size:9px; color:var(--text-secondary); text-transform:uppercase; font-weight:800; letter-spacing:.3px; }
+  .day-chip .dom{ font-size:17px; font-weight:800; margin-top:2px; }
+  .day-chip .mon{ font-size:9px; color:var(--text-secondary); text-transform:uppercase; font-weight:700; margin-top:1px; }
+  .day-dot{ width:4px; height:4px; border-radius:50%; margin:5px auto 0; background:var(--success); }
+  .day-chip.full .day-dot{ background:var(--text-secondary); opacity:.5; }
+  .day-chip.selected .day-dot{ background:#FAFAFA; }
+
+  .period-block{ margin-bottom:16px; }
+  .period-head{ display:flex; align-items:center; gap:6px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.4px; color:var(--text-secondary); margin-bottom:10px; }
+  .period-head svg{ width:13px; height:13px; }
+  .demand-legend{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; font-size:10px; color:var(--text-secondary); }
+  .demand-legend .dot{ width:6px; height:6px; border-radius:50%; display:inline-block; margin-right:3px; }
+
+  .time-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .time-chip{
+    position:relative; padding:10px 0 8px; text-align:center; border-radius:12px; cursor:pointer;
+    background:var(--card); border:1.3px solid var(--divider); transition:border-color .18s ease, transform .15s ease;
+  }
+  .time-chip:active:not(.taken){ transform:scale(0.95); }
+  .time-chip .hh{ font-size:13px; font-weight:700; }
+  .time-chip .ap{ font-size:8px; color:var(--text-secondary); text-transform:uppercase; font-weight:700; }
+  .time-chip .tag{ font-size:7px; font-weight:800; text-transform:uppercase; letter-spacing:.2px; margin-top:2px; }
+  .time-chip.selected{ background:var(--gold); border-color:var(--gold); }
+  .time-chip.selected .hh, .time-chip.selected .ap, .time-chip.selected .tag{ color:#141414 !important; }
+  .time-chip.disponible .tag{ color:var(--success); }
+  .time-chip.ultimos{ border-color:rgba(242,201,76,0.5); }
+  .time-chip.ultimos .tag{ color:var(--warning); }
+  .time-chip.solicitado .tag{ color:var(--error); }
+  .time-chip.taken{ opacity:.35; pointer-events:none; }
+  .time-chip.taken .hh{ text-decoration:line-through; }
+  .time-chip.taken .tag{ color:var(--text-secondary); }
+
+  /* ---- Confirmation (step 4) ---- */
+  .contact-card{ padding:14px; border-radius:16px; background:var(--card); border:1px solid var(--divider); margin-bottom:12px; }
+  .contact-card .cc-title{ font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--gold); margin-bottom:10px; }
+  .field{ margin-bottom:10px; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{ display:block; font-size:10px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:5px; }
+  .field-input{ display:flex; align-items:center; background:var(--card-2); border:1px solid var(--divider); border-radius:12px; height:46px; padding:0 12px; transition:border-color .2s ease, box-shadow .2s ease; }
+  .field-input.focused{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,163,91,0.14); }
+  .field-input input{ flex:1; background:transparent; border:none; outline:none; color:var(--text); font-size:16px; min-width:0; }
+  .prefix{ font-size:14px; font-weight:600; padding-right:8px; border-right:1px solid var(--divider); margin-right:8px; }
+
+  .confirm-card{ border-radius:18px; overflow:hidden; background:var(--card); border:1px solid var(--divider); margin-bottom:12px; }
+  .confirm-card-top{ display:flex; gap:12px; padding:14px; }
+  .confirm-photo{ width:60px; height:74px; border-radius:12px; object-fit:cover; flex-shrink:0; background:linear-gradient(160deg,#232019,#111); }
+  .confirm-photo-fallback{ width:60px; height:74px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; color:var(--gold); background:linear-gradient(160deg, rgba(201,163,91,0.2), rgba(201,163,91,0.05)); }
+  .confirm-rows{ flex:1; min-width:0; }
+  .confirm-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:8px 14px; border-top:1px solid var(--divider); }
+  .confirm-row-icon{ width:26px; height:26px; border-radius:8px; background:var(--card-2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .confirm-row-icon svg{ width:12px; height:12px; color:var(--gold); }
+  .confirm-row-label{ font-size:9px; font-weight:800; text-transform:uppercase; letter-spacing:.4px; color:var(--text-secondary); }
+  .confirm-row-value{ font-size:12.5px; font-weight:700; margin-top:1px; }
+  .confirm-row-l{ display:flex; align-items:center; gap:8px; min-width:0; }
+  .confirm-total{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-top:1px dashed var(--divider); }
+  .confirm-total .l{ font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--text-secondary); }
+  .confirm-total .v{ font-size:18px; font-weight:800; color:var(--gold); }
+  .confirm-total .cur{ font-size:10px; color:var(--text-secondary); font-weight:600; margin-left:3px; }
+
+  .trust-title{ display:flex; align-items:center; gap:6px; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; color:var(--gold); margin-bottom:10px; }
+  .trust-title svg{ width:13px; height:13px; }
+  .trust-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+  .trust-card{ padding:12px 6px; border-radius:14px; background:var(--card); border:1px solid var(--divider); text-align:center; }
+  .trust-card svg{ width:17px; height:17px; color:var(--gold); margin-bottom:6px; }
+  .trust-card .t{ font-size:10px; font-weight:700; }
+  .trust-card .s{ font-size:9px; color:var(--text-secondary); margin-top:2px; line-height:1.3; }
+
+  /* Política de cancelación - Diseño mejorado */
+  .cancel-policy{
+    background: linear-gradient(145deg, #FFFFFF, #FAFAFA);
+    border: 1px solid var(--gold);
+    border-radius: 20px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+  .cancel-policy-header{
+    text-align: center;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+  .cancel-policy-icon{
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--gold), #c9a227);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 10px;
+    box-shadow: 0 4px 12px rgba(201,162,39,0.3);
+  }
+  .cancel-policy-icon svg{ width: 22px; height: 22px; color:var(--text); }
+  .cancel-policy-title{
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--gold-dark);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .cancel-policy-intro{
+    font-size: 13px;
+    color: #1a1a1a;
+    line-height: 1.6;
+  }
+  .cancel-policy-intro strong{ color: var(--gold-dark); }
+  .cancel-policy-section{
+    background: #F8F8F8;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .cancel-policy-section:last-child{ margin-bottom: 0; }
+  .cancel-policy-section-title{
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cancel-policy-list{
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    padding-left: 0;
+    margin: 0;
+  }
+  .cancel-policy-list li{
+    margin-bottom: 8px;
+    list-style: none;
+    padding-left: 8px;
+    border-left: 2px solid var(--gold);
+  }
+  .cancel-policy-list li:last-child{ margin-bottom: 0; }
+  .cancel-policy-highlight{
+    background: rgba(201,162,39,0.1);
+    border-left-color: var(--gold);
+    padding: 8px 10px;
+    border-radius: 0 8px 8px 0;
+    margin-left: -8px;
+  }
+
+  .privacy-note{ display:flex; align-items:center; justify-content:center; gap:5px; font-size:10px; color:var(--text-secondary); margin:10px 0 0; }
+  .privacy-note svg{ width:11px; height:11px; }
+
+  /* ---- Bottom bar ---- */
+  .bottom-bar{
+    position:fixed; left:0; right:0; bottom:0; z-index:50;
+    height:var(--footer-height);
+  }
+  .bottom-bar-inner{
+    max-width:500px; margin:0 auto; display:flex; align-items:center; gap:10px;
+    padding:10px var(--content-padding) calc(10px + var(--safe-bottom, 0));
+    background:rgba(255,255,255,0.95); backdrop-filter:blur(18px); border-top:1px solid rgba(0,0,0,0.08);
+    height:100%; box-sizing:border-box;
+    box-shadow:0 -4px 20px rgba(0,0,0,0.06);
+  }
+  .bb-thumb{ width:38px; height:38px; border-radius:10px; object-fit:cover; flex-shrink:0; }
+  .bb-thumb-fallback{ width:38px; height:38px; border-radius:10px; flex-shrink:0; background:var(--card-2); display:flex; align-items:center; justify-content:center; color:var(--gold); }
+  .bb-thumb-fallback svg{ width:16px; height:16px; }
+  .bb-mid{ flex:1; min-width:0; }
+  .bb-mid .n{ font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bb-mid .s{ font-size:10px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bb-price{ text-align:right; flex-shrink:0; }
+  .bb-price b{ display:block; font-size:13px; font-weight:800; color:var(--gold); }
+  .bb-price span{ font-size:8px; color:var(--text-secondary); text-transform:uppercase; }
+  .bb-cta{ height:44px; padding:0 18px; border-radius:12px; font-size:13px; font-weight:700; flex-shrink:0; display:flex; align-items:center; gap:5px; }
+  .nav-row{ display:flex; gap:8px; margin-top:5px; }
+  .nav-row button{ flex:1; height:48px; font-size:13px; border-radius:14px; }
+
+  /* ---- Success (step 5) ---- */
+  .confirm-wrap{ text-align:center; padding:40px 0 0; }
+  .check-circle{
+    width:78px; height:78px; border-radius:50%;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    display:flex; align-items:center; justify-content:center; margin:0 auto 22px;
+    box-shadow:0 0 0 10px rgba(201,163,91,0.08);
+  }
+  .success-title{ font-size:22px; font-weight:800; margin-bottom:8px; }
+  .success-sub{ font-size:13px; color:var(--text-secondary); max-width:320px; margin:0 auto; line-height:1.5; }
+
+  #toast{
+    position:fixed; left:50%; bottom:24px; transform:translate(-50%, 16px);
+    background:rgba(255,255,255,0.98); backdrop-filter:blur(14px);
+    border:1px solid rgba(0,0,0,0.1); border-radius:14px; padding:12px 18px;
+    font-size:13px; display:flex; align-items:center; gap:8px; color:#1a1a1a;
+    opacity:0; pointer-events:none; transition:opacity 0.3s ease, transform 0.3s ease; z-index:80;
+    box-shadow:0 4px 20px rgba(0,0,0,0.12);
+  }
+  #toast.show{ opacity:1; transform:translate(-50%, 0); }
+  .toast-dot{ width:8px; height:8px; border-radius:50%; background:var(--gold); flex-shrink:0; }
+
+  /* Popup centrado */
+  .center-popup{
+    position:fixed; top:50%; left:50%; transform:translate(-50%, -50%) scale(0.9);
+    background:rgba(255,255,255,0.98); backdrop-filter:blur(20px);
+    border:1px solid var(--gold); border-radius:16px; padding:24px 28px;
+    box-shadow:0 8px 40px rgba(0,0,0,0.15); color:#1a1a1a;
+    font-size:14px; text-align:center; color:var(--text);
+    opacity:0; pointer-events:none; transition:opacity 0.25s ease, transform 0.25s ease; z-index:100;
+    max-width:280px;
+  }
+  .center-popup.show{ opacity:1; transform:translate(-50%, -50%) scale(1); pointer-events:auto; }
+  .center-popup-icon{ margin-bottom:12px; }
+  .center-popup-icon svg{ width:32px; height:32px; color:var(--gold); }
+
+  /* Ajustes para pantallas pequeñas */
+  @media (max-width:375px){
+    :root{ --content-padding:14px; }
+    .barber-card{ flex:0 0 calc(100% - 18px); }
+    .barber-info{ padding:12px; }
+    .barber-header{ gap:8px; margin-bottom:8px; }
+    .barber-name{ font-size:16px; }
+    .barber-reviews-btn{ padding:4px 8px; font-size:10px; }
+    .barber-stats{ gap:4px; padding-top:8px; }
+    .barber-stat b{ font-size:14px; }
+    .barber-stat span{ font-size:9px; }
+    .trust-grid{ gap:6px; }
+    .sede-choice-card{ min-height:170px; }
+    .phone-input-wrap{ gap:5px; }
+    .country-select{ width:58px; font-size:11px; }
+    .phone-search-btn{ flex:0 0 42px; width:42px; height:42px; }
+    .phone-input-wrap .form-input{ height:42px; }
+    .country-select{ height:42px; }
+  }
+  @media (max-width:340px){
+    :root{ --content-padding:12px; }
+    .barber-card{ flex:0 0 calc(100% - 14px); }
+    .barber-info{ padding:10px; }
+    .barber-header{ flex-direction:column; align-items:flex-start; gap:5px; }
+    .barber-name{ font-size:15px; }
+    .barber-stat b{ font-size:13px; }
+    .barber-stat span{ font-size:8px; }
+    .sede-choice-name{ font-size:14px; }
+    .phone-input-wrap{ gap:4px; }
+    .country-select{ width:54px; font-size:10px; padding:0 2px 0 6px; }
+  }
+  /* Pantallas muy cortas (iPhone SE, etc.) */
+  /* =============================================
+     STEP CLIENTE - Diseño Premium Cinematográfico
+     ============================================= */
+  #stepCliente{
+    position:relative;
+    flex-direction:column;
+    height:100%;
+    min-height:100dvh;
+    padding:0 !important;
+    margin:0;
+    box-sizing:border-box;
+    overflow:hidden;
+    background:#FFFFFF;
+  }
+
+  /* Fondo de barbería con degradado oscuro */
+  .stepcliente-bg{
+    position:absolute;
+    inset:0;
+    background-image:url('../assets/barbershop-bg.jpg');
+    background-size:cover;
+    background-position:center top;
+    background-repeat:no-repeat;
+    z-index:0;
+  }
+  .stepcliente-bg::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,0.35);
+    z-index:1;
+  }
+  .stepcliente-bg::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.2) 0%,
+      rgba(0,0,0,0.1) 35%,
+      rgba(255,255,255,0.3) 55%,
+      rgba(255,255,255,0.85) 75%,
+      rgba(255,255,255,1) 90%
+    );
+    z-index:2;
+  }
+
+  /* Contenedor interno - compacto */
+  .stepcliente-inner{
+    position:relative;
+    z-index:3;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+    height:100%;
+    padding:0 5%;
+    padding-top:calc(env(safe-area-inset-top, 12px) + 12px);
+    padding-bottom:calc(env(safe-area-inset-bottom, 8px) + 8px);
+    box-sizing:border-box;
+    overflow-y:auto;
+  }
+
+  /* Logo blanco - más compacto */
+  .welcome-logo{
+    width:clamp(160px, 45vw, 200px);
+    height:auto;
+    object-fit:contain;
+    filter:brightness(0) invert(1) drop-shadow(0 4px 20px rgba(0,0,0,0.5));
+    margin-bottom:clamp(12px, 2vh, 20px);
+    flex-shrink:0;
+  }
+
+  /* Header con textos - compacto */
+  .welcome-header{
+    text-align:center;
+    flex-shrink:0;
+    margin-bottom:clamp(12px, 2vh, 18px);
+  }
+  .welcome-title{
+    font-family:'Georgia', 'Times New Roman', serif;
+    font-size:clamp(28px, 7vw, 38px);
+    font-weight:400;
+    font-style:italic;
+    color:#FFFFFF;
+    margin:0;
+    line-height:1.2;
+    text-shadow:0 2px 20px rgba(0,0,0,0.5);
+  }
+  .welcome-message{
+    font-size:clamp(13px, 3.2vw, 15px);
+    color:rgba(255,255,255,0.9);
+    margin:clamp(6px, 1vh, 10px) 0 0;
+    text-shadow:0 1px 10px rgba(0,0,0,0.4);
+  }
+  .welcome-line{
+    width:40px;
+    height:2px;
+    background:#CFAE45;
+    margin:clamp(8px, 1.5vh, 14px) auto 0;
+    border-radius:2px;
+  }
+
+  /* Tarjeta de formulario - compacta */
+  .client-form-card{
+    width:92%;
+    max-width:380px;
+    background:#FFFFFF;
+    border:none;
+    border-radius:20px;
+    padding:clamp(14px, 2.5vh, 20px) clamp(16px, 4vw, 22px);
+    box-sizing:border-box;
+    box-shadow:0 8px 40px rgba(0,0,0,0.12), 0 2px 10px rgba(0,0,0,0.06);
+    flex-shrink:0;
+    margin-bottom:auto;
+  }
+  .client-form-title{
+    font-size:clamp(15px, 3.8vw, 17px);
+    font-weight:600;
+    color:#111111;
+    margin:0 0 2px;
+  }
+  .client-form-sub{
+    font-size:clamp(11px, 2.8vw, 13px);
+    color:#8E8E93;
+    margin:0 0 clamp(10px, 2vh, 16px);
+    line-height:1.4;
+  }
+  .form-group{ margin-bottom:0; }
+  .form-label{
+    display:block;
+    font-size:9px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:#8E8E93;
+    margin-bottom:6px;
+  }
+
+  /* Phone input premium - compacto */
+  .phone-input-wrap{
+    display:flex;
+    gap:6px;
+    align-items:stretch;
+  }
+  .country-select{
+    flex:0 0 auto;
+    width:80px;
+    padding:0 6px 0 10px;
+    font-size:13px;
+    font-weight:600;
+    background:#F5F5F5;
+    border:1px solid #E5E5E2;
+    border-radius:10px;
+    color:#111111;
+    cursor:pointer;
+    outline:none;
+    transition:border-color .2s ease;
+    appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 6px center;
+    height:46px;
+  }
+  .country-select:focus{ border-color:#CFAE45; }
+  .phone-input-wrap .form-input{
+    flex:1;
+    min-width:0;
+    font-size:16px;
+    padding:0 12px;
+    height:46px;
+    background:#F5F5F5;
+    border:1px solid #E5E5E2;
+    border-radius:10px;
+    color:#111111;
+  }
+  .phone-input-wrap .form-input:focus{
+    border-color:#CFAE45;
+    box-shadow:0 0 0 3px rgba(207,174,69,0.15);
+  }
+  .phone-input-wrap .form-input::placeholder{ color:#8E8E93; font-size:14px; }
+
+  .phone-search-btn{
+    flex:0 0 46px;
+    width:46px;
+    height:46px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(180deg, #D4AF37 0%, #CFAE45 100%);
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    transition:all .2s ease;
+    box-shadow:0 4px 12px rgba(207,174,69,0.35);
+  }
+  .phone-search-btn:hover{ transform:translateY(-1px); box-shadow:0 6px 16px rgba(207,174,69,0.4); }
+  .phone-search-btn:active{ transform:scale(0.96); }
+  .phone-search-btn:disabled{ opacity:0.5; cursor:not-allowed; transform:none; }
+  .phone-search-btn svg{ width:18px; height:18px; color:#111111; stroke-width:2.5; }
+  .phone-search-btn svg.spin{ animation:spin 1s linear infinite; }
+  @keyframes spin{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+
+  /* Badges - compactos */
+  .client-found-badge{
+    display:inline-flex; align-items:center; gap:5px; padding:8px 12px;
+    background:rgba(76,175,80,0.1); border:1px solid rgba(76,175,80,0.25);
+    border-radius:10px; font-size:12px; font-weight:600; color:#4CAF50; margin-bottom:12px;
+  }
+  .client-found-badge svg{ width:14px; height:14px; }
+  .client-new-badge{
+    display:inline-flex; align-items:center; gap:5px; padding:8px 12px;
+    background:rgba(207,174,69,0.1); border:1px solid rgba(207,174,69,0.25);
+    border-radius:10px; font-size:12px; font-weight:600; color:#CFAE45; margin-bottom:12px;
+  }
+  .client-new-badge svg{ width:14px; height:14px; }
+
+  .form-row{ display:flex; gap:6px; }
+  .form-row .form-group{ flex:1; min-width:0; }
+  #clientDataFields{ margin-top:10px; }
+  #clientStatusBadge:not(:empty){ margin-top:8px; }
+
+  .form-input{
+    width:100%; padding:12px 12px; font-size:15px; font-weight:500;
+    background:#F5F5F5; border:1px solid #E5E5E2; border-radius:10px;
+    color:#111111; outline:none; transition:border-color .2s ease;
+    box-sizing:border-box; height:42px;
+  }
+  .form-input:focus{ border-color:#CFAE45; box-shadow:0 0 0 3px rgba(207,174,69,0.15); }
+  .form-input::placeholder{ color:#8E8E93; }
+  .form-input:disabled{ opacity:0.6; cursor:not-allowed; }
+
+  /* Tagline inferior - compacto */
+  .welcome-tagline{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-top:auto;
+    padding-top:clamp(8px, 1.5vh, 14px);
+    padding-top:clamp(12px, 2vh, 20px);
+  }
+  .welcome-tagline-line{
+    width:30px;
+    height:1px;
+    background:#CFAE45;
+  }
+  .welcome-tagline-text{
+    font-size:10px;
+    font-weight:600;
+    letter-spacing:0.2em;
+    text-transform:uppercase;
+    color:#888888666;
+  }
+
+  /* Responsive para pantallas pequeñas */
+  @media (max-height:700px){
+    .welcome-logo{ width:clamp(160px, 45vw, 200px); margin-bottom:clamp(12px, 2vh, 20px); }
+    .welcome-title{ font-size:clamp(26px, 7vw, 34px); }
+    .welcome-header{ margin-bottom:clamp(12px, 2vh, 20px); }
+    .client-form-card{ padding:clamp(16px, 3vh, 22px) clamp(14px, 4vw, 20px); }
+  }
+  @media (max-height:600px){
+    .welcome-logo{ width:clamp(120px, 35vw, 160px); margin-bottom:10px; }
+    .welcome-title{ font-size:clamp(22px, 6vw, 28px); }
+    .welcome-message{ font-size:12px; margin-top:4px; }
+    .welcome-line{ margin-top:8px; }
+    .client-form-card{ padding:14px 16px; border-radius:18px; }
+    .client-form-title{ font-size:14px; }
+    .client-form-sub{ font-size:11px; margin-bottom:12px; }
+    .country-select, .phone-input-wrap .form-input, .phone-search-btn{ height:46px; }
+    .phone-search-btn{ flex:0 0 46px; width:46px; }
+  }
+
+  /* ---- Access Gate Modal ---- */
+  #accessGate{
+    position:fixed; inset:0; z-index:99999;
+    background:rgba(11,11,11,0.97);
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+  }
+  #accessGate.hidden{ display:none; }
+  .access-card{
+    background:var(--card); border:1.5px solid var(--divider);
+    border-radius:24px; padding:32px 28px; max-width:340px; width:100%;
+    text-align:center;
+  }
+  .access-card .lock-icon{
+    width:56px; height:56px; margin:0 auto 16px;
+    background:rgba(201,163,91,0.12); border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .access-card .lock-icon svg{ width:28px; height:28px; color:var(--gold); }
+  .access-card h2{ font-size:18px; font-weight:800; color:var(--text); margin-bottom:8px; }
+  .access-card p{ font-size:13px; color:var(--text-secondary); margin-bottom:24px; line-height:1.5; }
+  .access-input{
+    width:100%; padding:14px 16px; font-size:18px; font-weight:700; letter-spacing:8px; text-align:center;
+    background:var(--bg); border:1.5px solid var(--divider); border-radius:14px; color:var(--text);
+    outline:none; transition:border-color .2s ease;
+  }
+  .access-input:focus{ border-color:var(--gold); }
+  .access-input::placeholder{ letter-spacing:2px; color:var(--text-secondary); }
+  .access-btn{
+    width:100%; margin-top:16px; padding:14px; font-size:14px; font-weight:700;
+    background:var(--gold); color:#141414; border:none; border-radius:14px; cursor:pointer;
+    transition:opacity .2s ease;
+  }
+  .access-btn:hover{ opacity:0.9; }
+  .access-error{ color:#ff6b6b; font-size:12px; margin-top:12px; display:none; }
+  .access-error.show{ display:block; }
+
+  /* ---- Citas Pendientes ---- */
+  #clientPendingCitas{
+    width:100%;
+    margin-top:16px;
+    padding:16px;
+    background:rgba(201,163,91,0.08);
+    border:1px solid rgba(201,163,91,0.2);
+    border-radius:14px;
+  }
+  .pending-citas-header{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    font-weight:600;
+    color:var(--gold);
+    margin-bottom:12px;
+  }
+  .pending-citas-icon{ font-size:18px; }
+  #pendingCitasList{
+    max-height:120px;
+    overflow-y:auto;
+    margin-bottom:12px;
+  }
+  .pending-cita-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 12px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(0,0,0,0.08);
+    border-radius:10px;
+    margin-bottom:6px;
+  }
+  .pending-cita-item:last-child{ margin-bottom:0; }
+  .pending-cita-info{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  .pending-cita-fecha{
+    font-size:13px;
+    font-weight:600;
+    color:#111111;
+  }
+  .pending-cita-servicio{
+    font-size:11px;
+    color:var(--text-secondary);
+  }
+  .pending-cita-hora{
+    font-size:12px;
+    font-weight:600;
+    color:var(--gold);
+  }
+  .pending-citas-actions{
+    display:flex;
+    gap:8px;
+  }
+  .btn-cancel-citas, .btn-nueva-cita{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:12px 14px;
+    font-size:13px;
+    font-weight:600;
+    border-radius:10px;
+    cursor:pointer;
+    transition:all 0.2s ease;
+  }
+  .btn-cancel-citas{
+    background:rgba(239,83,80,0.12);
+    border:1px solid rgba(239,83,80,0.25);
+    color:#EF5350;
+  }
+  .btn-cancel-citas:hover{ background:rgba(239,83,80,0.2); }
+  .btn-nueva-cita{
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    border:none;
+    color:#111;
+  }
+  .btn-nueva-cita:hover{ opacity:0.9; }
+  .btn-cancel-citas svg, .btn-nueva-cita svg{ flex-shrink:0; }
+</style>
+</head>
+<body>
+
+<!-- Access Gate -->
+<!-- Access Gate deshabilitado - acceso público -->
+<div id="accessGate" class="hidden"></div>
+
+<!-- Splash Premium Monocromático - Fuera del #app -->
+<div class="splash" id="splash">
+  <div class="splash-content">
+    <div class="splash-logo-wrap">
+      <img src="../assets/logo-transparent.png" class="splash-logo" id="splashLogo" alt="Keicy Barber">
+    </div>
+    <div class="splash-label" id="splashLabel">Reservas</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar" id="topBar">
+    <div class="back-btn hidden" id="backBtn">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#C9A35B" stroke-width="2.2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <img src="../assets/logo-transparent.png" class="brand-logo" alt="Keicy Barbería">
+    <div class="topbar-spacer"></div>
+  </div>
+
+  <div class="steps" id="stepsBar"></div>
+
+  <!-- Step Cliente: datos del cliente -->
+  <div class="step active" id="stepCliente">
+    <div class="stepcliente-bg"></div>
+    <div class="stepcliente-inner">
+      <img src="../assets/logo-transparent.png" alt="Keicy Barber" class="welcome-logo">
+
+      <div class="welcome-header">
+        <h1 class="welcome-title" id="welcomeTitle">Bienvenido</h1>
+        <p class="welcome-message" id="welcomeMessage">Agenda tu cita en segundos</p>
+        <div class="welcome-line"></div>
+      </div>
+
+      <div class="client-form-card">
+        <div class="client-form-title">Tus datos de contacto</div>
+        <div class="client-form-sub">Ingresa tu número para continuar</div>
+
+        <div class="form-group">
+          <label class="form-label">Teléfono</label>
+          <div class="phone-input-wrap">
+            <select class="country-select" id="countryCode">
+              <!-- Latinoamérica (primero) -->
+              <option value="+57">🇨🇴 +57</option>
+              <option value="+54">🇦🇷 +54</option>
+              <option value="+591">🇧🇴 +591</option>
+              <option value="+55">🇧🇷 +55</option>
+              <option value="+56">🇨🇱 +56</option>
+              <option value="+506">🇨🇷 +506</option>
+              <option value="+53">🇨🇺 +53</option>
+              <option value="+593">🇪🇨 +593</option>
+              <option value="+503">🇸🇻 +503</option>
+              <option value="+502">🇬🇹 +502</option>
+              <option value="+509">🇭🇹 +509</option>
+              <option value="+504">🇭🇳 +504</option>
+              <option value="+52">🇲🇽 +52</option>
+              <option value="+505">🇳🇮 +505</option>
+              <option value="+507">🇵🇦 +507</option>
+              <option value="+595">🇵🇾 +595</option>
+              <option value="+51">🇵🇪 +51</option>
+              <option value="+1787">🇵🇷 +1787</option>
+              <option value="+1809">🇩🇴 +1809</option>
+              <option value="+598">🇺🇾 +598</option>
+              <option value="+58">🇻🇪 +58</option>
+              <!-- Norteamérica -->
+              <option value="+1">🇺🇸 +1</option>
+              <option value="+1">🇨🇦 +1</option>
+              <!-- Europa -->
+              <option value="+34">🇪🇸 +34</option>
+              <option value="+33">🇫🇷 +33</option>
+              <option value="+49">🇩🇪 +49</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+39">🇮🇹 +39</option>
+              <option value="+351">🇵🇹 +351</option>
+              <option value="+31">🇳🇱 +31</option>
+              <option value="+32">🇧🇪 +32</option>
+              <option value="+41">🇨🇭 +41</option>
+              <option value="+43">🇦🇹 +43</option>
+              <option value="+45">🇩🇰 +45</option>
+              <option value="+46">🇸🇪 +46</option>
+              <option value="+47">🇳🇴 +47</option>
+              <option value="+48">🇵🇱 +48</option>
+              <option value="+353">🇮🇪 +353</option>
+              <option value="+358">🇫🇮 +358</option>
+              <option value="+30">🇬🇷 +30</option>
+              <option value="+36">🇭🇺 +36</option>
+              <option value="+420">🇨🇿 +420</option>
+              <option value="+421">🇸🇰 +421</option>
+              <option value="+40">🇷🇴 +40</option>
+              <option value="+359">🇧🇬 +359</option>
+              <option value="+385">🇭🇷 +385</option>
+              <option value="+386">🇸🇮 +386</option>
+              <option value="+381">🇷🇸 +381</option>
+              <option value="+380">🇺🇦 +380</option>
+              <option value="+7">🇷🇺 +7</option>
+              <option value="+370">🇱🇹 +370</option>
+              <option value="+371">🇱🇻 +371</option>
+              <option value="+372">🇪🇪 +372</option>
+              <!-- Asia -->
+              <option value="+81">🇯🇵 +81</option>
+              <option value="+82">🇰🇷 +82</option>
+              <option value="+86">🇨🇳 +86</option>
+              <option value="+852">🇭🇰 +852</option>
+              <option value="+886">🇹🇼 +886</option>
+              <option value="+91">🇮🇳 +91</option>
+              <option value="+92">🇵🇰 +92</option>
+              <option value="+880">🇧🇩 +880</option>
+              <option value="+94">🇱🇰 +94</option>
+              <option value="+95">🇲🇲 +95</option>
+              <option value="+66">🇹🇭 +66</option>
+              <option value="+84">🇻🇳 +84</option>
+              <option value="+60">🇲🇾 +60</option>
+              <option value="+65">🇸🇬 +65</option>
+              <option value="+62">🇮🇩 +62</option>
+              <option value="+63">🇵🇭 +63</option>
+              <option value="+855">🇰🇭 +855</option>
+              <option value="+856">🇱🇦 +856</option>
+              <option value="+977">🇳🇵 +977</option>
+              <!-- Medio Oriente -->
+              <option value="+90">🇹🇷 +90</option>
+              <option value="+972">🇮🇱 +972</option>
+              <option value="+971">🇦🇪 +971</option>
+              <option value="+966">🇸🇦 +966</option>
+              <option value="+974">🇶🇦 +974</option>
+              <option value="+973">🇧🇭 +973</option>
+              <option value="+965">🇰🇼 +965</option>
+              <option value="+968">🇴🇲 +968</option>
+              <option value="+962">🇯🇴 +962</option>
+              <option value="+961">🇱🇧 +961</option>
+              <option value="+98">🇮🇷 +98</option>
+              <option value="+964">🇮🇶 +964</option>
+              <!-- África -->
+              <option value="+20">🇪🇬 +20</option>
+              <option value="+27">🇿🇦 +27</option>
+              <option value="+234">🇳🇬 +234</option>
+              <option value="+254">🇰🇪 +254</option>
+              <option value="+255">🇹🇿 +255</option>
+              <option value="+256">🇺🇬 +256</option>
+              <option value="+233">🇬🇭 +233</option>
+              <option value="+212">🇲🇦 +212</option>
+              <option value="+216">🇹🇳 +216</option>
+              <option value="+213">🇩🇿 +213</option>
+              <option value="+251">🇪🇹 +251</option>
+              <option value="+225">🇨🇮 +225</option>
+              <option value="+221">🇸🇳 +221</option>
+              <option value="+237">🇨🇲 +237</option>
+              <!-- Oceanía -->
+              <option value="+61">🇦🇺 +61</option>
+              <option value="+64">🇳🇿 +64</option>
+              <option value="+679">🇫🇯 +679</option>
+              <option value="+675">🇵🇬 +675</option>
+            </select>
+            <input type="tel" class="form-input" id="clientPhoneNew" placeholder="Número de teléfono" inputmode="numeric">
+            <button class="phone-search-btn" id="phoneSearchBtn" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div id="clientStatusBadge"></div>
+
+        <!-- Citas pendientes del cliente -->
+        <div id="clientPendingCitas" style="display:none;">
+          <div class="pending-citas-header">
+            <span class="pending-citas-icon">📅</span>
+            <span>Tienes citas agendadas</span>
+          </div>
+          <div id="pendingCitasList"></div>
+          <div class="pending-citas-actions">
+            <button type="button" class="btn-cancel-citas" id="btnVerCancelar">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              Cancelar citas
+            </button>
+            <button type="button" class="btn-nueva-cita" id="btnNuevaCita">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Agendar nueva
+            </button>
+          </div>
+        </div>
+
+        <div id="clientDataFields" style="display:none;">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Nombre</label>
+              <input type="text" class="form-input" id="clientFirstName" placeholder="Tu nombre">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Apellido</label>
+              <input type="text" class="form-input" id="clientLastNameNew" placeholder="Tu apellido">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Correo electrónico <span style="color:var(--error);">*</span></label>
+            <input type="email" class="form-input" id="clientEmailNew" placeholder="tu@email.com">
+          </div>
+
+          <button class="btn-gold" id="clientContinueBtn" disabled style="width:100%; height:48px; border-radius:12px; font-size:14px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px; margin-top:14px;">
+            Continuar
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#111" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="welcome-tagline">
+        <span class="welcome-tagline-line"></span>
+        <span class="welcome-tagline-text">Tu estilo, nuestra pasión</span>
+        <span class="welcome-tagline-line"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra inferior del paso Cliente (legacy, hidden - NO USAR) -->
+  <div class="bottom-bar" id="bottomBarCliente" style="display:none !important; visibility:hidden; pointer-events:none;"></div>
+
+  <!-- Step 0: elegir sede -->
+  <div class="step" id="step0" style="padding:0 18px;">
+    <div class="sede-title-block">
+      <div class="sede-hero-title">¿En qué sede prefieres tu cita?</div>
+      <div class="sede-hero-sub">Elige la sede más cercana para continuar.</div>
+    </div>
+
+    <div class="sede-benefits">
+      <div class="sede-benefit">
+        <div class="sede-benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.6 7-11.5A7 7 0 0 0 5 9.5C5 14.4 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>
+        <div><b>Misma calidad</b><span>en todas las sedes</span></div>
+      </div>
+      <div class="sede-benefit">
+        <div class="sede-benefit-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg></div>
+        <div><b>Atención puntual</b><span>en tu horario</span></div>
+      </div>
+      <div class="sede-benefit">
+        <div class="sede-benefit-icon"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg></div>
+        <div><b>Barberos</b><span>de confianza</span></div>
+      </div>
+    </div>
+
+    <div id="sedeChoiceList"></div>
+  </div>
+
+  <!-- Barra inferior fija del Paso 0 -->
+  <div class="bottom-bar" id="bottomBar0" style="display:none;">
+    <div class="bottom-bar-inner" style="justify-content:center;">
+      <button class="btn-gold" id="sedeContinueBtn" disabled style="width:100%; height:52px; border-radius:16px; font-size:14.5px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px;">
+        Continuar
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#141414" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 1: servicio -->
+  <div class="step" id="step1">
+    <div class="hero-card fade-in">
+      <img id="heroBarberImg1" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="" onerror="this.style.display='none'">
+      <div class="hero-pattern"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-eyebrow"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 8l10 10M8 16l10-10"/></svg>Elige tu servicio</div>
+        <div class="hero-title">¿Qué servicio quieres?</div>
+        <div class="hero-sub">Puedes elegir uno o varios servicios para tu cita.</div>
+      </div>
+    </div>
+
+    <div class="cat-scroll" id="catScroll"></div>
+
+    <div class="list-head">
+      <h3 id="catTitle">Servicios</h3>
+      <span id="catCount"></span>
+    </div>
+    <div id="servicioList"><div class="svc-card">Cargando servicios…</div></div>
+  </div>
+
+  <!-- Step 2: barbero -->
+  <div class="step" id="step2">
+    <div class="step2-title">Escoge tu barbero</div>
+
+    <div class="carousel-wrap">
+      <button class="carousel-nav prev" id="barberPrev" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="barber-carousel" id="barberCarousel"></div>
+      <button class="carousel-nav next" id="barberNext" aria-label="Siguiente"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+    <div class="carousel-dots" id="barberDots"></div>
+
+    <!-- Tarjeta de máxima disponibilidad ahora está en el carrusel -->
+  </div>
+
+  <!-- Step 3: fecha/hora -->
+  <div class="step" id="step3">
+    <div class="hero-card fade-in">
+      <img id="heroBarberImg3" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBTAA7" alt="" onerror="this.style.display='none'">
+      <div class="hero-pattern"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-eyebrow"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg>Fecha y hora</div>
+        <div class="hero-title">Elige fecha y hora</div>
+        <div class="hero-sub">Los horarios ocupados aparecen tachados.</div>
+      </div>
+    </div>
+
+    <div class="section-eyebrow">Elige un día</div>
+    <div class="carousel-wrap" style="margin:0 -18px 22px;">
+      <button class="scroll-nav prev" id="dayPrev" aria-label="Anterior"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="day-scroll" id="dayScroller" style="margin:0; padding:2px 30px 4px;"></div>
+      <button class="scroll-nav next" id="dayNext" aria-label="Siguiente"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+
+    <div class="section-eyebrow">Horarios disponibles</div>
+    <div class="demand-legend">
+      <span><span class="dot" style="background:var(--success);"></span>Disponible</span>
+      <span><span class="dot" style="background:var(--warning);"></span>Últimos cupos</span>
+      <span><span class="dot" style="background:var(--error);"></span>Muy solicitado</span>
+      <span><span class="dot" style="background:var(--text-secondary);"></span>Ocupado</span>
+    </div>
+    <div id="timeSlots"><div class="time-chip">Cargando…</div></div>
+  </div>
+
+  <!-- Step 4: confirmación -->
+  <div class="step" id="step4">
+    <div class="hero-card fade-in" style="height:200px;">
+      <img id="heroBarberImg4" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBTAA7" alt="" onerror="this.style.display='none'">
+      <div class="hero-pattern"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-title">¡Tu cita está lista!</div>
+        <div class="hero-sub">Revisa los detalles y confirma tu reserva.</div>
+      </div>
+    </div>
+
+    <div class="contact-card">
+      <div class="cc-title">Tus datos de contacto</div>
+      <div class="field">
+        <label>Nombre completo</label>
+        <div class="field-input" id="nameWrap"><input type="text" id="clientName" placeholder="ej. Camilo Rojas"></div>
+      </div>
+      <div class="field">
+        <label>Teléfono</label>
+        <div class="field-input" id="phoneWrap">
+          <span class="prefix">+57</span>
+          <input type="tel" id="clientPhone" placeholder="300 123 4567" inputmode="numeric" maxlength="12">
+        </div>
+      </div>
+    </div>
+
+    <div class="confirm-card">
+      <div class="confirm-card-top">
+        <img class="confirm-photo" id="confirmPhoto" src="" alt="" style="display:none;" onerror="this.style.display='none'">
+        <div class="confirm-photo-fallback" id="confirmPhotoFallback">--</div>
+        <div class="confirm-rows" style="display:flex; flex-direction:column; justify-content:center;">
+          <div style="font-size:9.5px; font-weight:800; text-transform:uppercase; letter-spacing:.4px; color:var(--text-secondary);">Barbero</div>
+          <div style="font-size:15px; font-weight:800;" id="sumBarbero">—</div>
+        </div>
+      </div>
+      <div class="confirm-row">
+        <div class="confirm-row-l">
+          <div class="confirm-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 8l10 10M8 16l10-10"/></svg></div>
+          <div><div class="confirm-row-label">Servicio</div><div class="confirm-row-value" id="sumServicio">—</div></div>
+        </div>
+      </div>
+      <div class="confirm-row">
+        <div class="confirm-row-l">
+          <div class="confirm-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg></div>
+          <div><div class="confirm-row-label">Fecha</div><div class="confirm-row-value" id="sumFecha">—</div></div>
+        </div>
+      </div>
+      <div class="confirm-row">
+        <div class="confirm-row-l">
+          <div class="confirm-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg></div>
+          <div><div class="confirm-row-label">Hora</div><div class="confirm-row-value" id="sumHora">—</div></div>
+        </div>
+      </div>
+      <div class="confirm-row">
+        <div class="confirm-row-l">
+          <div class="confirm-row-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2v20M18 2v20M6 7h4a2 2 0 0 1 0 4H8a2 2 0 0 0 0 4h4" stroke-linecap="round"/></svg></div>
+          <div><div class="confirm-row-label">Duración</div><div class="confirm-row-value" id="sumDuracion">—</div></div>
+        </div>
+      </div>
+      <div class="confirm-total">
+        <span class="l">Total</span>
+        <span><span class="v" id="sumPrecio">—</span><span class="cur">COP</span></span>
+      </div>
+    </div>
+
+    <div class="trust-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z"/></svg>Tu experiencia, nuestra prioridad</div>
+    <div class="trust-grid">
+      <div class="trust-card" id="trustWa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        <div class="t">Recordatorio por WhatsApp</div>
+        <div class="s">Te avisamos antes de tu cita.</div>
+      </div>
+      <div class="trust-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+        <div class="t">Cancelación gratuita</div>
+        <div class="s">Según políticas de la sede.</div>
+      </div>
+      <div class="trust-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg>
+        <div class="t">Atención puntual</div>
+        <div class="s">Valoramos tu tiempo.</div>
+      </div>
+    </div>
+
+    <!-- Política de cancelación -->
+    <div class="cancel-policy">
+      <div class="cancel-policy-header">
+        <div class="cancel-policy-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M12 2L3 7v7c0 5 3.5 9.7 9 11 5.5-1.3 9-6 9-11V7l-9-5z"/></svg>
+        </div>
+        <div class="cancel-policy-title">Antes de confirmar</div>
+        <div class="cancel-policy-intro">
+          Gracias por agendar ✨ Estaremos confirmando tu reserva.<br>
+          <strong>Por favor ten presente:</strong>
+        </div>
+      </div>
+
+      <div class="cancel-policy-section">
+        <div class="cancel-policy-section-title">📋 Sobre tu cita</div>
+        <ul class="cancel-policy-list">
+          <li><strong>Confirma tu reserva</strong> cuando te contactemos, de lo contrario será cancelada.</li>
+          <li><strong>Llega 10 min antes.</strong> Tiempo de espera: 15 min (corte básico) o 10 min (otros servicios). Después serás re-agendado según disponibilidad 🫰🏼</li>
+          <li><strong>A la tercera falla</strong> no podrás agendar. Avísanos con tiempo ;)</li>
+          <li class="cancel-policy-highlight">💛 <strong>Te esperamos en la barber,</strong> gracias por hacer parte de la casa ❤️</li>
+        </ul>
+      </div>
+
+      <div class="cancel-policy-section">
+        <div class="cancel-policy-section-title">💳 Métodos de pago</div>
+        <ul class="cancel-policy-list">
+          <li><strong>💵 Efectivo</strong> — Siempre disponible</li>
+          <li><strong>🏧 QR</strong> — Paga desde cualquier app bancaria ✅</li>
+          <li><strong>💳 Tarjeta</strong> — Disponible ✅</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-ghost" id="back4">Atrás</button>
+      <button class="btn-gold" id="confirmBtn">Confirmar reserva</button>
+    </div>
+    <div class="privacy-note">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      Tus datos están protegidos.
+    </div>
+  </div>
+
+  <!-- Step 5: éxito -->
+  <div class="step" id="step5">
+    <div class="confirm-wrap fade-in">
+      <div class="check-circle">
+        <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="#111111" stroke-width="2.4"><path d="M5 12.5l4.8 4.8L19.5 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="success-title">¡Cita agendada!</div>
+      <div class="success-sub" id="confirmMsg">Te esperamos.</div>
+    </div>
+  </div>
+
+  <!-- Barra inferior fija -->
+  <div class="bottom-bar" id="bottomBar1" style="display:none;">
+    <div class="bottom-bar-inner">
+      <div id="bbThumb1" class="bb-thumb-fallback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 8l10 10M8 16l10-10"/></svg></div>
+      <div class="bb-mid"><div class="n" id="bbName1">Elige un servicio</div><div class="s" id="bbSub1">—</div></div>
+      <div class="bb-price"><b id="bbPrice1">—</b><span>Total</span></div>
+      <button class="btn-gold bb-cta" id="next1" disabled>Continuar</button>
+    </div>
+  </div>
+
+  <div class="bottom-bar" id="bottomBar2" style="display:none;">
+    <div class="bottom-bar-inner">
+      <div id="bbThumb2" class="bb-thumb-fallback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 8l10 10M8 16l10-10"/></svg></div>
+      <div class="bb-mid"><div class="n" id="bbName2">—</div><div class="s" id="bbSub2">—</div></div>
+      <div class="bb-price"><b id="bbPrice2">—</b><span>Total</span></div>
+      <button class="btn-gold bb-cta" id="next2" disabled>Continuar</button>
+    </div>
+  </div>
+
+  <div class="bottom-bar" id="bottomBar3" style="display:none;">
+    <div class="bottom-bar-inner">
+      <div id="bbThumb3" class="bb-thumb-fallback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 8l10 10M8 16l10-10"/></svg></div>
+      <div class="bb-mid"><div class="n" id="bbName3">—</div><div class="s" id="bbSub3">—</div></div>
+      <div class="bb-price"><b id="bbPrice3">—</b><span>Total</span></div>
+      <button class="btn-gold bb-cta" id="next3" disabled>Continuar <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#141414" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg></button>
+    </div>
+  </div>
+
+  <div id="toast"><span class="toast-dot"></span><span id="toastText"></span></div>
+
+  <!-- Popup centrado para mensajes -->
+  <div id="centerPopup" class="center-popup">
+    <div class="center-popup-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    </div>
+    <span id="centerPopupText"></span>
+  </div>
+
+  <!-- Modal de reseñas del barbero -->
+  <div id="reviewsModalOverlay" class="reviews-modal-overlay" onclick="if(event.target===this)closeReviewsModal()">
+    <div class="reviews-modal">
+      <div class="reviews-modal-header">
+        <div>
+          <div class="reviews-modal-title" id="reviewsModalTitle">Reseñas</div>
+          <div class="reviews-modal-subtitle" id="reviewsModalSubtitle">Opiniones de clientes</div>
+        </div>
+        <button class="reviews-modal-close" onclick="closeReviewsModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="reviews-modal-body" id="reviewsModalBody">
+        <!-- Content loaded dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de reseña individual con info del cliente -->
+  <div id="reviewDetailOverlay" class="reviews-modal-overlay" onclick="if(event.target===this)closeReviewDetail()">
+    <div class="reviews-modal" style="max-height:70vh;">
+      <div class="reviews-modal-header">
+        <div>
+          <div class="reviews-modal-title" id="reviewDetailTitle">Cliente</div>
+          <div class="reviews-modal-subtitle" id="reviewDetailSubtitle"></div>
+        </div>
+        <button class="reviews-modal-close" onclick="closeReviewDetail()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="reviews-modal-body" id="reviewDetailBody">
+        <!-- Content loaded dynamically -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+  // ============ SPLASH PREMIUM CONTROLLER ============
+  // Duración total: ~5 segundos - Se muestra cada vez que se carga la página
+  (function initSplash(){
+    const splash = document.getElementById('splash');
+    const splashLogo = document.getElementById('splashLogo');
+    const splashLabel = document.getElementById('splashLabel');
+    const app = document.getElementById('app');
+
+    if (!splash) {
+      if (app) app.classList.add('no-splash');
+      return;
+    }
+
+    // Bloquear scroll durante splash
+    document.body.style.overflow = 'hidden';
+
+    // Iniciar animaciones - Tiempos extendidos para experiencia premium de bienvenida
+    let cleanupTimeout1, cleanupTimeout2, cleanupTimeout3, cleanupTimeout4;
+
+    // 200ms: Iniciar animación del logo
+    cleanupTimeout1 = setTimeout(() => {
+      if (splashLogo) splashLogo.classList.add('animate');
+    }, 200);
+
+    // Label: el delay está en CSS
+    cleanupTimeout2 = setTimeout(() => {
+      if (splashLabel) splashLabel.classList.add('animate');
+    }, 200);
+
+    // 3800ms: Iniciar transición de salida
+    cleanupTimeout3 = setTimeout(() => {
+      // Iniciar animación de salida elegante
+      if (splashLogo) splashLogo.classList.add('leaving');
+      if (splashLabel) splashLabel.classList.add('leaving');
+
+      // Revelar contenido principal con transición coordinada
+      if (app) app.classList.add('ready');
+
+      // Fade out del splash
+      setTimeout(() => {
+        if (splash) splash.classList.add('leaving');
+      }, 200);
+    }, 3800);
+
+    // 4800ms: Ocultar completamente y restaurar scroll
+    cleanupTimeout4 = setTimeout(() => {
+      if (splash) splash.classList.add('hidden');
+      document.body.style.overflow = '';
+    }, 4800);
+
+    // Cleanup en caso de que el usuario navegue antes de terminar
+    window.addEventListener('beforeunload', () => {
+      clearTimeout(cleanupTimeout1);
+      clearTimeout(cleanupTimeout2);
+      clearTimeout(cleanupTimeout3);
+      clearTimeout(cleanupTimeout4);
+    });
+  })();
+  // ============ END SPLASH CONTROLLER ============
+
+  // ============ ACCESS GATE - DESHABILITADO ============
+  // Acceso público habilitado - sin PIN de acceso
+  // ============ END ACCESS GATE ============
+
+  const toastEl = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  function toast(msg){
+    toastText.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(window._t);
+    window._t = setTimeout(() => toastEl.classList.remove('show'), 2400);
+  }
+
+  const centerPopupEl = document.getElementById('centerPopup');
+  const centerPopupText = document.getElementById('centerPopupText');
+  function showCenterPopup(msg){
+    centerPopupText.textContent = msg;
+    centerPopupEl.classList.add('show');
+    clearTimeout(window._cp);
+    window._cp = setTimeout(() => centerPopupEl.classList.remove('show'), 2500);
+  }
+
+  function formatHora12(hora) {
+    if (!hora) return '';
+    const [h, m] = hora.split(':');
+    const hour = parseInt(h);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${m} ${ampm}`;
+  }
+
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+
+  // VERSIÓN DEL CÓDIGO - para verificar cache
+  console.log('[DN] Reservas v2026-09-07-v11 - Chips categoria con !important');
+
+  const state = {
+    serviciosSeleccionados: [], barbero: null, anyBarber: false, fecha: null, hora: null,
+    categoriaActiva: null, servicios: [], categorias: [], barberos: [],
+    cliente: { id: null, phone: null, countryCode: '+57', name: '', lastName: '', email: '', isNew: true }
+  };
+
+  // Sedes variables (needed early for client form logic)
+  let sedesCargadas = [];
+  let sedeActualObj = null;
+  let fromClientApp = false; // Flag para saber si viene desde la app de cliente
+  let urlBarberoId = null; // Barbero preseleccionado desde URL (link directo del barbero)
+
+  // Textos de email personalizados
+  let emailTextos = {};
+
+  // ============ CLIENT FORM LOGIC ============
+  const clientPhoneInputNew = document.getElementById('clientPhoneNew');
+  const countryCodeSelect = document.getElementById('countryCode');
+  const phoneSearchBtn = document.getElementById('phoneSearchBtn');
+  const clientDataFields = document.getElementById('clientDataFields');
+  const clientStatusBadge = document.getElementById('clientStatusBadge');
+  const clientFirstNameInput = document.getElementById('clientFirstName');
+  const clientLastNameInputNew = document.getElementById('clientLastNameNew');
+  const clientEmailInputNew = document.getElementById('clientEmailNew');
+  const clientContinueBtn = document.getElementById('clientContinueBtn');
+
+  async function searchClientByPhone() {
+    const countryCode = countryCodeSelect.value.replace('+', '');
+    const phone = clientPhoneInputNew.value.replace(/\D/g, '');
+
+    if (!phone || phone.length < 7) {
+      toast('Ingresa un número de teléfono válido');
+      return;
+    }
+
+    phoneSearchBtn.disabled = true;
+    phoneSearchBtn.innerHTML = '<svg class="spin" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12"/></svg>';
+
+    try {
+      // Try to find with full number (country code + phone)
+      const fullPhone = countryCode + phone;
+      let { data: users } = await sb.from('usuarios').select('id, full_name, email, phone').or(`phone.eq.${fullPhone},phone.eq.${phone}`).limit(1);
+
+      if (users && users.length > 0) {
+        const user = users[0];
+        state.cliente.id = user.id;
+        state.cliente.phone = user.phone;
+        state.cliente.isNew = false;
+
+        // Parse full_name into name and lastName
+        const nameParts = (user.full_name || '').trim().split(' ');
+        state.cliente.name = nameParts[0] || '';
+        state.cliente.lastName = nameParts.slice(1).join(' ') || '';
+        state.cliente.email = user.email || '';
+
+        clientFirstNameInput.value = state.cliente.name;
+        clientLastNameInputNew.value = state.cliente.lastName;
+        clientEmailInputNew.value = state.cliente.email;
+
+        // Buscar citas pendientes del cliente
+        const today = new Date().toISOString().split('T')[0];
+        const { data: citasPendientes } = await sb.from('citas')
+          .select(`
+            id,
+            fecha,
+            hora_inicio,
+            barbero_id,
+            servicios:servicio_id(nombre)
+          `)
+          .eq('cliente_id', user.id)
+          .gte('fecha', today)
+          .in('estado', ['agendada', 'confirmada'])
+          .order('fecha', { ascending: true })
+          .order('hora_inicio', { ascending: true })
+          .limit(5);
+
+        const pendingCitasDiv = document.getElementById('clientPendingCitas');
+        const pendingCitasList = document.getElementById('pendingCitasList');
+
+        if (citasPendientes && citasPendientes.length > 0) {
+          // Obtener nombres de barberos
+          const barberoIds = [...new Set(citasPendientes.map(c => c.barbero_id).filter(Boolean))];
+          let barberosMap = {};
+          if (barberoIds.length > 0) {
+            const { data: barberos } = await sb.from('usuarios')
+              .select('id, full_name')
+              .in('id', barberoIds);
+            if (barberos) {
+              barberos.forEach(b => barberosMap[b.id] = b.full_name);
+            }
+          }
+
+          // Mostrar citas pendientes
+          pendingCitasList.innerHTML = citasPendientes.map(cita => {
+            const fecha = new Date(cita.fecha + 'T12:00:00');
+            const fechaStr = fecha.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' });
+            const hora = formatHora12(cita.hora_inicio);
+            const barberoNombre = barberosMap[cita.barbero_id] || 'Barbero disponible';
+            return `
+              <div class="pending-cita-item">
+                <div class="pending-cita-info">
+                  <span class="pending-cita-fecha">${capitalize(fechaStr)}</span>
+                  <span class="pending-cita-servicio">✂️ ${cita.servicios?.nombre || 'Servicio'} · ${barberoNombre}</span>
+                </div>
+                <span class="pending-cita-hora">${hora}</span>
+              </div>
+            `;
+          }).join('');
+          pendingCitasDiv.style.display = 'block';
+          clientStatusBadge.innerHTML = '<div class="client-found-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>¡Hola de nuevo!</div>';
+          clientDataFields.style.display = 'none';
+          clientContinueBtn.disabled = true;
+        } else {
+          pendingCitasDiv.style.display = 'none';
+          clientStatusBadge.innerHTML = '<div class="client-found-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Cliente encontrado</div>';
+          clientDataFields.style.display = 'block';
+          validateClientForm();
+        }
+      } else {
+        // New client
+        state.cliente.id = null;
+        state.cliente.phone = countryCode === '57' ? phone : fullPhone;
+        state.cliente.isNew = true;
+        state.cliente.name = '';
+        state.cliente.lastName = '';
+        state.cliente.email = '';
+
+        clientFirstNameInput.value = '';
+        clientLastNameInputNew.value = '';
+        clientEmailInputNew.value = '';
+
+        // Ocultar citas pendientes si estaban visibles
+        document.getElementById('clientPendingCitas').style.display = 'none';
+
+        clientStatusBadge.innerHTML = '<div class="client-new-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>Nuevo cliente</div>';
+        clientDataFields.style.display = 'block';
+        validateClientForm();
+      }
+    } catch (e) {
+      console.error(e);
+      toast('Error buscando cliente');
+    } finally {
+      phoneSearchBtn.disabled = false;
+      phoneSearchBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>';
+    }
+  }
+
+  phoneSearchBtn.addEventListener('click', searchClientByPhone);
+  clientPhoneInputNew.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') searchClientByPhone();
+  });
+
+  // Botones de citas pendientes
+  document.getElementById('btnVerCancelar').addEventListener('click', () => {
+    const phone = clientPhoneInputNew.value.replace(/\D/g, '');
+    window.location.href = `../cancelar/?phone=${phone}`;
+  });
+
+  document.getElementById('btnNuevaCita').addEventListener('click', () => {
+    // Ocultar citas pendientes y mostrar formulario normal
+    document.getElementById('clientPendingCitas').style.display = 'none';
+    clientDataFields.style.display = 'block';
+    validateClientForm();
+    clientStatusBadge.innerHTML = '<div class="client-found-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Cliente encontrado</div>';
+  });
+
+  // Update state when inputs change
+  clientFirstNameInput.addEventListener('input', () => { state.cliente.name = clientFirstNameInput.value.trim(); validateClientForm(); });
+  clientLastNameInputNew.addEventListener('input', () => { state.cliente.lastName = clientLastNameInputNew.value.trim(); validateClientForm(); });
+  clientEmailInputNew.addEventListener('input', () => { state.cliente.email = clientEmailInputNew.value.trim(); validateClientForm(); });
+
+  function validateClientForm() {
+    const hasPhone = clientPhoneInputNew.value.replace(/\D/g, '').length >= 7;
+    const hasName = state.cliente.name.length > 0;
+    // Email es opcional
+    clientContinueBtn.disabled = !(hasPhone && hasName);
+  }
+
+  clientContinueBtn.addEventListener('click', async () => {
+    state.cliente.countryCode = countryCodeSelect.value;
+    const phone = clientPhoneInputNew.value.replace(/\D/g, '');
+    const countryCode = state.cliente.countryCode.replace('+', '');
+    state.cliente.phone = countryCode === '57' ? phone : countryCode + phone;
+
+    // Asegurar que los valores de los inputs estén en el state
+    state.cliente.name = clientFirstNameInput.value.trim();
+    state.cliente.lastName = clientLastNameInputNew.value.trim();
+    state.cliente.email = clientEmailInputNew.value.trim();
+
+    const fullName = (state.cliente.name + ' ' + state.cliente.lastName).trim();
+
+    // If new client, create in database
+    if (state.cliente.isNew && state.cliente.name) {
+      try {
+        const { data, error } = await sb.from('usuarios').insert({
+          username: state.cliente.phone,
+          phone: state.cliente.phone,
+          full_name: fullName,
+          email: state.cliente.email || null,
+          role: 'cliente',
+          origen: 'web_reservas'
+        }).select('id').single();
+
+        if (error && error.code !== '23505') {
+          console.error(error);
+          toast('Error creando cliente');
+          return;
+        }
+
+        if (data) {
+          state.cliente.id = data.id;
+        } else {
+          // Client already existed (409), fetch the ID
+          const { data: existing } = await sb.from('usuarios').select('id').eq('phone', state.cliente.phone).single();
+          if (existing) state.cliente.id = existing.id;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    } else if (!state.cliente.isNew && state.cliente.id) {
+      // Cliente existente: actualizar nombre y email si han cambiado
+      try {
+        await sb.from('usuarios').update({
+          full_name: fullName,
+          email: state.cliente.email || null
+        }).eq('id', state.cliente.id);
+      } catch (e) {
+        console.error('Error actualizando cliente:', e);
+      }
+    }
+
+    // If only one sede, skip sede selection
+    if (sedesCargadas && sedesCargadas.length === 1) {
+      confirmarSedeYContinuar(sedesCargadas[0].id);
+    } else {
+      goToStep(0);
+    }
+  });
+  // ============ END CLIENT FORM LOGIC ============
+
+  function totalServicios(){
+    const precio = state.serviciosSeleccionados.reduce((s,x) => s + (Number(x.precio)||0), 0);
+    const duracion = state.serviciosSeleccionados.reduce((s,x) => s + (Number(x.duracion)||60), 0);
+    const nombres = state.serviciosSeleccionados.map(x => x.nombre).join(', ');
+    return { precio, duracion, nombres };
+  }
+
+  const STEP_LABELS = ['Servicio','Barbero','Fecha','Confirmación'];
+  function renderStepsBar(n){
+    const bar = document.getElementById('stepsBar');
+    if (n < 1) { bar.innerHTML = ''; return; }
+    const shown = Math.min(n, 4);
+    bar.innerHTML = STEP_LABELS.map((label, i) => {
+      const idx = i + 1;
+      const cls = idx < shown ? 'done' : (idx === shown ? 'current' : '');
+      const nodeHtml = `<div class="step-node ${cls}"><div class="step-circle">${idx < shown ? '✓' : idx}</div><div class="step-label">${label}</div></div>`;
+      if (i === 0) return nodeHtml;
+      return `<div class="step-line ${idx <= shown ? 'done' : ''}"></div>${nodeHtml}`;
+    }).join('');
+  }
+
+  function goToStep(n){
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    // Handle special 'Cliente' step
+    if (n === 'Cliente') {
+      document.getElementById('stepCliente').classList.add('active');
+      renderStepsBar(0);
+      document.getElementById('backBtn').classList.add('hidden');
+      ['bottomBar0','bottomBar1','bottomBar2','bottomBar3','bottomBarCliente'].forEach(id => document.getElementById(id).style.display = 'none');
+      document.getElementById('bottomBarCliente').style.display = 'block';
+    } else {
+      document.getElementById('step' + n).classList.add('active');
+      renderStepsBar(n);
+      document.getElementById('backBtn').classList.toggle('hidden', n <= 0 || n === 5);
+      ['bottomBar0','bottomBar1','bottomBar2','bottomBar3','bottomBarCliente'].forEach(id => document.getElementById(id).style.display = 'none');
+      if (n === 0) document.getElementById('bottomBar0').style.display = 'block';
+      else if (n === 1) document.getElementById('bottomBar1').style.display = 'block';
+      else if (n === 2) document.getElementById('bottomBar2').style.display = 'block';
+      else if (n === 3) document.getElementById('bottomBar3').style.display = 'block';
+    }
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+  document.getElementById('backBtn').addEventListener('click', () => {
+    // Check if we're on step0 (sede) or step1 (servicios)
+    if (document.getElementById('step0').classList.contains('active')) {
+      // Si viene de la app, notificar al padre para cerrar
+      if (fromClientApp) {
+        window.parent.postMessage({ type: 'dn-reservas-close' }, '*');
+        return;
+      }
+      goToStep('Cliente');
+      return;
+    }
+    const current = [1,2,3,4].find(n => document.getElementById('step'+n).classList.contains('active'));
+    if (current === 1) {
+      // En servicios, ir a sedes (o cerrar si solo hay 1 sede y viene de app)
+      if (fromClientApp && sedesCargadas.length === 1) {
+        window.parent.postMessage({ type: 'dn-reservas-close' }, '*');
+        return;
+      }
+      goToStep(0);
+    }
+    else if (current > 1) goToStep(current - 1);
+  });
+
+  function updateBottomBar(barId, { name, sub, price } = {}){
+    if (name !== undefined) document.getElementById('bbName'+barId).textContent = name;
+    if (sub !== undefined) document.getElementById('bbSub'+barId).textContent = sub;
+    if (price !== undefined) document.getElementById('bbPrice'+barId).textContent = price;
+  }
+
+  // ================= STEP 1: Servicios =================
+  const CATEGORY_ICONS = {
+    cortes: '<circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 8l10 10M8 16l10-10"/>',
+    barba: '<path d="M8 3v6c0 5 1.8 9 4 9s4-4 4-9V3"/><path d="M8 9h8"/>',
+    facial: '<circle cx="12" cy="12" r="9"/><path d="M9 10h.01M15 10h.01M8.5 15c1 1.3 2.2 2 3.5 2s2.5-.7 3.5-2" stroke-linecap="round"/>',
+    combos: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    diseños: '<path d="M4 20l4-1 10-10-3-3L5 16l-1 4z"/><path d="M13 7l3 3"/>',
+    disenos: '<path d="M4 20l4-1 10-10-3-3L5 16l-1 4z"/><path d="M13 7l3 3"/>',
+    color: '<path d="M12 3c3 4 6 7 6 10.5A6 6 0 0 1 6 13.5C6 10 9 7 12 3z"/>'
+  };
+  function categoryIcon(nombre){
+    const key = (nombre||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+    const path = CATEGORY_ICONS[key] || CATEGORY_ICONS.cortes;
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${path}</svg>`;
+  }
+
+  let servicioMasElegidoId = null;
+
+  async function loadServicios(){
+    try {
+      const [svcRes, catRes] = await Promise.all([
+        sb.from('servicios_publicos').select('id, nombre, precio, precio_desde, duracion_min, descripcion, categoria_id, foto_url').eq('activo', true).order('orden'),
+        sb.from('categorias_servicio').select('id, nombre, orden').order('orden')
+      ]);
+      if (svcRes.error) throw svcRes.error;
+      // Filtrar servicios E2E test
+      state.servicios = (svcRes.data || []).filter(s =>
+        !s.nombre.toLowerCase().includes('e2e') &&
+        !s.nombre.toLowerCase().includes('test')
+      );
+      state.categorias = catRes.data || [];
+
+      // El "más elegido" es un extra decorativo: OPTIMIZADO - solo últimos 90 días
+      try {
+        const hace90 = new Date(); hace90.setDate(hace90.getDate() - 90);
+        const hace90ISO = hace90.toISOString().slice(0,10);
+        const sedesTestIds = await dnGetSedesTestIds();
+        let popQuery = sb.from('citas').select('servicio_id').not('estado', 'in', '(cancelada,sin_respuesta)').gte('fecha', hace90ISO).limit(500);
+        if (sedesTestIds.length > 0) popQuery = popQuery.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+        const { data: popData } = await popQuery;
+        const counts = {};
+        (popData || []).forEach(c => { if (c.servicio_id) counts[c.servicio_id] = (counts[c.servicio_id]||0)+1; });
+        const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+        servicioMasElegidoId = top ? top[0] : null;
+      } catch (popErr) {
+        console.error(popErr);
+      }
+
+      // Solo mostrar categorías que efectivamente tienen servicios activos.
+      const usedCatIds = new Set(state.servicios.map(s => s.categoria_id));
+      const catsToShow = state.categorias.filter(c => usedCatIds.has(c.id));
+
+      const catScroll = document.getElementById('catScroll');
+      if (!catsToShow.length) {
+        catScroll.style.display = 'none';
+      } else {
+        // Agregar "Todos" al inicio + las demás categorías
+        const todosChip = `<div class="cat-chip active" data-cat="todos" onclick="selectCategoria('todos')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          <span>Todos</span>
+        </div>`;
+        catScroll.innerHTML = todosChip + catsToShow.map(c => `
+          <div class="cat-chip" data-cat="${c.id}" onclick="selectCategoria('${c.id}')">
+            ${categoryIcon(c.nombre)}
+            <span>${c.nombre}</span>
+          </div>`).join('');
+        state.categoriaActiva = null; // "Todos" seleccionado por defecto
+        initCatNavs();
+      }
+
+      renderServicios(true);
+    } catch (err) {
+      console.error(err);
+      document.getElementById('servicioList').innerHTML = '<div class="svc-card">No pudimos cargar los servicios.</div>';
+    }
+  }
+
+  function actualizarResumenServicios(){
+    const n = state.serviciosSeleccionados.length;
+    document.getElementById('next1').disabled = n === 0;
+    if (n === 0) {
+      updateBottomBar(1, { name: 'Elige un servicio', sub: '—', price: '—' });
+      return;
+    }
+    const { precio, duracion, nombres } = totalServicios();
+    updateBottomBar(1, {
+      name: n === 1 ? nombres : `${n} servicios seleccionados`,
+      sub: n === 1 ? `${duracion} min` : nombres,
+      price: dnFormatCOP(precio)
+    });
+  }
+
+  let serviciosExpandido = false;
+  function selectCategoria(catId){
+    state.categoriaActiva = catId === 'todos' ? null : catId;
+    serviciosExpandido = false;
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.toggle('active', c.dataset.cat === catId));
+    renderServicios(false);
+  }
+
+  function renderServicios(setActiveChip){
+    if (setActiveChip) {
+      const activeCat = state.categoriaActiva || 'todos';
+      document.querySelectorAll('.cat-chip').forEach(c => c.classList.toggle('active', c.dataset.cat === activeCat));
+    }
+    const catObj = state.categorias.find(c => c.id === state.categoriaActiva);
+    document.getElementById('catTitle').textContent = catObj ? catObj.nombre : 'Todos los servicios';
+    const filtered = state.categoriaActiva ? state.servicios.filter(s => s.categoria_id === state.categoriaActiva) : state.servicios;
+    document.getElementById('catCount').textContent = `${filtered.length} servicio${filtered.length===1?'':'s'}`;
+
+    const VISIBLE = 4;
+    // Si es "Todos" (sin categoría activa), mostrar todos los servicios
+    const esTodos = !state.categoriaActiva;
+    const toShow = (esTodos || serviciosExpandido) ? filtered : filtered.slice(0, VISIBLE);
+    const el = document.getElementById('servicioList');
+
+    el.innerHTML = toShow.map(s => {
+      const selected = state.serviciosSeleccionados.some(x => x.id === s.id);
+      const isTop = s.id === servicioMasElegidoId;
+      return `
+        <div class="svc-card ${selected?'selected':''}" data-id="${s.id}" data-precio="${s.precio}" data-nombre="${s.nombre}" data-duracion="${s.duracion_min||''}">
+          <div class="svc-photo-wrap">
+            ${s.foto_url
+              ? `<img class="svc-photo" src="${s.foto_url}" alt="" onerror="this.outerHTML='<div class=&quot;svc-photo-fallback&quot;><svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.8&quot;><circle cx=&quot;6&quot; cy=&quot;6&quot; r=&quot;2&quot;/><circle cx=&quot;6&quot; cy=&quot;18&quot; r=&quot;2&quot;/><path d=&quot;M8 8l10 10M8 16l10-10&quot;/></svg></div>'">`
+              : `<div class="svc-photo-fallback">${categoryIcon(catObj?.nombre)}</div>`}
+            <div class="svc-photo-overlay"></div>
+            ${isTop ? '<span class="svc-badge">Más elegido</span>' : ''}
+            <div class="svc-check"></div>
+            <div class="svc-name">${s.nombre}</div>
+          </div>
+          <div class="svc-body">
+            ${s.descripcion ? `<div class="svc-desc">${s.descripcion}</div>` : ''}
+            <div class="svc-bottom-row">
+              <div class="svc-price">${s.precio_desde ? '<span class="desde">Desde</span>' : ''}${dnFormatCOP(s.precio)}</div>
+              ${s.duracion_min ? `<div class="svc-duration-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg>${s.duracion_min} min</div>` : ''}
+            </div>
+          </div>
+        </div>`;
+    }).join('') + (!esTodos && !serviciosExpandido && filtered.length > VISIBLE ? `<div class="expand-btn" onclick="expandirServicios()">Ver todos los servicios ⌄</div>` : '');
+
+    el.querySelectorAll('.svc-card').forEach(row => {
+      row.addEventListener('click', () => {
+        const id = row.dataset.id;
+        const idx = state.serviciosSeleccionados.findIndex(x => x.id === id);
+        if (idx >= 0) {
+          state.serviciosSeleccionados.splice(idx, 1);
+          row.classList.remove('selected');
+        } else {
+          state.serviciosSeleccionados.push({ id, nombre: row.dataset.nombre, precio: row.dataset.precio, duracion: row.dataset.duracion });
+          row.classList.add('selected');
+        }
+        actualizarResumenServicios();
+      });
+    });
+  }
+  function expandirServicios(){ serviciosExpandido = true; renderServicios(false); }
+
+  function heroFallbackSrc(imgEl, fallbackPath){
+    return () => { imgEl.src = fallbackPath; imgEl.onerror = () => { imgEl.style.display = 'none'; }; };
+  }
+
+  function aplicarFotoHero(imgEl, url, fallbackPath){
+    imgEl.style.display = '';
+    if (url) {
+      imgEl.onerror = heroFallbackSrc(imgEl, fallbackPath);
+      imgEl.src = url;
+    } else {
+      imgEl.onerror = () => { imgEl.style.display = 'none'; };
+      imgEl.src = fallbackPath;
+    }
+  }
+
+  function refrescarHeroesPorSede(){
+    const hero1 = document.getElementById('heroBarberImg1');
+    aplicarFotoHero(hero1, sedeActualObj?.foto_hero_servicio, null);
+    // Los heroes de fecha/confirmación arrancan con la foto de la sede; si ya hay un
+    // barbero elegido con foto propia, esa tiene prioridad (ver selección de barbero y renderSummary).
+    const hero3 = document.getElementById('heroBarberImg3');
+    const hero4 = document.getElementById('heroBarberImg4');
+    const barberoPhoto = state.barbero ? state.barberos.find(b => b.id === state.barbero.id)?.usuarios?.avatar_url : null;
+    aplicarFotoHero(hero3, barberoPhoto || sedeActualObj?.foto_hero_fecha, '../assets/hero-fecha.jpg');
+    aplicarFotoHero(hero4, barberoPhoto || sedeActualObj?.foto_hero_confirmacion, '../assets/hero-confirmacion.jpg');
+  }
+
+  // ================= STEP 0: Elegir sede =================
+  let sedeSeleccionadaId = null;
+  let userCoords = null;
+
+  const SEDE_FEATURE_DEFS = [
+    { key:'todos_los_servicios', label:'Todos los servicios', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 8l10 10M8 16l10-10"/></svg>' },
+    { key:'parqueadero_carro', label:'Parqueadero carro', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11"/><rect x="3" y="11" width="18" height="6" rx="2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>' },
+    { key:'parqueadero_moto', label:'Parqueadero moto', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5.5" cy="17.5" r="2.5"/><circle cx="18.5" cy="17.5" r="2.5"/><path d="M5.5 17.5h5l2-6h4.5M9 11.5h5l1.5 3M13 5h3l1.5 3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' }
+  ];
+
+  function sedeCardHtml(s, posClass){
+    const carac = s.caracteristicas || {};
+    const features = SEDE_FEATURE_DEFS.filter(f => carac[f.key]);
+    const foto = s.foto_fachada || s.foto_hero_servicio;
+    const distanciaKm = (userCoords && s.lat != null && s.lng != null)
+      ? dnDistanciaKm(userCoords.lat, userCoords.lng, Number(s.lat), Number(s.lng)) : null;
+    return `
+      <div class="sede-choice-card ${posClass}" data-id="${s.id}">
+        <div class="sede-choice-info">
+          <div class="sede-choice-name">${s.nombre}</div>
+          <div class="sede-choice-addr">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.6 7-11.5A7 7 0 0 0 5 9.5C5 14.4 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+            ${s.direccion || 'Dirección por confirmar'}
+          </div>
+          ${distanciaKm !== null ? `
+            <div class="sede-choice-distance">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" stroke-linecap="round"/><circle cx="12" cy="12" r="4"/></svg>
+              A ${distanciaKm < 1 ? Math.round(distanciaKm*1000)+' m' : distanciaKm.toFixed(1)+' km'} de ti
+            </div>` : ''}
+          ${features.length ? `
+            <div class="sede-choice-features">
+              ${features.map(f => `<div class="sede-choice-feature"><div class="sede-choice-feature-icon">${f.icon}</div><span>${f.label}</span></div>`).join('')}
+            </div>` : ''}
+        </div>
+        <div class="sede-choice-photo-wrap">
+          ${foto
+            ? `<img class="sede-choice-photo" src="${foto}" alt="" onerror="this.parentElement.innerHTML='<div class=&quot;sede-choice-photo-fallback&quot;><svg viewBox=&quot;0 0 24 24&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;1.8&quot;><path d=&quot;M12 21s7-6.6 7-11.5A7 7 0 0 0 5 9.5C5 14.4 12 21 12 21z&quot;/><circle cx=&quot;12&quot; cy=&quot;9.5&quot; r=&quot;2.5&quot;/></svg></div>'">`
+            : `<div class="sede-choice-photo-fallback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.6 7-11.5A7 7 0 0 0 5 9.5C5 14.4 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div>`}
+          ${s.resenas_count > 0 ? `
+            <div class="sede-choice-rating">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>
+              ${Number(s.calificacion).toFixed(1)}
+            </div>` : ''}
+          <div class="sede-choice-check"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#141414" stroke-width="2.8"><path d="M5 12.5l4.8 4.8L19.5 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        </div>
+      </div>`;
+  }
+
+  function renderSedeChoiceList(sedes){
+    const el = document.getElementById('sedeChoiceList');
+    el.innerHTML = `<div class="sede-cards-wrap">${sedes.map((s,i) => {
+      const posClass = i === 0 ? 'is-first' : (i === sedes.length - 1 ? 'is-last' : '');
+      const card = sedeCardHtml(s, posClass);
+      const seam = i < sedes.length - 1
+        ? `<div class="sede-seam"><div class="sede-seam-logo"><img src="../assets/logo-transparent.png" alt="Keicy Barber"></div></div>`
+        : '';
+      return card + seam;
+    }).join('')}</div>`;
+    el.querySelectorAll('.sede-choice-card').forEach(card => {
+      card.addEventListener('click', () => {
+        sedeSeleccionadaId = card.dataset.id;
+        el.querySelectorAll('.sede-choice-card').forEach(c => c.classList.toggle('selected', c === card));
+        document.getElementById('sedeContinueBtn').disabled = false;
+      });
+    });
+  }
+
+  function confirmarSedeYContinuar(sedeId){
+    dnSetSedeActual(sedeId);
+    sedeActualObj = sedesCargadas.find(s => s.id === sedeId) || null;
+    refrescarHeroesPorSede();
+    loadBarberos();
+    document.getElementById('topBar').style.display = '';
+    goToStep(1);
+  }
+
+  document.getElementById('sedeContinueBtn').addEventListener('click', () => {
+    if (sedeSeleccionadaId) confirmarSedeYContinuar(sedeSeleccionadaId);
+  });
+
+  function pedirUbicacion(){
+    return new Promise((resolve) => {
+      if (!navigator.geolocation) { resolve(null); return; }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => resolve(null),
+        { timeout: 4000 }
+      );
+    });
+  }
+
+  async function loadWelcomeMessage(){
+    try {
+      const { data } = await sb.from('app_config').select('key, value').in('key', ['welcome_title', 'welcome_message']);
+      if (data) {
+        for (const item of data) {
+          if (item.key === 'welcome_title' && item.value) {
+            document.getElementById('welcomeTitle').textContent = item.value;
+          }
+          if (item.key === 'welcome_message' && item.value) {
+            document.getElementById('welcomeMessage').textContent = item.value;
+          }
+        }
+      }
+    } catch (e) { console.error('Error loading welcome message:', e); }
+  }
+
+  async function loadEmailTextos(){
+    try {
+      const { data } = await sb.from('app_config').select('key, value').in('key', [
+        'email_asunto', 'email_titulo', 'email_subtitulo',
+        'email_recordatorio_titulo', 'email_recordatorio_texto',
+        'email_calendario_texto', 'email_cancelar_texto'
+      ]);
+      if (data) {
+        data.forEach(item => {
+          const keyMap = {
+            'email_asunto': 'asunto',
+            'email_titulo': 'titulo',
+            'email_subtitulo': 'subtitulo',
+            'email_recordatorio_titulo': 'recordatorio_titulo',
+            'email_recordatorio_texto': 'recordatorio_texto',
+            'email_calendario_texto': 'calendario_texto',
+            'email_cancelar_texto': 'cancelar_texto'
+          };
+          if (keyMap[item.key] && item.value) {
+            emailTextos[keyMap[item.key]] = item.value;
+          }
+        });
+      }
+    } catch (err) {
+      console.warn('[DN] No se pudieron cargar textos de email:', err);
+    }
+  }
+
+  async function initSedeFlow(){
+    try {
+      loadWelcomeMessage();
+      loadEmailTextos();
+      const sedes = await dnLoadSucursalesPublico(false);
+      sedesCargadas = sedes;
+
+      // Aplicar foto de fondo en pantalla de bienvenida
+      const welcomeBg = document.getElementById('welcomeBg');
+      if (welcomeBg && sedes.length > 0) {
+        const fotoFondo = sedes[0].foto_fachada || sedes[0].foto_hero_servicio || null;
+        if (fotoFondo) {
+          welcomeBg.style.backgroundImage = `url('${fotoFondo}')`;
+        }
+      }
+
+      if (!sedes.length) {
+        document.getElementById('sedeChoiceList').innerHTML = '<div class="svc-card">Todavía no hay sedes disponibles para reservar.</div>';
+        return;
+      }
+
+      // Pre-render sede list for when they continue
+      renderSedeChoiceList(sedes);
+
+      // Detectar parámetros de URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const fromApp = urlParams.get('fromApp') === '1';
+      urlBarberoId = urlParams.get('barberoId'); // Link directo desde barbero
+      if (urlBarberoId) console.log('[DN] Barbero preseleccionado desde URL:', urlBarberoId);
+
+      if (fromApp) {
+        // Pre-llenar datos del cliente desde la URL
+        const clienteId = urlParams.get('clienteId');
+        const clienteNombre = urlParams.get('clienteNombre') || '';
+        const clienteTelefono = urlParams.get('clienteTelefono') || '';
+        const clienteEmail = urlParams.get('clienteEmail') || '';
+
+        if (clienteId) {
+          fromClientApp = true; // Marcar que viene desde la app
+          state.cliente.id = clienteId;
+          state.cliente.phone = clienteTelefono;
+          state.cliente.email = clienteEmail;
+          state.cliente.isNew = false;
+
+          // Separar nombre y apellido
+          const nameParts = clienteNombre.trim().split(' ');
+          state.cliente.name = nameParts[0] || '';
+          state.cliente.lastName = nameParts.slice(1).join(' ') || '';
+
+          console.log('[DN] Cliente desde app:', state.cliente);
+
+          // Si hay una sola sede, ir directo a servicios
+          if (sedes.length === 1) {
+            confirmarSedeYContinuar(sedes[0].id);
+          } else {
+            // Ir directo a selección de sede, saltar paso de cliente
+            goToStep(0);
+          }
+          return;
+        }
+      }
+
+      // Show client step first (flujo normal)
+      document.getElementById('topBar').style.display = 'none';
+      document.getElementById('bottomBarCliente').style.display = 'block';
+    } catch (err) {
+      console.error(err);
+      document.getElementById('sedeChoiceList').innerHTML = '<div class="svc-card">No pudimos cargar las sedes.</div>';
+    }
+  }
+
+  function barberCardMarkup(b, name, citasCount){
+    const photo = b.usuarios?.avatar_url;
+    const focusY = b.usuarios?.avatar_focus_y_reservas ?? 30;
+    const instagram = b.usuarios?.instagram;
+    const rawRating = b.avgRating ?? b.calificacion ?? null;
+    const avgRating = rawRating !== null ? Number(rawRating).toFixed(1) : '—';
+    const reviewsCount = b.reviewsCount || 0;
+    const reviews = barberoReviews[b.id] || [];
+
+    // Generar HTML de reseñas (máximo 3)
+    const reviewsHTML = reviews.slice(0, 3).map(r => {
+      const clientName = r.cliente ? `${r.cliente.nombre || ''} ${r.cliente.apellido || ''}`.trim() : 'Cliente';
+      const initials = clientName.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+      const rating = r.calificacion || 0;
+      const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+      return `
+        <div class="barber-review-item">
+          <div class="barber-review-avatar">${initials}</div>
+          <div class="barber-review-content">
+            <div class="barber-review-header">
+              <span class="barber-review-name">${clientName}</span>
+              <span class="barber-review-stars">${stars}</span>
+            </div>
+            ${r.comentario ? `<p class="barber-review-text">${r.comentario}</p>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="barber-card" data-id="${b.id}" data-nombre="${name}">
+        ${photo ? `<img src="${photo}" alt="" style="object-position:center ${focusY}%;" onerror="this.remove()">` : ''}
+        ${!photo ? `<div class="avatar-fallback">${dnInitials(name)[0]}</div>` : ''}
+        <div class="barber-overlay"></div>
+        <div class="barber-rating"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>${avgRating}</div>
+        ${instagram ? `<a href="https://instagram.com/${instagram}" target="_blank" class="barber-instagram" onclick="event.stopPropagation()"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>` : ''}
+        <div class="barber-selected-badge"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#141414" stroke-width="2.6"><path d="M5 12.5l4.8 4.8L19.5 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="barber-info">
+          <div class="barber-header">
+            <div class="barber-name">${name} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <button class="barber-reviews-btn" onclick="event.stopPropagation();toggleBarberReviews(this)">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>
+              ${reviewsCount > 0 ? reviewsCount + ' reseñas' : 'Reseñas'}
+            </button>
+          </div>
+          <div class="barber-stats">
+            <div class="barber-stat"><b>${citasCount}</b><span>Cortes</span></div>
+            <div class="barber-stat"><b>${avgRating}</b><span>Calificación</span></div>
+            <div class="barber-stat"><b>${b.activo ? 'Hoy' : '—'}</b><span>Disponibilidad</span></div>
+          </div>
+          <div class="barber-reviews-section">
+            ${reviews.length > 0 ? reviewsHTML : '<p class="barber-no-reviews">Sin reseñas aún</p>'}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Tarjeta de máxima disponibilidad (primera en el carrusel)
+  function anyBarberCardMarkup(barberos = []){
+    // Crear collage con hasta 6 fotos de barberos
+    const maxPhotos = 6;
+    const barberosConFoto = barberos.slice(0, maxPhotos);
+
+    let collageHTML = '';
+    if (barberosConFoto.length > 0) {
+      collageHTML = '<div class="any-barber-collage">';
+      for (let i = 0; i < maxPhotos; i++) {
+        const b = barberosConFoto[i % barberosConFoto.length];
+        const foto = b?.usuarios?.avatar_url;
+        const nombre = b?.usuarios?.full_name || b?.usuarios?.username || '';
+        const initials = nombre.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase() || '★';
+        if (foto) {
+          collageHTML += `<div class="collage-item"><img src="${foto}" alt="" onerror="this.parentElement.innerHTML='<div class=\\'collage-fallback\\'>${initials}</div>'"></div>`;
+        } else {
+          collageHTML += `<div class="collage-item"><div class="collage-fallback">${initials}</div></div>`;
+        }
+      }
+      collageHTML += '</div>';
+    } else {
+      collageHTML = `<div class="any-barber-bg">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/>
+          <path d="M2 20c1.5-4 4-6 6-6s4.5 2 6 6M10 20c1.5-4 4-6 6-6s4.5 2 6 6" stroke-linecap="round"/>
+        </svg>
+      </div>`;
+    }
+
+    return `
+      <div class="barber-card any-barber-card" data-id="any" data-nombre="Máxima disponibilidad">
+        ${collageHTML}
+        <div class="barber-overlay"></div>
+        <div class="barber-rating" style="background:linear-gradient(135deg,var(--gold-bright),var(--gold));color:#141414;">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M13 3l2.5 5 5.5.8-4 3.9.9 5.3-4.9-2.6L8.1 18l.9-5.3-4-3.9 5.5-.8L13 3z"/></svg>
+          TOP
+        </div>
+        <div class="barber-selected-badge"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#141414" stroke-width="2.6"><path d="M5 12.5l4.8 4.8L19.5 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="barber-info">
+          <div class="barber-name">Máxima disponibilidad <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="barber-especialidad">El mejor barbero disponible para ti</div>
+          <div class="barber-tags"><span class="barber-tag" style="background:var(--gold);color:#141414;">Recomendado</span><span class="barber-tag">Menor espera</span></div>
+          <div class="barber-stats">
+            <div class="barber-stat"><b>+</b><span>Flexibilidad</span></div>
+            <div class="barber-stat"><b>-</b><span>Espera</span></div>
+            <div class="barber-stat"><b>Hoy</b><span>Disponibilidad</span></div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Store reviews data globally for modal
+  let barberoReviews = {};
+
+  async function loadBarberos(){
+    const carousel = document.getElementById('barberCarousel');
+    carousel.innerHTML = '<div class="barber-card">Cargando barberos…</div>';
+    try {
+      const { data, error } = await sb.from('barberos')
+        .select('id, especialidad, calificacion, activo, puesto, dia_descanso')
+        .eq('sucursal_id', dnGetSedeActual())
+        .eq('activo', true)
+        .eq('tipo_colaborador', 'barbero');
+      if (error) throw error;
+
+      // Cargar datos de usuarios por separado para asegurar que traiga el instagram
+      const barberoIds = data.map(b => b.id);
+      const { data: usuariosData } = await sb.from('usuarios')
+        .select('id, username, full_name, avatar_url, avatar_focus_y_reservas, instagram')
+        .in('id', barberoIds);
+
+      const usuariosMap = {};
+      (usuariosData || []).forEach(u => { usuariosMap[u.id] = u; });
+
+      // Cargar reseñas de todos los barberos de esta sede
+      const { data: resenasData, error: resenasError } = await sb.from('resenas')
+        .select('barbero_id, cliente_id, calificacion, comentario, created_at')
+        .in('barbero_id', barberoIds)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (resenasError) console.error('Error cargando reseñas:', resenasError);
+
+      // Cargar datos de clientes que tienen reseñas (están en tabla usuarios)
+      const clienteIds = [...new Set((resenasData || []).map(r => r.cliente_id).filter(Boolean))];
+      let clientesMap = {};
+      if (clienteIds.length > 0) {
+        const { data: clientesData } = await sb.from('usuarios')
+          .select('id, full_name, username, phone, lealtad_info')
+          .in('id', clienteIds);
+        (clientesData || []).forEach(c => {
+          const lealtad = c.lealtad_info || {};
+          clientesMap[c.id] = {
+            nombre: c.full_name || c.username || 'Cliente',
+            apellido: '',
+            phone: c.phone || null,
+            cortes: lealtad.cortes_total || 0,
+            categoria: lealtad.categoria || null
+          };
+        });
+      }
+
+      // Agrupar reseñas por barbero y calcular promedios
+      const reviewsByBarber = {};
+      const avgByBarber = {};
+      (resenasData || []).forEach(r => {
+        if (!r.barbero_id) return;
+        if (!reviewsByBarber[r.barbero_id]) reviewsByBarber[r.barbero_id] = [];
+        // Agregar datos del cliente a la reseña
+        r.cliente = clientesMap[r.cliente_id] || null;
+        reviewsByBarber[r.barbero_id].push(r);
+      });
+      Object.keys(reviewsByBarber).forEach(bid => {
+        const reviews = reviewsByBarber[bid];
+        const sum = reviews.reduce((s, r) => s + (r.calificacion || 0), 0);
+        avgByBarber[bid] = reviews.length > 0 ? (sum / reviews.length) : null;
+      });
+      barberoReviews = reviewsByBarber;
+
+
+      // Combinar datos
+      const barberosConUsuarios = data.map(b => ({
+        ...b,
+        usuarios: usuariosMap[b.id] || {},
+        reviewsCount: (reviewsByBarber[b.id] || []).length,
+        avgRating: avgByBarber[b.id] !== undefined ? avgByBarber[b.id] : (b.calificacion || null)
+      }));
+
+      state.barberos = dnShuffle(barberosConUsuarios);
+
+      // Cortes realizados: OPTIMIZADO - últimos 6 meses con límite (excluye TEST)
+      let countsByBarber = {};
+      try {
+        const hace6m = new Date(); hace6m.setMonth(hace6m.getMonth() - 6);
+        const hace6mISO = hace6m.toISOString().slice(0,10);
+        const sedesTestIds2 = await dnGetSedesTestIds();
+        let finQuery = sb.from('citas').select('barbero_id').eq('estado','finalizada').gte('fecha', hace6mISO).limit(2000);
+        if (sedesTestIds2.length > 0) finQuery = finQuery.not('sucursal_id', 'in', `(${sedesTestIds2.join(',')})`);
+        const { data: fin } = await finQuery;
+        (fin || []).forEach(c => { if (c.barbero_id) countsByBarber[c.barbero_id] = (countsByBarber[c.barbero_id]||0)+1; });
+      } catch (e) { console.error(e); }
+
+      // Siempre mostrar tarjeta de máxima disponibilidad primero + barberos
+      const barberCards = state.barberos.map(b => {
+        const name = b.usuarios?.full_name || b.usuarios?.username || 'Barbero';
+        return barberCardMarkup(b, name, countsByBarber[b.id] || 0);
+      }).join('');
+      carousel.innerHTML = anyBarberCardMarkup(state.barberos) + barberCards;
+
+      // Dots: uno para "any" + uno por cada barbero
+      const totalCards = 1 + state.barberos.length;
+      document.getElementById('barberDots').innerHTML = Array(totalCards).fill(0).map((_,i) => `<span class="d ${i===0?'active':''}"></span>`).join('');
+
+      // Event listener para tarjeta de máxima disponibilidad
+      carousel.querySelector('.any-barber-card').addEventListener('click', selectAnyBarber);
+
+      // Event listeners para tarjetas de barberos
+      carousel.querySelectorAll('.barber-card[data-id]:not(.any-barber-card)').forEach(card => {
+        card.addEventListener('click', () => selectBarbero(card.dataset.id, card.dataset.nombre));
+      });
+
+      let scrollTimer = null;
+      carousel.onscroll = () => {
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(() => {
+          const cardW = carousel.firstElementChild ? carousel.firstElementChild.getBoundingClientRect().width + 14 : 1;
+          const idx = Math.max(0, Math.min(totalCards-1, Math.round(carousel.scrollLeft / cardW)));
+          document.querySelectorAll('#barberDots .d').forEach((d,i) => d.classList.toggle('active', i===idx));
+        }, 80);
+      };
+      initBarberNavs();
+      // Habilitar botón para que el popup de validación pueda mostrarse
+      document.getElementById('next2').disabled = false;
+
+      // Si hay barbero preseleccionado desde URL, seleccionarlo automáticamente
+      if (urlBarberoId) {
+        const barberoPreseleccionado = state.barberos.find(b => b.id === urlBarberoId);
+        if (barberoPreseleccionado) {
+          const nombre = barberoPreseleccionado.usuarios?.full_name || barberoPreseleccionado.usuarios?.username || 'Barbero';
+          console.log('[DN] Preseleccionando barbero:', nombre);
+          // Esperar a que el DOM esté listo y luego seleccionar
+          setTimeout(() => {
+            selectBarbero(urlBarberoId, nombre);
+            // Hacer scroll a la tarjeta del barbero
+            const card = carousel.querySelector(`.barber-card[data-id="${urlBarberoId}"]`);
+            if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+          }, 100);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      carousel.innerHTML = '<div class="barber-card">No pudimos cargar los barberos.</div>';
+    }
+  }
+
+  function selectAnyBarber(){
+    state.anyBarber = true;
+    state.barbero = null;
+    document.querySelectorAll('.barber-card').forEach(c => c.classList.remove('selected'));
+    document.querySelector('.any-barber-card').classList.add('selected');
+    document.getElementById('next2').disabled = false;
+    updateBottomBar(2, { name: 'Máxima disponibilidad', sub: 'Te asignaremos el mejor barbero', price: dnFormatCOP(totalServicios().precio) });
+  }
+
+  function selectBarbero(id, nombre){
+    state.anyBarber = false;
+    document.querySelectorAll('.barber-card').forEach(c => c.classList.remove('selected'));
+    document.querySelector(`.barber-card[data-id="${id}"]`).classList.add('selected');
+    state.barbero = { id, nombre };
+    document.getElementById('next2').disabled = false;
+    const b = state.barberos.find(x => x.id === id);
+    updateBottomBar(2, { name: nombre, sub: b?.especialidad || 'Barbero', price: dnFormatCOP(totalServicios().precio) });
+    refrescarHeroesPorSede();
+  }
+
+  // ================= STEP 3: Fecha y hora =================
+  const dayNames = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+  const monthNames = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  function buildDayScroller(){
+    const el = document.getElementById('dayScroller');
+    el.innerHTML = '';
+    const DIAS_DISPONIBLES = 365; // Un año completo
+    let lastMonth = -1;
+
+    for (let i = 0; i < DIAS_DISPONIBLES; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+
+      // Agregar separador de mes cuando cambia
+      if (d.getMonth() !== lastMonth) {
+        lastMonth = d.getMonth();
+        if (i > 0) { // No agregar separador al inicio
+          const sep = document.createElement('div');
+          sep.className = 'day-month-sep';
+          sep.innerHTML = `<span>${monthNames[d.getMonth()]} ${d.getFullYear()}</span>`;
+          sep.style.cssText = 'display:flex;align-items:center;padding:0 12px;font-size:11px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.5px;white-space:nowrap;';
+          el.appendChild(sep);
+        }
+      }
+
+      const chip = document.createElement('div');
+      chip.className = 'day-chip' + (i === 0 ? ' selected' : '');
+      chip.dataset.iso = iso;
+      chip.innerHTML = `<div class="dow">${dayNames[d.getDay()]}</div><div class="dom">${d.getDate()}</div><div class="mon">${monthNames[d.getMonth()]}</div><div class="day-dot"></div>`;
+      chip.addEventListener('click', () => {
+        el.querySelectorAll('.day-chip').forEach(c => c.classList.remove('selected'));
+        chip.classList.add('selected');
+        state.fecha = iso;
+        state.hora = null;
+        document.getElementById('next3').disabled = true;
+        loadHorarios();
+      });
+      el.appendChild(chip);
+      if (i === 0) state.fecha = iso;
+    }
+  }
+
+  // Generar TIME_SLOTS dinámicamente según horario de la sede
+  const DIAS_SEMANA_RESERVA = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+
+  function getTimeSlotsForDate(fechaISO) {
+    // Obtener horario de la sede para el día seleccionado
+    const horario = sedeActualObj?.horario;
+    const fechaObj = new Date(fechaISO + 'T12:00:00');
+    const esDomingo = fechaObj.getDay() === 0;
+
+    if (!horario) {
+      // Fallback: horario por defecto 10:00 - 19:00 (domingos hasta las 16:00)
+      if (esDomingo) {
+        return ['10:00:00','11:00:00','12:00:00','14:00:00','15:00:00','16:00:00'];
+      }
+      return ['10:00:00','11:00:00','12:00:00','14:00:00','15:00:00','16:00:00','17:00:00','18:00:00','19:00:00'];
+    }
+
+    const diaSemana = DIAS_SEMANA_RESERVA[fechaObj.getDay()];
+    const horarioDia = horario[diaSemana];
+
+    if (!horarioDia || horarioDia.cerrado) {
+      return []; // Sede cerrada este día
+    }
+
+    const [abreH] = (horarioDia.abre || '10:00').split(':').map(Number);
+    let [cierraH] = (horarioDia.cierra || '20:00').split(':').map(Number);
+
+    // Domingos: citas solo hasta las 5 PM (17:00), no se puede agendar de 17:00 a 20:00
+    if (esDomingo && cierraH > 17) {
+      cierraH = 17;
+    }
+
+    const slots = [];
+    // Generar slots de hora en hora, excluir almuerzo 13:00-14:00
+    for (let h = abreH; h < cierraH; h++) {
+      if (h === 13) continue; // Saltar hora de almuerzo
+      slots.push(`${String(h).padStart(2,'0')}:00:00`);
+    }
+    return slots;
+  }
+
+  function periodOf(t){ const h = Number(t.split(':')[0]); return h < 12 ? 'mañana' : (h < 18 ? 'tarde' : 'noche'); }
+  function fmtHora(t){ const [h] = t.split(':'); let hour = parseInt(h,10); const ampm = hour>=12?'PM':'AM'; hour = hour%12||12; return { hh: String(hour).padStart(2,'0'), ap: ampm }; }
+
+  async function loadHorarios(){
+    const el = document.getElementById('timeSlots');
+    el.innerHTML = '<div class="time-chip">Cargando…</div>';
+    try {
+      // Trae todas las citas activas del día (para toda la sede) para calcular demanda real
+      // y, si el cliente eligió "cualquiera disponible", para resolver qué barbero queda libre.
+      // Incluye hora_fin para bloquear correctamente servicios de más de 1 hora
+      const { data, error } = await sb.from('citas').select('hora_inicio, hora_fin, barbero_id')
+        .eq('fecha', state.fecha).eq('sucursal_id', dnGetSedeActual())
+        .not('estado', 'in', '(cancelada,sin_respuesta)');
+      if (error) throw error;
+
+      // Cargar bloqueos de todos los barberos para esta fecha
+      const { data: bloqueos } = await sb.from('bloqueos_barbero')
+        .select('barbero_id, tipo, hora_inicio, hora_fin')
+        .eq('fecha', state.fecha);
+
+      // Crear mapa de bloqueos por barbero
+      const bloqueosPorBarbero = {};
+      (bloqueos || []).forEach(b => {
+        if (!bloqueosPorBarbero[b.barbero_id]) bloqueosPorBarbero[b.barbero_id] = [];
+        bloqueosPorBarbero[b.barbero_id].push(b);
+      });
+
+      // Función para verificar si un barbero está bloqueado en un horario
+      function isBarberoBlocked(barberoId, hora) {
+        // Verificar día de descanso del barbero
+        const barbero = state.barberos.find(b => b.id === barberoId);
+        if (barbero && barbero.dia_descanso !== null && barbero.dia_descanso !== undefined) {
+          const weekday = new Date(state.fecha + 'T00:00:00').getDay();
+          if (Number(barbero.dia_descanso) === weekday) return true;
+        }
+        // Verificar bloqueos específicos
+        const bqs = bloqueosPorBarbero[barberoId] || [];
+        for (const bq of bqs) {
+          if (bq.tipo === 'dia') return true;
+          if (bq.tipo === 'horas' && bq.hora_inicio && bq.hora_fin) {
+            if (hora >= bq.hora_inicio && hora < bq.hora_fin) return true;
+          }
+        }
+        return false;
+      }
+
+      const totalBarberos = state.barberos.length || 1;
+      const bookedByHour = {};
+
+      // Función auxiliar para convertir hora a minutos
+      function horaToMin(h) {
+        const [hh, mm] = h.split(':').map(Number);
+        return hh * 60 + (mm || 0);
+      }
+
+      // Marcar todas las horas ocupadas según la duración del servicio
+      (data || []).forEach(c => {
+        const startMin = horaToMin(c.hora_inicio);
+        const endMin = c.hora_fin ? horaToMin(c.hora_fin) : startMin + 60; // Default 1 hora si no hay hora_fin
+
+        // Bloquear cada hora que cubre la cita
+        for (let min = startMin; min < endMin; min += 60) {
+          const horaStr = `${String(Math.floor(min / 60)).padStart(2, '0')}:00:00`;
+          if (!bookedByHour[horaStr]) bookedByHour[horaStr] = new Set();
+          bookedByHour[horaStr].add(c.barbero_id);
+        }
+      });
+
+      // Obtener slots dinámicos según horario de la sede para la fecha
+      const TIME_SLOTS = getTimeSlotsForDate(state.fecha);
+
+      // Verificar si la sede está cerrada este día
+      if (TIME_SLOTS.length === 0) {
+        el.innerHTML = '<div class="time-chip" style="color:var(--text-secondary);">La sede está cerrada este día</div>';
+        return;
+      }
+
+      // Agregar barberos bloqueados a los ocupados
+      for (const t of TIME_SLOTS) {
+        if (!bookedByHour[t]) bookedByHour[t] = new Set();
+        state.barberos.forEach(b => {
+          if (isBarberoBlocked(b.id, t)) bookedByHour[t].add(b.id);
+        });
+      }
+
+      // Verificar si es el día actual para marcar horas pasadas
+      const MARGEN_MINUTOS_CITA = 15; // Margen de 15 minutos después de la hora para poder reservar
+      const ahora = new Date();
+      const fechaHoy = ahora.getFullYear() + '-' + String(ahora.getMonth()+1).padStart(2,'0') + '-' + String(ahora.getDate()).padStart(2,'0');
+      const horaActualMin = ahora.getHours() * 60 + ahora.getMinutes();
+      const esHoy = state.fecha === fechaHoy;
+
+      // Función para verificar si una hora ya pasó (con margen de 15 min)
+      function isHoraPasada(horaStr) {
+        if (!esHoy) return false;
+        const [hh] = horaStr.split(':').map(Number);
+        const horaMin = hh * 60;
+        // Permitir si estamos dentro del margen de 15 minutos después de la hora
+        return horaMin + MARGEN_MINUTOS_CITA < horaActualMin;
+      }
+
+      // Obtener duración total de los servicios seleccionados
+      const { duracion: duracionServicio } = totalServicios();
+      const horasNecesarias = Math.ceil(duracionServicio / 60); // Redondear hacia arriba
+
+      // Función para verificar si todas las horas necesarias están disponibles
+      function isSlotAvailable(horaInicio, barberoId) {
+        const startMin = horaToMin(horaInicio);
+        for (let i = 0; i < horasNecesarias; i++) {
+          const checkMin = startMin + (i * 60);
+          const checkHora = `${String(Math.floor(checkMin / 60)).padStart(2, '0')}:00:00`;
+          const booked = bookedByHour[checkHora] || new Set();
+
+          if (barberoId) {
+            // Verificar para barbero específico
+            if (booked.has(barberoId)) return false;
+            if (isBarberoBlocked(barberoId, checkHora)) return false;
+          } else {
+            // Verificar si todos los barberos están ocupados
+            if (booked.size >= totalBarberos) return false;
+          }
+        }
+        return true;
+      }
+
+      // Encontrar barbero disponible para todas las horas necesarias
+      function findAvailableBarber(horaInicio) {
+        const startMin = horaToMin(horaInicio);
+        return state.barberos.find(b => {
+          for (let i = 0; i < horasNecesarias; i++) {
+            const checkMin = startMin + (i * 60);
+            const checkHora = `${String(Math.floor(checkMin / 60)).padStart(2, '0')}:00:00`;
+            const booked = bookedByHour[checkHora] || new Set();
+            if (booked.has(b.id)) return false;
+            if (isBarberoBlocked(b.id, checkHora)) return false;
+          }
+          return true;
+        });
+      }
+
+      const periods = [['mañana','☀','Mañana'], ['tarde','🌤','Tarde'], ['noche','🌙','Noche']];
+      el.innerHTML = periods.map(([key, icon, label]) => {
+        const slots = TIME_SLOTS.filter(t => periodOf(t) === key);
+        if (!slots.length) return '';
+        return `
+          <div class="period-block">
+            <div class="period-head">${icon} ${label}</div>
+            <div class="time-grid">
+              ${slots.map(t => {
+                const booked = bookedByHour[t] || new Set();
+                const horaPasada = isHoraPasada(t);
+
+                // Para servicios largos, verificar disponibilidad de todas las horas necesarias
+                let slotDisponible = false;
+                if (!state.anyBarber && state.barbero) {
+                  slotDisponible = isSlotAvailable(t, state.barbero.id);
+                } else {
+                  slotDisponible = findAvailableBarber(t) !== undefined;
+                }
+
+                const ratio = booked.size / totalBarberos;
+                let statusClass = 'disponible', statusLabel = 'Disponible';
+                if (horaPasada) { statusClass = 'taken'; statusLabel = 'Pasado'; }
+                else if (!slotDisponible) { statusClass = 'taken'; statusLabel = 'Ocupado'; }
+                else if (ratio >= 0.75) { statusClass = 'ultimos'; statusLabel = 'Últimos cupos'; }
+                else if (ratio >= 0.4) { statusClass = 'solicitado'; statusLabel = 'Muy solicitado'; }
+                const { hh, ap } = fmtHora(t);
+                return `<div class="time-chip ${statusClass}" data-time="${t}"><div class="hh">${hh}:00</div><div class="ap">${ap}</div><div class="tag">${statusLabel}</div></div>`;
+              }).join('')}
+            </div>
+          </div>`;
+      }).join('');
+
+      el.querySelectorAll('.time-chip:not(.taken)').forEach(chip => {
+        chip.addEventListener('click', () => {
+          el.querySelectorAll('.time-chip').forEach(c => c.classList.remove('selected'));
+          chip.classList.add('selected');
+          state.hora = chip.dataset.time;
+
+          if (state.anyBarber) {
+            // Limpiar barbero anterior para evitar asignar uno incorrecto
+            state.barbero = null;
+            // Buscar barbero disponible para TODAS las horas que necesita el servicio
+            const free = findAvailableBarber(state.hora);
+
+            if (free) {
+              const name = free.usuarios?.full_name || free.usuarios?.username || 'Barbero';
+              state.barbero = { id: free.id, nombre: name, auto: true };
+              refrescarHeroesPorSede();
+              document.getElementById('next3').disabled = false;
+            } else {
+              // No hay barbero disponible para todas las horas necesarias
+              toast('No hay barberos disponibles para este horario. Intenta otra hora.');
+              document.getElementById('next3').disabled = true;
+              chip.classList.remove('selected');
+              state.hora = null;
+              return;
+            }
+          } else {
+            document.getElementById('next3').disabled = false;
+          }
+        });
+      });
+    } catch (err) {
+      console.error(err);
+      el.innerHTML = '<div class="time-chip">Error al cargar</div>';
+    }
+  }
+
+  // ================= STEP 4: Confirmación =================
+  const nameInput = document.getElementById('clientName');
+  const phoneInput = document.getElementById('clientPhone');
+  const nameWrap = document.getElementById('nameWrap');
+  const phoneWrap = document.getElementById('phoneWrap');
+  [[nameInput,nameWrap],[phoneInput,phoneWrap]].forEach(([i,w]) => {
+    i.addEventListener('focus', () => w.classList.add('focused'));
+    i.addEventListener('blur', () => w.classList.remove('focused'));
+  });
+
+  function formatPhone(v){
+    let d = v.replace(/\D/g,'').slice(0,10);
+    if (d.length > 6) return d.slice(0,3)+' '+d.slice(3,6)+' '+d.slice(6);
+    if (d.length > 3) return d.slice(0,3)+' '+d.slice(3);
+    return d;
+  }
+  phoneInput.addEventListener('input', (e) => { e.target.value = formatPhone(e.target.value); });
+
+  async function renderSummary(){
+    const { precio, duracion, nombres } = totalServicios();
+    document.getElementById('sumServicio').textContent = nombres;
+    // Mostrar el nombre del barbero (asignado automáticamente si eligió máxima disponibilidad)
+    document.getElementById('sumBarbero').textContent = state.barbero?.nombre
+      ? (state.barbero.nombre + (state.barbero.auto ? ' (asignado)' : ''))
+      : 'Sin barbero asignado';
+    const d = new Date(state.fecha + 'T00:00:00');
+    document.getElementById('sumFecha').textContent = d.toLocaleDateString('es-CO',{weekday:'long', day:'numeric', month:'long'});
+    const { hh, ap } = fmtHora(state.hora);
+    document.getElementById('sumHora').textContent = `${hh}:00 ${ap}`;
+    document.getElementById('sumDuracion').textContent = `${duracion} minutos`;
+    document.getElementById('sumPrecio').textContent = dnFormatCOP(precio).replace('$','$ ');
+
+    // Pre-fill client data from state
+    const fullName = (state.cliente.name + ' ' + state.cliente.lastName).trim();
+    document.getElementById('clientName').value = fullName;
+    document.getElementById('clientPhone').value = state.cliente.phone || '';
+
+    const barberoObj = state.barberos.find(b => b.id === state.barbero?.id);
+    const photo = barberoObj?.usuarios?.avatar_url;
+    const photoEl = document.getElementById('confirmPhoto');
+    const fallbackEl = document.getElementById('confirmPhotoFallback');
+    if (photo) { photoEl.src = photo; photoEl.style.display = 'block'; fallbackEl.style.display = 'none'; }
+    else { photoEl.style.display = 'none'; fallbackEl.style.display = 'flex'; fallbackEl.textContent = dnInitials(state.barbero?.nombre || '★'); }
+
+    refrescarHeroesPorSede();
+
+    try {
+      const { data: cfg } = await sb.from('configuracion_negocio').select('notif_recordatorio_whatsapp').eq('id', true).maybeSingle();
+      document.getElementById('trustWa').style.display = (cfg && cfg.notif_recordatorio_whatsapp === false) ? 'none' : 'block';
+    } catch (e) { /* si falla, se deja visible por defecto */ }
+  }
+
+  // ---- Navigation ----
+  document.getElementById('next1').addEventListener('click', () => goToStep(2));
+  document.getElementById('next2').addEventListener('click', () => {
+    // Validar que se haya seleccionado un barbero
+    if (!state.barbero && !state.anyBarber) {
+      showCenterPopup('Por favor selecciona un barbero antes de continuar');
+      return;
+    }
+    goToStep(3);
+    loadHorarios();
+    refrescarHeroesPorSede();
+    const { precio, duracion, nombres } = totalServicios();
+    updateBottomBar(3, {
+      name: nombres,
+      sub: `con ${state.barbero ? state.barbero.nombre : 'cualquiera disponible'} · ${duracion} min`,
+      price: dnFormatCOP(precio)
+    });
+  });
+  document.getElementById('next3').addEventListener('click', () => {
+    // Validar que hay barbero antes de continuar
+    if (!state.barbero?.id) {
+      toast('Selecciona un horario con barbero disponible.');
+      return;
+    }
+    renderSummary();
+    goToStep(4);
+  });
+  document.getElementById('back4').addEventListener('click', () => goToStep(3));
+
+  document.getElementById('confirmBtn').addEventListener('click', async () => {
+    const name = (state.cliente.name + ' ' + state.cliente.lastName).trim() || nameInput.value.trim();
+    const phoneDigits = state.cliente.phone || phoneInput.value.replace(/\D/g,'');
+    if (name.length < 3) return toast('Escribe tu nombre completo.');
+    if (phoneDigits.length < 7) return toast('Escribe un teléfono válido.');
+
+    // Validación de barbero (los IDs pueden ser UUIDs o números)
+    if (!state.barbero?.id) {
+      console.error('[DN] Error: No hay barbero asignado', { state_barbero: state.barbero, anyBarber: state.anyBarber });
+      return toast('No hay barbero disponible para este horario. Por favor selecciona otra hora.');
+    }
+
+    const btn = document.getElementById('confirmBtn');
+    btn.disabled = true; btn.textContent = 'Agendando…';
+
+    try {
+      // Use client ID from state if already identified
+      let clienteId = state.cliente.id;
+
+      if (!clienteId) {
+        // Find or create the client by phone
+        const { data: existing } = await sb.from('usuarios').select('id').eq('phone', phoneDigits).maybeSingle();
+        if (existing) {
+          clienteId = existing.id;
+        } else {
+          const usernameBase = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'.').replace(/^\.+|\.+$/g,'');
+          const username = (usernameBase || 'cliente') + '.' + phoneDigits.slice(-4);
+          const { data: created, error: createErr } = await sb.from('usuarios')
+            .insert({ username, phone: phoneDigits, full_name: name, email: state.cliente.email || null, role: 'cliente', origen: 'web_reservas' })
+            .select('id').single();
+          if (createErr) throw createErr;
+          clienteId = created.id;
+        }
+      }
+
+      const [principal, ...extras] = state.serviciosSeleccionados;
+      const { precio: precioTotal, duracion: duracionTotal } = totalServicios();
+
+      // Calcular hora_fin basada en la duración de los servicios
+      const [h, m] = state.hora.split(':').map(Number);
+      const startMinutes = h * 60 + m;
+      const endMinutes = startMinutes + duracionTotal;
+      const horaFin = `${String(Math.floor(endMinutes / 60)).padStart(2, '0')}:${String(endMinutes % 60).padStart(2, '0')}:00`;
+
+      // Usar el barbero asignado (ya sea selección directa o asignado automáticamente en "máxima disponibilidad")
+      const barberoId = state.barbero?.id;
+
+      // VALIDACIÓN CRÍTICA: No permitir insertar sin barbero
+      if (!barberoId) {
+        console.error('[DN] CRÍTICO: Intento de insertar cita sin barbero', {
+          state_barbero: state.barbero,
+          anyBarber: state.anyBarber,
+          hora: state.hora,
+          fecha: state.fecha
+        });
+        btn.disabled = false;
+        btn.textContent = 'Confirmar reserva';
+        return toast('Error: No hay barbero asignado. Vuelve a seleccionar la hora.');
+      }
+
+      // Log para verificar qué barbero se está guardando
+      console.log('[DN] Guardando cita con barbero:', barberoId, state.barbero?.nombre);
+
+      const { data: citaData, error: citaErr } = await sb.from('citas').insert({
+        cliente_id: clienteId,
+        barbero_id: barberoId,
+        servicio_id: principal.id,
+        sucursal_id: dnGetSedeActual(),
+        servicios_adicionales: extras.map(x => ({ id: x.id, nombre: x.nombre, precio: Number(x.precio)||0, duracion_min: Number(x.duracion)||null })),
+        fecha: state.fecha,
+        hora_inicio: state.hora,
+        hora_fin: horaFin,
+        precio: precioTotal,
+        estado: 'agendada',
+        origen: 'web_reservas'
+      }).select('id').single();
+      if (citaErr) throw citaErr;
+
+      // Enviar email de confirmación (no bloquea el flujo)
+      if (state.cliente.email) {
+        try {
+          const sedeActual = sedesCargadas?.find(s => s.id === dnGetSedeActual());
+          const barberoNombre = state.barbero?.nombre || null;
+
+          await fetch('https://zzmtnjlfrlqmouijfste.supabase.co/functions/v1/send-confirmation-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sb.supabaseKey}`
+            },
+            body: JSON.stringify({
+              cita_id: citaData.id,
+              cliente_nombre: (state.cliente.name + ' ' + (state.cliente.lastName || '')).trim(),
+              cliente_email: state.cliente.email,
+              cliente_telefono: state.cliente.phone,
+              barbero_nombre: barberoNombre,
+              servicio_nombre: principal.nombre,
+              servicios_adicionales: extras.map(x => ({ nombre: x.nombre, precio: Number(x.precio)||0 })),
+              fecha: state.fecha,
+              hora: state.hora,
+              precio_total: precioTotal,
+              sede_nombre: sedeActual?.nombre || 'Keicy Barbería',
+              sede_direccion: sedeActual?.direccion || '',
+              textos: Object.keys(emailTextos).length > 0 ? emailTextos : undefined
+            })
+          });
+          console.log('[DN] Email de confirmación enviado');
+        } catch (emailErr) {
+          console.warn('[DN] No se pudo enviar email de confirmación:', emailErr);
+        }
+      }
+
+      document.getElementById('confirmMsg').textContent =
+        `${state.cliente.name || name}, tu cita quedó agendada.${state.cliente.email ? ' Te enviamos un correo de confirmación.' : ''}`;
+      goToStep(5);
+
+      // Si viene desde la app de cliente, notificar éxito
+      if (fromClientApp) {
+        window.parent.postMessage({ type: 'dn-reservas-success' }, '*');
+      }
+
+    } catch (err) {
+      console.error(err);
+      btn.disabled = false; btn.textContent = 'Confirmar reserva';
+      if (err.message?.includes('duplicate') && err.message?.includes('phone')) {
+        toast('Ese teléfono ya está registrado, intenta de nuevo.');
+      } else if (err.code === '23P01') {
+        toast('Justo se ocupó ese horario. Elige otra hora, por favor.');
+      } else {
+        toast('No pudimos agendar tu cita. Intenta de nuevo.');
+      }
+    }
+  });
+
+  // Inyecta los píxeles de marketing (Meta/Google) solo si el negocio los configuró
+  // desde admin/marketing.html. Si no hay ningún ID guardado, esta función no hace nada.
+  async function initMarketingPixels(){
+    try {
+      const { data: cfg } = await sb.from('configuracion_negocio').select('pixel_meta_id, pixel_google_id').eq('id', true).maybeSingle();
+      if (!cfg) return;
+      if (cfg.pixel_meta_id) {
+        const s = document.createElement('script');
+        s.innerHTML = `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${cfg.pixel_meta_id}');fbq('track','PageView');`;
+        document.head.appendChild(s);
+      }
+      if (cfg.pixel_google_id) {
+        const gs = document.createElement('script');
+        gs.async = true;
+        gs.src = `https://www.googletagmanager.com/gtag/js?id=${cfg.pixel_google_id}`;
+        document.head.appendChild(gs);
+        const cfgScript = document.createElement('script');
+        cfgScript.innerHTML = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${cfg.pixel_google_id}');`;
+        document.head.appendChild(cfgScript);
+      }
+    } catch (e) { /* si falla, la reserva sigue funcionando igual sin el píxel */ }
+  }
+
+  // ================= Navegación con flechas para web =================
+  function setupCarouselNav(scrollEl, prevBtn, nextBtn, scrollAmount) {
+    if (!scrollEl || !prevBtn || !nextBtn) return;
+
+    // Remover listeners previos clonando los botones
+    const newPrev = prevBtn.cloneNode(true);
+    const newNext = nextBtn.cloneNode(true);
+    prevBtn.parentNode.replaceChild(newPrev, prevBtn);
+    nextBtn.parentNode.replaceChild(newNext, nextBtn);
+
+    // Asegurar que nunca estén deshabilitados
+    newPrev.removeAttribute('disabled');
+    newNext.removeAttribute('disabled');
+    newPrev.style.pointerEvents = 'auto';
+    newNext.style.pointerEvents = 'auto';
+
+    const updateOpacity = () => {
+      const canScrollLeft = scrollEl.scrollLeft > 5;
+      const canScrollRight = scrollEl.scrollLeft + scrollEl.clientWidth < scrollEl.scrollWidth - 5;
+      newPrev.style.opacity = canScrollLeft ? '1' : '0.4';
+      newNext.style.opacity = canScrollRight ? '1' : '0.4';
+    };
+
+    newPrev.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      scrollEl.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      setTimeout(updateOpacity, 400);
+    };
+
+    newNext.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      scrollEl.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      setTimeout(updateOpacity, 400);
+    };
+
+    scrollEl.addEventListener('scroll', updateOpacity);
+    setTimeout(updateOpacity, 300);
+  }
+
+  function initCarouselNavs() {
+    // Scroll de días (chips ~70px)
+    setupCarouselNav(
+      document.getElementById('dayScroller'),
+      document.getElementById('dayPrev'),
+      document.getElementById('dayNext'),
+      210
+    );
+  }
+
+  // Inicializar categorías (botones de navegación eliminados, solo scroll táctil)
+  function initCatNavs() {
+    // Las categorías ahora solo usan scroll táctil nativo
+  }
+
+  // Inicializar flechas de barberos después de cargarlos
+  function initBarberNavs() {
+    setTimeout(() => {
+      setupCarouselNav(
+        document.getElementById('barberCarousel'),
+        document.getElementById('barberPrev'),
+        document.getElementById('barberNext'),
+        300
+      );
+    }, 100);
+  }
+
+  // ================= TOGGLE RESEÑAS EN TARJETA =================
+  function toggleBarberReviews(btn) {
+    const card = btn.closest('.barber-card');
+    if (!card) return;
+
+    // Cerrar otras tarjetas expandidas
+    document.querySelectorAll('.barber-card.reviews-expanded').forEach(c => {
+      if (c !== card) c.classList.remove('reviews-expanded');
+    });
+
+    // Toggle esta tarjeta
+    card.classList.toggle('reviews-expanded');
+  }
+
+  // ================= MODAL DE RESEÑAS =================
+  function openReviewsModal(barberoId, barberoName) {
+    const overlay = document.getElementById('reviewsModalOverlay');
+    const title = document.getElementById('reviewsModalTitle');
+    const subtitle = document.getElementById('reviewsModalSubtitle');
+    const body = document.getElementById('reviewsModalBody');
+
+    title.textContent = `Reseñas de ${barberoName}`;
+
+    const reviews = barberoReviews[barberoId] || [];
+
+    if (reviews.length === 0) {
+      subtitle.textContent = 'Sin reseñas aún';
+      body.innerHTML = `
+        <div style="text-align:center;padding:40px 20px;color:var(--text-secondary);">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:16px;opacity:0.5;">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          <p>Este barbero aún no tiene reseñas.</p>
+          <p style="font-size:13px;margin-top:8px;">¡Sé el primero en dejar tu opinión!</p>
+        </div>
+      `;
+    } else {
+      // Calcular estadísticas
+      const total = reviews.length;
+      const sum = reviews.reduce((s, r) => s + (r.calificacion || 0), 0);
+      const avg = (sum / total).toFixed(1);
+
+      // Distribución de estrellas
+      const dist = [0, 0, 0, 0, 0];
+      reviews.forEach(r => {
+        if (r.calificacion >= 1 && r.calificacion <= 5) {
+          dist[r.calificacion - 1]++;
+        }
+      });
+
+      subtitle.textContent = `${total} opinión${total !== 1 ? 'es' : ''} · Promedio ${avg}★`;
+
+      // Generar estrellas
+      const starsHTML = (rating) => {
+        let html = '';
+        for (let i = 1; i <= 5; i++) {
+          const filled = i <= rating;
+          html += `<svg viewBox="0 0 24 24" width="14" height="14" fill="${filled ? 'var(--gold)' : 'none'}" stroke="${filled ? 'var(--gold)' : 'var(--text-secondary)'}" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+        }
+        return html;
+      };
+
+      // Distribución visual
+      const maxCount = Math.max(...dist, 1);
+      let distHTML = '<div style="margin-bottom:20px;">';
+      for (let i = 5; i >= 1; i--) {
+        const count = dist[i - 1];
+        const pct = (count / maxCount) * 100;
+        distHTML += `
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;">
+            <span style="width:15px;text-align:right;">${i}</span>
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="var(--gold)" stroke="var(--gold)" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <div style="flex:1;height:8px;background:var(--bg-tertiary);border-radius:4px;overflow:hidden;">
+              <div style="width:${pct}%;height:100%;background:var(--gold);border-radius:4px;"></div>
+            </div>
+            <span style="width:25px;color:var(--text-secondary);font-size:12px;">${count}</span>
+          </div>
+        `;
+      }
+      distHTML += '</div>';
+
+      // Guardar reseñas para acceso por click
+      window._currentReviews = reviews;
+
+      // Lista de reseñas (clickeables)
+      let reviewsHTML = '<div style="display:flex;flex-direction:column;gap:16px;">';
+      reviews.forEach((r, idx) => {
+        const fecha = new Date(r.created_at);
+        const fechaStr = fecha.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+        const comentario = r.comentario ? `<p style="margin:8px 0 0;color:var(--text-primary);font-size:14px;line-height:1.5;">${r.comentario}</p>` : '';
+        const clienteName = r.cliente?.nombre || 'Cliente';
+
+        reviewsHTML += `
+          <div onclick="openReviewDetail(window._currentReviews[${idx}])" style="padding:16px;background:var(--bg-tertiary);border-radius:12px;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;" onmouseenter="this.style.transform='scale(1.02)';this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)';" onmouseleave="this.style.transform='';this.style.boxShadow='';">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="display:flex;gap:2px;">${starsHTML(r.calificacion)}</div>
+                <span style="font-size:12px;color:var(--gold);font-weight:600;">${clienteName}</span>
+              </div>
+              <span style="font-size:12px;color:var(--text-secondary);">${fechaStr}</span>
+            </div>
+            ${comentario}
+            <div style="margin-top:8px;font-size:11px;color:var(--text-secondary);display:flex;align-items:center;gap:4px;">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              Toca para ver mas
+            </div>
+          </div>
+        `;
+      });
+      reviewsHTML += '</div>';
+
+      body.innerHTML = distHTML + reviewsHTML;
+    }
+
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeReviewsModal() {
+    const overlay = document.getElementById('reviewsModalOverlay');
+    overlay.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  // ================= MODAL DE RESEÑA INDIVIDUAL =================
+  function calcularCategoria(cortes) {
+    cortes = cortes || 0;
+    if (cortes < 10) return null;
+    if (cortes < 30) return 'bronce';
+    if (cortes < 50) return 'plata';
+    if (cortes < 70) return 'oro';
+    return 'black';
+  }
+
+  function openReviewDetail(review) {
+    const overlay = document.getElementById('reviewDetailOverlay');
+    const title = document.getElementById('reviewDetailTitle');
+    const subtitle = document.getElementById('reviewDetailSubtitle');
+    const body = document.getElementById('reviewDetailBody');
+
+    const cliente = review.cliente || {};
+    const nombre = cliente.nombre || 'Cliente';
+    const cortes = cliente.cortes || 0;
+    const categoria = cliente.categoria || calcularCategoria(cortes);
+    const phone = cliente.phone || null;
+
+    title.textContent = nombre;
+
+    // Categoría badge
+    const catColors = { bronce: '#CD7F32', plata: '#C0C0C0', oro: '#FFD700', black: '#1a1a1a' };
+    const catBg = { bronce: 'rgba(205,127,50,0.15)', plata: 'rgba(192,192,192,0.15)', oro: 'rgba(255,215,0,0.15)', black: 'rgba(0,0,0,0.3)' };
+    const catIcons = { bronce: '🥉', plata: '🥈', oro: '🥇', black: '🏆' };
+
+    let categoriaBadge = '';
+    if (categoria) {
+      const catNombre = categoria.charAt(0).toUpperCase() + categoria.slice(1);
+      categoriaBadge = `<span style="background:${catBg[categoria]};color:${catColors[categoria]};padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;">${catIcons[categoria] || '⭐'} ${catNombre}</span>`;
+    }
+
+    subtitle.innerHTML = `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span style="background:var(--gold-glow);color:var(--gold);padding:4px 10px;border-radius:8px;font-size:12px;font-weight:600;">✂️ ${cortes} corte${cortes !== 1 ? 's' : ''}</span>
+      ${categoriaBadge}
+    </div>`;
+
+    // Estrellas de la reseña
+    const starsHTML = (rating) => {
+      let html = '';
+      for (let i = 1; i <= 5; i++) {
+        const filled = i <= rating;
+        html += `<svg viewBox="0 0 24 24" width="18" height="18" fill="${filled ? 'var(--gold)' : 'none'}" stroke="${filled ? 'var(--gold)' : 'var(--text-secondary)'}" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+      }
+      return html;
+    };
+
+    const fecha = new Date(review.created_at);
+    const fechaStr = fecha.toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' });
+
+    let bodyHTML = `
+      <div style="padding:16px;background:var(--bg-tertiary);border-radius:12px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="display:flex;gap:2px;">${starsHTML(review.calificacion)}</div>
+          <span style="font-size:12px;color:var(--text-secondary);">${fechaStr}</span>
+        </div>
+        ${review.comentario ? `<p style="margin:0;color:var(--text-primary);font-size:15px;line-height:1.5;">"${review.comentario}"</p>` : '<p style="margin:0;color:var(--text-secondary);font-style:italic;">Sin comentario</p>'}
+      </div>
+    `;
+
+    // Botón de WhatsApp
+    if (phone) {
+      const phoneClean = phone.replace(/\D/g, '');
+      const waLink = `https://wa.me/${phoneClean.startsWith('57') ? phoneClean : '57' + phoneClean}`;
+      bodyHTML += `
+        <a href="${waLink}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:10px;background:#25D366;color:white;padding:14px 20px;border-radius:12px;text-decoration:none;font-weight:700;font-size:14px;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Escribir por WhatsApp
+        </a>
+      `;
+    } else {
+      bodyHTML += `
+        <div style="text-align:center;padding:12px;color:var(--text-secondary);font-size:13px;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:4px;opacity:0.5;"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+          <p style="margin:4px 0 0;">Sin telefono registrado</p>
+        </div>
+      `;
+    }
+
+    body.innerHTML = bodyHTML;
+    overlay.classList.add('show');
+  }
+
+  function closeReviewDetail() {
+    const overlay = document.getElementById('reviewDetailOverlay');
+    overlay.classList.remove('show');
+  }
+
+  buildDayScroller();
+  loadServicios();
+  initSedeFlow();
+  initMarketingPixels();
+  initCarouselNavs();
+</script>
+
+</body>
+</html>

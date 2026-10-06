@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Keicy Barbería · Reportes</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/mobile-admin.css">
+<style>
+  /* Variables heredadas de design-system.css */
+  body{ overflow-x:hidden; background:var(--bg); }
+  #app{ display:flex; min-height:100vh; }
+  .main{ flex:1; min-width:0; max-width:1440px; margin:0 auto; padding:26px 30px 60px; width:100%; }
+
+  .sidebar{ width:60px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--divider); display:flex; flex-direction:column; align-items:center; padding:20px 6px; position:sticky; top:0; height:100vh; z-index:40; overflow:hidden; overflow-y:auto; transition:width .28s cubic-bezier(.4,0,.2,1), padding .28s ease; }
+  .sidebar.expanded{ width:230px; align-items:stretch; padding:22px 16px; }
+  .sidebar-logo{ display:block; cursor:pointer; margin:0 auto; }
+  .sidebar-logo-icon{ width:48px; height:48px; border-radius:12px; margin-bottom:26px; }
+  .sidebar-logo-full{ height:56px; margin-bottom:28px; display:none; border-radius:12px; }
+  .sidebar.expanded .sidebar-logo-icon{ display:none; }
+  .sidebar.expanded .sidebar-logo-full{ display:block; }
+  .nav-group{ flex:1; display:flex; flex-direction:column; gap:3px; overflow-y:auto; width:100%; min-width:0; }
+  .nav-link{ display:flex; align-items:center; gap:12px; justify-content:center; width:40px; height:40px; margin:0 auto; padding:0; border-radius:12px; font-size:13.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:background .15s ease, color .15s ease; text-decoration:none; white-space:nowrap; }
+  .sidebar.expanded .nav-link{ justify-content:flex-start; width:100%; height:auto; margin:0; padding:11px 12px; }
+  .nav-link svg{ width:22px; height:22px; flex-shrink:0; }
+  .nav-link:hover{ background:var(--card); color:var(--text); }
+  .nav-link.active{ background:var(--gold); color:#141414; }
+  .nav-link.active svg{ stroke:#141414; }
+  .nav-label{ opacity:0; max-width:0; overflow:hidden; transition:opacity .16s ease, max-width .26s ease; }
+  .sidebar.expanded .nav-label{ opacity:1; max-width:170px; }
+    .sidebar-card{ display:none; position:relative; align-items:center; gap:9px; padding:9px; border-radius:14px; background:var(--glass-2, rgba(255,255,255,0.04)); border:1px solid var(--glass-border); margin-bottom:16px; cursor:pointer; }
+  .sidebar.expanded .sidebar-card{ display:flex; }
+  .sidebar-card-avatar{ width:32px; height:32px; border-radius:50%; background:var(--gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:800; flex-shrink:0; }
+  .sidebar-card-info{ flex:1; min-width:0; }
+  .sidebar-card-name{ font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-card-sub{ font-size:10.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+  .sidebar-card-chevron{ width:14px; height:14px; color:var(--text-secondary); flex-shrink:0; }
+  .sidebar-card-menu{ display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--card, #1c1c1c); border:1px solid var(--glass-border); border-radius:12px; padding:6px; z-index:60; max-height:220px; overflow-y:auto; box-shadow:0 12px 30px rgba(0,0,0,0.4); }
+  .sidebar-card-menu.show{ display:block; }
+  .sidebar-card-menu-item{ padding:9px 10px; border-radius:8px; font-size:12px; font-weight:600; color:var(--text-secondary); cursor:pointer; }
+  .sidebar-card-menu-item:hover{ background:var(--glass-2, rgba(255,255,255,0.06)); color:var(--text); }
+  .sidebar-card-menu-item.active{ color:var(--gold); font-weight:700; }
+  .nav-section-label{ display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
+  .nav-section-label:first-of-type{ padding-top:2px; }
+  .sidebar.expanded .nav-section-label{ display:block; }
+  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0; display:none; }
+  .sidebar.expanded .plan-card{ display:block; }
+  .plan-card .label{ font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--gold); text-transform:uppercase; display:flex; align-items:center; gap:6px; }
+  .plan-card .sub{ font-size:12px; color:var(--text-secondary); margin-top:6px; }
+  .sidebar-bottom { margin-top:auto; padding-top:12px; border-top:1px solid var(--divider); display:flex; flex-direction:column; gap:8px; width:100%; }
+  .logout-btn { font-size:12px; color:#EF5350; display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; cursor:pointer; width:40px; height:40px; border-radius:10px; background:rgba(239,83,80,0.1); border:1px solid rgba(239,83,80,0.2); }
+  .sidebar.expanded .logout-btn { justify-content:flex-start; width:100%; height:auto; padding:10px 12px; margin:0; }
+  .logout-btn:hover { background:rgba(239,83,80,0.2); }
+  .logout-btn svg { width:16px; height:16px; flex-shrink:0; }
+  .logout-label { display:none; }
+  .sidebar.expanded .logout-label { display:inline; }
+  .help-link{ margin-top:14px; font-size:12.5px; color:var(--text-secondary); display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; cursor:pointer; width:100%; }
+  .sidebar.expanded .help-link{ justify-content:flex-start; }
+  .help-link:hover{ color:var(--text); }
+
+  .header-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; gap:14px; flex-wrap:wrap; }
+  .header-left{ display:flex; align-items:center; gap:14px; }
+  .header-left img{ height:40px; cursor:pointer; }
+  .header-title{ font-size:21px; font-weight:800; }
+  .header-sub{ font-size:12.5px; color:var(--text-secondary); }
+
+  .panel{
+    background:var(--glass); backdrop-filter:blur(16px); border:1px solid var(--glass-border);
+    border-radius:22px; padding:22px 24px; box-shadow:0 20px 50px rgba(0,0,0,0.3);
+  }
+  .panel-title{ font-size:16px; font-weight:800; }
+  .panel-sub{ font-size:12.5px; color:var(--text-secondary); margin-top:2px; }
+
+  /* ---- Filtros ---- */
+  .filter-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; align-items:center; }
+  .range-btn{ padding:10px 16px; border-radius:12px; font-size:13px; font-weight:700; cursor:pointer; background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text-secondary); }
+  .range-btn.active{ background:var(--gold); color:#141414; border-color:var(--gold); }
+  .filter-select, .filter-date{ height:42px; border-radius:12px; padding:0 12px; background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text); font-size:13px; font-family:inherit; }
+
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+  @media (max-width:900px){ .kpi-grid{ grid-template-columns:repeat(2,1fr); } }
+  .kpi-card{ padding:16px 18px; }
+  .kpi-card .lbl{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--text-secondary); }
+  .kpi-card .val{ font-size:22px; font-weight:800; margin-top:5px; }
+  .kpi-card .val.gold{ color:var(--gold); }
+  .kpi-card .val.bad{ color:var(--error); }
+  .bar-fill.over{ background:linear-gradient(90deg, var(--success), #6fe08a); }
+  .chart-meta-line{ stroke:var(--text-secondary); stroke-width:1.5; stroke-dasharray:5 4; }
+  .chart-meta-label{ font-size:9.5px; fill:var(--text-secondary); font-weight:700; }
+  .kpi-card .sub{ font-size:11px; color:var(--text-secondary); margin-top:3px; }
+
+  .chart-wrap{ position:relative; margin-top:6px; }
+  .chart-day-labels{ display:flex; justify-content:space-between; margin-top:6px; font-size:10.5px; color:var(--text-secondary); padding:0 4px; }
+
+  .split-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; align-items:start; }
+  @media (max-width:900px){ .split-grid{ grid-template-columns:1fr; } }
+
+  .bar-row{ margin-bottom:12px; }
+  .bar-row:last-child{ margin-bottom:0; }
+  .bar-row-top{ display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:5px; }
+  .bar-row-top .name{ font-weight:700; }
+  .bar-row-top .amt{ font-weight:800; color:var(--gold); }
+  .bar-track{ height:8px; border-radius:999px; background:var(--glass-2); overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:999px; background:linear-gradient(90deg, var(--gold), var(--gold-bright)); }
+
+  .empty-row{ padding:24px 0; text-align:center; color:var(--text-secondary); font-size:13px; }
+
+  @media (max-width:767px){
+    .sidebar{ display:none; }
+    .main{ padding:calc(16px + var(--safe-top)) var(--page-padding-x) calc(96px + var(--safe-bottom)); }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <script>
+    if (localStorage.getItem('dnNavExpanded') === '1' && window.innerWidth > 767) {
+      document.write('<style>@media(min-width:768px){#sidebar{width:230px!important;align-items:stretch!important;padding:22px 16px!important;}}</style>');
+    }
+  </script>
+  <div class="sidebar" id="sidebar">
+    <img src="../assets/apple-touch-icon-v2.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
+    <img src="../assets/logo-transparent.png" class="sidebar-logo sidebar-logo-full" alt="Keicy Barbería" id="sidebarLogoFull">
+    <div class="sidebar-card" id="sidebarCard" title="Cambiar de sede">
+      <div class="sidebar-card-avatar">DN</div>
+      <div class="sidebar-card-info">
+        <div class="sidebar-card-name" id="sidebarCardName">Keicy Barbería</div>
+        <div class="sidebar-card-sub" id="sidebarCardSede">—</div>
+      </div>
+      <svg class="sidebar-card-chevron" id="sidebarCardChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="sidebar-card-menu" id="sidebarCardMenu"></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-section-label">Gestionar</div>
+      <a class="nav-link" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Resumen
+      </a>
+      <a class="nav-link" href="calendario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        Agenda
+      </a>
+      <a class="nav-link" href="clientes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg>
+        Clientes
+      </a>
+      <a class="nav-link" href="caja.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        Cuadre de caja
+      </a>
+      <a class="nav-link" href="fidelizacion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z" stroke-linejoin="round"/></svg>
+        Fidelización
+      </a>
+      <div class="nav-section-label">Desempeño</div>
+      <a class="nav-link" href="servicios.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
+        Servicios
+      </a>
+      <a class="nav-link" href="barberos.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2M14.5 14.8c2 .3 3.7 1.7 4.5 4.2" stroke-linecap="round"/></svg>
+        Colaboradores
+      </a>      <a class="nav-link" href="inventario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+        Inventario
+      </a>
+      <a class="nav-link active" href="reportes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7" stroke-linecap="round"/></svg>
+        Reportes
+      </a>
+      <a class="nav-link" href="marketing.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4h4l6 5V5L7 10H3z"/></svg>
+        Marketing
+      </a>
+      <a class="nav-link" href="configuracion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="logout-label">Cerrar sesión</span>
+      </div>
+      <div class="plan-card">
+        <div class="label">👑 Plan de por vida</div>
+        <div class="sub">✓ Crisbo</div>
+      </div>
+      <div class="help-link" onclick="toast('Abriendo centro de ayuda…')">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2 1.9-2 3.5" stroke-linecap="round"/><circle cx="12" cy="16.3" r="0.6" fill="currentColor"/></svg>
+        Centro de ayuda
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <div class="header-row fade-in">
+      <div class="header-left">
+        <img src="../assets/logo-transparent.png" alt="Keicy Barber" onclick="window.location.href='dashboard.html'">
+        <div>
+          <div class="header-title">Reportes</div>
+          <div class="header-sub">Ingresos, comisiones y desempeño del negocio.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-row fade-in">
+      <div class="range-btn active" data-range="7">Últimos 7 días</div>
+      <div class="range-btn" data-range="30">Últimos 30 días</div>
+      <div class="range-btn" data-range="mes">Este mes</div>
+      <div class="range-btn" data-range="custom">Personalizado</div>
+      <input type="date" class="filter-date" id="customFrom" style="display:none;">
+      <input type="date" class="filter-date" id="customTo" style="display:none;">
+      <select class="filter-select" id="sedeSelect" style="display:none;"></select>
+      <div style="flex:1;"></div>
+      <div class="range-btn" id="exportPdfBtn" onclick="exportReportePDF()">⬇ PDF</div>
+      <div class="range-btn" id="exportExcelBtn" onclick="exportReporteExcel()">⬇ Excel</div>
+    </div>
+
+    <div class="kpi-grid fade-in">
+      <div class="card kpi-card"><div class="lbl">Ingresos totales</div><div class="val gold" id="kIngresos">—</div><div class="sub" id="kIngresosSub">—</div></div>
+      <div class="card kpi-card"><div class="lbl">Utilidad neta</div><div class="val" id="kUtilidad">—</div><div class="sub">Ingresos − comisiones − gastos</div></div>
+      <div class="card kpi-card"><div class="lbl">Gastos del período</div><div class="val" id="kGastos">—</div><div class="sub" id="kGastosSub">—</div></div>
+      <div class="card kpi-card"><div class="lbl">Cumplimiento de meta</div><div class="val gold" id="kMetaPct">—</div><div class="sub" id="kMetaSub">—</div></div>
+      <div class="card kpi-card"><div class="lbl">Citas finalizadas</div><div class="val" id="kCitas">—</div></div>
+      <div class="card kpi-card"><div class="lbl">Ticket promedio</div><div class="val" id="kTicket">—</div></div>
+      <div class="card kpi-card"><div class="lbl">Comisiones a barberos</div><div class="val" id="kComisiones">—</div></div>
+    </div>
+
+    <div class="panel fade-in" style="margin-bottom:20px;">
+      <div class="panel-title">Ingresos por día</div>
+      <div class="panel-sub" id="chartSub">—</div>
+      <div class="chart-wrap">
+        <svg viewBox="0 0 560 180" style="width:100%; height:170px;">
+          <defs>
+            <linearGradient id="repAreaFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#D4AF55" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#D4AF55" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <g id="chartContent"></g>
+        </svg>
+        <div class="chart-day-labels" id="chartLabels"></div>
+      </div>
+    </div>
+
+    <div class="split-grid">
+      <div class="panel fade-in">
+        <div class="panel-title">Ingresos por servicio</div>
+        <div class="panel-sub">Top servicios del período.</div>
+        <div id="porServicio" style="margin-top:14px;"><div class="empty-row">Cargando…</div></div>
+      </div>
+      <div class="panel fade-in">
+        <div class="panel-title">Ingresos por barbero</div>
+        <div class="panel-sub">Ventas generadas y comisión calculada.</div>
+        <div id="porBarbero" style="margin-top:14px;"><div class="empty-row">Cargando…</div></div>
+      </div>
+    </div>
+
+    <div class="split-grid">
+      <div class="panel fade-in">
+        <div class="panel-title">Ingresos por método de pago</div>
+        <div class="panel-sub">Distribución del período.</div>
+        <div id="porMetodo" style="margin-top:14px;"><div class="empty-row">Cargando…</div></div>
+      </div>
+      <div class="panel fade-in" id="porSedePanel" style="display:none;">
+        <div class="panel-title">Ingresos por sede</div>
+        <div class="panel-sub">Comparativo entre sucursales.</div>
+        <div id="porSede" style="margin-top:14px;"><div class="empty-row">Cargando…</div></div>
+      </div>
+    </div>
+
+    <div class="split-grid">
+      <div class="panel fade-in">
+        <div class="panel-title">Gastos por concepto</div>
+        <div class="panel-sub">Egresos registrados en caja durante el período.</div>
+        <div id="porGasto" style="margin-top:14px;"><div class="empty-row">Cargando…</div></div>
+      </div>
+      <div class="panel fade-in">
+        <div class="panel-title">Meta diaria</div>
+        <div class="panel-sub" id="metaPanelSub">—</div>
+        <div style="margin-top:18px;">
+          <div class="bar-track" style="height:14px; border-radius:10px;"><div class="bar-fill" id="metaBarFill" style="width:0%; border-radius:10px;"></div></div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-secondary); margin-top:10px;">
+            <span id="metaRealTxt">Real: —</span>
+            <span id="metaMetaTxt">Meta: —</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"><span class="toast-dot"></span><span id="toastText"></span></div>
+
+<!-- Barra de navegación inferior — idéntica en todas las páginas del panel -->
+<div class="dn-bottom-nav">
+      <a href="calendario.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        Agenda
+      </a>
+      <a href="caja.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        Cuadre de caja
+      </a>
+      <a href="dashboard.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Resumen
+      </a>
+      <a href="configuracion.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+  const toastEl = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  function toast(msg){
+    toastText.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(window._t);
+    window._t = setTimeout(() => toastEl.classList.remove('show'), 2400);
+  }
+
+  const sidebarEl = document.getElementById('sidebar');
+  document.querySelectorAll('.nav-link, .help-link').forEach(el => {
+    const lastNode = el.lastChild;
+    if (lastNode && lastNode.nodeType === 3 && lastNode.textContent.trim()) {
+      const span = document.createElement('span');
+      span.className = 'nav-label';
+      span.textContent = lastNode.textContent.trim();
+      el.replaceChild(span, lastNode);
+    }
+  });
+  function dnSetNavExpanded(exp){
+    sidebarEl.classList.toggle('expanded', exp);
+    localStorage.setItem('dnNavExpanded', exp ? '1' : '0');
+  }
+  dnSetNavExpanded(localStorage.getItem('dnNavExpanded') === '1');
+  document.getElementById('sidebarLogoIcon').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+  document.getElementById('sidebarLogoFull').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+
+  // Cerrar sesión
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    if (confirm('¿Seguro que deseas cerrar sesión?')) {
+      dnClearSession();
+      window.location.href = '../auth.html';
+    }
+  });
+
+  const user = dnRequireAdmin();
+  dnInitSidebarCard();
+
+  let currentRange = '7';
+  let sedes = [];
+  let sedeFiltro = '';
+  let metaDiariaGlobal = 0;
+  let lastReportData = null; // snapshot del último período cargado, para exportar a PDF/Excel
+
+  function daysBetweenInclusive(from, to){
+    const d1 = new Date(from + 'T00:00:00');
+    const d2 = new Date(to + 'T00:00:00');
+    return Math.max(1, Math.round((d2 - d1) / 86400000) + 1);
+  }
+
+  function isoDaysAgo(n){
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+
+  function getRangeDates(){
+    const today = dnTodayISO();
+    if (currentRange === '7') return { from: isoDaysAgo(6), to: today };
+    if (currentRange === '30') return { from: isoDaysAgo(29), to: today };
+    if (currentRange === 'mes') {
+      const d = new Date();
+      const first = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-01';
+      return { from: first, to: today };
+    }
+    // custom
+    const from = document.getElementById('customFrom').value || isoDaysAgo(6);
+    const to = document.getElementById('customTo').value || today;
+    return { from, to };
+  }
+
+  document.querySelectorAll('.range-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentRange = btn.dataset.range;
+      const isCustom = currentRange === 'custom';
+      document.getElementById('customFrom').style.display = isCustom ? 'block' : 'none';
+      document.getElementById('customTo').style.display = isCustom ? 'block' : 'none';
+      if (!isCustom || (document.getElementById('customFrom').value && document.getElementById('customTo').value)) {
+        loadReportes();
+      }
+    });
+  });
+  document.getElementById('customFrom').addEventListener('change', () => { if (currentRange === 'custom') loadReportes(); });
+  document.getElementById('customTo').addEventListener('change', () => { if (currentRange === 'custom') loadReportes(); });
+
+  async function initSedeSelector(){
+    try {
+      sedes = await dnLoadSucursales(true);
+      if (sedes.length > 1) {
+        const sel = document.getElementById('sedeSelect');
+        sel.innerHTML = '<option value="">Todas las sedes</option>' + sedes.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
+        sel.style.display = 'block';
+        sel.addEventListener('change', () => { sedeFiltro = sel.value; loadReportes(); });
+        document.getElementById('porSedePanel').style.display = 'block';
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function initConfig(){
+    try {
+      const { data, error } = await sb.from('configuracion_negocio').select('meta_diaria').eq('id', true).maybeSingle();
+      if (error) throw error;
+      metaDiariaGlobal = Number(data?.meta_diaria) || 0;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function loadReportes(){
+    const { from, to } = getRangeDates();
+    document.getElementById('chartSub').textContent = `${dnFormatDateRange(from,to)}`;
+    document.getElementById('kIngresosSub').textContent = dnFormatDateRange(from,to);
+
+    try {
+      // AISLAMIENTO TEST: Obtener IDs de sedes TEST para excluirlas de reportes
+      const sedesTestIds = await dnGetSedesTestIds();
+
+      let query = sb.from('citas')
+        .select('fecha, precio, metodo_pago, comision_calculada, servicio_id, servicios(nombre), barbero_id, barberos(comision_pct, usuarios!barberos_id_fkey(full_name, username)), sucursal_id')
+        .eq('estado', 'finalizada')
+        .gte('fecha', from)
+        .lte('fecha', to);
+      if (sedeFiltro) {
+        query = query.eq('sucursal_id', sedeFiltro);
+      } else if (sedesTestIds.length > 0) {
+        // Excluir sedes TEST de reportes globales
+        query = query.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      const citas = data || [];
+
+      // Gastos del período: caja_movimientos (tipo='gasto') de las sesiones de caja en el rango de fechas.
+      let sesQuery = sb.from('caja_sesiones').select('id').gte('fecha', from).lte('fecha', to);
+      if (sedeFiltro) {
+        sesQuery = sesQuery.eq('sucursal_id', sedeFiltro);
+      } else if (sedesTestIds.length > 0) {
+        sesQuery = sesQuery.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+      }
+      const { data: sesionesPeriodo, error: sesError } = await sesQuery;
+      if (sesError) throw sesError;
+      const sesionIds = (sesionesPeriodo || []).map(s => s.id);
+      let gastos = [];
+      if (sesionIds.length) {
+        const { data: movs, error: movError } = await sb.from('caja_movimientos')
+          .select('monto, descripcion')
+          .eq('tipo', 'gasto')
+          .in('sesion_id', sesionIds);
+        if (movError) throw movError;
+        gastos = movs || [];
+      }
+      const totalGastos = gastos.reduce((s,m) => s + (Number(m.monto)||0), 0);
+
+      // KPIs
+      const totalIngresos = citas.reduce((s,c) => s + (Number(c.precio)||0), 0);
+      const totalComisiones = citas.reduce((s,c) => s + (Number(c.comision_calculada)||0), 0);
+      const utilidadNeta = totalIngresos - totalComisiones - totalGastos;
+      document.getElementById('kIngresos').textContent = dnFormatCOP(totalIngresos);
+      document.getElementById('kCitas').textContent = citas.length;
+      document.getElementById('kTicket').textContent = dnFormatCOP(citas.length ? totalIngresos/citas.length : 0);
+      document.getElementById('kComisiones').textContent = dnFormatCOP(totalComisiones);
+      const kUtilidadEl = document.getElementById('kUtilidad');
+      kUtilidadEl.textContent = dnFormatCOP(utilidadNeta);
+      kUtilidadEl.classList.toggle('bad', utilidadNeta < 0);
+      document.getElementById('kGastos').textContent = dnFormatCOP(totalGastos);
+      document.getElementById('kGastosSub').textContent = `${gastos.length} movimiento${gastos.length === 1 ? '' : 's'}`;
+
+      // Meta diaria: comparar ingresos del período vs (meta_diaria × días del período)
+      const dias = daysBetweenInclusive(from, to);
+      const metaPeriodo = metaDiariaGlobal * dias;
+      const cumplimientoPct = metaPeriodo > 0 ? Math.round((totalIngresos / metaPeriodo) * 100) : 0;
+      document.getElementById('kMetaPct').textContent = `${cumplimientoPct}%`;
+      document.getElementById('kMetaSub').textContent = metaPeriodo > 0 ? `Meta: ${dnFormatCOP(metaPeriodo)}` : 'Sin meta configurada';
+
+      document.getElementById('metaPanelSub').textContent = dnFormatDateRange(from, to);
+      const metaBarFill = document.getElementById('metaBarFill');
+      metaBarFill.style.width = `${Math.min(100, cumplimientoPct)}%`;
+      metaBarFill.classList.toggle('over', cumplimientoPct >= 100);
+      document.getElementById('metaRealTxt').textContent = `Real: ${dnFormatCOP(totalIngresos)}`;
+      document.getElementById('metaMetaTxt').textContent = metaPeriodo > 0 ? `Meta: ${dnFormatCOP(metaPeriodo)}` : 'Meta: sin configurar';
+
+      lastReportData = { from, to, citas, gastos, totalIngresos, totalComisiones, totalGastos, utilidadNeta, metaPeriodo, cumplimientoPct };
+
+      renderChart(citas, from, to);
+      renderPorServicio(citas, totalIngresos);
+      renderPorBarbero(citas, totalIngresos);
+      renderPorMetodo(citas, totalIngresos);
+      renderPorGasto(gastos);
+      if (sedes.length > 1) renderPorSede(citas, totalIngresos);
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos cargar los reportes.');
+    }
+  }
+
+  function dnFormatDateRange(from, to){
+    const f = new Date(from + 'T00:00:00').toLocaleDateString('es-CO', { day:'numeric', month:'short' });
+    const t = new Date(to + 'T00:00:00').toLocaleDateString('es-CO', { day:'numeric', month:'short', year:'numeric' });
+    return `${f} — ${t}`;
+  }
+
+  function renderChart(citas, from, to){
+    const dias = [];
+    let d = new Date(from + 'T00:00:00');
+    const end = new Date(to + 'T00:00:00');
+    while (d <= end) {
+      dias.push(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'));
+      d.setDate(d.getDate() + 1);
+    }
+    const totalsByDay = dias.map(dia => citas.filter(c => c.fecha === dia).reduce((s,c) => s + (Number(c.precio)||0), 0));
+    const maxVal = Math.max(...totalsByDay, metaDiariaGlobal, 1);
+
+    const chartW = 560, chartH = 180, padX = 10, padTop = 20, padBottom = 20;
+    const usableW = chartW - padX*2;
+    const usableH = chartH - padTop - padBottom;
+    const points = totalsByDay.map((v,i) => {
+      const x = dias.length > 1 ? padX + (usableW * i/(dias.length-1)) : chartW/2;
+      const y = padTop + usableH - (v/maxVal)*usableH;
+      return [x,y];
+    });
+    const polyPoints = points.map(p => p.join(',')).join(' ');
+    const polygonPoints = points.length > 1 ? polyPoints + ` ${points[points.length-1][0]},${chartH-padBottom} ${points[0][0]},${chartH-padBottom}` : '';
+    const dots = points.map(([x,y]) => `<circle cx="${x}" cy="${y}" r="3.5" fill="#D4AF55"/>`).join('');
+    const metaY = metaDiariaGlobal > 0 ? padTop + usableH - (metaDiariaGlobal/maxVal)*usableH : null;
+    const metaLine = metaY !== null ? `
+      <line x1="${padX}" y1="${metaY}" x2="${chartW-padX}" y2="${metaY}" class="chart-meta-line"/>
+      <text x="${chartW-padX}" y="${metaY-5}" text-anchor="end" class="chart-meta-label">Meta diaria</text>` : '';
+    document.getElementById('chartContent').innerHTML = `
+      ${metaLine}
+      <polyline points="${polyPoints}" fill="none" stroke="#D4AF55" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      ${polygonPoints ? `<polygon points="${polygonPoints}" fill="url(#repAreaFill)"/>` : ''}
+      ${dots}
+    `;
+
+    // Etiquetas: si son muchos días, mostrar solo algunos para no saturar
+    const maxLabels = 8;
+    const step = Math.max(1, Math.ceil(dias.length / maxLabels));
+    const labelsHtml = dias.map((dia, i) => {
+      if (i % step !== 0 && i !== dias.length - 1) return '';
+      const dt = new Date(dia + 'T00:00:00');
+      return `<span>${dt.toLocaleDateString('es-CO', { day:'numeric', month:'short' })}</span>`;
+    }).filter(Boolean).join('');
+    document.getElementById('chartLabels').innerHTML = labelsHtml;
+  }
+
+  function barRowsHtml(items, maxVal){
+    return items.map(it => `
+      <div class="bar-row">
+        <div class="bar-row-top"><span class="name">${it.name}</span><span class="amt">${dnFormatCOP(it.value)}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${maxVal ? Math.max(4, (it.value/maxVal)*100) : 0}%;"></div></div>
+      </div>`).join('');
+  }
+
+  function renderPorServicio(citas, total){
+    const el = document.getElementById('porServicio');
+    const map = {};
+    citas.forEach(c => {
+      const nombre = c.servicios?.nombre || 'Otro';
+      map[nombre] = (map[nombre] || 0) + (Number(c.precio)||0);
+    });
+    const items = Object.entries(map).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value).slice(0, 8);
+    if (!items.length) { el.innerHTML = '<div class="empty-row">Sin datos en este período.</div>'; return; }
+    const maxVal = Math.max(...items.map(i => i.value));
+    el.innerHTML = barRowsHtml(items, maxVal);
+  }
+
+  function renderPorBarbero(citas, total){
+    const el = document.getElementById('porBarbero');
+    const map = {};
+    citas.forEach(c => {
+      const nombre = c.barberos?.usuarios?.full_name || c.barberos?.usuarios?.username || 'Sin asignar';
+      if (!map[nombre]) map[nombre] = { ventas: 0, comision: 0 };
+      map[nombre].ventas += (Number(c.precio)||0);
+      map[nombre].comision += (Number(c.comision_calculada)||0);
+    });
+    const items = Object.entries(map).map(([name, v]) => ({ name, value: v.ventas, comision: v.comision })).sort((a,b) => b.value - a.value).slice(0, 8);
+    if (!items.length) { el.innerHTML = '<div class="empty-row">Sin datos en este período.</div>'; return; }
+    const maxVal = Math.max(...items.map(i => i.value));
+    el.innerHTML = items.map(it => `
+      <div class="bar-row">
+        <div class="bar-row-top"><span class="name">${it.name}</span><span class="amt">${dnFormatCOP(it.value)}</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${maxVal ? Math.max(4, (it.value/maxVal)*100) : 0}%;"></div></div>
+        <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">Comisión: ${dnFormatCOP(it.comision)}</div>
+      </div>`).join('');
+  }
+
+  const METODO_LABEL = { tarjeta: 'Tarjeta', nequi: 'Nequi', daviplata: 'Daviplata', apple_pay: 'Apple Pay', google_pay: 'Google Pay', efectivo: 'Efectivo' };
+  function renderPorMetodo(citas, total){
+    const el = document.getElementById('porMetodo');
+    const map = {};
+    citas.forEach(c => {
+      const metodo = METODO_LABEL[c.metodo_pago] || 'Sin registrar';
+      map[metodo] = (map[metodo] || 0) + (Number(c.precio)||0);
+    });
+    const items = Object.entries(map).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
+    if (!items.length) { el.innerHTML = '<div class="empty-row">Sin datos en este período.</div>'; return; }
+    const maxVal = Math.max(...items.map(i => i.value));
+    el.innerHTML = barRowsHtml(items, maxVal);
+  }
+
+  function renderPorGasto(gastos){
+    const el = document.getElementById('porGasto');
+    const map = {};
+    gastos.forEach(g => {
+      const nombre = g.descripcion?.trim() || 'Sin descripción';
+      map[nombre] = (map[nombre] || 0) + (Number(g.monto)||0);
+    });
+    const items = Object.entries(map).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value).slice(0, 8);
+    if (!items.length) { el.innerHTML = '<div class="empty-row">Sin gastos registrados en este período.</div>'; return; }
+    const maxVal = Math.max(...items.map(i => i.value));
+    el.innerHTML = barRowsHtml(items, maxVal);
+  }
+
+  function renderPorSede(citas, total){
+    const el = document.getElementById('porSede');
+    const map = {};
+    citas.forEach(c => {
+      const sede = sedes.find(s => s.id === c.sucursal_id);
+      const nombre = sede?.nombre || 'Sin sede';
+      map[nombre] = (map[nombre] || 0) + (Number(c.precio)||0);
+    });
+    const items = Object.entries(map).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
+    if (!items.length) { el.innerHTML = '<div class="empty-row">Sin datos en este período.</div>'; return; }
+    const maxVal = Math.max(...items.map(i => i.value));
+    el.innerHTML = barRowsHtml(items, maxVal);
+  }
+
+  // ---- Exportar reporte del período seleccionado ----
+  function buildBreakdowns(citas, gastos){
+    const porServicio = {};
+    citas.forEach(c => { const n = c.servicios?.nombre || 'Otro'; porServicio[n] = (porServicio[n]||0) + (Number(c.precio)||0); });
+
+    const porBarbero = {};
+    citas.forEach(c => {
+      const n = c.barberos?.usuarios?.full_name || c.barberos?.usuarios?.username || 'Sin asignar';
+      if (!porBarbero[n]) porBarbero[n] = { ventas:0, comision:0 };
+      porBarbero[n].ventas += Number(c.precio)||0;
+      porBarbero[n].comision += Number(c.comision_calculada)||0;
+    });
+
+    const porMetodo = {};
+    citas.forEach(c => { const n = METODO_LABEL[c.metodo_pago] || 'Sin registrar'; porMetodo[n] = (porMetodo[n]||0) + (Number(c.precio)||0); });
+
+    const porGasto = {};
+    gastos.forEach(g => { const n = g.descripcion?.trim() || 'Sin descripción'; porGasto[n] = (porGasto[n]||0) + (Number(g.monto)||0); });
+
+    return { porServicio, porBarbero, porMetodo, porGasto };
+  }
+
+  function exportReportePDF(){
+    if (!lastReportData) { toast('Espera a que carguen los datos del período.'); return; }
+    const { from, to, citas, gastos, totalIngresos, totalComisiones, totalGastos, utilidadNeta } = lastReportData;
+    const { porServicio, porBarbero, porMetodo, porGasto } = buildBreakdowns(citas, gastos);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(16); doc.setFont(undefined, 'bold');
+    doc.text('Keicy Barbería · Reporte financiero', 14, 18);
+    doc.setFontSize(10); doc.setFont(undefined, 'normal');
+    doc.text(`Período: ${dnFormatDateRange(from, to)}`, 14, 25);
+
+    doc.autoTable({
+      startY: 32,
+      head: [['Indicador', 'Valor']],
+      body: [
+        ['Ingresos totales', dnFormatCOP(totalIngresos)],
+        ['Utilidad neta', dnFormatCOP(utilidadNeta)],
+        ['Comisiones a barberos', dnFormatCOP(totalComisiones)],
+        ['Gastos del período', dnFormatCOP(totalGastos)],
+        ['Citas finalizadas', String(citas.length)],
+        ['Ticket promedio', dnFormatCOP(citas.length ? totalIngresos/citas.length : 0)],
+      ],
+      theme: 'grid', headStyles: { fillColor: [201,163,91] }, styles: { fontSize: 9 }
+    });
+
+    let y = doc.lastAutoTable.finalY + 10;
+    const addSection = (title, rows, headers) => {
+      if (!rows.length) return;
+      doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.text(title, 14, y);
+      doc.autoTable({ startY: y + 3, head: [headers], body: rows, theme: 'striped', headStyles: { fillColor: [40,40,40] }, styles: { fontSize: 8.5 } });
+      y = doc.lastAutoTable.finalY + 10;
+    };
+
+    addSection('Ingresos por servicio', Object.entries(porServicio).sort((a,b)=>b[1]-a[1]).map(([n,v])=>[n, dnFormatCOP(v)]), ['Servicio','Ingresos']);
+    addSection('Ingresos por barbero', Object.entries(porBarbero).sort((a,b)=>b[1].ventas-a[1].ventas).map(([n,v])=>[n, dnFormatCOP(v.ventas), dnFormatCOP(v.comision)]), ['Barbero','Ventas','Comisión']);
+    addSection('Ingresos por método de pago', Object.entries(porMetodo).sort((a,b)=>b[1]-a[1]).map(([n,v])=>[n, dnFormatCOP(v)]), ['Método','Total']);
+    addSection('Gastos por concepto', Object.entries(porGasto).sort((a,b)=>b[1]-a[1]).map(([n,v])=>[n, dnFormatCOP(v)]), ['Concepto','Monto']);
+
+    doc.save(`reporte-diego-neira-${from}_a_${to}.pdf`);
+    toast('PDF descargado.');
+  }
+
+  function exportReporteExcel(){
+    if (!lastReportData) { toast('Espera a que carguen los datos del período.'); return; }
+    const { from, to, citas, gastos, totalIngresos, totalComisiones, totalGastos, utilidadNeta } = lastReportData;
+    const { porServicio, porBarbero, porMetodo, porGasto } = buildBreakdowns(citas, gastos);
+    const wb = XLSX.utils.book_new();
+
+    const resumenRows = [
+      ['Keicy Barbería · Reporte financiero'],
+      [`Período: ${dnFormatDateRange(from, to)}`],
+      [],
+      ['Indicador', 'Valor'],
+      ['Ingresos totales', totalIngresos],
+      ['Utilidad neta', utilidadNeta],
+      ['Comisiones a barberos', totalComisiones],
+      ['Gastos del período', totalGastos],
+      ['Citas finalizadas', citas.length],
+      ['Ticket promedio', citas.length ? Math.round(totalIngresos/citas.length) : 0],
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumenRows), 'Resumen');
+
+    const servRows = [['Servicio','Ingresos'], ...Object.entries(porServicio).sort((a,b)=>b[1]-a[1])];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(servRows), 'Por servicio');
+
+    const barbRows = [['Barbero','Ventas','Comisión'], ...Object.entries(porBarbero).sort((a,b)=>b[1].ventas-a[1].ventas).map(([n,v])=>[n, v.ventas, v.comision])];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(barbRows), 'Por barbero');
+
+    const metRows = [['Método','Total'], ...Object.entries(porMetodo).sort((a,b)=>b[1]-a[1])];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(metRows), 'Por método');
+
+    if (Object.keys(porGasto).length) {
+      const gastoRows = [['Concepto','Monto'], ...Object.entries(porGasto).sort((a,b)=>b[1]-a[1])];
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(gastoRows), 'Gastos');
+    }
+
+    const citasRows = [
+      ['Fecha','Servicio','Barbero','Método de pago','Precio','Comisión'],
+      ...citas.map(c => [
+        c.fecha, c.servicios?.nombre || '—',
+        c.barberos?.usuarios?.full_name || c.barberos?.usuarios?.username || '—',
+        METODO_LABEL[c.metodo_pago] || c.metodo_pago || '—',
+        Number(c.precio)||0, Number(c.comision_calculada)||0
+      ])
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(citasRows), 'Citas detalle');
+
+    XLSX.writeFile(wb, `reporte-diego-neira-${from}_a_${to}.xlsx`);
+    toast('Excel descargado.');
+  }
+
+  Promise.all([initSedeSelector(), initConfig()]).then(loadReportes);
+</script>
+
+<script src="../assets/mobile-nav.js"></script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+</body>
+</html>

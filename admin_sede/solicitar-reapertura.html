@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#111111">
+<title>Solicitar Reapertura · Admin Sede</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<style>
+  /* Variables heredadas de design-system.css */
+  body { background:var(--bg); min-height:100vh; min-height:100dvh; }
+
+  .container { max-width:500px; margin:0 auto; padding:24px var(--page-padding-x) 60px; padding-top:calc(24px + var(--safe-top)); padding-bottom:calc(60px + var(--safe-bottom)); }
+
+  .header { display:flex; align-items:center; gap:16px; margin-bottom:32px; }
+  .back-btn {
+    width:44px; height:44px; border-radius:14px;
+    background:var(--card); border:1px solid var(--divider);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; color:var(--text); text-decoration:none;
+  }
+  .back-btn svg { width:20px; height:20px; }
+  .header-text .title { font-size:22px; font-weight:800; }
+  .header-text .sub { font-size:13px; color:var(--text-secondary); margin-top:2px; }
+
+  .alert-card {
+    padding:20px;
+    background:rgba(239,83,80,0.1);
+    border:1px solid rgba(239,83,80,0.3);
+    border-radius:18px;
+    margin-bottom:24px;
+    text-align:center;
+  }
+  .alert-icon { font-size:48px; margin-bottom:12px; }
+  .alert-title { font-size:16px; font-weight:800; margin-bottom:6px; }
+  .alert-sub { font-size:13px; color:var(--text-secondary); }
+
+  .form-group { margin-bottom:20px; }
+  .form-label { font-size:13px; font-weight:700; margin-bottom:8px; display:block; }
+  .form-textarea {
+    width:100%; min-height:120px; padding:16px;
+    background:var(--card); border:1px solid var(--divider); border-radius:16px;
+    color:var(--text); font-size:14px; resize:vertical;
+    font-family:inherit;
+  }
+  .form-textarea:focus { outline:none; border-color:var(--gold); }
+  .form-textarea::placeholder { color:var(--text-secondary); }
+
+  .btn-primary {
+    width:100%; padding:16px; border-radius:16px; border:none;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#141414; font-size:15px; font-weight:800; cursor:pointer;
+  }
+  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+
+  /* Pending state */
+  .pending-card {
+    padding:24px;
+    background:rgba(242,201,76,0.1);
+    border:1px solid rgba(242,201,76,0.3);
+    border-radius:18px;
+    text-align:center;
+  }
+  .pending-icon { font-size:48px; margin-bottom:12px; }
+  .pending-title { font-size:16px; font-weight:800; margin-bottom:6px; }
+  .pending-sub { font-size:13px; color:var(--text-secondary); margin-bottom:20px; }
+  .pending-time { font-size:12px; color:var(--text-secondary); }
+
+  /* Toast */
+  #toast {
+    position:fixed; bottom:calc(32px + var(--safe-bottom)); left:50%; transform:translateX(-50%) translateY(20px);
+    background:rgba(250,250,250,0.95); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--divider); border-radius:14px; padding:12px 20px;
+    font-size:13px; font-weight:600; opacity:0; pointer-events:none; max-width:90%;
+    transition:opacity 0.3s ease, transform 0.3s ease; z-index:200;
+  }
+  #toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header class="header">
+    <a href="seleccionar-sede.html" class="back-btn">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div class="header-text">
+      <div class="title">Solicitar Acceso</div>
+      <div class="sub" id="sedeName">Cargando...</div>
+    </div>
+  </header>
+
+  <!-- Estado: Turno cerrado, puede solicitar -->
+  <div id="formState">
+    <div class="alert-card">
+      <div class="alert-icon">🔒</div>
+      <div class="alert-title">Turno cerrado</div>
+      <div class="alert-sub">El turno de hoy ya fue cerrado. Puedes solicitar acceso al administrador para volver a operar.</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Motivo de la solicitud</label>
+      <textarea class="form-textarea" id="motivoInput" placeholder="Explica por que necesitas reabrir el turno..."></textarea>
+    </div>
+
+    <button class="btn-primary" id="btnSolicitar">Enviar solicitud</button>
+  </div>
+
+  <!-- Estado: Ya tiene solicitud pendiente -->
+  <div id="pendingState" style="display:none;">
+    <div class="pending-card">
+      <div class="pending-icon">⏳</div>
+      <div class="pending-title">Solicitud pendiente</div>
+      <div class="pending-sub">Tu solicitud de reapertura esta siendo revisada por el administrador.</div>
+      <div class="pending-time" id="pendingTime">Enviada hace unos minutos</div>
+    </div>
+
+    <button class="btn-primary" style="margin-top:20px;" onclick="location.reload()">Verificar estado</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/mobile-nav.js"></script>
+<script>
+(async function() {
+  const user = dnRequireAdmin('../index.html');
+  if (!user) return;
+
+  if (user.role !== 'admin_sede') {
+    window.location.href = '../auth.html';
+    return;
+  }
+
+  // Obtener sede del parametro URL
+  const params = new URLSearchParams(window.location.search);
+  const sedeId = params.get('sede') || dnGetTurnoSedeActual();
+
+  if (!sedeId) {
+    window.location.href = 'seleccionar-sede.html';
+    return;
+  }
+
+  // Cargar sede
+  const { data: sede } = await sb.from('sucursales').select('nombre').eq('id', sedeId).single();
+  document.getElementById('sedeName').textContent = sede?.nombre || 'Sede';
+
+  const hoy = dnTodayISO();
+
+  // Verificar si ya tiene solicitud pendiente
+  const { data: solicitudExistente } = await sb
+    .from('autorizaciones_admin_sede')
+    .select('*')
+    .eq('solicitante_id', user.id)
+    .eq('sucursal_id', sedeId)
+    .eq('fecha', hoy)
+    .eq('tipo', 'reapertura')
+    .eq('estado', 'pendiente')
+    .limit(1);
+
+  if (solicitudExistente && solicitudExistente.length > 0) {
+    document.getElementById('formState').style.display = 'none';
+    document.getElementById('pendingState').style.display = 'block';
+
+    const createdAt = new Date(solicitudExistente[0].created_at);
+    const ahora = new Date();
+    const minutos = Math.round((ahora - createdAt) / 60000);
+    document.getElementById('pendingTime').textContent =
+      minutos < 1 ? 'Enviada hace unos segundos' :
+      minutos === 1 ? 'Enviada hace 1 minuto' :
+      `Enviada hace ${minutos} minutos`;
+    return;
+  }
+
+  // Verificar si ya fue aprobada
+  const { data: solicitudAprobada } = await sb
+    .from('autorizaciones_admin_sede')
+    .select('*')
+    .eq('solicitante_id', user.id)
+    .eq('sucursal_id', sedeId)
+    .eq('fecha', hoy)
+    .eq('tipo', 'reapertura')
+    .eq('estado', 'aprobada')
+    .limit(1);
+
+  if (solicitudAprobada && solicitudAprobada.length > 0) {
+    showToast('Tu solicitud fue aprobada. Redirigiendo...');
+    dnSetTurnoSedeActual(sedeId);
+    setTimeout(() => {
+      window.location.href = 'ventas.html';
+    }, 1500);
+    return;
+  }
+
+  // Enviar solicitud
+  document.getElementById('btnSolicitar').addEventListener('click', async () => {
+    const motivo = document.getElementById('motivoInput').value.trim();
+
+    if (!motivo) {
+      showToast('Por favor escribe un motivo');
+      return;
+    }
+
+    const btn = document.getElementById('btnSolicitar');
+    btn.disabled = true;
+    btn.textContent = 'Enviando...';
+
+    try {
+      await dnSolicitarReapertura(sedeId, motivo);
+      showToast('Solicitud enviada correctamente');
+
+      document.getElementById('formState').style.display = 'none';
+      document.getElementById('pendingState').style.display = 'block';
+      document.getElementById('pendingTime').textContent = 'Enviada hace unos segundos';
+
+    } catch (err) {
+      console.error(err);
+      showToast('Error al enviar solicitud');
+      btn.disabled = false;
+      btn.textContent = 'Enviar solicitud';
+    }
+  });
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+})();
+</script>
+</body>
+</html>

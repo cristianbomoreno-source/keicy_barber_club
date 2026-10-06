@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#111111">
+<title>Iniciar Turno · Admin Sede</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<style>
+  .dn-bottom-nav, nav.mobile-nav, .tab-bar { display:none !important; }
+  body { background:var(--bg); min-height:100vh; min-height:100dvh; }
+
+  .container {
+    max-width:500px;
+    margin:0 auto;
+    padding:24px var(--page-padding-x) 60px;
+    padding-top:calc(24px + var(--safe-top));
+    padding-bottom:calc(60px + var(--safe-bottom));
+  }
+
+  .header {
+    text-align:center;
+    margin-bottom:32px;
+  }
+  .logo {
+    height:64px;
+    margin-bottom:16px;
+  }
+  .sede-name {
+    font-size:20px;
+    font-weight:800;
+    margin-bottom:4px;
+  }
+  .sede-address {
+    font-size:13px;
+    color:var(--text-secondary);
+  }
+
+  .datetime-card {
+    background:var(--card);
+    border:1px solid var(--divider);
+    border-radius:20px;
+    padding:24px;
+    text-align:center;
+    margin-bottom:32px;
+  }
+  .datetime-time {
+    font-size:48px;
+    font-weight:800;
+    color:var(--gold);
+  }
+  .datetime-date {
+    font-size:14px;
+    color:var(--text-secondary);
+    margin-top:4px;
+  }
+
+  .section-title {
+    font-size:16px;
+    font-weight:800;
+    margin-bottom:8px;
+    text-align:center;
+  }
+  .section-sub {
+    font-size:13px;
+    color:var(--text-secondary);
+    margin-bottom:20px;
+    text-align:center;
+  }
+
+  .operadores-grid {
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-bottom:24px;
+  }
+
+  .operador-card {
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:18px 20px;
+    background:var(--card);
+    border:2px solid var(--divider);
+    border-radius:18px;
+    cursor:pointer;
+    transition:all 0.2s ease;
+  }
+  .operador-card:hover {
+    border-color:var(--gold);
+    transform:translateY(-2px);
+  }
+  .operador-card.selected {
+    border-color:var(--gold);
+    background:rgba(200,160,90,0.1);
+  }
+
+  .operador-avatar {
+    width:56px;
+    height:56px;
+    border-radius:16px;
+    background:linear-gradient(135deg, var(--gold-bright), var(--gold));
+    color:#141414;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    font-weight:800;
+    flex-shrink:0;
+  }
+
+  .operador-info {
+    flex:1;
+    min-width:0;
+  }
+  .operador-name {
+    font-size:17px;
+    font-weight:700;
+  }
+  .operador-status {
+    font-size:12px;
+    color:var(--text-secondary);
+    margin-top:2px;
+  }
+
+  .operador-check {
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    border:2px solid var(--divider);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    transition:all 0.2s ease;
+  }
+  .operador-card.selected .operador-check {
+    background:var(--gold);
+    border-color:var(--gold);
+  }
+  .operador-check svg {
+    width:16px;
+    height:16px;
+    stroke:#141414;
+    opacity:0;
+    transition:opacity 0.2s ease;
+  }
+  .operador-card.selected .operador-check svg {
+    opacity:1;
+  }
+
+  .btn-continuar {
+    width:100%;
+    padding:18px;
+    border-radius:16px;
+    border:none;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#141414;
+    font-size:16px;
+    font-weight:800;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    transition:all 0.2s ease;
+    opacity:0.5;
+    pointer-events:none;
+  }
+  .btn-continuar.active {
+    opacity:1;
+    pointer-events:auto;
+  }
+  .btn-continuar:active {
+    transform:scale(0.98);
+  }
+  .btn-continuar svg {
+    width:20px;
+    height:20px;
+  }
+
+  .logout-link {
+    display:block;
+    text-align:center;
+    margin-top:24px;
+    font-size:13px;
+    color:var(--text-secondary);
+    cursor:pointer;
+  }
+  .logout-link:hover {
+    color:var(--error);
+  }
+
+  /* Modal de espera de horario */
+  .modal-overlay {
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.7);
+    backdrop-filter:blur(8px);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s ease;
+  }
+  .modal-overlay.show {
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  .modal-box {
+    background:var(--card);
+    border:1px solid var(--divider);
+    border-radius:24px;
+    padding:32px;
+    max-width:400px;
+    width:90%;
+    text-align:center;
+    position:relative;
+  }
+
+  .modal-icon {
+    width:72px; height:72px;
+    border-radius:50%;
+    background:rgba(242,201,76,0.15);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 20px;
+    font-size:32px;
+  }
+
+  .modal-title { font-size:18px; font-weight:800; margin-bottom:8px; }
+  .modal-sub { font-size:14px; color:var(--text-secondary); margin-bottom:24px; }
+
+  .modal-actions { display:flex; flex-direction:column; gap:12px; }
+
+  .btn-primary {
+    width:100%;
+    padding:14px;
+    border-radius:14px;
+    border:none;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#141414;
+    font-size:14px;
+    font-weight:800;
+    cursor:pointer;
+  }
+  .btn-secondary {
+    width:100%;
+    padding:14px;
+    border-radius:14px;
+    border:1px solid var(--divider);
+    background:var(--card-2);
+    color:var(--text);
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  .btn-close-modal {
+    position:absolute;
+    top:16px;
+    right:16px;
+    width:36px; height:36px;
+    border-radius:50%;
+    background:var(--card-2);
+    border:none;
+    color:var(--text-secondary);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  #toast {
+    position:fixed;
+    bottom:calc(32px + var(--safe-bottom));
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:var(--card);
+    border:1px solid var(--divider);
+    border-radius:14px;
+    padding:12px 20px;
+    font-size:13px;
+    font-weight:600;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s ease, transform 0.3s ease;
+    z-index:200;
+    max-width:90%;
+  }
+  #toast.show {
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  /* Fallback para sedes múltiples */
+  .sedes-grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+    gap:16px;
+    margin-bottom:24px;
+  }
+  .sede-card {
+    background:var(--card);
+    border:1px solid var(--divider);
+    border-radius:20px;
+    overflow:hidden;
+    cursor:pointer;
+    transition:all 0.2s ease;
+  }
+  .sede-card:hover {
+    transform:translateY(-4px);
+    border-color:var(--gold);
+  }
+  .sede-image {
+    width:100%;
+    height:140px;
+    object-fit:cover;
+    background:var(--card-2);
+  }
+  .sede-content { padding:16px; }
+  .sede-card-name { font-size:16px; font-weight:700; margin-bottom:4px; }
+  .sede-card-address { font-size:12px; color:var(--text-secondary); }
+
+  .empty-state {
+    text-align:center;
+    padding:60px 20px;
+    color:var(--text-secondary);
+  }
+  .empty-state .icon { font-size:48px; margin-bottom:16px; }
+  .empty-state .title { font-size:16px; font-weight:700; color:var(--text); margin-bottom:8px; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header class="header">
+    <img src="../assets/logo-transparent.png" alt="Logo" class="logo">
+    <div class="sede-name" id="sedeName">Cargando...</div>
+    <div class="sede-address" id="sedeAddress"></div>
+  </header>
+
+  <div class="datetime-card">
+    <div class="datetime-time" id="currentTime">--:--</div>
+    <div class="datetime-date" id="currentDate">Cargando...</div>
+  </div>
+
+  <!-- Vista para cuenta de sede fija (pregunta quién trabaja) -->
+  <div id="vistaOperadores" style="display:none;">
+    <div class="section-title">¿Quién trabaja hoy?</div>
+    <div class="section-sub">Selecciona el administrador de turno</div>
+
+    <div class="operadores-grid" id="operadoresGrid">
+      <!-- Se llena dinámicamente -->
+    </div>
+
+    <button class="btn-continuar" id="btnContinuar">
+      Continuar
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Vista para cuentas con múltiples sedes (selección de sede) -->
+  <div id="vistaSedes" style="display:none;">
+    <div class="section-title">Selecciona tu sede</div>
+    <div class="section-sub">Elige la sede donde trabajarás hoy</div>
+
+    <div class="sedes-grid" id="sedesGrid"></div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="icon">🏢</div>
+    <div class="title">Sin sedes asignadas</div>
+    <div>Contacta al administrador para configurar tu acceso.</div>
+  </div>
+
+  <div class="logout-link" id="logoutBtn">Cerrar sesión</div>
+</div>
+
+<!-- Modal de turno cerrado -->
+<div class="modal-overlay" id="modalReabrir">
+  <div class="modal-box">
+    <button class="btn-close-modal" id="closeModalReabrir">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>
+    <div class="modal-icon">🔓</div>
+    <div class="modal-title">Reabrir turno</div>
+    <div class="modal-sub">Este turno ya fue cerrado. Escribe el motivo para reabrirlo.</div>
+    <textarea id="motivoReapertura" placeholder="Escribe el motivo de la reapertura..." style="
+      width:100%;
+      min-height:100px;
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--divider);
+      background:var(--card-2);
+      color:var(--text);
+      font-size:14px;
+      font-family:inherit;
+      resize:vertical;
+      margin-bottom:20px;
+    "></textarea>
+    <div class="modal-actions">
+      <button class="btn-primary" id="btnConfirmarReabrir" style="background:linear-gradient(180deg, var(--warning), #D4A845);">Reabrir turno</button>
+      <button class="btn-secondary" id="btnCancelarReabrir">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+(async function() {
+  // Verificar sesión
+  const user = dnRequireAdmin('../index.html');
+  if (!user) return;
+
+  if (user.role !== 'admin_sede') {
+    window.location.href = '../auth.html';
+    return;
+  }
+
+  // Variables
+  let sedeId = null;
+  let operadores = [];
+  let operadorSeleccionado = null;
+  let turnoActual = null;
+
+  // Actualizar reloj
+  function actualizarReloj() {
+    const ahora = new Date();
+    document.getElementById('currentTime').textContent =
+      ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('currentDate').textContent =
+      ahora.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+  actualizarReloj();
+  setInterval(actualizarReloj, 1000);
+
+  // Toast
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // Verificar si es cuenta de sede fija
+  async function init() {
+    // Verificar si el usuario tiene una sede fija asignada (sucursal_id)
+    if (user.sucursal_id) {
+      // Cuenta de sede fija (sede_colina o sede_165)
+      sedeId = user.sucursal_id;
+      await cargarDatosSede();
+      await verificarTurnoYMostrarOperadores();
+    } else {
+      // Cuenta sin sede fija - mostrar selección de sedes
+      await cargarSedesAsignadas();
+    }
+  }
+
+  // Cargar datos de la sede
+  async function cargarDatosSede() {
+    const { data: sede } = await sb.from('sucursales').select('nombre, direccion').eq('id', sedeId).single();
+    if (sede) {
+      document.getElementById('sedeName').textContent = sede.nombre;
+      document.getElementById('sedeAddress').textContent = sede.direccion || '';
+    }
+  }
+
+  // Verificar turno y mostrar operadores
+  async function verificarTurnoYMostrarOperadores() {
+    // Verificar si hay turno activo
+    const turno = await dnVerificarTurnoActivo(sedeId);
+    turnoActual = turno;
+
+    if (turno && (turno.estado === 'abierto' || turno.estado === 'cierre_en_progreso')) {
+      // Ya hay turno activo, ir al dashboard
+      dnSetTurnoSedeActual(sedeId);
+      window.location.href = 'ventas.html';
+      return;
+    }
+
+    if (turno && turno.estado === 'cerrado') {
+      // Turno cerrado, mostrar opción de reabrir
+      mostrarModalReabrir();
+      return;
+    }
+
+    // No hay turno, mostrar selección de operadores
+    await cargarOperadores();
+    document.getElementById('vistaOperadores').style.display = 'block';
+  }
+
+  // Cargar operadores disponibles
+  async function cargarOperadores() {
+    const { data, error } = await sb
+      .from('operadores_sede')
+      .select('*')
+      .eq('activo', true)
+      .order('nombre');
+
+    if (error) {
+      console.error('Error cargando operadores:', error);
+      operadores = [];
+    } else {
+      operadores = data || [];
+    }
+
+    renderOperadores();
+  }
+
+  function renderOperadores() {
+    const grid = document.getElementById('operadoresGrid');
+
+    if (operadores.length === 0) {
+      grid.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No hay operadores registrados</div>';
+      return;
+    }
+
+    grid.innerHTML = operadores.map(op => {
+      const initials = op.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+      const selected = operadorSeleccionado === op.id;
+
+      return `
+        <div class="operador-card ${selected ? 'selected' : ''}" data-id="${op.id}" onclick="seleccionarOperador('${op.id}')">
+          <div class="operador-avatar">${initials}</div>
+          <div class="operador-info">
+            <div class="operador-name">${op.nombre}</div>
+            <div class="operador-status">Disponible</div>
+          </div>
+          <div class="operador-check">
+            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Seleccionar operador
+  window.seleccionarOperador = function(id) {
+    operadorSeleccionado = id;
+    renderOperadores();
+    document.getElementById('btnContinuar').classList.add('active');
+  };
+
+  // Continuar a iniciar turno
+  document.getElementById('btnContinuar').addEventListener('click', () => {
+    if (!operadorSeleccionado) return;
+
+    const operador = operadores.find(o => o.id === operadorSeleccionado);
+    if (operador) {
+      // Guardar operador seleccionado en sessionStorage
+      sessionStorage.setItem('operador_turno', JSON.stringify({
+        id: operador.id,
+        nombre: operador.nombre
+      }));
+    }
+
+    dnSetTurnoSedeActual(sedeId);
+    window.location.href = 'iniciar-turno.html';
+  });
+
+  // Cargar sedes asignadas (para cuentas sin sede fija)
+  async function cargarSedesAsignadas() {
+    const sedesAsignadas = await dnGetSedesAsignadas();
+
+    if (sedesAsignadas.length === 0) {
+      document.getElementById('emptyState').style.display = 'block';
+      document.getElementById('sedeName').textContent = user.full_name || user.username;
+      return;
+    }
+
+    if (sedesAsignadas.length === 1) {
+      // Solo una sede, ir directo
+      sedeId = sedesAsignadas[0].id;
+      await cargarDatosSede();
+      await verificarTurnoYMostrarOperadores();
+      return;
+    }
+
+    // Múltiples sedes, mostrar selección
+    document.getElementById('sedeName').textContent = user.full_name || user.username;
+    document.getElementById('vistaSedes').style.display = 'block';
+    renderSedes(sedesAsignadas);
+  }
+
+  function renderSedes(sedes) {
+    const grid = document.getElementById('sedesGrid');
+    grid.innerHTML = sedes.map(sede => `
+      <div class="sede-card" data-id="${sede.id}">
+        <img src="${sede.foto_fachada || '../assets/placeholder-sede.jpg'}" alt="${sede.nombre}" class="sede-image">
+        <div class="sede-content">
+          <div class="sede-card-name">${sede.nombre}</div>
+          <div class="sede-card-address">${sede.direccion || ''}</div>
+        </div>
+      </div>
+    `).join('');
+
+    grid.querySelectorAll('.sede-card').forEach(card => {
+      card.addEventListener('click', async () => {
+        sedeId = card.dataset.id;
+        await cargarDatosSede();
+        document.getElementById('vistaSedes').style.display = 'none';
+        await verificarTurnoYMostrarOperadores();
+      });
+    });
+  }
+
+  // Modal de reabrir turno
+  function mostrarModalReabrir() {
+    document.getElementById('modalReabrir').classList.add('show');
+  }
+
+  function cerrarModalReabrir() {
+    document.getElementById('modalReabrir').classList.remove('show');
+  }
+
+  async function confirmarReabrirTurno() {
+    const motivo = document.getElementById('motivoReapertura').value.trim();
+
+    if (!motivo || motivo.length < 10) {
+      showToast('El motivo debe tener al menos 10 caracteres');
+      return;
+    }
+
+    const btn = document.getElementById('btnConfirmarReabrir');
+    btn.disabled = true;
+    btn.textContent = 'Reabriendo...';
+
+    try {
+      const { error } = await sb
+        .from('turnos_admin_sede')
+        .update({
+          estado: 'abierto',
+          cerrado_at: null,
+          cierre_paso_actual: null,
+          cierre_datos: null,
+          reabierto_at: new Date().toISOString(),
+          reabierto_motivo: motivo,
+          reabierto_por: user.id
+        })
+        .eq('id', turnoActual.id);
+
+      if (error) throw error;
+
+      showToast('Turno reabierto correctamente');
+      dnSetTurnoSedeActual(sedeId);
+      setTimeout(() => {
+        window.location.href = 'ventas.html';
+      }, 1000);
+
+    } catch (err) {
+      console.error(err);
+      showToast('Error al reabrir turno');
+      btn.disabled = false;
+      btn.textContent = 'Reabrir turno';
+    }
+  }
+
+  document.getElementById('closeModalReabrir').addEventListener('click', cerrarModalReabrir);
+  document.getElementById('btnCancelarReabrir').addEventListener('click', cerrarModalReabrir);
+  document.getElementById('btnConfirmarReabrir').addEventListener('click', confirmarReabrirTurno);
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    dnClearSession();
+    dnClearTurnoSede();
+    window.location.href = '../auth.html';
+  });
+
+  // Iniciar
+  init();
+})();
+</script>
+</body>
+</html>

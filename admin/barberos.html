@@ -1,0 +1,2165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Keicy Barbería · Barberos</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/mobile-admin.css">
+<style>
+  /* Variables heredadas de design-system.css */
+  body{ overflow-x:hidden; background:var(--bg); }
+  #app{ display:flex; min-height:100vh; }
+  .main{ flex:1; min-width:0; max-width:1440px; margin:0 auto; padding:26px 30px 60px; width:100%; }
+
+  /* ---- Sidebar: barra de íconos colapsable, se expande al tocar el logo ---- */
+  .sidebar{ width:60px; flex-shrink:0; background:var(--surface); border-right:1px solid var(--divider); display:flex; flex-direction:column; align-items:center; padding:20px 6px; position:sticky; top:0; height:100vh; z-index:40; overflow:hidden; overflow-y:auto; transition:width .28s cubic-bezier(.4,0,.2,1), padding .28s ease; }
+  .sidebar.expanded{ width:230px; align-items:stretch; padding:22px 16px; }
+  .sidebar-logo{ display:block; cursor:pointer; margin:0 auto; }
+  .sidebar-logo-icon{ width:48px; height:48px; border-radius:12px; margin-bottom:26px; }
+  .sidebar-logo-full{ height:56px; margin-bottom:28px; display:none; border-radius:12px; }
+  .sidebar.expanded .sidebar-logo-icon{ display:none; }
+  .sidebar.expanded .sidebar-logo-full{ display:block; }
+  .nav-group{ flex:1; display:flex; flex-direction:column; gap:3px; overflow-y:auto; width:100%; min-width:0; }
+  .nav-link{ display:flex; align-items:center; gap:12px; justify-content:center; width:40px; height:40px; margin:0 auto; padding:0; border-radius:12px; font-size:13.5px; font-weight:600; color:var(--text-secondary); cursor:pointer; transition:background .15s ease, color .15s ease; text-decoration:none; white-space:nowrap; }
+  .sidebar.expanded .nav-link{ justify-content:flex-start; width:100%; height:auto; margin:0; padding:11px 12px; }
+  .nav-link svg{ width:22px; height:22px; flex-shrink:0; }
+  .nav-link:hover{ background:var(--card); color:var(--text); }
+  .nav-link.active{ background:var(--gold); color:#141414; }
+  .nav-link.active svg{ stroke:#141414; }
+  .nav-label{ opacity:0; max-width:0; overflow:hidden; transition:opacity .16s ease, max-width .26s ease; }
+  .sidebar.expanded .nav-label{ opacity:1; max-width:170px; }
+    .sidebar-card{ display:none; position:relative; align-items:center; gap:9px; padding:9px; border-radius:14px; background:var(--glass-2, rgba(255,255,255,0.04)); border:1px solid var(--glass-border); margin-bottom:16px; cursor:pointer; }
+  .sidebar.expanded .sidebar-card{ display:flex; }
+  .sidebar-card-avatar{ width:32px; height:32px; border-radius:50%; background:var(--gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:800; flex-shrink:0; }
+  .sidebar-card-info{ flex:1; min-width:0; }
+  .sidebar-card-name{ font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-card-sub{ font-size:10.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+  .sidebar-card-chevron{ width:14px; height:14px; color:var(--text-secondary); flex-shrink:0; }
+  .sidebar-card-menu{ display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--card, #1c1c1c); border:1px solid var(--glass-border); border-radius:12px; padding:6px; z-index:60; max-height:220px; overflow-y:auto; box-shadow:0 12px 30px rgba(0,0,0,0.4); }
+  .sidebar-card-menu.show{ display:block; }
+  .sidebar-card-menu-item{ padding:9px 10px; border-radius:8px; font-size:12px; font-weight:600; color:var(--text-secondary); cursor:pointer; }
+  .sidebar-card-menu-item:hover{ background:var(--glass-2, rgba(255,255,255,0.06)); color:var(--text); }
+  .sidebar-card-menu-item.active{ color:var(--gold); font-weight:700; }
+  .nav-section-label{ display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
+  .nav-section-label:first-of-type{ padding-top:2px; }
+  .sidebar.expanded .nav-section-label{ display:block; }
+  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0; display:none; }
+  .sidebar.expanded .plan-card{ display:block; }
+  .plan-card .label{ font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--gold); text-transform:uppercase; display:flex; align-items:center; gap:6px; }
+  .plan-card .sub{ font-size:12px; color:var(--text-secondary); margin-top:6px; }
+  .sidebar-bottom { margin-top:auto; padding-top:12px; border-top:1px solid var(--divider); display:flex; flex-direction:column; gap:8px; width:100%; }
+  .logout-btn { font-size:12px; color:#EF5350; display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; cursor:pointer; width:40px; height:40px; border-radius:10px; background:rgba(239,83,80,0.1); border:1px solid rgba(239,83,80,0.2); }
+  .sidebar.expanded .logout-btn { justify-content:flex-start; width:100%; height:auto; padding:10px 12px; margin:0; }
+  .logout-btn:hover { background:rgba(239,83,80,0.2); }
+  .logout-btn svg { width:16px; height:16px; flex-shrink:0; }
+  .logout-label { display:none; }
+  .sidebar.expanded .logout-label { display:inline; }
+  .help-link{ margin-top:14px; font-size:12.5px; color:var(--text-secondary); display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; cursor:pointer; width:100%; }
+  .sidebar.expanded .help-link{ justify-content:flex-start; }
+  .help-link:hover{ color:var(--text); }
+
+  .header-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; gap:14px; flex-wrap:wrap; }
+  .header-left{ display:flex; align-items:center; gap:14px; }
+  .header-left img{ height:40px; cursor:pointer; }
+  .header-title{ font-size:21px; font-weight:800; }
+  .header-sub{ font-size:12.5px; color:var(--text-secondary); }
+  .back-btn{
+    display:flex; align-items:center; gap:8px; padding:11px 18px; border-radius:14px;
+    background:var(--glass); border:1px solid var(--glass-border); backdrop-filter:blur(10px);
+    color:var(--text); text-decoration:none; font-size:13px; font-weight:700; transition:border-color .2s ease;
+  }
+  .back-btn:hover{ border-color:rgba(255,255,255,0.2); }
+  .back-btn svg{ width:15px; height:15px; }
+
+  .layout{ display:grid; grid-template-columns:1.35fr 1fr; gap:20px; align-items:start; }
+  @media (max-width:1100px){ .layout{ grid-template-columns:1fr; } }
+
+  .panel{
+    background:var(--glass); backdrop-filter:blur(16px); border:1px solid var(--glass-border);
+    border-radius:22px; padding:22px 24px; box-shadow:0 20px 50px rgba(0,0,0,0.3);
+    overflow: hidden; max-width: 100%; box-sizing: border-box;
+  }
+  .panel-title{ font-size:16px; font-weight:800; }
+  .panel-sub{ font-size:12.5px; color:var(--text-secondary); margin-top:2px; }
+  .panel-head{ display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px; }
+
+  /* ---- Legend ---- */
+  .legend-row{ display:flex; align-items:center; gap:16px; font-size:12px; color:var(--text-secondary); flex-wrap:wrap; }
+  .legend-row span{ display:flex; align-items:center; gap:6px; }
+  .legend-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+  /* ---- Section tabs: Colaboradores / Administrativos ---- */
+  .sec-tabs{ display:flex; gap:8px; margin-bottom:18px; }
+  .sec-tab{ padding:11px 18px; border-radius:14px; font-size:13px; font-weight:700; cursor:pointer; background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text-secondary); }
+  .sec-tab:hover{ color:var(--text); }
+  .sec-tab.active{ background:var(--gold); color:#141414; border-color:var(--gold); }
+  .role-tag{ font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px; text-transform:uppercase; letter-spacing:.3px; }
+  .role-tag.barbero{ background:rgba(78,140,203,0.18); color:#9FCBFA; }
+  .role-tag.aseo{ background:rgba(155,111,224,0.18); color:#C9AFF5; }
+  .role-tag.admin{ background:rgba(201,163,91,0.18); color:var(--gold); }
+
+  /* ---- Photo preview grid ---- */
+  .pp-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px; }
+  .pp-card{ background:var(--glass-2); border:1px solid var(--glass-border); border-radius:18px; padding:14px; }
+  .pp-card.empty{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; min-height:210px; cursor:pointer; border-style:dashed; color:var(--text-secondary); }
+  .pp-card.empty:hover{ border-color:rgba(255,255,255,0.25); }
+  .pp-card-name{ font-size:13px; font-weight:700; margin-bottom:2px; }
+  .pp-card-status{ font-size:10.5px; color:var(--text-secondary); margin-bottom:10px; display:flex; align-items:center; gap:5px; }
+  .pp-card-status .d{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+  .pp-previews{ display:flex; gap:8px; margin-bottom:10px; }
+  .pp-profile{
+    flex:0 0 54px; height:100px; border-radius:12px; background:#FFFFFF #1c1c1c no-repeat; background-size:cover; position:relative; overflow:hidden;
+    cursor:pointer; outline:2px solid transparent; outline-offset:2px; transition:outline-color .15s ease;
+  }
+  .pp-profile.selected{ outline-color:var(--gold); }
+  .pp-profile .pp-overlay{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0.02) 45%, rgba(0,0,0,0.55) 78%, rgba(0,0,0,0.85) 100%); }
+  .pp-profile .pp-tag{ position:absolute; top:5px; left:5px; right:5px; font-size:7.5px; font-weight:800; letter-spacing:.2px; text-transform:uppercase; color:rgba(255,255,255,0.8); line-height:1.2; }
+  .pp-agenda{
+    flex:1; min-width:0; height:100px; border-radius:12px; background:#FFFFFF #1c1c1c no-repeat; background-size:cover; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:space-between; padding:8px;
+    cursor:pointer; outline:2px solid transparent; outline-offset:2px; transition:outline-color .15s ease;
+  }
+  .pp-agenda.selected{ outline-color:var(--gold); }
+  .pp-agenda .pp-tag{ font-size:8.5px; font-weight:800; letter-spacing:.3px; text-transform:uppercase; color:rgba(255,255,255,0.75); text-shadow:0 1px 3px rgba(0,0,0,0.7); position:relative; z-index:1; }
+  .pp-agenda .pp-sample-client{ font-size:12px; font-weight:700; color:#111111; text-shadow:0 1px 4px rgba(0,0,0,0.7); position:relative; z-index:1; }
+  .pp-agenda .pp-sample-time{ font-size:11.5px; font-weight:800; color:#111111; text-shadow:0 1px 4px rgba(0,0,0,0.7); position:relative; z-index:1; }
+  .pp-focus-row{ display:flex; align-items:center; gap:9px; }
+  .pp-focus-lbl{ flex-shrink:0; white-space:nowrap; }
+  .pp-focus-row input[type=range]{ flex:1; accent-color:var(--gold); }
+  .pp-focus-lbl{ font-size:10.5px; color:var(--text-secondary); white-space:nowrap; }
+  .pp-save-btn{
+    margin-top:10px; width:100%; height:36px; border-radius:11px; border:1px solid var(--glass-border);
+    background:var(--glass-2); color:var(--text); font-size:12px; font-weight:700; cursor:pointer; transition:background .15s ease;
+  }
+  .pp-save-btn:hover{ background:var(--card); }
+  .pp-save-btn.saved{ background:rgba(78,203,113,0.16); border-color:rgba(78,203,113,0.4); color:#4ECB71; }
+
+  .add-barber-btn{
+    display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:16px; cursor:pointer;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414;
+    transition:transform .15s ease, filter .2s ease; margin-top:4px;
+  }
+  .add-barber-btn:hover{ filter:brightness(1.05); }
+  .add-barber-btn:active{ transform:scale(0.98); }
+  .add-barber-btn .plus{ width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,0.16); display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:800; flex-shrink:0; }
+  .add-barber-btn .t{ font-weight:800; font-size:14px; }
+  .add-barber-btn .s{ font-size:11.5px; opacity:.75; }
+
+  /* ---- Team cards grid ---- */
+  .team-count{ color:var(--text-secondary); font-weight:600; font-size:12.5px; }
+  .barber-cards-grid{
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:16px;
+    max-width: 100%; overflow: hidden;
+  }
+  .barber-card{
+    background:var(--glass-2); border:1px solid var(--glass-border); border-radius:20px;
+    padding:20px 14px 16px; text-align:center; cursor:pointer;
+    transition:transform .18s ease, border-color .2s ease, box-shadow .2s ease;
+    position:relative;
+  }
+  .barber-card:hover{ transform:translateY(-4px); border-color:rgba(201,163,91,0.4); box-shadow:0 12px 28px rgba(0,0,0,0.3); }
+  .barber-card .card-avatar{
+    width:80px; height:80px; border-radius:50%; margin:0 auto 12px;
+    background:var(--card); display:flex; align-items:center; justify-content:center;
+    font-size:24px; font-weight:800; color:var(--gold); overflow:hidden;
+    border:3px solid var(--glass-border); transition:border-color .2s ease;
+  }
+  .barber-card:hover .card-avatar{ border-color:var(--gold); }
+  .barber-card .card-avatar img{ width:100%; height:100%; object-fit:cover; }
+  .barber-card .card-name{ font-size:14px; font-weight:700; margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .barber-card .card-username{ font-size:11px; color:var(--text-secondary); margin-bottom:8px; }
+  .barber-card .card-rating{ font-size:12px; color:var(--gold); margin-bottom:10px; display:flex; align-items:center; justify-content:center; gap:4px; }
+  .barber-card .card-rating svg{ width:14px; height:14px; fill:var(--gold); }
+  .barber-card .card-spec{ font-size:10px; color:var(--text-secondary); margin-bottom:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .barber-card .card-info{ flex:1; min-width:0; }
+  .barber-card .card-status{
+    font-size:10px; font-weight:800; padding:5px 10px; border-radius:999px;
+    display:inline-block; text-transform:uppercase; letter-spacing:.3px;
+  }
+  .barber-card .card-status.active{ background:rgba(78,203,113,0.16); color:#4ECB71; }
+  .barber-card .card-status.inactive{ background:var(--glass-2); color:var(--text-secondary); border:1px solid var(--glass-border); }
+
+  /* Mobile: lista vertical de barberos */
+  @media (max-width: 767px) {
+    .barber-cards-grid{ grid-template-columns: 1fr !important; gap: 10px; }
+    .barber-card{
+      display: flex !important; align-items: center; gap: 14px; text-align: left;
+      padding: 12px 14px; border-radius: 16px;
+    }
+    .barber-card:hover{ transform: none; }
+    .barber-card .card-avatar{ margin: 0 !important; width: 52px !important; height: 52px !important; flex-shrink: 0; font-size: 18px; }
+    .barber-card .card-info{ flex: 1; min-width: 0; }
+    .barber-card .card-name{ margin-bottom: 2px; font-size: 13px; }
+    .barber-card .card-username{ margin-bottom: 2px; font-size: 10px; }
+    .barber-card .card-rating{ justify-content: flex-start; margin-bottom: 4px; font-size: 11px; }
+    .barber-card .card-spec{ margin-bottom: 0; font-size: 9px; }
+    .barber-card .card-role{ position: absolute; right: 12px; top: 10px; font-size: 8px; padding: 3px 8px; }
+    .barber-card .card-status{ position: absolute; right: 12px; bottom: 10px; margin: 0; font-size: 8px; padding: 4px 8px; }
+  }
+
+  /* ---- Admin rows (para sección administrativos) ---- */
+  .admin-row{
+    display:flex; align-items:center; gap:13px; padding:13px 4px; border-bottom:1px solid var(--glass-border);
+    cursor:pointer; border-radius:12px; transition:background .15s ease;
+  }
+  .admin-row:hover{ background:var(--glass-2); }
+  .admin-row:last-child{ border-bottom:none; }
+  .admin-row .avatar{ width:44px; height:44px; font-size:14px; flex-shrink:0; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .admin-row .admin-mid{ flex:1; min-width:0; }
+  .admin-row .name{ font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .admin-row .meta{ font-size:11.5px; color:var(--text-secondary); margin-top:1px; }
+  .admin-row .row-chevron{ width:16px; height:16px; color:var(--text-secondary); flex-shrink:0; }
+
+  /* ---- Photo adjust modal cards ---- */
+  .photo-adjust-card{
+    background:var(--glass-2); border:1px solid var(--glass-border); border-radius:14px;
+    padding:12px; display:flex; flex-direction:column;
+  }
+  .photo-adjust-card-preview{
+    width:100%; border-radius:10px; background:#FFFFFF; background-size:cover; background-position:center 30%;
+    margin-bottom:10px; position:relative; overflow:hidden;
+  }
+  .photo-adjust-card-preview::after{
+    content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6) 100%);
+  }
+  .photo-adjust-card-label{
+    font-size:12px; font-weight:700; color:var(--text); margin-bottom:8px; text-align:center;
+  }
+  .photo-adjust-card-control{
+    display:flex; align-items:center; gap:8px; font-size:10px; color:var(--text-secondary);
+  }
+  .photo-adjust-card-control input[type=range]{ flex:1; accent-color:var(--gold); }
+  .photo-adjust-card-control span:last-child{ width:30px; text-align:right; font-weight:600; color:var(--text); }
+
+  .barber-card .card-role{
+    position:absolute; top:10px; right:10px;
+    font-size:8px; font-weight:800; padding:3px 7px; border-radius:6px;
+    text-transform:uppercase; letter-spacing:.2px;
+  }
+  .barber-card .card-role.barbero{ background:rgba(78,140,203,0.18); color:#9FCBFA; }
+  .barber-card .card-role.aseo{ background:rgba(155,111,224,0.18); color:#C9AFF5; }
+  @media (max-width:500px){
+    .barber-cards-grid{ grid-template-columns:repeat(2, 1fr); gap:12px; }
+    .barber-card .card-avatar{ width:64px; height:64px; font-size:20px; }
+    .barber-card .card-name{ font-size:13px; }
+  }
+
+  .empty-row{ padding:30px 0; text-align:center; color:var(--text-secondary); font-size:13px; }
+
+  /* ---- Modals ---- */
+  .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; z-index:80; padding:16px; }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background:rgba(26,26,26,0.9); backdrop-filter:blur(24px); border:1px solid var(--glass-border);
+    border-radius:22px; padding:26px; width:100%; max-width:440px; max-height:90vh; overflow-y:auto;
+    box-shadow:0 30px 70px rgba(0,0,0,0.5);
+  }
+  .modal-title{ font-size:17px; font-weight:800; }
+  .modal-sub{ font-size:12.5px; color:var(--text-secondary); margin-bottom:18px; }
+  .modal-close{ float:right; cursor:pointer; color:var(--text-secondary); font-size:13px; }
+  .modal-close:hover{ color:var(--text); }
+
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--text-secondary); margin-bottom:7px; }
+  .field input, .field select{
+    width:100%; height:48px; border-radius:13px; padding:0 14px;
+    background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text);
+    font-size:14px; outline:none; transition:border-color .2s ease; font-family:inherit;
+  }
+  .field input:focus, .field select:focus{ border-color:var(--gold); }
+  .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+  .photo-upload{ display:flex; align-items:center; gap:16px; margin-bottom:18px; }
+  .photo-preview{
+    width:76px; height:76px; border-radius:50%; background:var(--glass-2); border:2px dashed var(--glass-border);
+    display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; color:var(--text-secondary);
+    overflow:hidden; flex-shrink:0;
+  }
+  .photo-preview img{ width:100%; height:100%; object-fit:cover; }
+  .photo-upload-btn{
+    padding:9px 15px; border-radius:12px; background:var(--glass-2); border:1px solid var(--glass-border);
+    font-size:12px; font-weight:700; cursor:pointer; color:var(--text);
+  }
+  .photo-upload-btn:hover{ border-color:rgba(255,255,255,0.2); }
+
+  .toggle-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:var(--glass-2); border:1px solid var(--glass-border); border-radius:13px; margin-bottom:14px; }
+  .toggle-row .lbl{ font-size:13px; font-weight:700; }
+  .switch{ position:relative; width:44px; height:26px; border-radius:999px; background:var(--glass-border); cursor:pointer; transition:background .2s ease; flex-shrink:0; }
+  .switch.on{ background:#4ECB71; }
+  .switch .knob{ position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .2s ease; }
+  .switch.on .knob{ transform:translateX(18px); }
+
+  .error-box{
+    background:rgba(239,83,80,0.1); border:1px solid rgba(239,83,80,0.3); color:var(--error);
+    font-size:12.5px; padding:10px 13px; border-radius:12px; margin-bottom:14px; display:none;
+  }
+  .error-box.show{ display:block; }
+
+  .modal-actions{ display:flex; gap:10px; margin-top:6px; }
+  .modal-actions button{ flex:1; height:48px; border-radius:14px; font-size:13.5px; font-weight:700; cursor:pointer; }
+  .btn-cancel{ background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text); }
+  .btn-save{ background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; border:none; }
+  .btn-danger-outline{ background:transparent; border:1px solid rgba(239,83,80,0.35); color:var(--error); }
+
+  #toast{
+    position:fixed; left:50%; bottom:calc(var(--bottom-nav-total) + 16px); transform:translate(-50%, 16px);
+    background:rgba(250,250,250,0.95); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--glass-border); border-radius:14px; padding:12px 18px;
+    font-size:13px; display:flex; align-items:center; gap:8px; max-width:90%;
+    opacity:0; pointer-events:none; transition:opacity 0.3s ease, transform 0.3s ease; z-index:200;
+  }
+  #toast.show{ opacity:1; transform:translate(-50%, 0); }
+  .toast-dot{ width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0; }
+
+  @media (max-width:760px){
+    .pp-grid{ grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:10px; }
+    .pp-profile{ flex-basis:60px; height:88px; }
+    .pp-agenda{ height:88px; }
+  }
+  @media (max-width:767px){
+    .sidebar{ display:none; }
+    .main{ padding:calc(16px + var(--safe-top)) var(--page-padding-x) calc(96px + var(--safe-bottom)); overflow-x: hidden; }
+    .panel{ padding: 18px 16px; }
+  }
+
+  /* ---- Bloqueos de horarios ---- */
+  .bloqueos-section{ margin-top:20px; padding-top:16px; border-top:1px solid var(--glass-border); }
+  .bloqueos-title{ font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.4px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .bloqueos-list{ max-height:200px; overflow-y:auto; margin-bottom:12px; }
+  .bloqueo-item{
+    display:flex; align-items:center; justify-content:space-between; padding:10px 12px;
+    background:var(--glass-2); border:1px solid var(--glass-border); border-radius:12px; margin-bottom:8px;
+  }
+  .bloqueo-item .info{ display:flex; flex-direction:column; gap:2px; }
+  .bloqueo-item .fecha{ font-size:13px; font-weight:700; }
+  .bloqueo-item .horas{ font-size:11px; color:var(--text-secondary); }
+  .bloqueo-item .motivo{ font-size:10px; color:var(--gold); font-style:italic; }
+  .bloqueo-item .delete-btn{
+    width:28px; height:28px; border-radius:8px; border:none; background:rgba(239,83,80,0.12);
+    color:var(--error); cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .bloqueo-item .delete-btn:hover{ background:rgba(239,83,80,0.25); }
+  .add-bloqueo-row{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+  .add-bloqueo-row.full{ grid-template-columns:1fr; }
+  .add-bloqueo-row input, .add-bloqueo-row select{
+    padding:10px 12px; border-radius:10px; background:var(--bg); border:1px solid var(--glass-border);
+    color:var(--text); font-size:12px;
+  }
+  .add-bloqueo-btn{
+    width:100%; padding:10px; border-radius:10px; border:1px dashed var(--gold);
+    background:rgba(201,163,91,0.08); color:var(--gold); font-size:12px; font-weight:700;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .add-bloqueo-btn:hover{ background:rgba(201,163,91,0.15); }
+
+  /* ---- Reseñas del colaborador ---- */
+  .resenas-section{ margin-top:20px; padding-top:16px; border-top:1px solid var(--glass-border); }
+  .resenas-title{ font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.4px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .resenas-stats{ display:flex; align-items:center; gap:16px; margin-bottom:12px; padding:12px; background:var(--glass-2); border-radius:12px; }
+  .resenas-avg{ display:flex; align-items:center; gap:6px; font-size:20px; font-weight:800; color:var(--gold); }
+  .resenas-avg svg{ width:20px; height:20px; fill:var(--gold); }
+  .resenas-count{ font-size:12px; color:var(--text-secondary); }
+  .resenas-list{ max-height:250px; overflow-y:auto; }
+  .resena-item{
+    padding:12px; background:var(--glass-2); border:1px solid var(--glass-border);
+    border-radius:12px; margin-bottom:8px;
+  }
+  .resena-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
+  .resena-cliente{ font-size:12px; font-weight:700; }
+  .resena-fecha{ font-size:10px; color:var(--text-secondary); }
+  .resena-stars{ display:flex; gap:2px; margin-bottom:6px; }
+  .resena-stars svg{ width:14px; height:14px; }
+  .resena-stars svg.filled{ fill:var(--gold); stroke:var(--gold); }
+  .resena-stars svg.empty{ fill:none; stroke:var(--text-secondary); }
+  .resena-comentario{ font-size:12px; color:var(--text-secondary); font-style:italic; line-height:1.4; }
+  .resenas-empty{ font-size:12px; color:var(--text-secondary); text-align:center; padding:20px; }
+
+  /* ========== RESPONSIVE ========== */
+  @media (max-width: 1200px) {
+    .sidebar { width: 70px; }
+    .sidebar.expanded { width: 200px; }
+    .main { margin-left: 70px; }
+  }
+
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 16px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  }
+
+  @media (max-width: 600px) {
+    .header-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .header-row h1 { font-size: 20px; }
+    .add-btn { width: 100%; justify-content: center; }
+    .grid { grid-template-columns: 1fr; }
+    .card { padding: 16px; }
+    .card-info h3 { font-size: 15px; }
+    .modal-content { width: 95%; max-width: none; margin: 10px; padding: 20px; }
+    .form-row { flex-direction: column; }
+    .form-actions { flex-direction: column; }
+    .form-actions button { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <script>
+    if (localStorage.getItem('dnNavExpanded') === '1' && window.innerWidth > 767) {
+      document.write('<style>@media(min-width:768px){#sidebar{width:230px!important;align-items:stretch!important;padding:22px 16px!important;}}</style>');
+    }
+  </script>
+  <div class="sidebar" id="sidebar">
+    <img src="../assets/apple-touch-icon-v2.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
+    <img src="../assets/logo-transparent.png" class="sidebar-logo sidebar-logo-full" alt="Keicy Barbería" id="sidebarLogoFull">
+    <div class="sidebar-card" id="sidebarCard" title="Cambiar de sede">
+      <div class="sidebar-card-avatar">DN</div>
+      <div class="sidebar-card-info">
+        <div class="sidebar-card-name" id="sidebarCardName">Keicy Barbería</div>
+        <div class="sidebar-card-sub" id="sidebarCardSede">—</div>
+      </div>
+      <svg class="sidebar-card-chevron" id="sidebarCardChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="sidebar-card-menu" id="sidebarCardMenu"></div>
+    </div>
+        <div class="nav-group">
+      <div class="nav-section-label">Gestionar</div>
+      <a class="nav-link" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Resumen
+      </a>
+      <a class="nav-link" href="calendario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        Agenda
+      </a>
+      <a class="nav-link" href="clientes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg>
+        Clientes
+      </a>
+      <a class="nav-link" href="caja.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        Cuadre de caja
+      </a>
+      <a class="nav-link" href="fidelizacion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z" stroke-linejoin="round"/></svg>
+        Fidelización
+      </a>
+      <div class="nav-section-label">Desempeño</div>
+      <a class="nav-link" href="servicios.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
+        Servicios
+      </a>
+      <a class="nav-link active" href="barberos.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2M14.5 14.8c2 .3 3.7 1.7 4.5 4.2" stroke-linecap="round"/></svg>
+        Colaboradores
+      </a>      <a class="nav-link" href="inventario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+        Inventario
+      </a>
+      <a class="nav-link" href="reportes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7" stroke-linecap="round"/></svg>
+        Reportes
+      </a>
+      <a class="nav-link" href="marketing.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4h4l6 5V5L7 10H3z"/></svg>
+        Marketing
+      </a>
+      <a class="nav-link" href="configuracion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+    <div class="help-link" onclick="toast('Abriendo centro de ayuda…')">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.7-2 1.9-2 3.5" stroke-linecap="round"/><circle cx="12" cy="16.3" r="0.6" fill="currentColor"/></svg>
+      Centro de ayuda
+    </div>
+    <div class="sidebar-bottom">
+      <div class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="logout-label">Cerrar sesión</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+  <div class="header-row fade-in">
+    <div class="header-left">
+      <img src="../assets/logo-transparent.png" alt="Keicy Barber" onclick="window.location.href='calendario.html'">
+      <div>
+        <div class="header-title">Colaboradores</div>
+        <div class="header-sub">Gestiona tu equipo y sus cuentas.</div>
+      </div>
+    </div>
+    <a class="back-btn" href="../recepcion/dashboard.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Volver a Recepción
+    </a>
+  </div>
+
+  <div class="sec-tabs">
+    <div class="sec-tab active" data-sec="colaboradores" onclick="switchSeccion('colaboradores')">Colaboradores</div>
+    <div class="sec-tab" data-sec="administrativos" onclick="switchSeccion('administrativos')">Administrativos</div>
+  </div>
+
+  <div id="seccionColaboradores">
+    <!-- Panel de Barberos con tarjetas -->
+    <div class="panel fade-in" style="margin-bottom:20px;">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Tu equipo <span class="team-count" id="teamCount"></span></div>
+          <div class="panel-sub">Toca en un barbero para editar su perfil.</div>
+        </div>
+        <div class="add-btn" onclick="openCreateModal()" style="display:flex; align-items:center; gap:8px; padding:12px 16px; border-radius:14px; cursor:pointer; background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-weight:800; font-size:13px;">+ Crear colaborador</div>
+      </div>
+      <div id="barberList" class="barber-cards-grid" style="margin-top:14px;"><div class="empty-row" style="grid-column:1/-1;">Cargando…</div></div>
+    </div>
+  </div>
+
+  <div id="seccionAdministrativos" style="display:none;">
+    <!-- Administradores Generales -->
+    <div class="panel fade-in" style="margin-bottom:20px;">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Administradores Generales <span class="team-count" id="adminCount"></span></div>
+          <div class="panel-sub">Cuentas con acceso completo a toda la plataforma.</div>
+        </div>
+        <div class="add-btn" onclick="openCreateAdminModal()" style="display:flex; align-items:center; gap:8px; padding:12px 16px; border-radius:14px; cursor:pointer; background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-weight:800; font-size:13px;">+ Crear admin</div>
+      </div>
+      <div id="adminList" style="margin-top:14px;"><div class="empty-row">Cargando…</div></div>
+    </div>
+
+    <!-- Administradores de Sede -->
+    <div class="panel fade-in">
+      <div class="panel-head">
+        <div>
+          <div class="panel-title">Administradores de Sede <span class="team-count" id="adminSedeCount"></span></div>
+          <div class="panel-sub">Gestionan una o varias sedes específicas. Puedes configurar qué módulos puede ver cada uno.</div>
+        </div>
+        <div class="add-btn" onclick="openCreateAdminSedeModal()" style="display:flex; align-items:center; gap:8px; padding:12px 16px; border-radius:14px; cursor:pointer; background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-weight:800; font-size:13px;">+ Crear admin sede</div>
+      </div>
+      <div id="adminSedeList" style="margin-top:14px;"><div class="empty-row">Cargando…</div></div>
+    </div>
+  </div>
+
+  <!-- Crear cuenta -->
+  <div class="modal-overlay" id="createModal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-box">
+      <span class="modal-close" onclick="document.getElementById('createModal').classList.remove('show')">✕ Cerrar</span>
+      <div class="modal-title">Crear cuenta de barbero</div>
+      <div class="modal-sub">Define su usuario y clave — él la usará para entrar a su app.</div>
+
+      <div class="error-box" id="errorBox"></div>
+
+      <form id="createForm">
+        <div class="field"><label>Tipo de colaborador</label>
+          <select id="tipoColaborador">
+            <option value="barbero">Barbero</option>
+            <option value="aseo">Personal de aseo</option>
+          </select>
+        </div>
+        <div class="field"><label>Nombre completo</label><input type="text" id="fullName" placeholder="ej. Andrés Felipe" autocomplete="off"></div>
+        <div class="field" id="especialidadField"><label>Especialidad</label><input type="text" id="especialidad" placeholder="ej. Cortes clásicos y fade" autocomplete="off"></div>
+        <div class="toggle-row" id="todasSedesField" style="display:none;">
+          <span class="lbl">Trabaja en todas las sedes</span>
+          <div class="switch on" id="todasSedesSwitch"><div class="knob"></div></div>
+        </div>
+        <div class="field" id="sedeField"><label>Sede</label><select id="sedeId"></select></div>
+        <div class="field" id="sedesMultipleField" style="display:none;">
+          <label>Sedes asignadas</label>
+          <div id="sedesCheckboxes" style="margin-top:8px;max-height:200px;overflow-y:auto;"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Usuario</label><input type="text" id="username" placeholder="ej. andres.barber" autocomplete="off"></div>
+          <div class="field"><label>Clave</label><input type="password" id="password" placeholder="Mínimo 6 caracteres" autocomplete="off"></div>
+        </div>
+        <div class="field" id="comisionField"><label>Comisión (%)</label><input type="number" id="comision" value="40" min="0" max="100" autocomplete="off"></div>
+        <div class="field" id="pagoDiarioField" style="display:none;"><label>Pago diario ($)</label><input type="number" id="pagoDiario" value="50000" min="0" autocomplete="off"></div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="document.getElementById('createModal').classList.remove('show')">Cancelar</button>
+          <button type="submit" class="btn-save" id="submitBtn">Crear cuenta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Editar perfil -->
+  <div class="modal-overlay" id="editModal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-box">
+      <span class="modal-close" onclick="document.getElementById('editModal').classList.remove('show')">✕ Cerrar</span>
+      <div class="modal-title" id="editModalTitle">Editar barbero</div>
+      <div class="modal-sub" id="editModalSub">—</div>
+
+      <div class="photo-upload">
+        <div class="photo-preview" id="editPhotoPreview">--</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <input type="file" id="editPhotoInput" accept="image/*" style="display:none;">
+          <div class="photo-upload-btn" onclick="document.getElementById('editPhotoInput').click()">Cambiar foto</div>
+          <div class="photo-upload-btn" id="btnAjustarFoto" style="display:none; background:var(--glass-2); border:1px solid var(--gold); color:var(--gold);" onclick="openPhotoAdjustModal()">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Ajustar encuadre
+          </div>
+        </div>
+      </div>
+
+      <div class="field"><label>Tipo de colaborador</label>
+        <select id="editTipoColaborador">
+          <option value="barbero">Barbero</option>
+          <option value="aseo">Personal de aseo</option>
+        </select>
+      </div>
+      <div class="field"><label>Nombre completo</label><input type="text" id="editFullName"></div>
+      <div class="field-row">
+        <div class="field" id="editEspecialidadField"><label>Especialidad</label><input type="text" id="editEspecialidad"></div>
+        <div class="field"><label>Puesto</label><input type="text" id="editPuesto" placeholder="Ej. 4"></div>
+      </div>
+      <div class="toggle-row" id="editTodasSedesField" style="display:none;">
+        <span class="lbl">Trabaja en todas las sedes</span>
+        <div class="switch on" id="editTodasSedesSwitch"><div class="knob"></div></div>
+      </div>
+      <div class="field" id="editSedeField"><label>Sede</label><select id="editSedeId"></select></div>
+      <div class="field-row">
+        <div class="field" id="editComisionField"><label>Comisión (%)</label><input type="number" id="editComision" min="0" max="100"></div>
+        <div class="field"><label>Años de experiencia</label><input type="number" id="editAnos" min="0" max="60"></div>
+      </div>
+      <div class="field" id="editPagoDiarioField" style="display:none;"><label>Pago diario ($)</label><input type="number" id="editPagoDiario" min="0"></div>
+      <div class="field"><label>Instagram (sin @)</label><input type="text" id="editInstagram" placeholder="diegoneira_barber"></div>
+      <div class="field">
+        <label>Día de descanso (siempre bloqueado)</label>
+        <select id="editDiaDescanso">
+          <option value="">Ninguno</option>
+          <option value="1">Lunes</option>
+          <option value="2">Martes</option>
+          <option value="3">Miércoles</option>
+          <option value="4">Jueves</option>
+          <option value="5">Viernes</option>
+          <option value="6">Sábado</option>
+          <option value="0">Domingo</option>
+        </select>
+      </div>
+
+      <div class="toggle-row">
+        <div class="lbl">Cuenta activa</div>
+        <div class="switch" id="editActivoSwitch" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+      </div>
+
+      <!-- Bloqueos de horarios -->
+      <div class="bloqueos-section">
+        <div class="bloqueos-title">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Bloqueos de horarios
+        </div>
+        <div class="bloqueos-list" id="bloqueosList">
+          <div style="font-size:12px; color:var(--text-secondary); padding:12px; text-align:center;">Sin bloqueos programados</div>
+        </div>
+        <div class="add-bloqueo-row">
+          <input type="date" id="bloqueoFecha">
+          <select id="bloqueoTipo">
+            <option value="dia">Día completo</option>
+            <option value="horas">Horas específicas</option>
+          </select>
+        </div>
+        <div class="add-bloqueo-row" id="bloqueoHorasRow" style="display:none;">
+          <input type="time" id="bloqueoHoraInicio" value="09:00">
+          <input type="time" id="bloqueoHoraFin" value="18:00">
+        </div>
+        <div class="add-bloqueo-row full">
+          <input type="text" id="bloqueoMotivo" placeholder="Motivo (opcional)">
+        </div>
+        <button type="button" class="add-bloqueo-btn" onclick="addBloqueo()">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          Agregar bloqueo
+        </button>
+      </div>
+
+      <!-- Reseñas del colaborador -->
+      <div class="resenas-section">
+        <div class="resenas-title">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          Reseñas de clientes
+        </div>
+        <div class="resenas-stats" id="resenasStats">
+          <div class="resenas-avg">
+            <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span id="resenasPromedio">-</span>
+          </div>
+          <div class="resenas-count"><span id="resenasTotal">0</span> reseñas</div>
+        </div>
+        <div class="resenas-list" id="resenasList">
+          <div class="resenas-empty">Cargando reseñas...</div>
+        </div>
+      </div>
+
+      <div style="font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.4px; margin:18px 0 8px;">Credenciales de acceso</div>
+      <div class="field"><label>Usuario de ingreso</label><input type="text" id="editUsername" autocomplete="off"></div>
+      <div class="field">
+        <label>Nueva contraseña (déjalo vacío para no cambiarla)</label>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input type="text" id="editPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password" style="flex:1;">
+          <button type="button" onclick="generarPasswordColaborador()" style="padding:8px 12px; background:var(--primary); color:#111111; border:none; border-radius:8px; font-size:12px; cursor:pointer; white-space:nowrap;">Generar</button>
+        </div>
+      </div>
+      <div id="credencialesBox" style="display:none; background:var(--glass); border:1px solid var(--primary); border-radius:10px; padding:12px; margin-top:10px;">
+        <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px;">Credenciales para compartir:</div>
+        <div id="credencialesTexto" style="font-family:monospace; font-size:13px; background:var(--card); padding:10px; border-radius:6px; white-space:pre-line;"></div>
+        <button type="button" onclick="copiarCredenciales()" style="margin-top:10px; width:100%; padding:10px; background:var(--success); color:#111111; border:none; border-radius:8px; font-size:13px; cursor:pointer;">📋 Copiar credenciales</button>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="document.getElementById('editModal').classList.remove('show')">Cancelar</button>
+        <button type="button" class="btn-save" id="editSaveBtn" onclick="saveBarberEdit()">Guardar cambios</button>
+      </div>
+
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--glass-border);">
+        <button type="button" class="btn-cancel" style="width:100%; color:var(--error); border-color:rgba(239,83,80,0.35);" onclick="deleteBarberProfile(this)">Eliminar perfil</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Crear administrador -->
+  <div class="modal-overlay" id="createAdminModal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-box">
+      <span class="modal-close" onclick="document.getElementById('createAdminModal').classList.remove('show')">✕ Cerrar</span>
+      <div class="modal-title">Crear administrador</div>
+      <div class="modal-sub">Tendrá acceso completo al panel administrativo.</div>
+
+      <div class="error-box" id="adminErrorBox"></div>
+
+      <form id="createAdminForm">
+        <div class="field"><label>Nombre completo</label><input type="text" id="adminFullName" placeholder="ej. Keicy Barber" autocomplete="off"></div>
+        <div class="field-row">
+          <div class="field"><label>Usuario</label><input type="text" id="adminUsername" placeholder="ej. diego.admin" autocomplete="off"></div>
+          <div class="field"><label>Clave</label><input type="password" id="adminPassword" placeholder="Mínimo 6 caracteres" autocomplete="off"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="document.getElementById('createAdminModal').classList.remove('show')">Cancelar</button>
+          <button type="submit" class="btn-save" id="adminSubmitBtn">Crear administrador</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Editar administrador -->
+  <div class="modal-overlay" id="editAdminModal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-box">
+      <span class="modal-close" onclick="document.getElementById('editAdminModal').classList.remove('show')">✕ Cerrar</span>
+      <div class="modal-title">Editar administrador</div>
+      <div class="modal-sub" id="editAdminSub">—</div>
+      <div class="field"><label>Nombre completo</label><input type="text" id="editAdminFullName"></div>
+      <div class="field"><label>Usuario de ingreso</label><input type="text" id="editAdminUsername" autocomplete="off"></div>
+      <div class="field"><label>Nueva contraseña (déjalo vacío para no cambiarla)</label><input type="password" id="editAdminPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="document.getElementById('editAdminModal').classList.remove('show')">Cancelar</button>
+        <button type="button" class="btn-save" id="editAdminSaveBtn" onclick="saveAdminEdit()">Guardar cambios</button>
+      </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--glass-border);">
+        <button type="button" class="btn-cancel" style="width:100%; color:var(--error); border-color:rgba(239,83,80,0.35);" onclick="deleteAdminProfile(this)">Eliminar administrador</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Crear admin sede -->
+  <div class="modal-overlay" id="createAdminSedeModal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-box">
+      <span class="modal-close" onclick="document.getElementById('createAdminSedeModal').classList.remove('show')">✕ Cerrar</span>
+      <div class="modal-title">Crear administrador de sede</div>
+      <div class="modal-sub">Podrá gestionar las sedes que le asignes.</div>
+
+      <div class="error-box" id="adminSedeErrorBox"></div>
+
+      <form id="createAdminSedeForm">
+        <div class="field"><label>Nombre completo</label><input type="text" id="adminSedeFullName" placeholder="ej. Carlos López" autocomplete="off"></div>
+        <div class="field-row">
+          <div class="field"><label>Usuario</label><input type="text" id="adminSedeUsername" placeholder="ej. carlos.admin" autocomplete="off"></div>
+          <div class="field"><label>Clave</label><input type="password" id="adminSedePassword" placeholder="Mínimo 6 caracteres" autocomplete="off"></div>
+        </div>
+        <div class="field">
+          <label>Sedes asignadas</label>
+          <div id="adminSedeSedesCheckboxes" style="margin-top:8px;max-height:150px;overflow-y:auto;"></div>
+        </div>
+        <div class="field">
+          <label>Módulos disponibles</label>
+          <div id="adminSedeModulosCheckboxes" style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" onclick="document.getElementById('createAdminSedeModal').classList.remove('show')">Cancelar</button>
+          <button type="submit" class="btn-save" id="adminSedeSubmitBtn">Crear admin sede</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Editar admin sede -->
+  <div class="modal-overlay" id="editAdminSedeModal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-box">
+      <span class="modal-close" onclick="document.getElementById('editAdminSedeModal').classList.remove('show')">✕ Cerrar</span>
+      <div class="modal-title" id="editAdminSedeTitle">Editar admin sede</div>
+      <div class="modal-sub" id="editAdminSedeSub">—</div>
+      <input type="hidden" id="editAdminSedeId">
+
+      <div class="field"><label>Nombre completo</label><input type="text" id="editAdminSedeFullName"></div>
+      <div class="field"><label>Usuario de ingreso</label><input type="text" id="editAdminSedeUsername" autocomplete="off"></div>
+      <div class="field"><label>Nueva contraseña (vacío = sin cambios)</label><input type="password" id="editAdminSedeNewPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password"></div>
+
+      <div class="field">
+        <label>Sedes asignadas</label>
+        <div id="editAdminSedeSedesCheckboxes" style="margin-top:8px;max-height:150px;overflow-y:auto;"></div>
+      </div>
+      <div class="field">
+        <label>Módulos disponibles</label>
+        <div id="editAdminSedeModulosCheckboxes" style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="document.getElementById('editAdminSedeModal').classList.remove('show')">Cancelar</button>
+        <button type="button" class="btn-save" id="editAdminSedeSaveBtn" onclick="saveAdminSedeEdit()">Guardar cambios</button>
+      </div>
+      <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--glass-border);">
+        <button type="button" class="btn-cancel" style="width:100%; color:var(--error); border-color:rgba(239,83,80,0.35);" onclick="deleteAdminSedeProfile()">Eliminar admin sede</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Ajustar Foto -->
+  <div class="modal-overlay" id="photoAdjustModal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-box" style="max-width:520px;">
+      <span class="modal-close" onclick="document.getElementById('photoAdjustModal').classList.remove('show')">✕ Cerrar</span>
+      <div class="modal-title">Ajustar encuadre de foto</div>
+      <div class="modal-sub">Configura cómo se ve la foto en cada sección de la app.</div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px;">
+        <!-- Perfil Público -->
+        <div class="photo-adjust-card">
+          <div class="photo-adjust-card-preview" id="adjustPreviewProfile" style="height:140px;"></div>
+          <div class="photo-adjust-card-label">Perfil público</div>
+          <div class="photo-adjust-card-control">
+            <span>Posición</span>
+            <input type="range" min="0" max="100" value="30" id="adjustPosProfile" oninput="updateAdjustPreview('profile', this.value)">
+            <span id="adjustValProfile">30%</span>
+          </div>
+        </div>
+
+        <!-- Página de Reservas -->
+        <div class="photo-adjust-card">
+          <div class="photo-adjust-card-preview" id="adjustPreviewReservas" style="height:140px;"></div>
+          <div class="photo-adjust-card-label">Página de reservas</div>
+          <div class="photo-adjust-card-control">
+            <span>Posición</span>
+            <input type="range" min="0" max="100" value="30" id="adjustPosReservas" oninput="updateAdjustPreview('reservas', this.value)">
+            <span id="adjustValReservas">30%</span>
+          </div>
+        </div>
+
+        <!-- Agenda Móvil -->
+        <div class="photo-adjust-card">
+          <div class="photo-adjust-card-preview" id="adjustPreviewAgenda" style="height:100px;"></div>
+          <div class="photo-adjust-card-label">Agenda móvil</div>
+          <div class="photo-adjust-card-control">
+            <span>Posición</span>
+            <input type="range" min="0" max="100" value="30" id="adjustPosAgenda" oninput="updateAdjustPreview('agenda', this.value)">
+            <span id="adjustValAgenda">30%</span>
+          </div>
+        </div>
+
+        <!-- App del Barbero -->
+        <div class="photo-adjust-card">
+          <div class="photo-adjust-card-preview" id="adjustPreviewBarbero" style="height:100px;"></div>
+          <div class="photo-adjust-card-label">App del barbero</div>
+          <div class="photo-adjust-card-control">
+            <span>Posición</span>
+            <input type="range" min="0" max="100" value="30" id="adjustPosBarbero" oninput="updateAdjustPreview('barbero', this.value)">
+            <span id="adjustValBarbero">30%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top:24px;">
+        <button type="button" class="btn-cancel" onclick="document.getElementById('photoAdjustModal').classList.remove('show')">Cancelar</button>
+        <button type="button" class="btn-save" id="photoAdjustSaveBtn" onclick="savePhotoAdjust()">Guardar encuadre</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"><span class="toast-dot"></span><span id="toastText"></span></div>
+
+  <!-- Barra de navegación inferior — idéntica en todas las páginas del panel -->
+  <div class="dn-bottom-nav">
+      <a href="calendario.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        Agenda
+      </a>
+      <a href="caja.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        Cuadre de caja
+      </a>
+      <a href="dashboard.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Resumen
+      </a>
+      <a href="configuracion.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/admin-sede-nav.js"></script>
+
+<script>
+  const BARBER_INVITE_CODE = 'DIEGO-NEIRA-BARBERO-2026';
+  const DIA_NOMBRE = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+  const toastEl = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  function toast(msg){
+    toastText.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(window._t);
+    window._t = setTimeout(() => toastEl.classList.remove('show'), 2400);
+  }
+
+  const sidebarEl = document.getElementById('sidebar');
+  document.querySelectorAll('.nav-link, .help-link').forEach(el => {
+    const lastNode = el.lastChild;
+    if (lastNode && lastNode.nodeType === 3 && lastNode.textContent.trim()) {
+      const span = document.createElement('span');
+      span.className = 'nav-label';
+      span.textContent = lastNode.textContent.trim();
+      el.replaceChild(span, lastNode);
+    }
+  });
+  function dnSetNavExpanded(exp){
+    sidebarEl.classList.toggle('expanded', exp);
+    localStorage.setItem('dnNavExpanded', exp ? '1' : '0');
+  }
+  dnSetNavExpanded(localStorage.getItem('dnNavExpanded') === '1');
+  document.getElementById('sidebarLogoIcon').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+  document.getElementById('sidebarLogoFull').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+
+  document.querySelectorAll('.modal-overlay').forEach(ov => {
+    ov.addEventListener('click', (e) => { if (e.target === ov) ov.classList.remove('show'); });
+  });
+
+  // Cerrar sesión
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    if (confirm('¿Seguro que deseas cerrar sesión?')) {
+      dnClearSession();
+      if (typeof dnClearTurnoSede === 'function') dnClearTurnoSede();
+      window.location.href = '../auth.html';
+    }
+  });
+
+  const user = dnRequireAdmin();
+  dnInitSidebarCard(function(nuevaSedeId) {
+    sedeActualId = nuevaSedeId;
+    loadBarberos();
+  });
+
+  // Detectar modo admin_sede o sede seleccionada
+  const urlParams = new URLSearchParams(window.location.search);
+  const esVistaAdminSede = urlParams.has('admin_sede');
+  let sedeActualId = dnGetSedeActual(); // Siempre obtener la sede actual
+
+  const errorBox = document.getElementById('errorBox');
+  const form = document.getElementById('createForm');
+  const submitBtn = document.getElementById('submitBtn');
+
+  function showError(msg){
+    errorBox.textContent = msg;
+    errorBox.classList.add('show');
+  }
+
+  function switchSeccion(sec){
+    document.querySelectorAll('.sec-tab').forEach(t => t.classList.toggle('active', t.dataset.sec === sec));
+    document.getElementById('seccionColaboradores').style.display = sec === 'colaboradores' ? 'block' : 'none';
+    document.getElementById('seccionAdministrativos').style.display = sec === 'administrativos' ? 'block' : 'none';
+    if (sec === 'administrativos') {
+      loadAdmins();
+      loadAdminsSede();
+    }
+  }
+
+  function toggleTipoFields(tipo, especialidadFieldId, comisionFieldId){
+    const esBarbero = tipo === 'barbero';
+    const esAseo = tipo === 'aseo';
+    const esAdminSede = tipo === 'admin_sede';
+    document.getElementById(especialidadFieldId).style.display = esBarbero ? 'block' : 'none';
+    document.getElementById(comisionFieldId).style.display = esBarbero ? 'block' : 'none';
+    // Campo de pago diario para personal de aseo
+    const pagoDiarioField = comisionFieldId === 'comisionField' ? 'pagoDiarioField' : 'editPagoDiarioField';
+    const pdField = document.getElementById(pagoDiarioField);
+    if (pdField) pdField.style.display = esAseo ? 'block' : 'none';
+    // Toggle de todas las sedes para personal de aseo
+    const isCreate = comisionFieldId === 'comisionField';
+    const todasSedesField = document.getElementById(isCreate ? 'todasSedesField' : 'editTodasSedesField');
+    const todasSedesSwitch = document.getElementById(isCreate ? 'todasSedesSwitch' : 'editTodasSedesSwitch');
+    const sedeFieldId = isCreate ? 'sedeField' : 'editSedeField';
+    const sedeField = document.getElementById(sedeFieldId);
+    if (todasSedesField) {
+      todasSedesField.style.display = esAseo ? 'flex' : 'none';
+      if (esAseo) {
+        // Por defecto activado para aseo
+        todasSedesSwitch.classList.add('on');
+        if (sedeField) sedeField.style.display = 'none';
+      }
+    }
+    // Para admin_sede, mostrar nota explicativa y campo de sedes múltiples
+    const nota = document.getElementById('adminSedeNota');
+    if (nota) nota.style.display = esAdminSede ? 'block' : 'none';
+    // Mostrar/ocultar campos de sede
+    const sedesMultipleField = document.getElementById('sedesMultipleField');
+    if (!esAseo && sedeField) sedeField.style.display = esAdminSede ? 'none' : 'block';
+    if (sedesMultipleField) {
+      sedesMultipleField.style.display = esAdminSede ? 'block' : 'none';
+      if (esAdminSede) renderSedesCheckboxesCreate();
+    }
+  }
+
+  // Toggle para "trabaja en todas las sedes"
+  function setupTodasSedesToggle(switchId, sedeFieldId) {
+    const sw = document.getElementById(switchId);
+    const sedeField = document.getElementById(sedeFieldId);
+    if (sw) {
+      sw.addEventListener('click', () => {
+        sw.classList.toggle('on');
+        const isOn = sw.classList.contains('on');
+        if (sedeField) sedeField.style.display = isOn ? 'none' : 'block';
+      });
+    }
+  }
+  setupTodasSedesToggle('todasSedesSwitch', 'sedeField');
+  setupTodasSedesToggle('editTodasSedesSwitch', 'editSedeField');
+
+  function renderSedesCheckboxesCreate() {
+    const container = document.getElementById('sedesCheckboxes');
+    if (!container || sedes.length === 0) return;
+    container.innerHTML = sedes.map(s => `
+      <label style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:var(--glass-2);border:1px solid var(--glass-border);margin-bottom:8px;cursor:pointer;">
+        <input type="checkbox" class="sede-checkbox" value="${s.id}" style="width:18px;height:18px;accent-color:var(--gold);">
+        <span style="font-size:13px;font-weight:600;">${s.nombre}</span>
+      </label>
+    `).join('');
+  }
+  document.getElementById('tipoColaborador').addEventListener('change', (e) => toggleTipoFields(e.target.value, 'especialidadField', 'comisionField'));
+  document.getElementById('editTipoColaborador').addEventListener('change', (e) => toggleTipoFields(e.target.value, 'editEspecialidadField', 'editComisionField'));
+
+  let sedes = [];
+  async function loadSedesForSelects(){
+    try {
+      const { data, error } = await sb.from('sucursales').select('id, nombre, principal').eq('activa', true).order('orden');
+      if (error) throw error;
+      sedes = data || [];
+      const opts = sedes.map(s => `<option value="${s.id}">${s.nombre}</option>`).join('');
+      document.getElementById('sedeId').innerHTML = opts;
+      document.getElementById('editSedeId').innerHTML = opts;
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function openCreateModal(){
+    form.reset();
+    document.getElementById('comision').value = 40;
+    document.getElementById('tipoColaborador').value = 'barbero';
+    toggleTipoFields('barbero', 'especialidadField', 'comisionField');
+    const principal = sedes.find(s => s.principal) || sedes[0];
+    if (principal) document.getElementById('sedeId').value = principal.id;
+    errorBox.classList.remove('show');
+    document.getElementById('createModal').classList.add('show');
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox.classList.remove('show');
+
+    const tipo = document.getElementById('tipoColaborador').value;
+    const fullName = document.getElementById('fullName').value.trim();
+    const especialidad = document.getElementById('especialidad').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const comision = Number(document.getElementById('comision').value) || 40;
+    const pagoDiario = Number(document.getElementById('pagoDiario').value) || 50000;
+    const todasSedesActivo = tipo === 'aseo' && document.getElementById('todasSedesSwitch').classList.contains('on');
+    const sedeId = todasSedesActivo ? null : document.getElementById('sedeId').value;
+
+    // Para admin_sede, obtener las sedes seleccionadas de los checkboxes
+    const sedesSeleccionadas = tipo === 'admin_sede'
+      ? Array.from(document.querySelectorAll('.sede-checkbox:checked')).map(cb => cb.value)
+      : (sedeId ? [sedeId] : []);
+
+    if (fullName.length < 2) return showError('Escribe el nombre completo.');
+    if (username.length < 3) return showError('Escribe un nombre de usuario válido.');
+    if (password.length < 6) return showError('La clave debe tener al menos 6 caracteres.');
+    if (tipo === 'admin_sede' && sedesSeleccionadas.length === 0) return showError('Selecciona al menos una sede para el administrador.');
+    if (tipo !== 'admin_sede' && tipo !== 'aseo' && !sedeId) return showError('Elige la sede donde trabajará.');
+    if (tipo === 'aseo' && !todasSedesActivo && !sedeId) return showError('Elige la sede o activa "Trabaja en todas las sedes".');
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creando…';
+
+    try {
+      // Si es admin_sede, crear usuario directamente con ese rol
+      if (tipo === 'admin_sede') {
+        // Verificar que el username no exista
+        const { data: existing } = await sb.from('usuarios').select('id').eq('username', username).limit(1);
+        if (existing && existing.length > 0) {
+          throw new Error('Ese nombre de usuario ya existe.');
+        }
+
+        // Crear usuario con rol admin_sede
+        const { data: newUser, error: userError } = await sb.from('usuarios').insert({
+          username: username,
+          password_hash: password, // En produccion deberia ser hasheado
+          full_name: fullName,
+          role: 'admin_sede'
+        }).select().single();
+
+        if (userError) throw userError;
+
+        // Asignar las sedes seleccionadas
+        const sedesInsert = sedesSeleccionadas.map(sucursalId => ({
+          usuario_id: newUser.id,
+          sucursal_id: sucursalId,
+          activo: true
+        }));
+        const { error: asignError } = await sb.from('admin_sede_sedes_asignadas').insert(sedesInsert);
+
+        if (asignError) throw asignError;
+
+        document.getElementById('createModal').classList.remove('show');
+        toast(`Administrador de sede creado: ${fullName}`);
+        loadBarberos();
+      } else {
+        // Flujo normal para barberos y aseo
+        const { data, error } = await sb.rpc('crear_cuenta_barbero', {
+          p_username: username,
+          p_password: password,
+          p_full_name: fullName,
+          p_especialidad: tipo === 'barbero' ? (especialidad || null) : null,
+          p_codigo_invitacion: BARBER_INVITE_CODE
+        });
+        if (error) throw error;
+
+        if (data && data[0]) {
+          const patch = { sucursal_id: sedeId, tipo_colaborador: tipo };
+          if (tipo === 'barbero' && comision !== 40) patch.comision_pct = comision;
+          if (tipo === 'aseo') patch.pago_diario = pagoDiario;
+          await sb.from('barberos').update(patch).eq('id', data[0].id);
+        }
+
+        document.getElementById('createModal').classList.remove('show');
+        toast(`Cuenta creada para ${fullName}. Ya puede entrar con su usuario y clave.`);
+        loadBarberos();
+      }
+    } catch (err) {
+      console.error(err);
+      showError(err.message?.includes('ya existe') ? 'Ese nombre de usuario ya existe.' : (err.message || 'No pudimos crear la cuenta.'));
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Crear cuenta';
+    }
+  });
+
+  let barberos = [];
+  let currentEditId = null;
+  let editPhotoDataUrl = null;
+
+  async function loadBarberos(){
+    try {
+      let query = sb
+        .from('barberos')
+        .select('id, especialidad, puesto, comision_pct, pago_diario, calificacion, activo, anos_experiencia, dia_descanso, sucursal_id, tipo_colaborador, sucursales(nombre), usuarios!barberos_id_fkey(id, username, full_name, avatar_url, instagram, password_hash, avatar_focus_y, avatar_focus_y_reservas, avatar_focus_y_agenda, avatar_focus_y_barbero)');
+
+      // Filtrar por sede seleccionada (tanto para admin_sede como admin general)
+      if (sedeActualId) {
+        query = query.eq('sucursal_id', sedeActualId);
+      }
+
+      const { data, error } = await query.order('id');
+      if (error) throw error;
+      barberos = data || [];
+
+      document.getElementById('teamCount').textContent = barberos.length ? `(${barberos.length})` : '';
+      renderTeamList();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('barberList').innerHTML = '<div class="empty-row">No pudimos cargar el equipo.</div>';
+    }
+  }
+
+  function renderTeamList(){
+    const el = document.getElementById('barberList');
+    if (!barberos.length) {
+      el.innerHTML = '<div class="empty-row" style="grid-column:1/-1;">Aún no tienes colaboradores. Crea el primero con el botón "+".</div>';
+      return;
+    }
+    el.innerHTML = barberos.map(b => {
+      const tipo = b.tipo_colaborador || 'barbero';
+      const name = b.usuarios?.full_name || b.usuarios?.username || 'Colaborador';
+      const photo = b.usuarios?.avatar_url;
+      const avatarInner = photo ? `<img src="${photo}" alt="${name}">` : dnInitials(name);
+      const specs = tipo === 'barbero' ? (b.especialidad || 'Barbero') : 'Aseo';
+      const rating = tipo === 'barbero' ? Number(b.calificacion).toFixed(1) : null;
+      return `
+        <div class="barber-card" onclick="openEditModal('${b.id}')">
+          <span class="card-role ${tipo}">${tipo === 'barbero' ? 'Barbero' : 'Aseo'}</span>
+          <div class="card-avatar">${avatarInner}</div>
+          <div class="card-info">
+            <div class="card-name">${name}</div>
+            <div class="card-username">@${b.usuarios?.username || ''}</div>
+            ${rating ? `<div class="card-rating"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>${rating}</div>` : ''}
+            <div class="card-spec">${specs}${b.sucursales?.nombre ? ` · ${b.sucursales.nombre}` : ''}</div>
+          </div>
+          <span class="card-status ${b.activo ? 'active' : 'inactive'}">${b.activo ? 'Activo' : 'Inactivo'}</span>
+        </div>`;
+    }).join('');
+  }
+
+  // ---- Generador de contraseñas ----
+  function generarPasswordColaborador() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let password = '';
+    for (let i = 0; i < 8; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    document.getElementById('editPassword').value = password;
+    mostrarCredenciales();
+  }
+
+  function mostrarCredenciales() {
+    const username = document.getElementById('editUsername').value.trim();
+    const password = document.getElementById('editPassword').value;
+    if (username && password) {
+      const texto = `Usuario: ${username}\nContraseña: ${password}`;
+      document.getElementById('credencialesTexto').textContent = texto;
+      document.getElementById('credencialesBox').style.display = 'block';
+    }
+  }
+
+  function copiarCredenciales() {
+    const username = document.getElementById('editUsername').value.trim();
+    const password = document.getElementById('editPassword').value;
+    const texto = `Usuario: ${username}\nContraseña: ${password}`;
+    navigator.clipboard.writeText(texto).then(() => {
+      toast('Credenciales copiadas al portapapeles');
+    }).catch(() => {
+      // Fallback para navegadores sin soporte
+      const ta = document.createElement('textarea');
+      ta.value = texto;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      toast('Credenciales copiadas');
+    });
+  }
+
+  // Mostrar credenciales cuando se escribe contraseña manualmente
+  document.addEventListener('DOMContentLoaded', () => {
+    const passField = document.getElementById('editPassword');
+    if (passField) {
+      passField.addEventListener('input', () => {
+        if (passField.value.length >= 6) mostrarCredenciales();
+        else document.getElementById('credencialesBox').style.display = 'none';
+      });
+    }
+  });
+
+  // ---- Edit modal ----
+  function openEditModal(id){
+    const b = barberos.find(x => x.id === id);
+    if (!b) return;
+    currentEditId = id;
+    editPhotoDataUrl = b.usuarios?.avatar_url || null;
+    editPhotoFile = null; // Reset archivo para nueva foto
+    const name = b.usuarios?.full_name || b.usuarios?.username || 'Barbero';
+
+    document.getElementById('editModalTitle').textContent = name;
+    document.getElementById('editModalSub').textContent = `@${b.usuarios?.username}`;
+    document.getElementById('editPhotoPreview').innerHTML = editPhotoDataUrl ? `<img src="${editPhotoDataUrl}">` : dnInitials(name);
+    document.getElementById('editTipoColaborador').value = b.tipo_colaborador || 'barbero';
+    toggleTipoFields(b.tipo_colaborador || 'barbero', 'editEspecialidadField', 'editComisionField');
+    document.getElementById('editFullName').value = name;
+    document.getElementById('editEspecialidad').value = b.especialidad || '';
+    document.getElementById('editPuesto').value = b.puesto || '';
+    document.getElementById('editInstagram').value = b.usuarios?.instagram || '';
+    document.getElementById('editComision').value = b.comision_pct ?? 40;
+    document.getElementById('editPagoDiario').value = b.pago_diario ?? 50000;
+    document.getElementById('editAnos').value = b.anos_experiencia ?? '';
+    document.getElementById('editDiaDescanso').value = (b.dia_descanso === null || b.dia_descanso === undefined) ? '' : String(b.dia_descanso);
+    // Configurar toggle de todas las sedes para personal de aseo
+    const esAseo = (b.tipo_colaborador || 'barbero') === 'aseo';
+    const trabajaEnTodas = esAseo && !b.sucursal_id;
+    const editTodasSwitch = document.getElementById('editTodasSedesSwitch');
+    const editSedeField = document.getElementById('editSedeField');
+    editTodasSwitch.classList.toggle('on', trabajaEnTodas);
+    if (esAseo) {
+      document.getElementById('editTodasSedesField').style.display = 'flex';
+      editSedeField.style.display = trabajaEnTodas ? 'none' : 'block';
+    }
+    document.getElementById('editSedeId').value = b.sucursal_id || (sedes[0]?.id || '');
+    document.getElementById('editActivoSwitch').classList.toggle('on', !!b.activo);
+    document.getElementById('editUsername').value = b.usuarios?.username || '';
+    // Mostrar contraseña actual (texto plano) si existe y no es hash bcrypt
+    const currentPass = b.usuarios?.password_hash || '';
+    const isHash = currentPass.startsWith('$2a$') || currentPass.startsWith('$2b$');
+    document.getElementById('editPassword').value = isHash ? '' : currentPass;
+    document.getElementById('credencialesBox').style.display = 'none';
+    // Mostrar credenciales automáticamente si hay contraseña visible
+    if (currentPass && !isHash) {
+      setTimeout(mostrarCredenciales, 100);
+    }
+
+    // Cargar bloqueos y reseñas
+    loadBloqueos(id);
+    loadResenas(id);
+
+    // Reset bloqueo form
+    document.getElementById('bloqueoFecha').value = new Date().toISOString().split('T')[0];
+    document.getElementById('bloqueoTipo').value = 'dia';
+    document.getElementById('bloqueoHorasRow').style.display = 'none';
+    document.getElementById('bloqueoMotivo').value = '';
+
+    // Mostrar botón de ajustar foto si hay foto
+    document.getElementById('btnAjustarFoto').style.display = editPhotoDataUrl ? 'flex' : 'none';
+
+    document.getElementById('editModal').classList.add('show');
+  }
+
+  // Toggle horas row based on tipo
+  document.getElementById('bloqueoTipo').addEventListener('change', (e) => {
+    document.getElementById('bloqueoHorasRow').style.display = e.target.value === 'horas' ? 'grid' : 'none';
+  });
+
+  // Cargar bloqueos del barbero
+  async function loadBloqueos(barberoId) {
+    const list = document.getElementById('bloqueosList');
+    list.innerHTML = '<div style="font-size:12px; color:var(--text-secondary); padding:12px; text-align:center;">Cargando...</div>';
+
+    try {
+      const { data, error } = await sb.from('bloqueos_barbero')
+        .select('*')
+        .eq('barbero_id', barberoId)
+        .gte('fecha', new Date().toISOString().split('T')[0])
+        .order('fecha', { ascending: true });
+
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        list.innerHTML = '<div style="font-size:12px; color:var(--text-secondary); padding:12px; text-align:center;">Sin bloqueos programados</div>';
+        return;
+      }
+
+      list.innerHTML = data.map(b => {
+        const fecha = new Date(b.fecha + 'T00:00:00');
+        const fechaStr = fecha.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' });
+        const horasStr = b.tipo === 'dia' ? 'Todo el día' : `${b.hora_inicio?.slice(0,5)} - ${b.hora_fin?.slice(0,5)}`;
+        return `
+          <div class="bloqueo-item">
+            <div class="info">
+              <div class="fecha">${fechaStr}</div>
+              <div class="horas">${horasStr}</div>
+              ${b.motivo ? `<div class="motivo">${b.motivo}</div>` : ''}
+            </div>
+            <button class="delete-btn" onclick="deleteBloqueo('${b.id}')" title="Eliminar">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+            </button>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      console.error(err);
+      list.innerHTML = '<div style="font-size:12px; color:var(--error); padding:12px; text-align:center;">Error cargando bloqueos</div>';
+    }
+  }
+
+  // Cargar reseñas del barbero
+  async function loadResenas(barberoId) {
+    const list = document.getElementById('resenasList');
+    const statsEl = document.getElementById('resenasStats');
+    const promedioEl = document.getElementById('resenasPromedio');
+    const totalEl = document.getElementById('resenasTotal');
+
+    list.innerHTML = '<div class="resenas-empty">Cargando reseñas...</div>';
+
+    try {
+      const { data, error } = await sb.from('resenas')
+        .select('id, calificacion, comentario, created_at, cliente_id, usuarios!resenas_cliente_id_fkey(full_name)')
+        .eq('barbero_id', barberoId)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+
+      // Calcular promedio y total
+      const total = data?.length || 0;
+      const promedio = total > 0 ? (data.reduce((sum, r) => sum + (r.calificacion || 0), 0) / total).toFixed(1) : '-';
+
+      promedioEl.textContent = promedio;
+      totalEl.textContent = total;
+
+      if (!data || data.length === 0) {
+        list.innerHTML = '<div class="resenas-empty">Este colaborador aún no tiene reseñas</div>';
+        return;
+      }
+
+      list.innerHTML = data.map(r => {
+        const fecha = new Date(r.created_at);
+        const fechaStr = fecha.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+        const clienteNombre = r.usuarios?.full_name || 'Cliente';
+        const stars = Array.from({ length: 5 }, (_, i) =>
+          i < r.calificacion
+            ? '<svg class="filled" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+            : '<svg class="empty" viewBox="0 0 24 24" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+        ).join('');
+
+        return `
+          <div class="resena-item">
+            <div class="resena-header">
+              <span class="resena-cliente">${clienteNombre}</span>
+              <span class="resena-fecha">${fechaStr}</span>
+            </div>
+            <div class="resena-stars">${stars}</div>
+            ${r.comentario ? `<div class="resena-comentario">"${r.comentario}"</div>` : ''}
+          </div>`;
+      }).join('');
+    } catch (err) {
+      console.error('Error cargando reseñas:', err);
+      list.innerHTML = '<div class="resenas-empty" style="color:var(--error);">Error cargando reseñas</div>';
+    }
+  }
+
+  // Agregar bloqueo
+  async function addBloqueo() {
+    if (!currentEditId) return;
+
+    const fecha = document.getElementById('bloqueoFecha').value;
+    const tipo = document.getElementById('bloqueoTipo').value;
+    const horaInicio = tipo === 'horas' ? document.getElementById('bloqueoHoraInicio').value : null;
+    const horaFin = tipo === 'horas' ? document.getElementById('bloqueoHoraFin').value : null;
+    const motivo = document.getElementById('bloqueoMotivo').value.trim();
+
+    if (!fecha) { toast('Selecciona una fecha'); return; }
+    if (tipo === 'horas' && (!horaInicio || !horaFin)) { toast('Define las horas de inicio y fin'); return; }
+
+    try {
+      const { error } = await sb.from('bloqueos_barbero').insert({
+        barbero_id: currentEditId,
+        fecha,
+        tipo,
+        hora_inicio: horaInicio,
+        hora_fin: horaFin,
+        motivo: motivo || null,
+        autorizado_por: 'admin'
+      });
+
+      if (error) throw error;
+      toast('Bloqueo agregado');
+      loadBloqueos(currentEditId);
+
+      // Reset form
+      document.getElementById('bloqueoMotivo').value = '';
+    } catch (err) {
+      console.error(err);
+      toast('Error al agregar bloqueo');
+    }
+  }
+
+  // Eliminar bloqueo
+  async function deleteBloqueo(bloqueoId) {
+    if (!confirm('¿Eliminar este bloqueo?')) return;
+
+    try {
+      const { error } = await sb.from('bloqueos_barbero').delete().eq('id', bloqueoId);
+      if (error) throw error;
+      toast('Bloqueo eliminado');
+      if (currentEditId) loadBloqueos(currentEditId);
+    } catch (err) {
+      console.error(err);
+      toast('Error al eliminar bloqueo');
+    }
+  }
+
+  let editPhotoFile = null; // Archivo original para subir a Storage
+  document.getElementById('editPhotoInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2*1024*1024) { toast('La imagen debe pesar menos de 2MB.'); return; }
+    editPhotoFile = file; // Guardar archivo para Storage
+    const reader = new FileReader();
+    reader.onload = () => {
+      editPhotoDataUrl = reader.result;
+      document.getElementById('editPhotoPreview').innerHTML = `<img src="${editPhotoDataUrl}">`;
+      // Mostrar botón de ajustar foto
+      document.getElementById('btnAjustarFoto').style.display = 'flex';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // ---- Modal de ajuste de foto ----
+  let currentAdjustValues = { profile: 30, reservas: 30, agenda: 30, barbero: 30 };
+
+  function openPhotoAdjustModal() {
+    if (!currentEditId || !editPhotoDataUrl) return;
+    const b = barberos.find(x => x.id === currentEditId);
+    if (!b) return;
+
+    // Cargar valores actuales
+    currentAdjustValues = {
+      profile: b.usuarios?.avatar_focus_y ?? 30,
+      reservas: b.usuarios?.avatar_focus_y_reservas ?? 30,
+      agenda: b.usuarios?.avatar_focus_y_agenda ?? 30,
+      barbero: b.usuarios?.avatar_focus_y_barbero ?? 30
+    };
+
+    // Configurar previsualizaciones
+    const views = ['profile', 'reservas', 'agenda', 'barbero'];
+    views.forEach(view => {
+      const preview = document.getElementById(`adjustPreview${view.charAt(0).toUpperCase() + view.slice(1)}`);
+      const slider = document.getElementById(`adjustPos${view.charAt(0).toUpperCase() + view.slice(1)}`);
+      const valSpan = document.getElementById(`adjustVal${view.charAt(0).toUpperCase() + view.slice(1)}`);
+
+      if (preview) {
+        preview.style.backgroundImage = `url('${editPhotoDataUrl}')`;
+        preview.style.backgroundPosition = `center ${currentAdjustValues[view]}%`;
+      }
+      if (slider) slider.value = currentAdjustValues[view];
+      if (valSpan) valSpan.textContent = currentAdjustValues[view] + '%';
+    });
+
+    document.getElementById('photoAdjustModal').classList.add('show');
+  }
+
+  function updateAdjustPreview(view, value) {
+    currentAdjustValues[view] = Number(value);
+    const viewCapitalized = view.charAt(0).toUpperCase() + view.slice(1);
+    const preview = document.getElementById(`adjustPreview${viewCapitalized}`);
+    const valSpan = document.getElementById(`adjustVal${viewCapitalized}`);
+
+    if (preview) preview.style.backgroundPosition = `center ${value}%`;
+    if (valSpan) valSpan.textContent = value + '%';
+  }
+
+  async function savePhotoAdjust() {
+    if (!currentEditId) return;
+    const b = barberos.find(x => x.id === currentEditId);
+    if (!b || !b.usuarios) return;
+
+    const btn = document.getElementById('photoAdjustSaveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+
+    try {
+      const { error } = await sb.from('usuarios').update({
+        avatar_focus_y: currentAdjustValues.profile,
+        avatar_focus_y_reservas: currentAdjustValues.reservas,
+        avatar_focus_y_agenda: currentAdjustValues.agenda,
+        avatar_focus_y_barbero: currentAdjustValues.barbero
+      }).eq('id', b.usuarios.id);
+
+      if (error) throw error;
+
+      // Actualizar datos locales
+      b.usuarios.avatar_focus_y = currentAdjustValues.profile;
+      b.usuarios.avatar_focus_y_reservas = currentAdjustValues.reservas;
+      b.usuarios.avatar_focus_y_agenda = currentAdjustValues.agenda;
+      b.usuarios.avatar_focus_y_barbero = currentAdjustValues.barbero;
+
+      toast('Encuadre guardado correctamente');
+      document.getElementById('photoAdjustModal').classList.remove('show');
+    } catch (err) {
+      console.error(err);
+      toast('Error al guardar el encuadre');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar encuadre';
+    }
+  }
+
+  async function saveBarberEdit(){
+    if (!currentEditId) return;
+    const b = barberos.find(x => x.id === currentEditId);
+    if (!b) return;
+
+    const tipo = document.getElementById('editTipoColaborador').value;
+    const fullName = document.getElementById('editFullName').value.trim();
+    const especialidad = document.getElementById('editEspecialidad').value.trim();
+    const puesto = document.getElementById('editPuesto').value.trim();
+    const comision = Number(document.getElementById('editComision').value) || 0;
+    const pagoDiario = Number(document.getElementById('editPagoDiario').value) || 0;
+    const anosVal = document.getElementById('editAnos').value;
+    const anos = anosVal === '' ? null : Number(anosVal);
+    const diaVal = document.getElementById('editDiaDescanso').value;
+    const dia = diaVal === '' ? null : Number(diaVal);
+    const activo = document.getElementById('editActivoSwitch').classList.contains('on');
+    const todasSedesActivo = tipo === 'aseo' && document.getElementById('editTodasSedesSwitch').classList.contains('on');
+    const sedeId = todasSedesActivo ? null : document.getElementById('editSedeId').value;
+    const username = document.getElementById('editUsername').value.trim();
+    const password = document.getElementById('editPassword').value;
+
+    if (!fullName) { toast('El nombre no puede estar vacío.'); return; }
+    if (!todasSedesActivo && !sedeId) { toast('Elige la sede del colaborador.'); return; }
+    if (username.length < 3) { toast('El usuario de ingreso debe tener al menos 3 caracteres.'); return; }
+    if (password && password.length < 6) { toast('La nueva contraseña debe tener al menos 6 caracteres.'); return; }
+
+    const saveBtn = document.getElementById('editSaveBtn');
+    const instagram = document.getElementById('editInstagram').value.trim().replace('@', '');
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Guardando…';
+    try {
+      const usuarioId = currentEditId;
+      console.log('Actualizando colaborador via RPC:', usuarioId);
+
+      // Si hay foto nueva, subirla a Storage primero
+      let avatarUrl = null;
+      if (editPhotoFile || editPhotoDataUrl) {
+        saveBtn.textContent = 'Subiendo foto…';
+        // Intentar subir a Storage
+        const uploaded = await dnUploadAvatar(usuarioId, editPhotoFile || editPhotoDataUrl);
+        if (uploaded) {
+          avatarUrl = uploaded;
+          console.log('Avatar subido a Storage:', avatarUrl);
+        } else {
+          // Fallback: usar base64 si Storage falla (bucket no existe)
+          console.warn('Storage no disponible, usando base64 como fallback');
+          avatarUrl = editPhotoDataUrl;
+        }
+        saveBtn.textContent = 'Guardando…';
+      }
+
+      // Usar RPC para actualizar datos principales (bypasea RLS)
+      const currentUser = dnGetSession();
+      const { data: rpcResult, error: rpcErr } = await sb.rpc('actualizar_colaborador', {
+        p_caller_id: currentUser.id,
+        p_usuario_id: usuarioId,
+        p_username: username,
+        p_password: password || null,
+        p_full_name: fullName,
+        p_instagram: instagram || null,
+        p_avatar_url: avatarUrl
+      });
+
+      console.log('Resultado RPC:', rpcResult);
+      if (rpcErr) {
+        console.error('Error RPC:', rpcErr);
+        throw rpcErr;
+      }
+
+      if (!rpcResult?.success) {
+        console.error('RPC falló:', rpcResult?.error, rpcResult);
+        toast(rpcResult?.error || 'No se pudo actualizar el colaborador');
+        return;
+      }
+      console.log('RPC exitoso, procediendo a actualizar barberos...');
+
+      // Si hay foto nueva, actualizar también los ajustes de posición
+      if (editPhotoDataUrl) {
+        const posY = Number(document.getElementById('photoPosY')?.value) || 30;
+        await sb.from('usuarios').update({
+          avatar_focus_y: posY,
+          avatar_focus_y_reservas: posY,
+          avatar_focus_y_agenda: posY,
+          avatar_focus_y_barbero: posY
+        }).eq('id', usuarioId);
+      }
+
+      console.log('Colaborador actualizado:', rpcResult);
+
+      const updateData = {
+        tipo_colaborador: tipo, especialidad: tipo === 'barbero' ? (especialidad || null) : null,
+        puesto: puesto || null, comision_pct: tipo === 'barbero' ? comision : 0,
+        pago_diario: tipo === 'aseo' ? pagoDiario : null,
+        anos_experiencia: anos, dia_descanso: dia, activo, sucursal_id: sedeId
+      };
+      console.log('Actualizando barbero id:', currentEditId, 'con datos:', updateData);
+
+      const { data: updateResult, error: bErr } = await sb.from('barberos').update(updateData).eq('id', currentEditId).select();
+      console.log('Resultado update barberos:', updateResult, 'Error:', bErr);
+      if (bErr) throw bErr;
+      if (!updateResult || updateResult.length === 0) {
+        console.warn('⚠️ El update no afectó ninguna fila. Posible problema de RLS o ID incorrecto.');
+        toast('No se pudo actualizar. Verifica permisos.');
+        return;
+      }
+      console.log('✅ Update exitoso. dia_descanso guardado:', updateResult[0]?.dia_descanso);
+
+      toast('Perfil actualizado.');
+      document.getElementById('editModal').classList.remove('show');
+      loadBarberos();
+    } catch (err) {
+      console.error(err);
+      toast(err.message?.includes('ya existe') ? 'Ese nombre de usuario ya existe.' : 'No pudimos guardar los cambios.');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Guardar cambios';
+    }
+  }
+
+  async function deleteBarberProfile(delBtn){
+    if (!currentEditId) return;
+    const b = barberos.find(x => x.id === currentEditId);
+    if (!b) return;
+    const name = b.usuarios?.full_name || b.usuarios?.username || 'este barbero';
+    if (!confirm(`¿Eliminar el perfil de ${name}? Esta acción no se puede deshacer. Si tiene historial en la agenda, no se podrá eliminar — en ese caso, desactívalo en su lugar.`)) return;
+
+    if (delBtn) { delBtn.disabled = true; delBtn.textContent = 'Eliminando…'; }
+    try {
+      // Usar RPC para eliminar barbero con todas sus dependencias
+      const { error: rpcErr } = await sb.rpc('eliminar_barbero_completo', { p_barbero_id: currentEditId });
+      if (rpcErr) {
+        console.error('Error en RPC eliminar_barbero_completo:', rpcErr);
+        throw rpcErr;
+      }
+
+      toast(`Perfil de ${name} eliminado.`);
+      document.getElementById('editModal').classList.remove('show');
+      loadBarberos();
+    } catch (err) {
+      console.error('Error completo:', err);
+      toast('No se puede eliminar: tiene historial en la agenda. Desactívalo con el switch "Cuenta activa" en su lugar.');
+    } finally {
+      if (delBtn) { delBtn.disabled = false; delBtn.textContent = 'Eliminar perfil'; }
+    }
+  }
+
+  // ---- Administrativos ----
+  let admins = [];
+  let currentEditAdminId = null;
+  const adminForm = document.getElementById('createAdminForm');
+  const adminErrorBox = document.getElementById('adminErrorBox');
+  const adminSubmitBtn = document.getElementById('adminSubmitBtn');
+
+  function showAdminError(msg){
+    adminErrorBox.textContent = msg;
+    adminErrorBox.classList.add('show');
+  }
+
+  async function loadAdmins(){
+    try {
+      const { data, error } = await sb.from('usuarios').select('id, username, full_name, created_at').eq('role', 'admin').order('created_at');
+      if (error) throw error;
+      admins = data || [];
+      document.getElementById('adminCount').textContent = admins.length ? `(${admins.length})` : '';
+      renderAdminList();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('adminList').innerHTML = '<div class="empty-row">No pudimos cargar los administradores.</div>';
+    }
+  }
+
+  function renderAdminList(){
+    const el = document.getElementById('adminList');
+    if (!admins.length) { el.innerHTML = '<div class="empty-row">Aún no tienes administradores.</div>'; return; }
+    el.innerHTML = admins.map(a => {
+      const name = a.full_name || a.username;
+      return `
+        <div class="admin-row" onclick="openEditAdminModal('${a.id}')">
+          <div class="avatar" style="background:var(--card);color:var(--gold);">${dnInitials(name)}</div>
+          <div class="admin-mid">
+            <div class="name">${name} <span class="role-tag admin">Admin</span></div>
+            <div class="meta">@${a.username}</div>
+          </div>
+          <svg class="row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>`;
+    }).join('');
+  }
+
+  function openCreateAdminModal(){
+    adminForm.reset();
+    adminErrorBox.classList.remove('show');
+    document.getElementById('createAdminModal').classList.add('show');
+  }
+
+  adminForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    adminErrorBox.classList.remove('show');
+
+    const fullName = document.getElementById('adminFullName').value.trim();
+    const username = document.getElementById('adminUsername').value.trim();
+    const password = document.getElementById('adminPassword').value;
+
+    if (fullName.length < 2) return showAdminError('Escribe el nombre completo.');
+    if (username.length < 3) return showAdminError('Escribe un nombre de usuario válido.');
+    if (password.length < 6) return showAdminError('La clave debe tener al menos 6 caracteres.');
+
+    adminSubmitBtn.disabled = true;
+    adminSubmitBtn.textContent = 'Creando…';
+    try {
+      const { data, error } = await sb.rpc('crear_cuenta_admin', { p_username: username, p_password: password });
+      if (error) throw error;
+      if (data && data[0]) {
+        await sb.from('usuarios').update({ full_name: fullName }).eq('id', data[0].id);
+      }
+      document.getElementById('createAdminModal').classList.remove('show');
+      toast(`Cuenta de administrador creada para ${fullName}.`);
+      loadAdmins();
+    } catch (err) {
+      console.error(err);
+      showAdminError(err.message?.includes('ya existe') ? 'Ese nombre de usuario ya existe.' : (err.message || 'No pudimos crear la cuenta.'));
+    } finally {
+      adminSubmitBtn.disabled = false;
+      adminSubmitBtn.textContent = 'Crear administrador';
+    }
+  });
+
+  function openEditAdminModal(id){
+    const a = admins.find(x => x.id === id);
+    if (!a) return;
+    currentEditAdminId = id;
+    document.getElementById('editAdminSub').textContent = `@${a.username}`;
+    document.getElementById('editAdminFullName').value = a.full_name || '';
+    document.getElementById('editAdminUsername').value = a.username || '';
+    document.getElementById('editAdminPassword').value = '';
+    document.getElementById('editAdminModal').classList.add('show');
+  }
+
+  async function saveAdminEdit(){
+    if (!currentEditAdminId) return;
+    const a = admins.find(x => x.id === currentEditAdminId);
+    if (!a) return;
+
+    const fullName = document.getElementById('editAdminFullName').value.trim();
+    const username = document.getElementById('editAdminUsername').value.trim();
+    const password = document.getElementById('editAdminPassword').value;
+
+    if (!fullName) { toast('El nombre no puede estar vacío.'); return; }
+    if (username.length < 3) { toast('El usuario de ingreso debe tener al menos 3 caracteres.'); return; }
+    if (password && password.length < 6) { toast('La nueva contraseña debe tener al menos 6 caracteres.'); return; }
+
+    const saveBtn = document.getElementById('editAdminSaveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Guardando…';
+    try {
+      // Actualizar datos básicos y credenciales directamente
+      const updateData = { full_name: fullName };
+      if (username !== (a.username || '')) {
+        updateData.username = username;
+      }
+      if (password) {
+        updateData.password_hash = password;
+      }
+
+      const { error: uErr } = await sb.from('usuarios').update(updateData).eq('id', currentEditAdminId);
+      if (uErr) throw uErr;
+
+      toast('Administrador actualizado.');
+      document.getElementById('editAdminModal').classList.remove('show');
+      loadAdmins();
+    } catch (err) {
+      console.error(err);
+      toast(err.message?.includes('ya existe') ? 'Ese nombre de usuario ya existe.' : 'No pudimos guardar los cambios.');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Guardar cambios';
+    }
+  }
+
+  async function deleteAdminProfile(delBtn){
+    if (!currentEditAdminId) return;
+    const a = admins.find(x => x.id === currentEditAdminId);
+    if (!a) return;
+
+    // No permitir eliminar al admin principal (diegoneira)
+    if (a.username === 'diegoneira') {
+      toast('No puedes eliminar al administrador principal.');
+      return;
+    }
+
+    const name = a.full_name || a.username;
+    if (!confirm(`¿Eliminar el acceso de administrador de ${name}?\n\nSu cuenta quedará como cliente.`)) return;
+
+    if (delBtn) { delBtn.disabled = true; delBtn.textContent = 'Eliminando…'; }
+    try {
+      // Cambiar rol a cliente en lugar de eliminar (evita problemas de foreign key)
+      const { error } = await sb.from('usuarios').update({ role: 'cliente', password_hash: null }).eq('id', currentEditAdminId);
+      if (error) throw error;
+      toast(`Acceso de administrador de ${name} eliminado.`);
+      document.getElementById('editAdminModal').classList.remove('show');
+      loadAdmins();
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos eliminar esta cuenta.');
+    } finally {
+      if (delBtn) { delBtn.disabled = false; delBtn.textContent = 'Eliminar administrador'; }
+    }
+  }
+
+  loadSedesForSelects().then(loadBarberos);
+
+  // ---- Admin Sede ----
+  // MODULOS_ADMIN_SEDE ya está definido en supabase-client.js
+
+  let adminsSede = [];
+  let currentEditAdminSedeId = null;
+
+  async function loadAdminsSede() {
+    try {
+      const { data, error } = await sb.from('usuarios')
+        .select('id, username, full_name, created_at')
+        .eq('role', 'admin_sede')
+        .order('created_at');
+      if (error) throw error;
+      adminsSede = data || [];
+      document.getElementById('adminSedeCount').textContent = adminsSede.length ? `(${adminsSede.length})` : '';
+
+      // Cargar sedes asignadas
+      const { data: asignaciones } = await sb.from('admin_sede_sedes_asignadas')
+        .select('usuario_id, sucursal_id, sucursales(nombre)')
+        .eq('activo', true);
+
+      const sedesPorAdmin = {};
+      (asignaciones || []).forEach(a => {
+        if (!sedesPorAdmin[a.usuario_id]) sedesPorAdmin[a.usuario_id] = [];
+        sedesPorAdmin[a.usuario_id].push(a.sucursales?.nombre || 'Sede');
+      });
+
+      renderAdminSedeList(sedesPorAdmin);
+    } catch (err) {
+      console.error(err);
+      document.getElementById('adminSedeList').innerHTML = '<div class="empty-row">No pudimos cargar los administradores de sede.</div>';
+    }
+  }
+
+  function renderAdminSedeList(sedesPorAdmin) {
+    const el = document.getElementById('adminSedeList');
+    if (!adminsSede.length) {
+      el.innerHTML = '<div class="empty-row">Aún no tienes administradores de sede.</div>';
+      return;
+    }
+    el.innerHTML = adminsSede.map(a => {
+      const name = a.full_name || a.username;
+      const sedesArr = sedesPorAdmin[a.id] || [];
+      const sedesText = sedesArr.length > 0 ? sedesArr.join(', ') : 'Sin sedes asignadas';
+      return `
+        <div class="admin-row" onclick="openEditAdminSedeModal('${a.id}')">
+          <div class="avatar" style="background:rgba(201,163,91,0.2);color:var(--gold);">${dnInitials(name)}</div>
+          <div class="admin-mid">
+            <div class="name">${name} <span class="role-tag admin">Admin Sede</span></div>
+            <div class="meta">@${a.username} · ${sedesText}</div>
+          </div>
+          <svg class="row-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+        </div>`;
+    }).join('');
+  }
+
+  function renderSedesCheckboxes(containerId, selectedIds = []) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = sedes.map(s => `
+      <label style="display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:var(--glass-2);border:1px solid var(--glass-border);margin-bottom:6px;cursor:pointer;">
+        <input type="checkbox" class="sede-cb" value="${s.id}" ${selectedIds.includes(s.id) ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--gold);">
+        <span style="font-size:13px;font-weight:600;">${s.nombre}</span>
+      </label>
+    `).join('');
+  }
+
+  function renderModulosCheckboxes(containerId, permisos = {}) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = MODULOS_ADMIN_SEDE.map(m => `
+      <label style="display:flex;align-items:center;gap:8px;padding:10px;border-radius:10px;background:var(--glass-2);border:1px solid var(--glass-border);cursor:pointer;">
+        <input type="checkbox" class="modulo-cb" value="${m.id}" ${permisos[m.id] !== false ? 'checked' : ''} style="width:16px;height:16px;accent-color:var(--gold);">
+        <span style="font-size:14px;">${m.icono}</span>
+        <span style="font-size:12px;font-weight:600;">${m.nombre}</span>
+      </label>
+    `).join('');
+  }
+
+  function openCreateAdminSedeModal() {
+    document.getElementById('createAdminSedeForm').reset();
+    document.getElementById('adminSedeErrorBox').classList.remove('show');
+    renderSedesCheckboxes('adminSedeSedesCheckboxes', []);
+    renderModulosCheckboxes('adminSedeModulosCheckboxes', {});
+    document.getElementById('createAdminSedeModal').classList.add('show');
+  }
+
+  document.getElementById('createAdminSedeForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errorBox = document.getElementById('adminSedeErrorBox');
+    errorBox.classList.remove('show');
+
+    const fullName = document.getElementById('adminSedeFullName').value.trim();
+    const username = document.getElementById('adminSedeUsername').value.trim();
+    const password = document.getElementById('adminSedePassword').value;
+
+    const sedesSeleccionadas = Array.from(document.querySelectorAll('#adminSedeSedesCheckboxes .sede-cb:checked')).map(cb => cb.value);
+    const modulosSeleccionados = {};
+    document.querySelectorAll('#adminSedeModulosCheckboxes .modulo-cb').forEach(cb => {
+      modulosSeleccionados[cb.value] = cb.checked;
+    });
+
+    if (fullName.length < 2) { errorBox.textContent = 'Escribe el nombre completo.'; errorBox.classList.add('show'); return; }
+    if (username.length < 3) { errorBox.textContent = 'Escribe un nombre de usuario válido.'; errorBox.classList.add('show'); return; }
+    if (password.length < 6) { errorBox.textContent = 'La clave debe tener al menos 6 caracteres.'; errorBox.classList.add('show'); return; }
+    if (sedesSeleccionadas.length === 0) { errorBox.textContent = 'Selecciona al menos una sede.'; errorBox.classList.add('show'); return; }
+
+    const btn = document.getElementById('adminSedeSubmitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Creando…';
+
+    try {
+      // Verificar username único
+      const { data: existing } = await sb.from('usuarios').select('id').eq('username', username).limit(1);
+      if (existing && existing.length > 0) throw new Error('Ese nombre de usuario ya existe.');
+
+      // Crear usuario
+      const { data: newUser, error: userErr } = await sb.from('usuarios').insert({
+        username, password_hash: password, full_name: fullName, role: 'admin_sede'
+      }).select().single();
+      if (userErr) throw userErr;
+
+      // Asignar sedes
+      const sedesInsert = sedesSeleccionadas.map(sid => ({ usuario_id: newUser.id, sucursal_id: sid, activo: true }));
+      await sb.from('admin_sede_sedes_asignadas').insert(sedesInsert);
+
+      // Guardar permisos
+      await sb.from('admin_sede_permisos').upsert({ usuario_id: newUser.id, permisos: modulosSeleccionados }, { onConflict: 'usuario_id' });
+
+      toast(`Admin de sede ${fullName} creado.`);
+      document.getElementById('createAdminSedeModal').classList.remove('show');
+      loadAdminsSede();
+    } catch (err) {
+      console.error(err);
+      errorBox.textContent = err.message || 'Error al crear admin sede.';
+      errorBox.classList.add('show');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Crear admin sede';
+    }
+  });
+
+  async function openEditAdminSedeModal(userId) {
+    const a = adminsSede.find(x => x.id === userId);
+    if (!a) return;
+    currentEditAdminSedeId = userId;
+
+    document.getElementById('editAdminSedeId').value = userId;
+    document.getElementById('editAdminSedeTitle').textContent = a.full_name || a.username;
+    document.getElementById('editAdminSedeSub').textContent = '@' + a.username;
+    document.getElementById('editAdminSedeFullName').value = a.full_name || '';
+    document.getElementById('editAdminSedeUsername').value = a.username || '';
+    document.getElementById('editAdminSedeNewPassword').value = '';
+
+    // Cargar sedes asignadas
+    const { data: asignadas } = await sb.from('admin_sede_sedes_asignadas')
+      .select('sucursal_id').eq('usuario_id', userId).eq('activo', true);
+    const sedesIds = (asignadas || []).map(a => a.sucursal_id);
+    renderSedesCheckboxes('editAdminSedeSedesCheckboxes', sedesIds);
+
+    // Cargar permisos
+    const { data: permData } = await sb.from('admin_sede_permisos')
+      .select('permisos').eq('usuario_id', userId).maybeSingle();
+    const permisos = permData?.permisos || {};
+    renderModulosCheckboxes('editAdminSedeModulosCheckboxes', permisos);
+
+    document.getElementById('editAdminSedeModal').classList.add('show');
+  }
+
+  async function saveAdminSedeEdit() {
+    if (!currentEditAdminSedeId) return;
+    const userId = currentEditAdminSedeId;
+
+    const fullName = document.getElementById('editAdminSedeFullName').value.trim();
+    const username = document.getElementById('editAdminSedeUsername').value.trim();
+    const password = document.getElementById('editAdminSedeNewPassword').value;
+
+    const sedesSeleccionadas = Array.from(document.querySelectorAll('#editAdminSedeSedesCheckboxes .sede-cb:checked')).map(cb => cb.value);
+    const modulosSeleccionados = {};
+    document.querySelectorAll('#editAdminSedeModulosCheckboxes .modulo-cb').forEach(cb => {
+      modulosSeleccionados[cb.value] = cb.checked;
+    });
+
+    if (!fullName) { toast('El nombre no puede estar vacío.'); return; }
+    if (username.length < 3) { toast('El usuario debe tener al menos 3 caracteres.'); return; }
+    if (password && password.length < 6) { toast('La contraseña debe tener al menos 6 caracteres.'); return; }
+    if (sedesSeleccionadas.length === 0) { toast('Selecciona al menos una sede.'); return; }
+
+    const btn = document.getElementById('editAdminSedeSaveBtn');
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+
+    try {
+      // Actualizar usuario (nombre, username y contraseña directamente)
+      const updateData = { full_name: fullName };
+      const a = adminsSede.find(x => x.id === userId);
+      if (a && username !== a.username) {
+        updateData.username = username;
+      }
+      if (password) {
+        updateData.password_hash = password;
+      }
+      const { error: uErr } = await sb.from('usuarios').update(updateData).eq('id', userId);
+      if (uErr) throw uErr;
+
+      // Actualizar sedes: desactivar todas y luego activar/insertar las seleccionadas
+      await sb.from('admin_sede_sedes_asignadas').update({ activo: false }).eq('usuario_id', userId);
+      for (const sid of sedesSeleccionadas) {
+        const { data: existing } = await sb.from('admin_sede_sedes_asignadas')
+          .select('id').eq('usuario_id', userId).eq('sucursal_id', sid).maybeSingle();
+        if (existing) {
+          await sb.from('admin_sede_sedes_asignadas').update({ activo: true }).eq('id', existing.id);
+        } else {
+          await sb.from('admin_sede_sedes_asignadas').insert({ usuario_id: userId, sucursal_id: sid, activo: true });
+        }
+      }
+
+      // Actualizar permisos
+      await sb.from('admin_sede_permisos').upsert({ usuario_id: userId, permisos: modulosSeleccionados }, { onConflict: 'usuario_id' });
+
+      toast('Admin de sede actualizado.');
+      document.getElementById('editAdminSedeModal').classList.remove('show');
+      loadAdminsSede();
+    } catch (err) {
+      console.error(err);
+      toast(err.message?.includes('ya existe') ? 'Ese nombre de usuario ya existe.' : 'Error al guardar.');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar cambios';
+    }
+  }
+
+  async function deleteAdminSedeProfile() {
+    if (!currentEditAdminSedeId) return;
+    const a = adminsSede.find(x => x.id === currentEditAdminSedeId);
+    if (!a) return;
+
+    const name = a.full_name || a.username;
+    if (!confirm(`¿Eliminar a ${name} como administrador de sede?\n\nSu cuenta quedará como barbero.`)) return;
+
+    try {
+      await sb.from('admin_sede_permisos').delete().eq('usuario_id', currentEditAdminSedeId);
+      await sb.from('admin_sede_sedes_asignadas').delete().eq('usuario_id', currentEditAdminSedeId);
+      await sb.from('usuarios').update({ role: 'barbero', password_hash: null }).eq('id', currentEditAdminSedeId);
+
+      toast(`Admin de sede ${name} eliminado.`);
+      document.getElementById('editAdminSedeModal').classList.remove('show');
+      loadAdminsSede();
+    } catch (err) {
+      console.error(err);
+      toast('Error al eliminar.');
+    }
+  }
+
+</script>
+
+<script src="../assets/mobile-nav.js"></script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+</body>
+</html>

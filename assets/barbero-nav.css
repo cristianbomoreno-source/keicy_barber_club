@@ -1,0 +1,433 @@
+/**
+ * ============================================
+ * BARBERO NAV - Componente Centralizado
+ * ============================================
+ *
+ * FUENTE ÚNICA DE VERDAD para la navegación inferior de la app Barbero.
+ * NO duplicar estos estilos en los HTML individuales.
+ *
+ * Funciona correctamente en:
+ * - Safari iOS normal
+ * - PWA standalone (Agregar a pantalla de inicio)
+ * - Dynamic Island, notch, home indicator
+ *
+ * Uso: <link rel="stylesheet" href="../assets/barbero-nav.css">
+ */
+
+/* ============================================
+   VARIABLES ESPECÍFICAS DE BARBERO NAV
+   ============================================ */
+:root {
+  /* Dimensiones fijas - NO usar media queries para cambiar altura */
+  --barbero-nav-height: 56px;
+  --barbero-nav-icon-size: 22px;
+  --barbero-nav-font-size: 9px;
+  --barbero-nav-gap: 3px;
+
+  /* Z-index jerarquía */
+  --barbero-nav-z: 50;
+  --barbero-sheet-z: 100;
+  --barbero-toast-z: 200;
+
+  /* Colores */
+  --barbero-nav-bg: var(--bg, #0A0A0C);
+  --barbero-nav-border: rgba(255, 255, 255, 0.04);
+  --barbero-nav-inactive: rgba(255, 255, 255, 0.38);
+  --barbero-nav-active: var(--gold, #D9B872);
+}
+
+/* ============================================
+   PWA STANDALONE DETECTION
+   ============================================ */
+
+/* iOS PWA standalone mode */
+@media (display-mode: standalone) {
+  :root {
+    /* Asegurar que safe areas funcionen en PWA */
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/* Fallback para iOS Safari standalone (legacy) */
+@supports (-webkit-touch-callout: none) {
+  :root {
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+/* ============================================
+   NAVBAR PRINCIPAL
+   ============================================ */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  /* Centrado con max-width */
+  max-width: 480px;
+  margin: 0 auto;
+
+  /* Layout interno */
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+
+  /* ALTURA FIJA - nunca cambia */
+  height: var(--barbero-nav-height);
+  box-sizing: content-box;
+
+  /* Padding: horizontal + safe area inferior */
+  padding: 0 var(--page-padding-x, 16px) env(safe-area-inset-bottom, 0px);
+
+  /* Estilo visual */
+  background: var(--barbero-nav-bg);
+  border-top: 1px solid var(--barbero-nav-border);
+
+  /* Z-index consistente */
+  z-index: var(--barbero-nav-z);
+
+  /* Prevenir interacciones no deseadas */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* ============================================
+   TAB ITEMS
+   ============================================ */
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--barbero-nav-gap);
+
+  /* Altura completa del contenedor */
+  height: 100%;
+  padding: 6px 0;
+
+  /* Estilo base */
+  color: var(--barbero-nav-inactive);
+  cursor: pointer;
+
+  /* Transiciones suaves */
+  transition: color 0.2s ease, transform 0.14s var(--ease-ios, cubic-bezier(0.25, 0.46, 0.45, 0.94));
+
+  /* Prevenir selección de texto */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Feedback táctil */
+.tab-item:active {
+  transform: scale(0.92);
+}
+
+/* Icono */
+.tab-item svg {
+  width: var(--barbero-nav-icon-size);
+  height: var(--barbero-nav-icon-size);
+  flex-shrink: 0;
+}
+
+/* Label */
+.tab-item span {
+  font-size: var(--barbero-nav-font-size);
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  line-height: 1;
+}
+
+/* Estado activo - SOLO cambia color */
+.tab-item.active {
+  color: var(--barbero-nav-active);
+}
+
+/* ============================================
+   BOTTOM SHEET - Jerarquía sobre navbar
+   ============================================ */
+.sheet-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  /* Z-index sobre TODO incluyendo navbar */
+  z-index: var(--barbero-sheet-z);
+
+  /* Layout para sheet */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  /* Estado oculto */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s var(--ease-ios, cubic-bezier(0.25, 0.46, 0.45, 0.94));
+}
+
+.sheet-bg.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sheet-box {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+
+  /* Estilo visual */
+  background: rgba(18, 18, 18, 0.92);
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.08));
+  border-bottom: none;
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  border-radius: 30px 30px 0 0;
+
+  /* Padding con safe area inferior */
+  padding: 10px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+
+  /* Altura máxima segura - respeta safe areas */
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 20px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  /* Posición relativa para contenido */
+  position: relative;
+
+  /* Animación de entrada */
+  transform: translateY(100%);
+  transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sheet-bg.show .sheet-box {
+  transform: translateY(0);
+}
+
+/* Handle del sheet */
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.16);
+  margin: 0 auto 14px;
+}
+
+/* Título del sheet */
+.sheet-title {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 3px;
+  letter-spacing: -0.2px;
+}
+
+/* Subtítulo */
+.sheet-sub {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.42);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+/* Botón cerrar */
+.sheet-close {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sheet-close svg {
+  width: 13px;
+  height: 13px;
+  opacity: 0.8;
+}
+
+.sheet-close:active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ============================================
+   TOAST - Siempre visible sobre todo
+   ============================================ */
+#toast {
+  position: fixed;
+  left: 50%;
+  /* Posicionado encima de la navbar + safe area */
+  bottom: calc(var(--barbero-nav-height) + env(safe-area-inset-bottom, 0px) + 16px);
+  transform: translate(-50%, 16px);
+
+  /* Estilo visual */
+  background: rgba(28, 28, 28, 0.9);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.08));
+  border-radius: 16px;
+  padding: 12px 18px;
+  font-size: 13px;
+
+  /* Layout */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 88%;
+
+  /* Estado oculto */
+  opacity: 0;
+  pointer-events: none;
+
+  /* Z-index máximo */
+  z-index: var(--barbero-toast-z);
+
+  /* Transición */
+  transition:
+    opacity 0.3s var(--ease-ios, cubic-bezier(0.25, 0.46, 0.45, 0.94)),
+    transform 0.3s var(--ease-ios, cubic-bezier(0.25, 0.46, 0.45, 0.94));
+}
+
+#toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.toast-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ring-green, #34D399);
+  flex-shrink: 0;
+}
+
+/* ============================================
+   MODAL BACKGROUND - Bloquea navbar
+   ============================================ */
+.sheet-bg.show ~ .tab-bar,
+.modal-bg.show ~ .tab-bar {
+  /* Cuando hay modal/sheet abierto, navbar no es interactuable */
+  pointer-events: none;
+}
+
+/* ============================================
+   WAITING NOTE (para sheets)
+   ============================================ */
+.waiting-note {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.42);
+  line-height: 1.55;
+  text-align: center;
+}
+
+/* ============================================
+   CONTENIDO PRINCIPAL - Espacio para navbar
+   ============================================ */
+.barbero-content,
+#app {
+  /* Padding inferior para no quedar debajo de navbar */
+  padding-bottom: calc(var(--barbero-nav-height) + env(safe-area-inset-bottom, 0px) + 16px);
+}
+
+/* ============================================
+   CORRECCIONES PWA iOS
+   ============================================ */
+
+/* Prevenir scroll bounce en iOS */
+html.pwa-standalone {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.pwa-standalone body {
+  overflow: auto;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe area para PWA */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .tab-bar {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .sheet-box {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* ============================================
+   NO usar height:100vh en PWA iOS
+   Usar 100dvh para altura dinámica correcta
+   ============================================ */
+@supports (height: 100dvh) {
+  .sheet-box {
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 20px);
+  }
+}
+
+/* Fallback para navegadores que no soportan dvh */
+@supports not (height: 100dvh) {
+  .sheet-box {
+    max-height: calc(100vh - env(safe-area-inset-top, 44px) - 20px);
+  }
+}
+
+/* ============================================
+   TEMA CLARO
+   ============================================ */
+[data-theme="light"] {
+  --barbero-nav-bg: #FFFFFF;
+  --barbero-nav-border: rgba(0, 0, 0, 0.08);
+  --barbero-nav-inactive: rgba(0, 0, 0, 0.4);
+  --barbero-nav-active: #B8860B;
+}
+
+[data-theme="light"] .sheet-bg {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] .sheet-box {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .sheet-handle {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .sheet-sub {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .sheet-close {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .sheet-close svg {
+  stroke: var(--text, #111);
+}
+
+[data-theme="light"] .sheet-close:active {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] #toast {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--text, #111);
+}
+
+[data-theme="light"] .waiting-note {
+  color: rgba(0, 0, 0, 0.5);
+}

@@ -1,0 +1,2407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://zzmtnjlfrlqmouijfste.supabase.co" crossorigin>
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" as="script">
+<link rel="dns-prefetch" href="https://zzmtnjlfrlqmouijfste.supabase.co">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Keicy Barbería · Barbero</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/barbero-nav.css">
+<link rel="stylesheet" href="../assets/barbero-white.css">
+<style>
+  /* Variables heredadas de design-system.css */
+  html{ height:100%; }
+  body{
+    min-height:100%; margin:0;
+    -webkit-font-smoothing:antialiased;
+    background:var(--bg);
+  }
+  [data-theme="dark"] body{
+    background:
+      radial-gradient(ellipse 120% 60% at 50% -10%, rgba(217,184,114,0.08), transparent 60%),
+      radial-gradient(ellipse 100% 50% at 90% 110%, rgba(255,255,255,0.035), transparent 55%),
+      #000000;
+  }
+
+  * { -webkit-tap-highlight-color: transparent; }
+
+  #app{
+    max-width:480px; margin:0 auto;
+    min-height:100dvh;
+    display:flex; flex-direction:column;
+    padding-left: var(--page-padding-x);
+    padding-right: var(--page-padding-x);
+    padding-top: 0;
+    padding-bottom: calc(var(--barbero-nav-height, 56px) + env(safe-area-inset-bottom, 0px) + 8px);
+    box-sizing:border-box;
+  }
+
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:translateY(0); } }
+  .fade-in{ animation:fadeUp 0.42s var(--ease-ios) both; }
+
+  /* ---- Hero: estación de trabajo del barbero ---- */
+  .hero{
+    position:relative; flex-shrink:0; height:calc(24vh + var(--safe-top)); min-height:140px; max-height:220px;
+    margin: 0 calc(-1 * var(--page-padding-x)); border-radius:0 0 20px 20px; overflow:hidden; background:var(--surface);
+  }
+  .hero-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
+  .hero-fallback{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:52px; font-weight:800; color:rgba(217,184,114,0.35);
+    background:radial-gradient(ellipse 90% 60% at 50% 20%, rgba(217,184,114,0.1), transparent 60%), linear-gradient(165deg, #1c1c1c, #0a0a0a);
+  }
+  .hero-overlay{
+    position:absolute; inset:0; pointer-events:none;
+    background:linear-gradient(180deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.02) 26%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0.93) 100%);
+  }
+  .hero-topbar{
+    position:absolute; top:0; left:0; right:0; z-index:2; display:flex; flex-direction:column; align-items:center;
+    padding: max(6px, var(--safe-top)) var(--page-padding-x) 6px;
+    background:linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, transparent 100%);
+  }
+  .hero-topbar-row{ width:100%; display:flex; align-items:center; justify-content:center; position:relative; }
+  .hero-clock{ font-size:13px; font-weight:700; color:rgba(255,255,255,0.9); letter-spacing:.5px; margin-top:2px; }
+  .hero-icon-btn{
+    width:38px; height:38px; border-radius:13px; flex-shrink:0; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
+    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    transition:transform .16s var(--ease-ios), background .16s ease;
+  }
+  .hero-icon-btn:active{ transform:scale(0.9); background:rgba(255,255,255,0.17); }
+  .hero-icon-btn svg{ width:17px; height:17px; }
+  .hero-topbar-right{ position:absolute; right:0; top:0; display:flex; align-items:center; }
+  .hero-logo{ height:32px; border-radius:8px; opacity:.96; filter:drop-shadow(0 2px 10px rgba(0,0,0,0.55)); }
+  .bell-badge{
+    position:absolute; top:-3px; right:-3px; min-width:15px; height:15px; padding:0 3px; border-radius:8px;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-size:9px; font-weight:800;
+    display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  }
+  .hero-content{ position:absolute; left:16px; right:16px; bottom:10px; z-index:2; }
+  .hero-puesto{ font-size:10px; font-weight:800; letter-spacing:1.4px; color:var(--ring-gold); text-transform:uppercase; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
+  .hero-name{ font-size:26px; font-weight:800; letter-spacing:-0.5px; color:#111111; line-height:1.1; margin-top:2px; text-shadow:0 2px 10px rgba(0,0,0,0.7); }
+  .hdr-estado{
+    display:inline-flex; align-items:center; gap:4px; font-size:9px; font-weight:700; margin-top:6px;
+    padding:3px 8px 3px 6px; border-radius:999px; letter-spacing:0.3px; text-transform:uppercase;
+    background:rgba(52,211,153,0.2); border:1px solid rgba(52,211,153,0.4); color:#5EEAB2;
+    transition:background .3s ease, border-color .3s ease, color .3s ease;
+  }
+  .hdr-estado.busy{ background:rgba(217,184,114,0.18); border-color:rgba(217,184,114,0.35); color:var(--ring-gold); }
+  .hdr-estado .dot{ width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; }
+  .hero-chips{ display:flex; gap:6px; margin-top:8px; }
+  .hero-chip{
+    flex:1; min-width:0; display:flex; align-items:center; gap:6px; padding:6px 8px; border-radius:12px; cursor:pointer;
+    background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.18); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    transition:transform .14s var(--ease-ios), background .16s ease;
+  }
+  .hero-chip:active{ transform:scale(0.96); background:rgba(255,255,255,0.15); }
+  .hero-chip.off .hero-chip-icon{ background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.4); }
+  .hero-chip.off .v{ color:rgba(255,255,255,0.45); }
+  .hero-chip-icon{ width:24px; height:24px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(217,184,114,0.25); color:var(--ring-gold); }
+  .hero-chip-icon svg{ width:12px; height:12px; }
+  .hero-chip-txt{ min-width:0; }
+  .hero-chip-txt .l{ display:block; font-size:7px; font-weight:800; letter-spacing:.5px; color:rgba(255,255,255,0.55); text-transform:uppercase; }
+  .hero-chip-txt .v{ display:block; font-size:10px; font-weight:700; color:#111111; margin-top:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  .arrival-banner{
+    width:100%; flex-shrink:0;
+    background:linear-gradient(135deg, rgba(52,211,153,0.14), rgba(52,211,153,0.03));
+    border:1px solid rgba(52,211,153,0.28); border-radius:18px; padding:12px 15px; margin-bottom:8px;
+    display:none; align-items:center; gap:10px; text-align:left; animation:pulseIn 0.4s var(--ease-ios);
+    backdrop-filter:blur(20px);
+  }
+  .arrival-banner.show{ display:flex; }
+  .arrival-banner .dot{ width:8px; height:8px; border-radius:50%; background:var(--ring-green); flex-shrink:0; box-shadow:0 0 0 0 rgba(52,211,153,0.5); animation:pulse 1.8s infinite; }
+  @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(52,211,153,0.45);} 70%{box-shadow:0 0 0 9px rgba(52,211,153,0);} 100%{box-shadow:0 0 0 0 rgba(52,211,153,0);} }
+  @keyframes pulseIn{ from{ opacity:0; transform:translateY(-6px);} to{ opacity:1; transform:translateY(0);} }
+  .arrival-banner .txt{ font-size:12.5px; font-weight:600; color:#5EEAB2; line-height:1.35; }
+
+  /* ---- Stage ---- */
+  .stage{
+    flex:1; display:flex; flex-direction:column; gap:6px;
+    padding-top:6px;
+  }
+  #swipeContainer{ margin-top:auto; flex-shrink:0; }
+
+  .empty-state{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; text-align:center; }
+  .empty-icon{
+    width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:var(--glass-card-2); border:1px solid var(--glass-border); backdrop-filter:blur(20px);
+  }
+  .empty-icon svg{ width:26px; height:26px; }
+  .empty-title{ font-size:17px; font-weight:700; letter-spacing:-0.2px; }
+  .empty-sub{ font-size:13px; color:var(--text-muted); max-width:260px; line-height:1.45; }
+  .empty-title{ color:var(--text); }
+
+  /* ---- Skeleton loader ---- */
+  .skel{ background:linear-gradient(100deg, var(--glass-card-2) 30%, var(--divider) 50%, var(--glass-card-2) 70%); background-size:220% 100%; animation:skelShine 1.5s ease-in-out infinite; border-radius:18px; }
+  @keyframes skelShine{ 0%{ background-position:120% 0; } 100%{ background-position:-20% 0; } }
+  .skel-stage{ flex:1; display:flex; flex-direction:column; gap:10px; padding-top:4px; }
+  .skel-card{ height:96px; border-radius:26px; }
+  .skel-ring{ width:180px; height:180px; border-radius:50%; margin:6px auto; }
+  .skel-line{ height:64px; border-radius:20px; }
+
+  /* ---- Glass card base ---- */
+  .glass-card{
+    background:var(--glass-card);
+    border:1px solid var(--glass-border);
+    border-radius:26px;
+    backdrop-filter:blur(24px) saturate(160%);
+    -webkit-backdrop-filter:blur(24px) saturate(160%);
+    box-shadow:0 1px 0 rgba(255,255,255,0.04) inset, 0 12px 30px rgba(0,0,0,0.35);
+  }
+
+  /* ---- Cita actual ---- */
+  .client-card{ flex-shrink:0; padding:8px 12px; position:relative; overflow:hidden; }
+  .client-eyebrow-row{ display:flex; align-items:center; gap:5px; }
+  .client-eyebrow-row svg{ width:10px; height:10px; opacity:.85; color:var(--ring-gold); }
+  .client-eyebrow{ font-size:9px; font-weight:700; letter-spacing:0.8px; color:var(--ring-gold); text-transform:uppercase; }
+  .client-name{ font-size:17px; font-weight:800; margin-top:3px; letter-spacing:-0.3px; line-height:1.15; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .client-service{
+    display:inline-flex; margin-top:4px; font-size:10px; color:var(--ring-gold); font-weight:700;
+    background:rgba(217,184,114,0.1); border:1px solid rgba(217,184,114,0.25); padding:2px 8px; border-radius:999px;
+  }
+  .client-time{ font-size:10px; color:rgba(255,255,255,0.4); margin-top:1px; display:flex; align-items:center; gap:4px; font-weight:500; }
+  .client-time svg{ width:10px; height:10px; opacity:0.75; }
+
+  /* ---- Tiempo restante (timer + barra segmentada + anillo %) ---- */
+  .time-card{ flex-shrink:0; flex-grow:1; padding:8px 12px; display:flex; flex-direction:column; }
+  .time-card-label{ font-size:8px; font-weight:800; letter-spacing:1px; color:var(--ring-gold); text-transform:uppercase; margin-bottom:6px; flex-shrink:0; }
+  .time-card-row{ flex:1; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+  .time-main{ flex:1; min-width:0; }
+  .time-value-lg{ font-variant-numeric:tabular-nums; }
+  #timerValue{ font-size:26px; font-weight:800; letter-spacing:-0.5px; color:#111111; transition:color .5s ease; }
+  .time-value-lg .unit{ font-size:13px; font-weight:700; color:rgba(255,255,255,0.35); margin-left:5px; }
+  .time-segbar{ display:flex; gap:3.5px; margin-top:11px; }
+  .time-seg{ flex:1; height:6px; border-radius:3px; background:rgba(255,255,255,0.08); transition:background .4s ease; }
+  .time-seg.filled{ background:linear-gradient(90deg,#34D399,#5EEAB2); }
+  .time-seg.filled.gold{ background:linear-gradient(90deg,var(--ring-gold),#E6CB90); }
+  .time-seg.filled.red{ background:linear-gradient(90deg,#FF6B5E,#FF8A7E); }
+  .time-ring-wrap{ position:relative; width:60px; height:60px; flex-shrink:0; }
+  .time-ring{ transform:rotate(-90deg); transform-origin:50% 50%; }
+  .time-ring-bg{ stroke:rgba(255,255,255,0.07); }
+  .time-ring-fg{ stroke-linecap:round; transition:stroke-dashoffset .6s linear, stroke .5s ease; }
+  .time-ring-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .time-ring-pct{ font-size:16px; font-weight:800; }
+  .time-ring-label{ font-size:7px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:.3px; margin-top:1px; text-align:center; line-height:1.2; }
+  .time-next-row{
+    display:flex; align-items:center; gap:5px; margin-top:8px; padding-top:8px; border-top:1px solid var(--glass-border-soft);
+    font-size:9px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:.3px;
+  }
+  .time-next-row b{ color:var(--ring-gold); font-weight:800; text-transform:none; }
+  .time-next-row svg{ width:12px; height:12px; opacity:.6; flex-shrink:0; }
+
+  /* ---- Timeline de pasos ---- */
+  .steps-card{ flex-shrink:0; padding:8px 12px; position:relative; }
+  .steps-card-label{ font-size:8px; font-weight:800; letter-spacing:1px; color:var(--ring-gold); text-transform:uppercase; margin-bottom:5px; }
+  .steps-grid{ display:grid; grid-template-columns:repeat(5, 1fr); gap:4px; }
+  .step-tile{
+    display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px; border-radius:12px;
+    background:rgba(255,255,255,0.03); border:1px solid var(--glass-border-soft);
+    transition:transform .14s var(--ease-ios), background .2s ease, border-color .2s ease, opacity .3s ease;
+  }
+  .step-tile.pending{ opacity:0.5; }
+  .step-tile.active{ cursor:pointer; border-color:rgba(217,184,114,0.5); }
+  .step-tile.active:active{ transform:scale(0.93); }
+  .step-tile.done{ background:rgba(52,211,153,0.09); border-color:rgba(52,211,153,0.4); }
+  .step-tile-icon{
+    position:relative; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.5); transition:all .35s var(--ease-ios);
+  }
+  .step-tile-icon svg{ width:14px; height:14px; }
+  .step-tile.done .step-tile-icon{ background:rgba(52,211,153,0.18); border-color:rgba(52,211,153,0.55); color:#5EEAB2; animation:stepDone .4s var(--ease-ios); }
+  @keyframes stepDone{ 0%{ transform:scale(0.7); } 60%{ transform:scale(1.12); } 100%{ transform:scale(1); } }
+  .step-tile.active .step-tile-icon{
+    background:rgba(217,184,114,0.16); border-color:rgba(217,184,114,0.65); color:var(--ring-gold);
+    box-shadow:0 0 0 1px rgba(217,184,114,0.35), 0 0 16px 3px rgba(217,184,114,0.22);
+    animation:haloPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes haloPulse{ 0%,100%{ opacity:0.65; } 50%{ opacity:1; } }
+  .step-tile-check{
+    position:absolute; right:-2px; bottom:-2px; width:12px; height:12px; border-radius:50%; background:#34D399;
+    display:flex; align-items:center; justify-content:center; border:1.5px solid #0d0d0d;
+  }
+  .step-tile-check svg{ width:6px; height:6px; }
+  .step-tile-label{ font-size:8px; font-weight:700; text-align:center; line-height:1.1; color:rgba(255,255,255,0.72); }
+  .step-tile.done .step-tile-label{ color:#5EEAB2; }
+  .step-tile.active .step-tile-label{ color:var(--ring-gold); }
+
+  /* ---- Bebida (cliente / barbero) ---- */
+  .bebida-opt{
+    display:flex; align-items:center; gap:12px; padding:13px 15px; border-radius:16px; margin-bottom:8px;
+    background:var(--glass-card-2); border:1px solid var(--glass-border-soft); cursor:pointer;
+    font-size:14px; font-weight:700; transition:transform .14s var(--ease-ios), background .15s ease;
+  }
+  .bebida-opt:active{ transform:scale(0.97); background:var(--glass-card); }
+  .bebida-opt .ic{ width:22px; height:22px; flex-shrink:0; color:var(--ring-gold); display:flex; align-items:center; justify-content:center; }
+  .bebida-opt .ic svg{ width:20px; height:20px; }
+
+  /* ---- Total + agregar servicio ---- */
+  .total-row{ flex-shrink:0; display:flex; align-items:center; gap:6px; }
+  .total-card{ flex:1.15; padding:8px 12px; cursor:pointer; min-width:0; }
+  .total-label{ font-size:8px; font-weight:700; letter-spacing:0.8px; color:rgba(255,255,255,0.4); text-transform:uppercase; }
+  .total-value{ font-size:18px; font-weight:800; letter-spacing:-0.4px; margin-top:1px; color:#111111; }
+  .total-badge{ font-size:9px; font-weight:700; color:rgba(255,255,255,0.42); margin-top:1px; }
+  .add-service-btn{
+    flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:8px 6px;
+    border-radius:18px; cursor:pointer; text-align:center;
+    background:linear-gradient(165deg, var(--gold-bright), var(--gold));
+    box-shadow:0 6px 16px rgba(217,184,114,0.22);
+    transition:transform .15s var(--ease-ios), box-shadow .2s ease;
+  }
+  .add-service-btn:active{ transform:scale(0.95); box-shadow:0 4px 12px rgba(217,184,114,0.18); }
+  .add-service-btn .plus-circle{
+    width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,0.14);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .add-service-btn svg{ width:14px; height:14px; stroke:#141414; }
+  .add-service-btn span{ font-size:9px; font-weight:800; color:#141414; }
+
+  .waiting-note{ font-size:12px; color:rgba(255,255,255,0.42); line-height:1.5; text-align:center; max-width:280px; margin:0 auto; }
+  .action-btn{ width:100%; height:44px; font-size:14px; flex-shrink:0; border-radius:16px; }
+
+  /* ---- Slider "Desliza para enviar a caja" ---- */
+  .swipe-track{
+    flex-shrink:0; position:relative; width:100%; height:46px; border-radius:20px; overflow:hidden;
+    background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    border:1px solid var(--glass-border); backdrop-filter:blur(20px);
+    display:flex; align-items:center; user-select:none; touch-action:pan-y;
+  }
+  .swipe-track::before{
+    content:''; position:absolute; inset:0; border-radius:22px; padding:1px;
+    background:linear-gradient(120deg, rgba(217,184,114,0.5), rgba(217,184,114,0) 40%, rgba(217,184,114,0) 60%, rgba(217,184,114,0.35));
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none;
+  }
+  .swipe-fill{ position:absolute; left:0; top:0; bottom:0; width:50px; background:linear-gradient(90deg, rgba(217,184,114,0.22), rgba(217,184,114,0.02)); pointer-events:none; transition:width .1s linear; }
+  .swipe-shimmer{
+    position:absolute; inset:0; pointer-events:none; opacity:0.5;
+    background:linear-gradient(100deg, transparent 40%, rgba(255,255,255,0.09) 50%, transparent 60%);
+    background-size:220% 100%; animation:swipeShine 3.2s ease-in-out infinite;
+  }
+  @keyframes swipeShine{ 0%{ background-position:150% 0; } 100%{ background-position:-50% 0; } }
+  .swipe-label{ position:absolute; left:0; right:0; text-align:center; pointer-events:none; }
+  .swipe-label .t{ font-size:11px; font-weight:800; letter-spacing:0.4px; color:rgba(255,255,255,0.92); }
+  .swipe-label .s{ font-size:8px; color:rgba(255,255,255,0.36); margin-top:0; }
+  .swipe-icon-hint{ position:absolute; right:18px; top:50%; transform:translateY(-50%); opacity:0.45; pointer-events:none; }
+  .swipe-icon-hint svg{ width:18px; height:18px; }
+  .swipe-handle{
+    position:absolute; left:3px; top:3px; width:40px; height:40px; border-radius:50%;
+    background:linear-gradient(165deg, var(--gold-bright), var(--gold));
+    display:flex; align-items:center; justify-content:center;
+    cursor:grab; touch-action:none; box-shadow:0 4px 14px rgba(217,184,114,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset;
+    transition:left 0.28s cubic-bezier(.2,.9,.3,1.3), transform .15s var(--ease-ios); z-index:2;
+  }
+  .swipe-handle.dragging{ transition:transform .1s ease; cursor:grabbing; transform:scale(1.06); }
+  .swipe-handle svg{ width:18px; height:18px; stroke:#141414; }
+  .swipe-track.done{ border-color:rgba(52,211,153,0.4); }
+  .swipe-track.done .swipe-handle{ background:linear-gradient(165deg, #5EEAB2, #34D399); box-shadow:0 4px 14px rgba(52,211,153,0.45); }
+  .swipe-track.disabled{ opacity:0.42; pointer-events:none; }
+  .swipe-pending{
+    flex-shrink:0; width:100%; min-height:44px; border-radius:20px; padding:10px 14px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015));
+    border:1px solid var(--glass-border-soft); display:flex; align-items:center; gap:10px;
+  }
+  .swipe-pending svg{ width:16px; height:16px; stroke:rgba(255,255,255,0.4); flex-shrink:0; }
+  .swipe-pending-txt{ font-size:10px; color:rgba(255,255,255,0.42); line-height:1.3; }
+  .swipe-pending-txt b{ color:rgba(255,255,255,0.62); }
+
+  /* ---- Confirmación de envío (overlay in-place, sin sheet ni foto) ---- */
+  .send-confirm{
+    position:fixed; inset:0; z-index:150; display:flex; align-items:center; justify-content:center;
+    background:rgba(0,0,0,0.55); backdrop-filter:blur(10px); opacity:0; pointer-events:none;
+    transition:opacity .3s var(--ease-ios);
+  }
+  .send-confirm.show{ opacity:1; pointer-events:auto; }
+  .send-confirm-card{
+    width:min(320px, 84vw); padding:32px 26px; text-align:center; border-radius:28px;
+    background:rgba(255,255,255,0.86); border:1px solid var(--glass-border); backdrop-filter:blur(30px);
+    transform:scale(0.85); transition:transform .34s cubic-bezier(.2,.9,.3,1.25);
+  }
+  .send-confirm.show .send-confirm-card{ transform:scale(1); }
+  .send-check{
+    width:66px; height:66px; border-radius:50%; margin:0 auto 16px; display:flex; align-items:center; justify-content:center;
+    background:rgba(52,211,153,0.15); border:1.5px solid rgba(52,211,153,0.55);
+    animation:successPop 0.45s cubic-bezier(.2,.9,.3,1.3);
+  }
+  .send-check svg{ width:30px; height:30px; stroke:#5EEAB2; }
+  @keyframes successPop{ from{ transform:scale(0.55); opacity:0; } to{ transform:scale(1); opacity:1; } }
+  .send-title{ font-size:18px; font-weight:800; letter-spacing:-0.2px; }
+  .send-sub{ font-size:13px; color:rgba(255,255,255,0.44); margin-top:6px; }
+
+  /* ---- Modales centrados (antes bottom sheets) ---- */
+  .sheet-bg{ position:fixed; inset:0; background:rgba(0,0,0,0.72); backdrop-filter:blur(8px); z-index:100; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.28s var(--ease-ios); padding:20px; }
+  .sheet-bg.show{ opacity:1; pointer-events:auto; }
+  .sheet-box{
+    width:100%; max-width:400px; margin:0 auto; background:rgba(22,22,22,0.98); border:1px solid var(--glass-border);
+    backdrop-filter:blur(30px) saturate(160%);
+    border-radius:24px; padding:20px 20px 24px;
+    transform:scale(0.9) translateY(20px); transition:transform 0.32s cubic-bezier(.22,1,.36,1), opacity 0.28s ease; max-height:80vh; overflow-y:auto;
+    position:relative; opacity:0;
+  }
+  .sheet-bg.show .sheet-box{ transform:scale(1) translateY(0); opacity:1; }
+  .sheet-handle{ display:none; }
+  .sheet-title{ font-size:17px; font-weight:800; margin-bottom:4px; letter-spacing:-0.2px; padding-right:36px; }
+  .sheet-sub{ font-size:12.5px; color:rgba(255,255,255,0.42); line-height:1.5; margin-bottom:18px; }
+  .sheet-close{ position:absolute; top:18px; right:18px; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .14s var(--ease-ios), background .15s ease; }
+  .sheet-close:hover{ background:rgba(255,255,255,0.12); }
+  .sheet-close:active{ transform:scale(0.88); }
+  .sheet-close svg{ width:14px; height:14px; opacity:0.9; }
+
+  /* Selector tipo (Servicios / Productos) */
+  .type-selector{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  .type-card{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; padding:24px 12px; border-radius:20px;
+    background:rgba(255,255,255,0.045); border:2px solid var(--glass-border-soft); cursor:pointer; text-align:center;
+    transition:transform .14s var(--ease-ios), border-color .15s ease, background .15s ease;
+  }
+  .type-card:active{ transform:scale(0.96); }
+  .type-card .type-icon{ font-size:32px; }
+  .type-card .type-label{ font-size:14px; font-weight:800; }
+  .type-card.selected{ border-color:var(--gold); background:rgba(217,184,114,0.12); }
+
+  .add-back-btn{
+    display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:12px; margin-bottom:14px;
+    background:rgba(255,255,255,0.06); border:1px solid var(--glass-border-soft); cursor:pointer;
+    font-size:12px; font-weight:700; color:rgba(255,255,255,0.7); transition:background .15s ease;
+  }
+  .add-back-btn:active{ background:rgba(255,255,255,0.1); }
+  .add-back-btn svg{ width:14px; height:14px; }
+
+  .cat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:6px; }
+  .cat-chip{
+    display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 6px; border-radius:18px;
+    background:rgba(255,255,255,0.045); border:1px solid var(--glass-border-soft); cursor:pointer; text-align:center;
+    transition:transform .14s var(--ease-ios), border-color .15s ease, background .15s ease;
+  }
+  .cat-chip:active{ transform:scale(0.94); }
+  .cat-chip.selected{ border-color:var(--gold); background:rgba(217,184,114,0.12); }
+  .cat-chip .ic{ font-size:20px; }
+  .cat-chip .t{ font-size:11px; font-weight:700; }
+
+  .variant-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+  .variant-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-radius:16px; background:rgba(255,255,255,0.045); border:1px solid var(--glass-border-soft); cursor:pointer; }
+  .variant-row .n{ font-size:13px; font-weight:700; }
+  .variant-row .p{ font-size:13px; font-weight:800; color:var(--gold); }
+
+  .manual-form{ margin-top:14px; display:flex; flex-direction:column; gap:10px; }
+  .manual-form input{ width:100%; background:rgba(255,255,255,0.045); border:1px solid var(--glass-border-soft); border-radius:14px; padding:12px 14px; color:#111111; font-size:14px; outline:none; }
+  .manual-form input:focus{ border-color:var(--gold); }
+
+  .added-list{ margin-top:16px; }
+  .added-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:13px; }
+  .added-row:last-child{ border-bottom:none; }
+  .added-row .p{ font-weight:800; color:var(--gold); margin-right:8px; }
+  .added-row .rm{
+    color:#111111; font-size:10px; font-weight:700; cursor:pointer;
+    background:rgba(255,107,94,0.2); border:1px solid rgba(255,107,94,0.4);
+    padding:4px 10px; border-radius:8px;
+    transition:background .15s ease;
+  }
+  .added-row .rm:active{ background:rgba(255,107,94,0.4); }
+  .added-row .trash-btn{
+    width:28px; height:28px; border-radius:8px; cursor:pointer;
+    background:rgba(255,107,94,0.15); border:1px solid rgba(255,107,94,0.35);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-left:8px;
+    transition:background .15s ease, transform .12s ease;
+  }
+  .added-row .trash-btn:active{ background:rgba(255,107,94,0.35); transform:scale(0.9); }
+  .added-row .trash-btn svg{ width:14px; height:14px; stroke:#FF6B5E; }
+
+  .order-total-row{ display:flex; justify-content:space-between; align-items:center; padding-top:14px; margin-top:6px; border-top:1px solid rgba(255,255,255,0.08); }
+  .order-total-row .l{ font-size:13px; font-weight:700; }
+  .order-total-row .v{ font-size:23px; font-weight:800; color:var(--gold); }
+
+  /* Toast y Tab-bar estilos en barbero-nav.css */
+
+  input[type="file"]{ display:none; }
+
+  /* Modal de ganancias */
+  .ganancias-modal-bg {
+    position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.75);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity .25s ease;
+  }
+  .ganancias-modal-bg.show { opacity:1; pointer-events:auto; }
+  .ganancias-modal {
+    width:92vw; max-width:360px; background:#FFFFFF; border-radius:24px;
+    border:1px solid rgba(0,0,0,0.1); padding:24px 20px;
+    transform:scale(0.92); transition:transform .25s var(--ease-ios);
+  }
+  .ganancias-modal-bg.show .ganancias-modal { transform:scale(1); }
+  .ganancias-modal-head {
+    display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;
+  }
+  .ganancias-modal-title { font-size:18px; font-weight:800; }
+  .ganancias-modal-close {
+    width:32px; height:32px; border-radius:10px; background:rgba(255,255,255,0.08);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    font-size:16px; color:#8A8780;
+  }
+  .ganancias-avatar {
+    width:64px; height:64px; border-radius:50%; margin:0 auto 16px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; font-weight:800; color:var(--ring-gold);
+    background:rgba(217,184,114,0.15); border:2px solid rgba(217,184,114,0.3);
+  }
+  .ganancias-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+  .ganancias-name { text-align:center; font-size:16px; font-weight:700; margin-bottom:20px; }
+  .ganancias-breakdown { display:flex; flex-direction:column; gap:0; }
+  .ganancias-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.06);
+    font-size:14px; color:#B0B0B0;
+  }
+  .ganancias-row:last-child { border-bottom:none; }
+  .ganancias-row b { color:#111111; font-weight:700; }
+  .ganancias-row.descuento b { color:#FF6B5E; }
+  .ganancias-total {
+    margin-top:16px; padding:16px; border-radius:16px;
+    background:linear-gradient(135deg, rgba(52,211,153,0.15), rgba(52,211,153,0.05));
+    border:1px solid rgba(52,211,153,0.3);
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .ganancias-total span { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#5EEAB2; }
+  .ganancias-total b { font-size:22px; font-weight:800; color:#111111; }
+  .ganancias-estado {
+    margin-top:14px; text-align:center; font-size:12px; font-weight:700;
+    padding:8px 16px; border-radius:20px;
+  }
+  .ganancias-estado.pendiente { background:rgba(255,107,94,0.15); color:#FF6B5E; }
+  .ganancias-estado.pagado { background:rgba(52,211,153,0.15); color:#5EEAB2; }
+
+  @media (max-height:740px){
+    #app{ gap:0; }
+    .stage{ gap:5px; }
+    .hero{ height:26vh; min-height:150px; }
+    .hero-name{ font-size:24px; }
+    .client-card{ padding:8px 12px; }
+    .time-card{ padding:6px 10px; }
+    .steps-card{ padding:6px 10px; }
+  }
+  @media (max-height:640px){
+    .hero{ height:22vh; min-height:120px; max-height:140px; }
+    .hero-name{ font-size:22px; }
+    .stage{ gap:4px; padding-top:4px; }
+    .time-card{ flex-grow:0; }
+  }
+</style>
+</head>
+<body>
+<script src="../assets/splash-screen.js"></script>
+
+<div id="app">
+
+  <div class="hero fade-in">
+    <img id="hdrAvatarImg" class="hero-photo" style="opacity:0;" alt="" width="480" height="220" fetchpriority="high" loading="eager">
+    <div id="hdrAvatarFallback" class="hero-fallback">--</div>
+    <div class="hero-overlay"></div>
+    <div class="hero-topbar">
+      <div class="hero-topbar-row">
+        <img src="../assets/logo-transparent.png" class="hero-logo" alt="Keicy Barbería" width="40" height="40">
+        <div class="hero-topbar-right">
+          <div class="hero-icon-btn" onclick="openAlertsSheet()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+            <span class="bell-badge" id="bellBadge" style="display:none;">0</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-clock" id="hdrClock">—</div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-puesto" id="hdrPuesto">Barbero</div>
+      <div class="hero-name" id="hdrName">—</div>
+      <div class="hdr-estado" id="hdrEstado"><span class="dot"></span>Cargando…</div>
+      <div class="hero-chips">
+        <div class="hero-chip" onclick="openGananciasModal()">
+          <span class="hero-chip-icon" style="background:rgba(52,211,153,0.2); color:#5EEAB2;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+          <div class="hero-chip-txt"><span class="l">Hoy</span><span class="v" id="heroGananciasVal">$0</span></div>
+        </div>
+        <div class="hero-chip" onclick="openBebidaSheet('barbero')">
+          <span class="hero-chip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12l-1.2 15.5A2 2 0 0 1 14.8 20H9.2a2 2 0 0 1-2-1.5L6 3Z" stroke-linejoin="round"/><path d="M5 8h14" stroke-linecap="round"/></svg></span>
+          <div class="hero-chip-txt"><span class="l">Tu bebida</span><span class="v" id="heroDrinkVal">Registrar</span></div>
+        </div>
+        <div class="hero-chip" onclick="openResenasModal()">
+          <span class="hero-chip-icon" style="background:rgba(255,215,0,0.2); color:#FFD700;"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
+          <div class="hero-chip-txt"><span class="l">Calificacion</span><span class="v" id="heroResenasVal">—</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrival-banner" id="arrivalBanner">
+    <span class="dot"></span>
+    <span class="txt" id="arrivalTxt">Tu próximo cliente ya está esperando en recepción.</span>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="skel-stage fade-in">
+      <div class="skel skel-card"></div>
+      <div class="skel skel-ring"></div>
+      <div class="skel skel-card" style="height:150px;"></div>
+      <div class="skel skel-line"></div>
+    </div>
+  </div>
+
+  <div class="tab-bar fade-in">
+    <div class="tab-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 11.5 12 4l9 7.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 10v9.5a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>Inicio</span>
+    </div>
+    <div class="tab-item" onclick="location.href='agenda.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="4"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg>
+      <span>Agenda</span>
+    </div>
+    <div class="tab-item" onclick="location.href='perfil.html'">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg>
+      <span>Perfil</span>
+    </div>
+  </div>
+
+  <div id="toast"><span class="toast-dot"></span><span id="toastText"></span></div>
+</div>
+
+<!-- Modal de ganancias del día -->
+<div class="ganancias-modal-bg" id="gananciasModalBg" onclick="if(event.target===this) closeGananciasModal()">
+  <div class="ganancias-modal" style="max-height:85vh; overflow-y:auto;">
+    <div class="ganancias-modal-head">
+      <div class="ganancias-modal-title">Mis ganancias de hoy</div>
+      <div class="ganancias-modal-close" onclick="closeGananciasModal()">✕</div>
+    </div>
+    <div class="ganancias-avatar" id="gananciasAvatar">—</div>
+    <div class="ganancias-name" id="gananciasName">—</div>
+
+    <!-- Detalle de servicios -->
+    <div id="gananciasDetalleServicios" style="margin-bottom:12px;"></div>
+
+    <!-- Detalle de productos -->
+    <div id="gananciasDetalleProductos" style="margin-bottom:12px;"></div>
+
+    <div class="ganancias-breakdown">
+      <div class="ganancias-row"><span>Propinas</span><b id="gananciasPropinas">$0</b></div>
+      <div class="ganancias-row descuento" id="gananciasDescuentoRow" style="display:none;"><span>Bebidas consumidas</span><b id="gananciasDescuento">-$0</b></div>
+    </div>
+    <div class="ganancias-total">
+      <span>Total a recibir</span>
+      <b id="gananciasTotal">$0</b>
+    </div>
+    <div class="ganancias-estado pendiente" id="gananciasEstado">Pendiente de pago</div>
+  </div>
+</div>
+
+<!-- Modal de reseñas -->
+<div class="ganancias-modal-bg" id="resenasModalBg" onclick="if(event.target===this) closeResenasModal()">
+  <div class="ganancias-modal" style="max-height:85vh; overflow-y:auto;">
+    <div class="ganancias-modal-head">
+      <div class="ganancias-modal-title">Mis reseñas</div>
+      <div class="ganancias-modal-close" onclick="closeResenasModal()">✕</div>
+    </div>
+    <div style="text-align:center; margin-bottom:16px;">
+      <div id="resenasPromedio" style="font-size:48px; font-weight:800; color:#FFD700;">—</div>
+      <div id="resenasStars" style="font-size:24px; margin:4px 0;">☆☆☆☆☆</div>
+      <div id="resenasCount" style="font-size:13px; color:rgba(0,0,0,0.5);">Sin reseñas</div>
+    </div>
+    <div id="resenasLista" style="display:flex; flex-direction:column; gap:12px;"></div>
+  </div>
+</div>
+
+<!-- Confirmación de envío a caja (sin foto) -->
+<div class="send-confirm" id="sendConfirm">
+  <div class="send-confirm-card">
+    <div class="send-check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+    <div class="send-title">Orden enviada</div>
+    <div class="send-sub">Recepción notificada</div>
+  </div>
+</div>
+
+<!-- Sheet: Agregar servicio -->
+<div class="sheet-bg" id="addSheetBg" onclick="if(event.target===this) closeAddSheet()">
+  <div class="sheet-box">
+    <div class="sheet-handle"></div>
+    <div class="sheet-close" onclick="closeAddSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg></div>
+    <div class="sheet-title" id="addSheetTitle">Agregar a la orden</div>
+    <div class="sheet-sub" id="addSheetSub">Selecciona qué agregar a la orden de esta cita.</div>
+    <div id="addSheetContent"></div>
+    <div class="added-list" id="addedList"></div>
+  </div>
+</div>
+
+<!-- Sheet: Ver orden actual -->
+<div class="sheet-bg" id="orderSheetBg" onclick="if(event.target===this) closeOrderSheet()">
+  <div class="sheet-box">
+    <div class="sheet-handle"></div>
+    <div class="sheet-close" onclick="closeOrderSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg></div>
+    <div class="sheet-title">Orden actual</div>
+    <div class="sheet-sub" id="orderSheetSub">—</div>
+    <div id="orderItemsList"></div>
+    <div class="order-total-row"><span class="l">Total</span><span class="v" id="orderSheetTotal">—</span></div>
+  </div>
+</div>
+
+<!-- Sheet: Alertas -->
+<div class="sheet-bg" id="alertsSheetBg" onclick="if(event.target===this) closeAlertsSheet()">
+  <div class="sheet-box">
+    <div class="sheet-handle"></div>
+    <div class="sheet-close" onclick="closeAlertsSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg></div>
+    <div class="sheet-title">Notificaciones</div>
+    <div id="alertsList" style="margin-top:10px;"></div>
+  </div>
+</div>
+
+<!-- Sheet: Mi cuenta / cerrar sesión -->
+<div class="sheet-bg" id="accountSheetBg" onclick="if(event.target===this) closeAccountSheet()">
+  <div class="sheet-box">
+    <div class="sheet-handle"></div>
+    <div class="sheet-close" onclick="closeAccountSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg></div>
+    <div class="sheet-title">Mi cuenta</div>
+    <div class="sheet-sub" id="accountSheetName">—</div>
+    <div style="margin-top:18px; padding:16px; border-radius:18px; background:rgba(255,107,94,0.1); border:1px solid rgba(255,107,94,0.3); display:flex; align-items:center; justify-content:space-between; cursor:pointer;" onclick="logoutBarbero()">
+      <span style="font-size:14.5px; font-weight:700; color:var(--ring-red);">Cerrar sesión</span>
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FF6B5E" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-linecap="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet: Bebida (cliente o barbero) -->
+<div class="sheet-bg" id="bebidaSheetBg" onclick="if(event.target===this) closeBebidaSheet()">
+  <div class="sheet-box">
+    <div class="sheet-handle"></div>
+    <div class="sheet-close" onclick="closeBebidaSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg></div>
+    <div class="sheet-title" id="bebidaSheetTitle">Elige la bebida</div>
+    <div class="sheet-sub" id="bebidaSheetSub">—</div>
+    <div id="bebidaOptionsList" style="margin-top:6px;"></div>
+  </div>
+</div>
+
+<!-- Sheet: Solicitud de insumos -->
+<div class="sheet-bg" id="insumosSheetBg" onclick="if(event.target===this) closeInsumosSheet()">
+  <div class="sheet-box">
+    <div class="sheet-handle"></div>
+    <div class="sheet-close" onclick="closeInsumosSheet()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg></div>
+    <div class="sheet-title">Solicitud de insumos</div>
+    <div class="sheet-sub">Elige lo que necesitas — recepción lo verá al instante.</div>
+    <div id="insumosOptionsList" style="margin-top:6px;"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/mobile-nav.js"></script>
+<script>
+  const toastEl = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  function toast(msg){
+    toastText.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(window._t);
+    window._t = setTimeout(() => toastEl.classList.remove('show'), 2400);
+  }
+  const vibracionOn = true;
+  function vibrate(pattern){ if (vibracionOn && navigator.vibrate) navigator.vibrate(pattern); }
+
+  const user = dnRequireBarbero();
+  const stage = document.getElementById('stage');
+  const arrivalBanner = document.getElementById('arrivalBanner');
+  let timerInterval = null;
+  let clockInterval = null;
+
+  // Set de citas que ya fueron llamadas hoy (persiste en localStorage)
+  const today = dnTodayISO();
+  const citasLlamadasKey = `dn_citas_llamadas_${today}`;
+  const citasFinalizadasKey = `dn_citas_finalizadas_${today}`;
+  const citaFijadaKey = `dn_cita_fijada_${today}`;
+
+  // Cargar del localStorage
+  function loadSetFromStorage(key) {
+    try {
+      const stored = localStorage.getItem(key);
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch { return new Set(); }
+  }
+  function saveSetToStorage(key, set) {
+    try {
+      localStorage.setItem(key, JSON.stringify([...set]));
+    } catch {}
+  }
+
+  const citasLlamadasHoy = loadSetFromStorage(citasLlamadasKey);
+  const citasFinalizadasHoy = loadSetFromStorage(citasFinalizadasKey);
+
+  // Cita fijada: evita que cambie automáticamente hasta que el barbero termine
+  let citaFijadaId = localStorage.getItem(citaFijadaKey) || null;
+  function fijarCita(id) {
+    citaFijadaId = id;
+    if (id) localStorage.setItem(citaFijadaKey, id);
+    else localStorage.removeItem(citaFijadaKey);
+  }
+
+  // Limpiar datos de días anteriores
+  Object.keys(localStorage).forEach(k => {
+    if ((k.startsWith('dn_citas_llamadas_') || k.startsWith('dn_citas_finalizadas_') || k.startsWith('dn_cita_fijada_')) && !k.includes(today)) {
+      localStorage.removeItem(k);
+    }
+  });
+
+  function fmtTime(hhmmss){
+    let [h,m] = hhmmss.split(':');
+    let hour = parseInt(h,10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12;
+    return `${String(hour).padStart(2,'0')}:${m} ${ampm}`;
+  }
+  function addMinutes(hhmmss, mins){
+    let [h,m] = hhmmss.split(':').map(Number);
+    let total = h*60+m+mins;
+    total = ((total % 1440) + 1440) % 1440;
+    return `${String(Math.floor(total/60)).padStart(2,'0')}:${String(total%60).padStart(2,'0')}:00`;
+  }
+
+  function tickClock(){
+    const now = new Date();
+    let h = now.getHours(); const ampm = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+    document.getElementById('hdrClock').textContent = `${h}:${String(now.getMinutes()).padStart(2,'0')} ${ampm}`;
+  }
+
+  // ---- Perfil del barbero (foto, puesto) ----
+  let barberProfile = null;
+  const PROFILE_CACHE_KEY = 'dn_barber_profile_cache';
+
+  // Mostrar avatar desde caché inmediatamente (optimiza LCP)
+  function showCachedProfile() {
+    try {
+      const cached = localStorage.getItem(PROFILE_CACHE_KEY);
+      if (!cached) return;
+      const c = JSON.parse(cached);
+      if (c.userId !== user?.id) return; // Caché de otro usuario
+
+      const img = document.getElementById('hdrAvatarImg');
+      const fallback = document.getElementById('hdrAvatarFallback');
+      if (c.avatarUrl) {
+        img.src = c.avatarUrl;
+        img.style.objectPosition = `center ${c.focusY || 30}%`;
+        img.style.opacity = '1';
+        fallback.style.display = 'none';
+      }
+      if (c.name) document.getElementById('hdrName').textContent = c.name;
+      if (c.puesto) document.getElementById('hdrPuesto').textContent = c.puesto;
+    } catch(e) {}
+  }
+
+  async function loadBarberProfile(){
+    const { data } = await sb.from('barberos').select('puesto, especialidad, comision_pct, usuarios!barberos_id_fkey(full_name, username, avatar_url, avatar_focus_y_barbero)').eq('id', user.id).maybeSingle();
+    barberProfile = data;
+    const name = data?.usuarios?.full_name || data?.usuarios?.username || user.full_name || user.username;
+    const puesto = data?.puesto ? `Puesto ${data.puesto}` : (data?.especialidad || 'Barbero');
+    document.getElementById('hdrName').textContent = name;
+    document.getElementById('hdrPuesto').textContent = puesto;
+    const avatarUrl = data?.usuarios?.avatar_url;
+    const focusY = data?.usuarios?.avatar_focus_y_barbero ?? 30;
+    const img = document.getElementById('hdrAvatarImg');
+    const fallback = document.getElementById('hdrAvatarFallback');
+    if (avatarUrl) {
+      img.src = avatarUrl; img.style.objectPosition = `center ${focusY}%`; img.style.opacity = '1'; fallback.style.display = 'none';
+    } else {
+      fallback.textContent = dnInitials(name); fallback.style.display = 'flex'; img.style.opacity = '0';
+    }
+    // Guardar en caché para próxima visita (solo URLs, no base64 que son muy grandes)
+    try {
+      const cacheableUrl = avatarUrl && !avatarUrl.startsWith('data:') ? avatarUrl : null;
+      localStorage.setItem(PROFILE_CACHE_KEY, JSON.stringify({ userId: user.id, avatarUrl: cacheableUrl, focusY, name, puesto }));
+    } catch(e) {}
+  }
+
+  function setHeaderEstado(estado){
+    const el = document.getElementById('hdrEstado');
+    if (estado === 'en_servicio') { el.classList.add('busy'); el.innerHTML = `<span class="dot"></span>En servicio`; }
+    else { el.classList.remove('busy'); el.innerHTML = `<span class="dot"></span>Libre`; }
+  }
+
+  // ---- Alertas (notificaciones) ----
+  let alertsCache = [];
+  async function loadAlerts(){
+    const { data } = await sb.from('alertas_barbero').select('id, tipo, mensaje, leida, created_at').eq('barbero_id', user.id).order('created_at', { ascending:false }).limit(20);
+    alertsCache = data || [];
+    const unread = alertsCache.filter(a => !a.leida).length;
+    const badge = document.getElementById('bellBadge');
+    badge.textContent = unread;
+    badge.style.display = unread ? 'flex' : 'none';
+  }
+  function openAlertsSheet(){
+    vibrate(8);
+    const list = document.getElementById('alertsList');
+    list.innerHTML = alertsCache.length ? alertsCache.map(a => {
+      const mins = Math.max(1, Math.round((Date.now() - new Date(a.created_at))/60000));
+      const timeLabel = mins < 60 ? `Hace ${mins} min` : `Hace ${Math.round(mins/60)} h`;
+      return `<div style="padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; gap:10px; align-items:flex-start;">
+        <div style="width:7px; height:7px; border-radius:50%; margin-top:5px; flex-shrink:0; background:${a.leida ? 'rgba(255,255,255,0.18)' : 'var(--gold)'};"></div>
+        <div style="flex:1;"><div style="font-size:12.5px; font-weight:600;">${a.mensaje}</div><div style="font-size:10.5px; color:rgba(255,255,255,0.36); margin-top:2px;">${timeLabel}</div></div>
+      </div>`;
+    }).join('') : '<div class="waiting-note">Sin notificaciones.</div>';
+    document.getElementById('alertsSheetBg').classList.add('show');
+    const unreadIds = alertsCache.filter(a => !a.leida).map(a => a.id);
+    if (unreadIds.length) {
+      sb.from('alertas_barbero').update({ leida:true }).in('id', unreadIds).then(() => loadAlerts());
+    }
+  }
+  function closeAlertsSheet(){ document.getElementById('alertsSheetBg').classList.remove('show'); }
+
+  function openAccountSheet(){
+    vibrate(8);
+    document.getElementById('accountSheetName').textContent = document.getElementById('hdrName').textContent + ' · ' + document.getElementById('hdrPuesto').textContent;
+    document.getElementById('accountSheetBg').classList.add('show');
+  }
+  function closeAccountSheet(){ document.getElementById('accountSheetBg').classList.remove('show'); }
+  function logoutBarbero(){
+    if (!confirm('¿Cerrar sesión?')) return;
+    dnClearSession();
+    window.location.href = '../auth.html';
+  }
+
+  function updateHeroDrinkChip(label){
+    const el = document.getElementById('heroDrinkVal');
+    if (el) el.textContent = label || 'Registrar';
+  }
+
+  // ---- Render de estados vacíos / de espera ----
+  function renderEmpty(title, sub){
+    clearInterval(timerInterval);
+    arrivalBanner.classList.remove('show');
+    setHeaderEstado('libre');
+    updateHeroDrinkChip(null);
+    stage.innerHTML = `
+      <div class="empty-state fade-in">
+        <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.6"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div>
+        <div class="empty-title">${title}</div>
+        <div class="empty-sub">${sub}</div>
+      </div>`;
+  }
+
+  function renderServicioCompletado(){
+    clearInterval(timerInterval);
+    arrivalBanner.classList.remove('show');
+    setHeaderEstado('libre');
+    updateHeroDrinkChip(null);
+    currentCita = null;
+    stage.innerHTML = `
+      <div class="empty-state fade-in">
+        <div class="empty-icon" style="background:rgba(52,211,153,0.15); border-color:rgba(52,211,153,0.3);">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.2"><path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9"/></svg>
+        </div>
+        <div class="empty-title" style="color:#34D399;">Servicio completado</div>
+        <div class="empty-sub">La orden fue enviada a caja.<br>Cargando siguiente cliente...</div>
+      </div>`;
+  }
+
+  function faltanLabel(cita){
+    const now = new Date();
+    const [h,m] = cita.hora_inicio.split(':').map(Number);
+    const target = new Date(now); target.setHours(h, m, 0, 0);
+    const diffMin = Math.round((target - now) / 60000);
+    return diffMin > 0 ? (diffMin < 60 ? `${diffMin} min` : `${Math.floor(diffMin/60)}h ${diffMin%60}m`) : 'En cualquier momento';
+  }
+
+  function renderProximo(cita){
+    clearInterval(timerInterval);
+    arrivalBanner.classList.remove('show');
+    setHeaderEstado('libre');
+    updateHeroDrinkChip(null);
+    const clientName = cita.usuarios?.full_name || cita.usuarios?.username || 'Cliente';
+    stage.innerHTML = `
+      <div class="stage" style="justify-content:center;">
+        <div class="empty-state fade-in" style="gap:12px;">
+          <div class="client-eyebrow">Próximo cliente</div>
+          <div class="client-name" style="font-size:23px; white-space:normal;">${clientName}</div>
+          <div class="client-service">${cita.servicios?.nombre || 'Servicio'}</div>
+          <div class="client-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${fmtTime(cita.hora_inicio)}</div>
+          <div style="width:32px; height:1px; background:rgba(255,255,255,0.1); margin:2px auto;"></div>
+          <div class="timer-label">Tiempo restante</div>
+          <div class="timer-value" style="font-size:27px;" id="proximoFaltanVal">${faltanLabel(cita)}</div>
+          <button class="btn-gold action-btn" style="max-width:280px; margin-top:10px;" id="callBtnProximo">Llamar cliente</button>
+        </div>
+      </div>`;
+    document.getElementById('callBtnProximo').addEventListener('click', () => { vibrate(15); llamarCliente(cita.id); });
+  }
+
+  function renderWaitingNote(title, sub){
+    clearInterval(timerInterval);
+    arrivalBanner.classList.remove('show');
+    setHeaderEstado('libre');
+    stage.innerHTML = `
+      <div class="stage" style="justify-content:center;">
+        <div class="empty-state fade-in">
+          <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="empty-title">${title}</div>
+          <div class="waiting-note">${sub}</div>
+        </div>
+      </div>`;
+  }
+
+  function renderLlegoBanner(cita){
+    clearInterval(timerInterval);
+    setHeaderEstado('libre');
+    const clientName = cita.usuarios?.full_name || cita.usuarios?.username || 'Cliente';
+    document.getElementById('arrivalTxt').textContent = 'Tu próximo cliente ya está esperando en recepción.';
+    arrivalBanner.classList.add('show');
+    stage.innerHTML = `
+      <div class="stage" style="justify-content:center;">
+        <div class="empty-state fade-in" style="gap:12px;">
+          <div class="client-eyebrow">Cliente en sala de espera</div>
+          <div class="client-name" style="font-size:23px; white-space:normal;">${clientName}</div>
+          <div class="client-service">${cita.servicios?.nombre || 'Servicio'}</div>
+          <div class="client-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${fmtTime(cita.hora_inicio)}</div>
+          <button class="btn-gold action-btn" style="max-width:280px; margin-top:10px;" id="callBtn">Llamar cliente</button>
+        </div>
+      </div>`;
+    document.getElementById('callBtn').addEventListener('click', () => { vibrate(15); llamarCliente(cita.id); });
+  }
+
+  // ---- Pasos del servicio ----
+  const STEP_DEFS = [
+    { key:'recibido', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M4.8 20c1.5-3.7 4.2-5.6 7.2-5.6s5.7 1.9 7.2 5.6" stroke-linecap="round"/></svg>', title:'Cliente recibido', short:'Recibido', desc:'Saluda y da la bienvenida' },
+    { key:'bebida', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12l-1.2 15.5A2 2 0 0 1 14.8 20H9.2a2 2 0 0 1-2-1.5L6 3Z" stroke-linejoin="round"/><path d="M5 8h14" stroke-linecap="round"/></svg>', title:'Bebida', short:'Bebida', desc:'Ofrece la bebida de su elección' },
+    { key:'corte', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.3"/><circle cx="6" cy="18" r="2.3"/><path d="M7.8 7.4 20 18M7.8 16.6 20 6" stroke-linecap="round"/></svg>', title:'Corte en proceso', short:'Corte', desc:'Realiza el corte solicitado' },
+    { key:'lavado', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v2M12 8v2M8 5v2M16 5v2M6 10c0 3.3 2.7 6 6 6s6-2.7 6-6" stroke-linecap="round"/><path d="M9 19c0-1.7 1.3-3 3-3s3 1.3 3 3v2H9v-2z" stroke-linejoin="round"/></svg>', title:'Lavado de cabeza', short:'Lavado', desc:'Lava el cabello del cliente' },
+    { key:'masaje', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v3.2M12 17.8V21M4.4 7.4l2.2 1.7M17.4 14.9l2.2 1.7M3 14l2.8-1M18.2 11l2.8-1M4.4 16.6l2.2-1.7M17.4 9.1l2.2-1.7" stroke-linecap="round"/><circle cx="12" cy="12" r="3"/></svg>', title:'Masaje', short:'Masaje', desc:'Finaliza con el masaje' },
+  ];
+
+  function nextStepLabel(pasos){
+    const idx = STEP_DEFS.findIndex(s => !pasos?.[s.key]);
+    return idx === -1 ? null : STEP_DEFS[idx].title;
+  }
+
+  function renderSteps(pasos){
+    const firstPendingIdx = STEP_DEFS.findIndex(s => !pasos?.[s.key]);
+    return `<div class="steps-grid">` + STEP_DEFS.map((s, i) => {
+      const done = !!pasos?.[s.key];
+      const isActive = !done && i === firstPendingIdx;
+      const cls = done ? 'done' : (isActive ? 'active' : 'pending');
+      const badge = done
+        ? `<span class="step-tile-check"><svg viewBox="0 0 24 24" fill="none" stroke="#0e0e0e" stroke-width="4"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`
+        : '';
+      // Mostrar qué bebida eligió el cliente cuando el paso está completado
+      let labelText = s.short;
+      if (s.key === 'bebida' && done && currentCita?.bebida_tipo) {
+        labelText = currentCita.bebida_tipo;
+      }
+      return `
+        <div class="step-tile ${cls}" ${isActive ? `onclick="completarPaso('${s.key}')"` : ''}>
+          <div class="step-tile-icon">${s.icon}${badge}</div>
+          <div class="step-tile-label">${labelText}</div>
+        </div>`;
+    }).join('') + `</div>`;
+  }
+
+  async function completarPaso(key){
+    if (!currentCita) return;
+    if (key === 'bebida') { openBebidaSheet('cliente'); return; }
+    vibrate(25);
+    const pasos = { ...(currentCita.pasos_servicio || {}) };
+    pasos[key] = new Date().toISOString();
+    try {
+      const { error } = await sb.from('citas').update({ pasos_servicio: pasos }).eq('id', currentCita.id);
+      if (error) throw error;
+      currentCita.pasos_servicio = pasos;
+      lastRenderSig = citaSig(currentCita, 'en_servicio');
+      document.getElementById('stepsList').innerHTML = renderSteps(pasos);
+      updateNextStepPill(pasos);
+      refreshSwipeContainer();
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos guardar ese paso.');
+    }
+  }
+
+  // ---- Bebidas: selector para el cliente (paso del servicio) y para el barbero (control de inventario) ----
+  const DRINK_OPTIONS = [
+    { key:'agua', label:'Agua', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3s6 6.5 6 11a6 6 0 1 1-12 0c0-4.5 6-11 6-11Z" stroke-linejoin="round"/></svg>', match:['Agua'] },
+    { key:'cocacola', label:'Coca-Cola', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12l-1.2 15.5A2 2 0 0 1 14.8 20H9.2a2 2 0 0 1-2-1.5L6 3Z" stroke-linejoin="round"/><path d="M5 8h14M15.5 3 17 1" stroke-linecap="round"/></svg>', match:['Coca-Cola','Gaseosa'] },
+    { key:'jugo', label:'Jugo de caja', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="6" width="12" height="15" rx="1.6"/><path d="M12 2v4M9.5 2h5" stroke-linecap="round"/></svg>', match:['Jugo de caja','Jugo'] },
+  ];
+  const NO_DRINK_OPTION = { key:'ninguna', label:'No toma bebida', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12" stroke-linecap="round"/></svg>', match:[] };
+  let bebidaMode = null;
+
+  function openBebidaSheet(mode){
+    vibrate(8);
+    bebidaMode = mode;
+    document.getElementById('bebidaSheetTitle').textContent = mode === 'barbero' ? 'Tu bebida' : 'Bebida para el cliente';
+    document.getElementById('bebidaSheetSub').textContent = mode === 'barbero'
+      ? 'Se descuenta del inventario y de tu pago al finalizar el turno.'
+      : 'Se registra en la cita y se descuenta del inventario.';
+    const opciones = mode === 'cliente' ? [...DRINK_OPTIONS, NO_DRINK_OPTION] : DRINK_OPTIONS;
+    document.getElementById('bebidaOptionsList').innerHTML = opciones.map(d =>
+      `<div class="bebida-opt" onclick="selectBebida('${d.key}')"><span class="ic">${d.icon}</span><span>${d.label}</span></div>`
+    ).join('');
+    document.getElementById('bebidaSheetBg').classList.add('show');
+  }
+  function closeBebidaSheet(){ document.getElementById('bebidaSheetBg').classList.remove('show'); bebidaMode = null; }
+
+  // ---- Insumos: solicitud desde el barbero hacia recepción/admin ----
+  let myBarberoSedeId = null;
+  let insumosCatalogo = [];
+
+  async function getMyBarberoSedeId(){
+    if (myBarberoSedeId) return myBarberoSedeId;
+    const { data: b } = await sb.from('barberos').select('sucursal_id').eq('id', user.id).maybeSingle();
+    myBarberoSedeId = b?.sucursal_id || null;
+    return myBarberoSedeId;
+  }
+
+  async function openInsumosSheet(){
+    document.getElementById('insumosSheetBg').classList.add('show');
+    const list = document.getElementById('insumosOptionsList');
+    list.innerHTML = '<div style="padding:14px 0; color:rgba(255,255,255,0.5); font-size:13px;">Cargando…</div>';
+    try {
+      await getMyBarberoSedeId();
+      const { data, error } = await sb.from('inventario_insumos').select('*').eq('activo', true).order('orden');
+      if (error) throw error;
+      insumosCatalogo = data || [];
+      if (!insumosCatalogo.length) {
+        list.innerHTML = '<div style="padding:14px 0; color:rgba(255,255,255,0.5); font-size:13px;">Todavía no hay insumos disponibles para solicitar.</div>';
+        return;
+      }
+      list.innerHTML = insumosCatalogo.map(i => {
+        const icon = i.foto_url ? `<img src="${i.foto_url}" style="width:100%; height:100%; object-fit:cover; border-radius:7px;">` : (i.icono || '🧴');
+        return `<div class="bebida-opt" onclick="solicitarInsumo('${i.id}')"><span class="ic">${icon}</span><span>${i.nombre}</span></div>`;
+      }).join('');
+    } catch (err) {
+      console.error(err);
+      list.innerHTML = '<div style="padding:14px 0; color:rgba(255,255,255,0.5); font-size:13px;">No pudimos cargar los insumos.</div>';
+    }
+  }
+  function closeInsumosSheet(){ document.getElementById('insumosSheetBg').classList.remove('show'); }
+
+  async function solicitarInsumo(insumoId){
+    const item = insumosCatalogo.find(i => i.id === insumoId);
+    if (!item) return;
+    closeInsumosSheet();
+    try {
+      const sedeId = await getMyBarberoSedeId();
+      const { error } = await sb.from('solicitudes_insumos').insert({
+        barbero_id: user.id, insumo_id: item.id, insumo_nombre: item.nombre, cantidad: 1, sucursal_id: sedeId
+      });
+      if (error) throw error;
+      toast(`Solicitaste ${item.nombre}. Recepción ya lo sabe.`);
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos enviar tu solicitud.');
+    }
+  }
+
+  async function decrementInventarioBebida(opt){
+    try {
+      const { data } = await sb.from('bebidas_inventario').select('id, nombre, cantidad, precio');
+      const row = (data || []).find(r => opt.match.some(m => (r.nombre || '').toLowerCase() === m.toLowerCase()));
+      if (row && row.cantidad > 0) {
+        await sb.from('bebidas_inventario').update({ cantidad: row.cantidad - 1 }).eq('id', row.id);
+      }
+      return row || null;
+    } catch (err) { console.error(err); return null; }
+  }
+
+  async function selectBebida(key){
+    const opt = key === 'ninguna' ? NO_DRINK_OPTION : DRINK_OPTIONS.find(d => d.key === key);
+    if (!opt) return;
+    vibrate(15);
+    const mode = bebidaMode;
+    closeBebidaSheet();
+
+    if (key === 'ninguna') {
+      if (!currentCita) return;
+      const pasos = { ...(currentCita.pasos_servicio || {}) };
+      pasos.bebida = new Date().toISOString();
+      try {
+        const { error } = await sb.from('citas').update({
+          pasos_servicio: pasos, bebida_entregada: false, bebida_entregada_at: new Date().toISOString(), bebida_tipo: 'No quiso bebida'
+        }).eq('id', currentCita.id);
+        if (error) throw error;
+        currentCita.pasos_servicio = pasos;
+        currentCita.bebida_tipo = 'No quiso bebida';
+        lastRenderSig = citaSig(currentCita, 'en_servicio');
+        document.getElementById('stepsList').innerHTML = renderSteps(pasos);
+        updateNextStepPill(pasos);
+        refreshSwipeContainer();
+        toast('Listo, no se descuenta nada de la nevera.');
+      } catch (err) {
+        console.error(err);
+        toast('No pudimos registrar el paso.');
+      }
+      return;
+    }
+
+    const bebidaRow = await decrementInventarioBebida(opt);
+
+    if (mode === 'barbero') {
+      const precio = Number(bebidaRow?.precio) || 0;
+      try {
+        const sedeId = await getMyBarberoSedeId();
+        await sb.from('consumos_bebidas_barbero').insert({
+          barbero_id: user.id, bebida_id: bebidaRow?.id || null, bebida_nombre: opt.label, precio, sucursal_id: sedeId
+        });
+      } catch (err) { console.error(err); }
+      toast(precio > 0 ? `${opt.label} registrada · se descuenta ${dnFormatCOP(precio)} de tu pago.` : `${opt.label} registrada.`);
+      return;
+    }
+
+    if (!currentCita) return;
+    const pasos = { ...(currentCita.pasos_servicio || {}) };
+    pasos.bebida = new Date().toISOString();
+    try {
+      const { error } = await sb.from('citas').update({
+        pasos_servicio: pasos, bebida_entregada: true, bebida_entregada_at: new Date().toISOString(), bebida_tipo: opt.label
+      }).eq('id', currentCita.id);
+      if (error) throw error;
+      currentCita.pasos_servicio = pasos;
+      currentCita.bebida_tipo = opt.label;
+      lastRenderSig = citaSig(currentCita, 'en_servicio');
+      document.getElementById('stepsList').innerHTML = renderSteps(pasos);
+      updateNextStepPill(pasos);
+      refreshSwipeContainer();
+      toast(`${opt.label} entregada al cliente.`);
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos registrar la bebida.');
+    }
+  }
+
+  function updateNextStepPill(pasos){
+    const el = document.getElementById('nextStepPill');
+    if (!el) return;
+    const label = nextStepLabel(pasos);
+    el.innerHTML = label
+      ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 1 0-16 0" stroke-linecap="round"/><circle cx="12" cy="8" r="4.2"/></svg>Próximo paso: <b>${label}</b>`
+      : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><b>Todos los pasos listos</b>`;
+  }
+
+  // ---- Timer circular ----
+  const RING_R = 40;
+  const RING_C = 2 * Math.PI * RING_R;
+  const SEG_COUNT = 10;
+  function updateRing(fracDone, overtime, remainingSec){
+    const fg = document.getElementById('ringFg');
+    const val = document.getElementById('timerValue');
+    const pctEl = document.getElementById('ringPct');
+    const seg = document.getElementById('timeSegbar');
+    if (!fg || !val) return;
+    let color = 'var(--ring-green)', segClass = '';
+    if (overtime) { color = 'var(--ring-red)'; segClass = 'red'; }
+    else if (remainingSec <= 300) { color = 'var(--ring-gold)'; segClass = 'gold'; }
+    fg.style.stroke = color;
+    val.style.color = color;
+    // Limitar el progreso entre 0% y 100%
+    const clamped = Math.max(0, Math.min(1, fracDone));
+    fg.style.strokeDashoffset = RING_C * (1 - clamped);
+    // Mostrar porcentaje (máximo 100%)
+    const pctValue = Math.min(100, Math.round(clamped * 100));
+    if (pctEl) pctEl.textContent = pctValue + '%';
+    if (seg) {
+      const filledCount = Math.min(SEG_COUNT, Math.round(clamped * SEG_COUNT));
+      seg.innerHTML = Array.from({ length: SEG_COUNT }, (_, i) =>
+        `<div class="time-seg ${i < filledCount ? 'filled ' + segClass : ''}"></div>`).join('');
+    }
+  }
+
+  let currentDurSec = 3600;
+  function startTimer(cita){
+    clearInterval(timerInterval);
+    const start = new Date(cita.inicio_servicio_at).getTime();
+    const durMin = cita.servicios?.duracion_min || 60;
+    currentDurSec = durMin * 60;
+    function tick(){
+      const elapsed = Math.max(0, Math.floor((Date.now() - start) / 1000));
+      const remaining = currentDurSec - elapsed;
+      const overtime = remaining < 0;
+      const abs = Math.abs(remaining);
+      const mm = String(Math.floor(abs/60)).padStart(2,'0');
+      const ss = String(abs%60).padStart(2,'0');
+      const val = document.getElementById('timerValue');
+      const label = document.getElementById('timerLabel');
+      const ringLabel = document.getElementById('ringLabel');
+      if (val) val.textContent = (overtime ? '+' : '') + `${mm}:${ss}`;
+      if (label) label.textContent = overtime ? 'Tiempo excedido' : 'Tiempo restante';
+      if (ringLabel) ringLabel.textContent = overtime ? 'excedido' : 'completado';
+      updateRing(elapsed / currentDurSec, overtime, remaining);
+    }
+    tick();
+    timerInterval = setInterval(tick, 1000);
+  }
+
+  // ---- Ítems adicionales / total de la orden ----
+  let currentItems = [];
+  function calcTotal(cita){
+    const base = Number(cita?.precio) || 0;
+    const extras = currentItems.reduce((a,i) => a + (Number(i.precio)||0), 0);
+    return base + extras;
+  }
+  function totalServiciosCount(){
+    const baseCount = (currentCita && Number(currentCita.precio) > 0) ? 1 : 0;
+    return baseCount + currentItems.length;
+  }
+
+  // ---- Render principal: en servicio ----
+  let currentCita = null;
+
+  function renderEnServicio(cita){
+    arrivalBanner.classList.remove('show');
+    setHeaderEstado('en_servicio');
+    const clientName = cita.usuarios?.full_name || cita.usuarios?.username || 'Cliente';
+    const durMin = cita.servicios?.duracion_min || 60;
+    const horaFinEstim = addMinutes(cita.hora_inicio, durMin);
+    const nextLabel = nextStepLabel(cita.pasos_servicio);
+
+    const servicioFoto = cita.servicios?.foto_url || '';
+    stage.innerHTML = `
+      <div class="glass-card client-card fade-in">
+        <div class="client-card-inner">
+          <div class="client-card-info">
+            <div class="client-eyebrow-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              <span class="client-eyebrow">Cita actual</span>
+            </div>
+            <div class="client-name">${clientName}</div>
+            <div class="client-service">${cita.servicios?.nombre || 'Servicio'}</div>
+          </div>
+          ${servicioFoto ? `<img src="${servicioFoto}" class="client-service-photo" alt="Servicio">` : ''}
+        </div>
+      </div>
+
+      <div class="glass-card time-card fade-in">
+        <div class="time-card-label" id="timerLabel">Tiempo restante</div>
+        <div class="time-card-row">
+          <div class="time-main">
+            <div class="time-value-lg"><span id="timerValue">00:00</span><span class="unit">min</span></div>
+            <div class="time-segbar" id="timeSegbar"></div>
+          </div>
+          <div class="time-ring-wrap">
+            <svg width="70" height="70" viewBox="0 0 92 92">
+              <circle class="time-ring time-ring-bg" cx="46" cy="46" r="${RING_R}" fill="none" stroke-width="7"></circle>
+              <circle class="time-ring time-ring-fg" id="ringFg" cx="46" cy="46" r="${RING_R}" fill="none" stroke-width="7"
+                stroke-dasharray="${RING_C}" stroke-dashoffset="${RING_C}"></circle>
+            </svg>
+            <div class="time-ring-center">
+              <div class="time-ring-pct" id="ringPct">0%</div>
+              <div class="time-ring-label" id="ringLabel">completado</div>
+            </div>
+          </div>
+        </div>
+        <div class="time-next-row" id="nextStepPill">
+          ${nextLabel
+            ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21a8 8 0 1 0-16 0" stroke-linecap="round"/><circle cx="12" cy="8" r="4.2"/></svg>Próximo paso: <b>${nextLabel}</b>`
+            : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg><b>Todos los pasos listos</b>`}
+        </div>
+      </div>
+
+      <div class="glass-card steps-card" id="stepsCard">
+        <div class="steps-card-label">Proceso del servicio</div>
+        <div id="stepsList">${renderSteps(cita.pasos_servicio)}</div>
+      </div>
+
+      <div class="total-row">
+        <div class="glass-card total-card" onclick="openOrderSheet()">
+          <div class="total-label">Total actual</div>
+          <div class="total-value" id="timerTotalValue">${dnFormatCOP(calcTotal(cita))}</div>
+          <div class="total-badge" id="totalBadge">${totalServiciosCount()} servicio${totalServiciosCount()===1?'':'s'}</div>
+        </div>
+        <div class="add-service-btn" onclick="openAddSheet()">
+          <span class="plus-circle"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.4"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></span>
+          <span>Agregar</span>
+        </div>
+      </div>
+
+      <div id="swipeContainer">${nextLabel ? swipePendingHtml() : swipeTrackHtml()}</div>
+    `;
+
+    startTimer(cita);
+    if (!nextLabel) setupSwipe(cita);
+  }
+
+  function swipeTrackHtml(){
+    return `
+      <div class="swipe-track" id="swipeTrack">
+        <div class="swipe-shimmer"></div>
+        <div class="swipe-fill" id="swipeFill"></div>
+        <div class="swipe-label"><div class="t">DESLIZA PARA ENVIAR A CAJA</div><div class="s">Se enviará la orden de cobro a recepción</div></div>
+        <div class="swipe-icon-hint"><svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="2"><path d="M7 6l5 6-5 6M13 6l5 6-5 6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="swipe-handle" id="swipeHandle"><svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2.4"><path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>`;
+  }
+
+  function swipePendingHtml(){
+    return `
+      <div class="swipe-pending">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9"/></svg>
+        <div class="swipe-pending-txt">Completa <b>todos los pasos del servicio</b> para poder enviar la orden a caja.</div>
+      </div>`;
+  }
+
+  // Refresca el contenedor del deslizador cuando cambia el estado de los pasos, sin re-renderizar toda la pantalla
+  function refreshSwipeContainer(){
+    if (!currentCita) return;
+    const container = document.getElementById('swipeContainer');
+    if (!container) return;
+    const allDone = !nextStepLabel(currentCita.pasos_servicio);
+    const hasTrack = !!document.getElementById('swipeTrack');
+    if (allDone && !hasTrack) {
+      container.innerHTML = swipeTrackHtml();
+      setupSwipe(currentCita);
+    } else if (!allDone && hasTrack) {
+      container.innerHTML = swipePendingHtml();
+    }
+  }
+
+  async function loadItemsAndRender(cita){
+    const { data } = await sb.from('cita_items_adicionales').select('*').eq('cita_id', cita.id).order('created_at');
+    currentItems = data || [];
+    renderEnServicio(cita);
+  }
+
+  // ---- Swipe to send (sin foto: al completar, envía directo a caja) ----
+  let swipeActive = false;
+  function setupSwipe(cita){
+    const track = document.getElementById('swipeTrack');
+    const handle = document.getElementById('swipeHandle');
+    const fill = document.getElementById('swipeFill');
+    if (!track || !handle) return;
+
+    let dragging = false, startX = 0, maxX = 0, currentX = 0, hapticFired = false;
+
+    function bounds(){ maxX = track.clientWidth - handle.clientWidth - 8; }
+    bounds();
+
+    function startDrag(e, el){
+      e.preventDefault();
+      dragging = true;
+      swipeActive = true;
+      startX = e.clientX - currentX;
+      hapticFired = false;
+      handle.classList.add('dragging');
+      el.setPointerCapture(e.pointerId);
+      vibrate(8);
+    }
+
+    function moveDrag(e){
+      if (!dragging) return;
+      e.preventDefault();
+      bounds();
+      currentX = Math.max(0, Math.min(maxX, e.clientX - startX));
+      handle.style.left = (4 + currentX) + 'px';
+      if (fill) fill.style.width = (currentX + handle.clientWidth) + 'px';
+      if (!hapticFired && currentX >= maxX * 0.82) { hapticFired = true; vibrate(12); }
+    }
+
+    async function onRelease(e){
+      if (!dragging) return;
+      dragging = false; swipeActive = false;
+      handle.classList.remove('dragging');
+      bounds();
+      if (currentX >= maxX * 0.82) {
+        currentX = maxX;
+        handle.style.left = (4 + maxX) + 'px';
+        track.classList.add('done');
+        track.classList.add('disabled');
+        vibrate([40,30,60]);
+        finalizarServicio(cita);
+      } else {
+        currentX = 0;
+        handle.style.left = '4px';
+        if (fill) fill.style.width = '58px';
+      }
+    }
+
+    // Escuchar en handle
+    handle.addEventListener('pointerdown', (e) => startDrag(e, handle));
+    handle.addEventListener('pointermove', moveDrag);
+    handle.addEventListener('pointerup', onRelease);
+    handle.addEventListener('pointercancel', onRelease);
+
+    // También escuchar en track para facilitar el uso
+    track.addEventListener('pointerdown', (e) => {
+      if (e.target === handle) return; // Ya manejado por handle
+      startDrag(e, track);
+    });
+    track.addEventListener('pointermove', moveDrag);
+    track.addEventListener('pointerup', onRelease);
+    track.addEventListener('pointercancel', onRelease);
+  }
+  function resetSwipe(){
+    const track = document.getElementById('swipeTrack');
+    const handle = document.getElementById('swipeHandle');
+    const fill = document.getElementById('swipeFill');
+    if (track) { track.classList.remove('done'); track.classList.remove('disabled'); }
+    if (handle) handle.style.left = '4px';
+    if (fill) fill.style.width = '58px';
+  }
+
+  // ---- Finalizar servicio: envía a caja directo, SIN pedir fotografía ----
+  // Variable para prevenir doble finalización
+  let finalizandoServicio = false;
+
+  async function finalizarServicio(cita){
+    // Prevenir doble clic o múltiples ejecuciones
+    if (finalizandoServicio) {
+      console.log('[finalizarServicio] Ya hay una operación en curso, ignorando');
+      return;
+    }
+
+    // Verificar que la cita existe y está en un estado que permite finalización
+    if (!cita || !cita.id) {
+      toast('Error: No hay cita activa');
+      resetSwipe();
+      return;
+    }
+
+    // Verificar que el estado permite finalización (idempotencia)
+    const estadoActual = cita.estado;
+    if (estadoActual === 'pendiente_pago' || estadoActual === 'finalizada') {
+      // Ya está finalizada, mostrar éxito sin hacer nada
+      document.getElementById('sendConfirm').classList.add('show');
+      setTimeout(() => {
+        document.getElementById('sendConfirm').classList.remove('show');
+        resetSwipe();
+        loadCurrentClient();
+      }, 1500);
+      return;
+    }
+
+    // Validar transición usando el módulo centralizado
+    if (typeof validarTransicion === 'function') {
+      const validacion = validarTransicion(estadoActual, 'pendiente_pago');
+      if (!validacion.permitido) {
+        toast(`No se puede finalizar desde estado: ${estadoActual}`);
+        resetSwipe();
+        return;
+      }
+    }
+
+    finalizandoServicio = true;
+
+    try {
+      const { data: barberoRow } = await sb.from('barberos').select('comision_pct').eq('id', user.id).maybeSingle();
+      const total = calcTotal(cita);
+      const comision = barberoRow?.comision_pct ? total * (Number(barberoRow.comision_pct)/100) : null;
+
+      const ahora = new Date().toISOString();
+      console.log('[finalizarServicio] Intentando actualizar cita:', cita.id, 'estado actual:', cita.estado);
+
+      // Actualizar con control de concurrencia:
+      // Solo actualizar si el estado actual es el esperado (evita race conditions)
+      const { data, error } = await sb.from('citas').update({
+        estado: 'pendiente_pago',
+        fin_servicio_at: ahora,
+        comision_calculada: comision,
+        precio: total
+      })
+      .eq('id', cita.id)
+      .in('estado', ['en_servicio', 'sala_espera', 'confirmada']) // Solo si está en estados válidos
+      .select();
+
+      if (error) {
+        console.error('[finalizarServicio] Error en update:', error);
+        throw error;
+      }
+      console.log('[finalizarServicio] Resultado update:', data);
+
+      // Verificar si la actualización tuvo efecto
+      if (!data || data.length === 0) {
+        // La cita ya fue modificada por otro proceso - verificar estado actual
+        const { data: citaActual } = await sb.from('citas').select('estado').eq('id', cita.id).single();
+        console.log('[finalizarServicio] Estado actual de la cita:', citaActual?.estado);
+
+        if (citaActual?.estado === 'pendiente_pago' || citaActual?.estado === 'finalizada') {
+          // Ya está procesada, mostrar éxito
+          citasFinalizadasHoy.add(cita.id);
+          saveSetToStorage(citasFinalizadasKey, citasFinalizadasHoy);
+          fijarCita(null); // Limpiar cita fijada para permitir siguiente cliente
+          document.getElementById('sendConfirm').classList.add('show');
+          setTimeout(() => {
+            document.getElementById('sendConfirm').classList.remove('show');
+            resetSwipe();
+            renderServicioCompletado();
+            setTimeout(() => loadCurrentClient(), 2500);
+          }, 1500);
+        } else {
+          toast('No se pudo enviar. Estado: ' + (citaActual?.estado || 'desconocido'));
+          resetSwipe();
+          loadCurrentClient();
+        }
+        return;
+      }
+
+      // Marcar cita como finalizada para evitar que reaparezca
+      citasFinalizadasHoy.add(cita.id);
+      saveSetToStorage(citasFinalizadasKey, citasFinalizadasHoy);
+      fijarCita(null); // Limpiar cita fijada para permitir siguiente cliente
+
+      document.getElementById('sendConfirm').classList.add('show');
+      vibrate([50,40,50,40,80]);
+
+      setTimeout(() => {
+        document.getElementById('sendConfirm').classList.remove('show');
+        resetSwipe();
+        // Mostrar estado de completado antes de cargar siguiente cita
+        renderServicioCompletado();
+        setTimeout(() => loadCurrentClient(), 2500);
+      }, 1500);
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos enviar la orden. Intenta de nuevo.');
+      resetSwipe();
+    } finally {
+      finalizandoServicio = false;
+    }
+  }
+
+  // ---- Transiciones de estado reales (sin cambios de lógica de fondo) ----
+  let iniciandoServicio = false;
+
+  async function llamarCliente(citaId){
+    // Prevenir doble clic
+    if (iniciandoServicio) return;
+    iniciandoServicio = true;
+
+    // Marcar como llamada INMEDIATAMENTE para evitar race condition con realtime/polling
+    citasLlamadasHoy.add(citaId);
+    saveSetToStorage(citasLlamadasKey, citasLlamadasHoy);
+
+    try {
+      const ahora = new Date().toISOString();
+      const { data, error } = await sb.from('citas').update({
+        estado: 'en_servicio',
+        inicio_servicio_at: ahora
+      })
+      .eq('id', citaId)
+      .in('estado', ['confirmada', 'sala_espera']) // Solo si está en estados válidos para iniciar
+      .select();
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        toast('Servicio iniciado');
+      } else {
+        // El update no tuvo efecto - verificar el estado actual
+        const { data: citaActual } = await sb.from('citas').select('estado').eq('id', citaId).single();
+        if (citaActual?.estado === 'en_servicio') {
+          // Ya estaba en servicio, todo bien
+          console.log('[llamarCliente] La cita ya estaba en en_servicio');
+        } else {
+          console.log('[llamarCliente] La cita cambió a otro estado:', citaActual?.estado);
+        }
+      }
+      loadCurrentClient();
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos actualizar la cita.');
+      // Remover del Set si falló
+      citasLlamadasHoy.delete(citaId);
+      saveSetToStorage(citasLlamadasKey, citasLlamadasHoy);
+    } finally {
+      iniciandoServicio = false;
+    }
+  }
+
+  // ---- Sheet: Agregar servicio ----
+  // Categorías de servicios
+  const SERVICIOS_CATS = [
+    { key:'cortes', icon:'✂️', label:'Cortes' },
+    { key:'barbas', icon:'🧔', label:'Barbas' },
+    { key:'mascarillas', icon:'🧖', label:'Mascarillas' },
+    { key:'faciales', icon:'✨', label:'Faciales' },
+    { key:'cejas', icon:'👁', label:'Cejas' },
+    { key:'disenos', icon:'🎨', label:'Diseños' },
+    { key:'otro_servicio', icon:'➕', label:'Otro' },
+  ];
+  // Categorías de productos
+  const PRODUCTOS_CATS = [
+    { key:'ceras', icon:'🫙', label:'Ceras' },
+    { key:'shampoos', icon:'🧴', label:'Shampoos' },
+    { key:'aceites', icon:'💧', label:'Aceites' },
+    { key:'otro_producto', icon:'➕', label:'Otro' },
+  ];
+
+  let allServiciosCache = null;
+  let allProductosCache = null;
+  let addSheetLevel = 'type'; // 'type' | 'categories' | 'items'
+  let addSheetType = null; // 'servicios' | 'productos'
+  let addSheetCategory = null;
+
+  async function openAddSheet(){
+    vibrate(8);
+    // Cargar servicios si no están en cache
+    if (!allServiciosCache) {
+      const { data } = await sb.from('servicios').select('id, nombre, precio, categoria_id').eq('activo', true);
+      allServiciosCache = data || [];
+    }
+    // Cargar productos si no están en cache
+    if (!allProductosCache) {
+      const { data } = await sb.from('inventario_productos_venta').select('id, nombre, precio, cantidad, categoria').eq('activo', true).gt('cantidad', 0);
+      allProductosCache = data || [];
+    }
+    addSheetLevel = 'type';
+    addSheetType = null;
+    addSheetCategory = null;
+    renderAddSheetContent();
+    renderAddedList();
+    document.getElementById('addSheetBg').classList.add('show');
+  }
+  function closeAddSheet(){ document.getElementById('addSheetBg').classList.remove('show'); }
+
+  function renderAddSheetContent(){
+    const content = document.getElementById('addSheetContent');
+    const title = document.getElementById('addSheetTitle');
+    const sub = document.getElementById('addSheetSub');
+
+    if (addSheetLevel === 'type') {
+      title.textContent = 'Agregar a la orden';
+      sub.textContent = '¿Qué deseas agregar?';
+      content.innerHTML = `
+        <div class="type-selector">
+          <div class="type-card" onclick="selectAddType('servicios')">
+            <span class="type-icon">✂️</span>
+            <span class="type-label">Servicios</span>
+          </div>
+          <div class="type-card" onclick="selectAddType('productos')">
+            <span class="type-icon">🧴</span>
+            <span class="type-label">Productos</span>
+          </div>
+        </div>`;
+    } else if (addSheetLevel === 'categories') {
+      const cats = addSheetType === 'servicios' ? SERVICIOS_CATS : PRODUCTOS_CATS;
+      title.textContent = addSheetType === 'servicios' ? 'Servicios' : 'Productos';
+      sub.textContent = 'Selecciona una categoría';
+      content.innerHTML = `
+        <div class="add-back-btn" onclick="goBackAddSheet()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Volver
+        </div>
+        <div class="cat-grid">${cats.map(c =>
+          `<div class="cat-chip" onclick="selectAddCategory('${c.key}')"><span class="ic">${c.icon}</span><span class="t">${c.label}</span></div>`
+        ).join('')}</div>`;
+    } else if (addSheetLevel === 'items') {
+      const catObj = (addSheetType === 'servicios' ? SERVICIOS_CATS : PRODUCTOS_CATS).find(c => c.key === addSheetCategory);
+      title.textContent = catObj?.label || 'Items';
+      sub.textContent = 'Selecciona para agregar';
+
+      // Si es "otro", mostrar formulario manual
+      if (addSheetCategory === 'otro_servicio' || addSheetCategory === 'otro_producto') {
+        const placeholder = addSheetCategory === 'otro_producto' ? 'Nombre del producto' : 'Nombre del servicio';
+        content.innerHTML = `
+          <div class="add-back-btn" onclick="goBackToCategories()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Volver
+          </div>
+          <div class="manual-form">
+            <input type="text" id="manualNombre" placeholder="${placeholder}">
+            <input type="number" id="manualPrecio" placeholder="Precio (COP)">
+            <button class="btn-gold" style="height:48px; border-radius:16px; font-weight:700;" onclick="agregarManual('${catObj?.label || 'Otro'}')">Agregar</button>
+          </div>`;
+        return;
+      }
+
+      // Filtrar items según categoría
+      let items = [];
+      if (addSheetType === 'servicios') {
+        items = filterServiciosByCategory(addSheetCategory);
+      } else {
+        items = filterProductosByCategory(addSheetCategory);
+      }
+
+      const tipoCategoria = addSheetType === 'servicios' ? 'Servicio' : 'Producto';
+      content.innerHTML = `
+        <div class="add-back-btn" onclick="goBackToCategories()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Volver
+        </div>
+        <div class="variant-list" id="itemsList">${items.length ? items.map((item, idx) =>
+          `<div class="variant-row" data-idx="${idx}">
+            <span class="n">${item.nombre}</span>
+            <span class="p">${dnFormatCOP(item.precio)}</span>
+          </div>`
+        ).join('') : '<div style="padding:16px; text-align:center; color:rgba(255,255,255,0.5); font-size:13px;">No hay items disponibles</div>'}</div>`;
+
+      // Agregar event listeners
+      document.querySelectorAll('#itemsList .variant-row').forEach(row => {
+        row.addEventListener('click', () => {
+          const idx = parseInt(row.dataset.idx);
+          const item = items[idx];
+          if (item) agregarItem(item.nombre, item.precio, tipoCategoria);
+        });
+      });
+    }
+  }
+
+  function filterServiciosByCategory(catKey){
+    // Mapeo de categorías a palabras clave en nombres de servicios
+    const mapping = {
+      'cortes': ['corte', 'haircut', 'fade', 'taper'],
+      'barbas': ['barba', 'beard', 'bigote'],
+      'mascarillas': ['mascarilla', 'exfolia', 'puntos negros'],
+      'faciales': ['facial', 'limpieza'],
+      'cejas': ['ceja', 'eyebrow'],
+      'disenos': ['diseño', 'design', 'línea', 'figura'],
+    };
+    const keywords = mapping[catKey] || [];
+    return allServiciosCache.filter(s => {
+      const nombre = s.nombre.toLowerCase();
+      return keywords.some(k => nombre.includes(k.toLowerCase()));
+    });
+  }
+
+  function filterProductosByCategory(catKey){
+    // Mapeo de categorías a palabras clave en nombres/categoría de productos
+    const mapping = {
+      'ceras': ['cera', 'wax', 'pomada', 'clay'],
+      'shampoos': ['shampoo', 'champú', 'champu', 'jabon', 'jabón'],
+      'aceites': ['aceite', 'oil', 'serum', 'tónico', 'tonico'],
+    };
+    const keywords = mapping[catKey] || [];
+    return allProductosCache.filter(p => {
+      const nombre = (p.nombre || '').toLowerCase();
+      const cat = (p.categoria || '').toLowerCase();
+      return keywords.some(k => nombre.includes(k.toLowerCase()) || cat.includes(k.toLowerCase()));
+    });
+  }
+
+  function selectAddType(type){
+    vibrate(6);
+    addSheetType = type;
+    addSheetLevel = 'categories';
+    renderAddSheetContent();
+  }
+
+  function selectAddCategory(catKey){
+    vibrate(6);
+    addSheetCategory = catKey;
+    addSheetLevel = 'items';
+    renderAddSheetContent();
+  }
+
+  function goBackAddSheet(){
+    vibrate(4);
+    addSheetLevel = 'type';
+    addSheetType = null;
+    addSheetCategory = null;
+    renderAddSheetContent();
+  }
+
+  function goBackToCategories(){
+    vibrate(4);
+    addSheetLevel = 'categories';
+    addSheetCategory = null;
+    renderAddSheetContent();
+  }
+
+  function agregarManual(categoria){
+    const nombre = document.getElementById('manualNombre').value.trim();
+    const precio = Number(document.getElementById('manualPrecio').value);
+    if (!nombre || !precio) { toast('Completa nombre y precio.'); return; }
+    agregarItem(nombre, precio, categoria);
+  }
+
+  async function agregarItem(nombre, precio, categoria){
+    if (!currentCita) {
+      toast('No hay cita activa');
+      return;
+    }
+    try {
+      const insertData = {
+        cita_id: currentCita.id,
+        nombre: nombre,
+        precio: Number(precio) || 0,
+        categoria: categoria,
+        agregado_por: user.full_name || user.username || 'Barbero'
+      };
+      console.log('Insertando item:', insertData);
+      const { data, error } = await sb.from('cita_items_adicionales').insert(insertData).select().single();
+      if (error) {
+        console.error('Error Supabase:', error);
+        throw error;
+      }
+      currentItems.push(data);
+      renderAddedList();
+      updateTotalsUI();
+      vibrate(10);
+      toast(`${nombre} agregado`);
+      // Volver al menú de categorías después de agregar
+      goBackToCategories();
+    } catch (err) {
+      console.error('Error agregando item:', err);
+      toast('Error: ' + (err.message || 'No pudimos agregar'));
+    }
+  }
+
+  // Exponer quitarItem al scope global para onclick inline
+  window.quitarItem = async function(itemId){
+    try {
+      await sb.from('cita_items_adicionales').delete().eq('id', itemId);
+      currentItems = currentItems.filter(i => i.id !== itemId);
+      renderAddedList();
+      updateTotalsUI();
+      vibrate(8);
+      toast('Item eliminado');
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos quitar el ítem.');
+    }
+  };
+
+  function renderAddedList(){
+    const el = document.getElementById('addedList');
+    if (!el) return;
+    el.innerHTML = currentItems.length ? currentItems.map(i =>
+      `<div class="added-row"><span>${i.nombre}</span><span><span class="p">${dnFormatCOP(i.precio)}</span><span class="rm" onclick="quitarItem('${i.id}')">Quitar</span></span></div>`
+    ).join('') : '<div style="font-size:12px; color:rgba(255,255,255,0.4); padding:8px 0;">Sin servicios adicionales todavía.</div>';
+  }
+
+  function updateTotalsUI(){
+    if (!currentCita) return;
+    const total = calcTotal(currentCita);
+    const t1 = document.getElementById('timerTotalValue');
+    const t2 = document.getElementById('totalBadge');
+    if (t1) t1.textContent = dnFormatCOP(total);
+    if (t2) t2.textContent = `${totalServiciosCount()} servicio${totalServiciosCount()===1?'':'s'}`;
+  }
+
+  // ---- Sheet: Ver orden actual ----
+  function renderOrderSheetItems(){
+    if (!currentCita) return;
+    const c = currentCita;
+    const trashIcon = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const rows = [];
+    // Servicio base (solo mostrar si precio > 0)
+    if (Number(c.precio) > 0) {
+      rows.push(`<div class="added-row"><span>${c.servicios?.nombre || 'Servicio base'}</span><span style="display:flex;align-items:center;"><span class="p">${dnFormatCOP(c.precio)}</span><div class="trash-btn" onclick="quitarServicioBase()">${trashIcon}</div></span></div>`);
+    }
+    // Items adicionales
+    currentItems.forEach(i => {
+      rows.push(`<div class="added-row"><span>${i.nombre}</span><span style="display:flex;align-items:center;"><span class="p">${dnFormatCOP(i.precio)}</span><div class="trash-btn" onclick="quitarItemFromSheet('${i.id}')">${trashIcon}</div></span></div>`);
+    });
+    // Si no hay nada, mostrar mensaje
+    if (rows.length === 0) {
+      rows.push(`<div style="font-size:12px; color:rgba(255,255,255,0.4); padding:12px 0; text-align:center;">Sin servicios. Agrega al menos uno antes de enviar.</div>`);
+    }
+    document.getElementById('orderItemsList').innerHTML = rows.join('');
+    document.getElementById('orderSheetTotal').textContent = dnFormatCOP(calcTotal(c));
+  }
+
+  function openOrderSheet(){
+    vibrate(8);
+    if (!currentCita) return;
+    const c = currentCita;
+    document.getElementById('orderSheetSub').textContent = `${c.usuarios?.full_name || c.usuarios?.username || 'Cliente'} · ${c.servicios?.nombre || 'Servicio'}`;
+    renderOrderSheetItems();
+    document.getElementById('orderSheetBg').classList.add('show');
+  }
+  function closeOrderSheet(){ document.getElementById('orderSheetBg').classList.remove('show'); }
+
+  // Eliminar item desde el sheet de orden
+  window.quitarItemFromSheet = async function(itemId){
+    try {
+      await sb.from('cita_items_adicionales').delete().eq('id', itemId);
+      currentItems = currentItems.filter(i => i.id !== itemId);
+      renderOrderSheetItems();
+      renderAddedList();
+      updateTotalsUI();
+      vibrate(8);
+      toast('Item eliminado');
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos quitar el ítem.');
+    }
+  };
+
+  // Eliminar servicio base (poner precio en 0)
+  window.quitarServicioBase = async function(){
+    if (!currentCita) return;
+    try {
+      await sb.from('citas').update({ precio: 0 }).eq('id', currentCita.id);
+      currentCita.precio = 0;
+      renderOrderSheetItems();
+      updateTotalsUI();
+      vibrate(8);
+      toast('Servicio eliminado');
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos quitar el servicio.');
+    }
+  };
+
+  // ---- Carga principal ----
+  let lastRenderSig = null;
+  function citaSig(c, estado){ return c ? `${c.id}|${estado}|${JSON.stringify(c.pasos_servicio||{})}` : `empty|${estado}`; }
+
+  async function loadCurrentClient(){
+    if (!user) return;
+    try {
+      const today = dnTodayISO();
+      const { data: citas, error } = await sb
+        .from('citas')
+        .select(`id, hora_inicio, estado, inicio_servicio_at, precio, cliente_id, pasos_servicio, bebida_tipo,
+                  usuarios!citas_cliente_id_fkey(username, full_name, phone, avatar_url),
+                  servicios(nombre, duracion_min)`)
+        .eq('barbero_id', user.id)
+        .eq('fecha', today)
+        .in('estado', ['confirmada','sala_espera','en_servicio'])
+        .order('hora_inicio', { ascending: true });
+
+      if (error) throw error;
+
+      if (!citas || citas.length === 0) {
+        currentCita = null;
+        const sig = citaSig(null, 'empty-day');
+        if (sig !== lastRenderSig) {
+          renderEmpty('Tómate un break ☕', 'Tienes este espacio disponible. Aún no tienes citas para hoy.');
+          lastRenderSig = sig;
+        }
+        return;
+      }
+
+      // Filtrar citas que ya fueron finalizadas en esta sesión (evita que reaparezcan)
+      const citasActivas = citas.filter(c => !citasFinalizadasHoy.has(c.id));
+
+      if (citasActivas.length === 0) {
+        currentCita = null;
+        const sig = citaSig(null, 'empty-all-done');
+        if (sig !== lastRenderSig) {
+          renderEmpty('¡Buen trabajo! ✨', 'Has completado todos tus servicios por ahora.');
+          lastRenderSig = sig;
+        }
+        return;
+      }
+
+      // Prioridad absoluta: en_servicio > cita_fijada > sala_espera > confirmada
+      const enServicio = citasActivas.find(c => c.estado === 'en_servicio');
+
+      // Si hay una cita en servicio, SIEMPRE mostrar esa
+      if (enServicio) {
+        // Limpiar del Set de citas llamadas si ya está en servicio (ya no es necesario el guard)
+        citasLlamadasHoy.delete(enServicio.id);
+        saveSetToStorage(citasLlamadasKey, citasLlamadasHoy);
+        fijarCita(enServicio.id);
+
+        const sig = citaSig(enServicio, 'en_servicio');
+        currentCita = enServicio;
+        if (sig !== lastRenderSig) {
+          lastRenderSig = sig;
+          await loadItemsAndRender(enServicio);
+        }
+        return;
+      }
+
+      // Si hay una cita fijada que aún existe, mantenerla (no cambiar automáticamente)
+      const citaFijada = citaFijadaId ? citasActivas.find(c => c.id === citaFijadaId) : null;
+
+      const salaEspera = citasActivas.find(c => c.estado === 'sala_espera');
+      const confirmada = citasActivas.find(c => c.estado === 'confirmada');
+
+      // Usar cita fijada si existe, sino buscar por prioridad normal
+      const active = citaFijada || salaEspera || confirmada || null;
+      const estadoActivo = active?.estado === 'sala_espera' ? 'sala_espera' : active?.estado === 'confirmada' ? 'confirmada' : 'empty';
+
+      // Si no hay cita fijada pero encontramos una activa, fijarla
+      if (active && !citaFijada) {
+        fijarCita(active.id);
+      }
+
+      // GUARD: Si la cita ya fue llamada en esta sesión, NO mostrar pantalla de "llamar cliente"
+      // Esto evita el bug donde la pantalla reaparece después de unos minutos por race condition con realtime/polling
+      if (active && citasLlamadasHoy.has(active.id)) {
+        console.log('[loadCurrentClient] Cita', active.id, 'ya fue llamada pero aún no está en_servicio. Esperando...');
+        // No cambiar lastRenderSig ni re-renderizar - esperar a que el realtime traiga el estado correcto
+        // Programar un retry para verificar el estado
+        setTimeout(() => loadCurrentClient(), 1500);
+        return;
+      }
+
+      const sig = citaSig(active, estadoActivo);
+      currentCita = active;
+
+      if (sig === lastRenderSig) {
+        // Sin cambios de fondo: solo refrescar detalles que sí cambian con el reloj
+        if (estadoActivo === 'confirmada') {
+          const el = document.getElementById('proximoFaltanVal');
+          if (el) el.textContent = faltanLabel(active);
+        }
+        return;
+      }
+      lastRenderSig = sig;
+
+      if (active?.estado === 'sala_espera') {
+        renderLlegoBanner(active);
+      } else if (active?.estado === 'confirmada') {
+        renderProximo(active);
+      } else {
+        fijarCita(null); // Limpiar cita fijada si no hay citas
+        renderEmpty('Tómate un break ☕', 'Tienes este espacio disponible hasta tu próxima cita.');
+      }
+    } catch (err) {
+      console.error(err);
+      renderEmpty('No pudimos cargar tu turno', 'Verifica tu conexión e intenta de nuevo.');
+      lastRenderSig = null;
+    }
+  }
+
+  // ---- Ganancias del día ----
+  const COMISION_PRODUCTO_FIJA = 5000; // $5,000 por producto
+  let gananciasData = { servicios:0, ventas:0, comision:0, propinas:0, descuento:0, comisionPct:0, pagado:true, nombre:'', foto:null, citasDetalle:[], productosComisiones:[], comisionProductos:0 };
+
+  async function loadGanancias() {
+    try {
+      const today = dnTodayISO();
+      // Reusar datos del barbero ya cargados en barberProfile (evita consulta duplicada)
+      const nombre = barberProfile?.usuarios?.full_name || barberProfile?.usuarios?.username || user.full_name || 'Barbero';
+      const foto = barberProfile?.usuarios?.avatar_url;
+      const comisionPct = Number(barberProfile?.comision_pct) || 40;
+
+      // Consultas en paralelo: citas, bebidas y comisiones de productos
+      const todayRange = dnLocalDayRangeUTC(today);
+      const [citasRes, bebidasRes, productosRes] = await Promise.all([
+        sb.from('citas')
+          .select('id, precio, propina, comision_pagada, servicios(nombre), usuarios!citas_cliente_id_fkey(full_name)')
+          .eq('barbero_id', user.id)
+          .eq('fecha', today)
+          .in('estado', ['finalizada', 'pendiente_pago'])
+          .order('pagada_at', { ascending: true }),
+        sb.from('consumos_bebidas_barbero')
+          .select('precio')
+          .eq('barbero_id', user.id)
+          .gte('created_at', todayRange.start)
+          .lte('created_at', todayRange.end),
+        sb.from('comisiones')
+          .select('id, tipo, concepto, valor_comision')
+          .eq('barbero_id', user.id)
+          .eq('tipo', 'producto')
+          .gte('created_at', todayRange.start)
+          .lte('created_at', todayRange.end)
+      ]);
+
+      const citas = citasRes.data || [];
+      const productosComisiones = productosRes.data || [];
+
+      let servicios = 0, ventas = 0, comision = 0, propinas = 0, pagado = true;
+      const citasDetalle = [];
+
+      citas.forEach(c => {
+        servicios++;
+        const precio = Number(c.precio) || 0;
+        const comisionCita = Math.round(precio * comisionPct / 100);
+        ventas += precio;
+        comision += comisionCita;
+        propinas += Number(c.propina) || 0;
+        if (!c.comision_pagada) pagado = false;
+
+        citasDetalle.push({
+          servicio: c.servicios?.nombre || 'Servicio',
+          cliente: c.usuarios?.full_name || 'Cliente',
+          precio: precio,
+          comision: comisionCita
+        });
+      });
+
+      // Sumar comisiones de productos
+      let comisionProductos = 0;
+      productosComisiones.forEach(p => {
+        comisionProductos += Number(p.valor_comision) || 0;
+      });
+
+      const descuento = (bebidasRes.data || []).reduce((sum, b) => sum + (Number(b.precio) || 0), 0);
+
+      gananciasData = {
+        servicios,
+        ventas,
+        comision,
+        propinas,
+        descuento,
+        comisionPct,
+        pagado,
+        nombre,
+        foto,
+        citasDetalle,
+        productosComisiones,
+        comisionProductos
+      };
+
+      const total = comision + comisionProductos + propinas - descuento;
+      document.getElementById('heroGananciasVal').textContent = dnFormatCOP(total);
+    } catch (err) {
+      console.error('Error cargando ganancias:', err);
+    }
+  }
+
+  function openGananciasModal() {
+    const d = gananciasData;
+    const avatarEl = document.getElementById('gananciasAvatar');
+    if (d.foto) {
+      avatarEl.innerHTML = `<img src="${d.foto}" alt="">`;
+    } else {
+      avatarEl.innerHTML = dnInitials(d.nombre);
+    }
+    document.getElementById('gananciasName').textContent = d.nombre;
+
+    // Renderizar detalle de servicios
+    const detalleServiciosEl = document.getElementById('gananciasDetalleServicios');
+    if (d.citasDetalle && d.citasDetalle.length > 0) {
+      let html = `<div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
+        Servicios (${d.citasDetalle.length})
+      </div>`;
+      d.citasDetalle.forEach(c => {
+        html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; margin-bottom:6px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,0,0,0.08);">
+          <div>
+            <div style="font-size:13px; font-weight:600;">${c.servicio}</div>
+            <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-top:2px;">${c.cliente} · ${d.comisionPct}% de ${dnFormatCOP(c.precio)}</div>
+          </div>
+          <div style="font-size:14px; font-weight:700; color:#5EEAB2;">+${dnFormatCOP(c.comision)}</div>
+        </div>`;
+      });
+      detalleServiciosEl.innerHTML = html;
+    } else {
+      detalleServiciosEl.innerHTML = '';
+    }
+
+    // Renderizar detalle de productos
+    const detalleProductosEl = document.getElementById('gananciasDetalleProductos');
+    if (d.productosComisiones && d.productosComisiones.length > 0) {
+      let html = `<div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+        Productos (${d.productosComisiones.length})
+      </div>`;
+      d.productosComisiones.forEach(p => {
+        const match = p.concepto?.match(/\((\d+) uds?\)/);
+        const cantidad = match ? parseInt(match[1]) : 1;
+        html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; margin-bottom:6px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,0,0,0.08);">
+          <div>
+            <div style="font-size:13px; font-weight:600;">Venta de producto${cantidad > 1 ? 's' : ''}</div>
+            <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-top:2px;">${cantidad} ${cantidad > 1 ? 'uds' : 'ud'} · $${COMISION_PRODUCTO_FIJA.toLocaleString('es-CO')} c/u</div>
+          </div>
+          <div style="font-size:14px; font-weight:700; color:#5EEAB2;">+${dnFormatCOP(p.valor_comision)}</div>
+        </div>`;
+      });
+      detalleProductosEl.innerHTML = html;
+    } else {
+      detalleProductosEl.innerHTML = '';
+    }
+
+    document.getElementById('gananciasPropinas').textContent = dnFormatCOP(d.propinas);
+
+    const descuentoRow = document.getElementById('gananciasDescuentoRow');
+    if (d.descuento > 0) {
+      descuentoRow.style.display = 'flex';
+      document.getElementById('gananciasDescuento').textContent = `-${dnFormatCOP(d.descuento)}`;
+    } else {
+      descuentoRow.style.display = 'none';
+    }
+
+    const total = d.comision + (d.comisionProductos || 0) + d.propinas - d.descuento;
+    document.getElementById('gananciasTotal').textContent = dnFormatCOP(total);
+
+    const estadoEl = document.getElementById('gananciasEstado');
+    if (d.pagado && d.servicios > 0) {
+      estadoEl.className = 'ganancias-estado pagado';
+      estadoEl.textContent = 'Pagado ✓';
+    } else if (d.servicios > 0 || d.productosComisiones?.length > 0) {
+      estadoEl.className = 'ganancias-estado pendiente';
+      estadoEl.textContent = 'Pendiente de pago';
+    } else {
+      estadoEl.className = 'ganancias-estado pendiente';
+      estadoEl.textContent = 'Sin servicios hoy';
+    }
+
+    document.getElementById('gananciasModalBg').classList.add('show');
+  }
+
+  function closeGananciasModal() {
+    document.getElementById('gananciasModalBg').classList.remove('show');
+  }
+
+  // ---- Reseñas del barbero ----
+  let resenasCache = [];
+
+  async function loadResenas() {
+    if (!user) return;
+    try {
+      const { data, error } = await sb.from('resenas')
+        .select('id, calificacion, comentario, created_at')
+        .eq('barbero_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      resenasCache = data || [];
+
+      // Calcular promedio
+      const total = resenasCache.length;
+      if (total === 0) {
+        document.getElementById('heroResenasVal').textContent = '—';
+        return;
+      }
+
+      const sum = resenasCache.reduce((s, r) => s + (r.calificacion || 0), 0);
+      let avg = sum / total;
+
+      // Si el promedio es >= 4.9, aproximar a 5.0
+      if (avg >= 4.9) avg = 5.0;
+
+      document.getElementById('heroResenasVal').textContent = avg.toFixed(1) + '★';
+    } catch (err) {
+      console.error('Error cargando reseñas:', err);
+    }
+  }
+
+  function openResenasModal() {
+    const total = resenasCache.length;
+    const promedioEl = document.getElementById('resenasPromedio');
+    const starsEl = document.getElementById('resenasStars');
+    const countEl = document.getElementById('resenasCount');
+    const listaEl = document.getElementById('resenasLista');
+
+    if (total === 0) {
+      promedioEl.textContent = '—';
+      starsEl.innerHTML = '<span style="color:#ccc;">☆☆☆☆☆</span>';
+      countEl.textContent = 'Sin reseñas aun';
+      listaEl.innerHTML = `
+        <div style="text-align:center; padding:30px 20px; color:rgba(0,0,0,0.4);">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:12px; opacity:0.4;">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+          </svg>
+          <p style="margin:0; font-size:14px;">Aun no tienes reseñas</p>
+          <p style="margin:6px 0 0; font-size:12px;">Tus clientes podran calificarte despues de cada servicio</p>
+        </div>
+      `;
+    } else {
+      const sum = resenasCache.reduce((s, r) => s + (r.calificacion || 0), 0);
+      let avg = sum / total;
+      if (avg >= 4.9) avg = 5.0;
+
+      promedioEl.textContent = avg.toFixed(1);
+
+      // Generar estrellas visuales
+      const fullStars = Math.floor(avg);
+      const hasHalf = avg - fullStars >= 0.5;
+      let starsHTML = '';
+      for (let i = 1; i <= 5; i++) {
+        if (i <= fullStars) {
+          starsHTML += '<span style="color:#FFD700;">★</span>';
+        } else if (i === fullStars + 1 && hasHalf) {
+          starsHTML += '<span style="color:#FFD700;">★</span>';
+        } else {
+          starsHTML += '<span style="color:#ddd;">☆</span>';
+        }
+      }
+      starsEl.innerHTML = starsHTML;
+      countEl.textContent = `${total} reseña${total !== 1 ? 's' : ''}`;
+
+      // Generar lista de reseñas
+      listaEl.innerHTML = resenasCache.map(r => {
+        const fecha = new Date(r.created_at);
+        const fechaStr = fecha.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+
+        // Estrellas de esta reseña
+        let stars = '';
+        for (let i = 1; i <= 5; i++) {
+          stars += i <= r.calificacion
+            ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="#FFD700" stroke="#FFD700" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+            : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ddd" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+        }
+
+        return `
+          <div style="padding:14px; background:rgba(0,0,0,0.03); border-radius:14px; border:1px solid rgba(0,0,0,0.06);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <div style="display:flex; gap:2px;">${stars}</div>
+              <span style="font-size:11px; color:rgba(0,0,0,0.4);">${fechaStr}</span>
+            </div>
+            ${r.comentario
+              ? `<p style="margin:0; font-size:14px; color:#333; line-height:1.4;">"${r.comentario}"</p>`
+              : `<p style="margin:0; font-size:13px; color:rgba(0,0,0,0.35); font-style:italic;">Sin comentario</p>`}
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('resenasModalBg').classList.add('show');
+  }
+
+  function closeResenasModal() {
+    document.getElementById('resenasModalBg').classList.remove('show');
+  }
+
+  // Variables para cleanup
+  let clientInterval = null;
+  let gananciasInterval = null;
+  let barberoChannel = null;
+
+  function init(){
+    if (!user) return;
+    showCachedProfile(); // Mostrar avatar en caché inmediatamente (LCP)
+    tickClock();
+    clockInterval = setInterval(tickClock, 15000);
+
+    // Cargar datos en paralelo para mejor performance
+    Promise.all([
+      loadBarberProfile(),
+      loadAlerts(),
+      loadGanancias(),
+      loadCurrentClient(),
+      loadResenas()
+    ]);
+
+    // Respaldo por si el canal realtime se desconecta (reducido de 15s a 30s)
+    clientInterval = setInterval(() => { if (!swipeActive) loadCurrentClient(); }, 30000);
+
+    barberoChannel = sb.channel('barbero-' + user.id)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'citas', filter: `barbero_id=eq.${user.id}` }, (payload) => {
+        if (payload.new.estado === 'sala_espera' && payload.old.estado !== 'sala_espera') {
+          toast('Tu cliente ya llegó');
+          vibrate([80,40,80]);
+        }
+        loadCurrentClient();
+        if (['finalizada', 'pendiente_pago'].includes(payload.new.estado) || payload.new.comision_pagada !== payload.old?.comision_pagada) {
+          loadGanancias();
+        }
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'alertas_barbero', filter: `barbero_id=eq.${user.id}` }, () => {
+        loadAlerts();
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'resenas', filter: `barbero_id=eq.${user.id}` }, () => {
+        loadResenas();
+        toast('Nueva reseña recibida ⭐');
+      })
+      .subscribe();
+
+    // Actualizar ganancias cada minuto
+    gananciasInterval = setInterval(loadGanancias, 60000);
+  }
+
+  // Cleanup al salir
+  function cleanupBarberoHome() {
+    if (clockInterval) clearInterval(clockInterval);
+    if (clientInterval) clearInterval(clientInterval);
+    if (gananciasInterval) clearInterval(gananciasInterval);
+    if (barberoChannel) sb.removeChannel(barberoChannel);
+  }
+  window.addEventListener('beforeunload', cleanupBarberoHome);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      cleanupBarberoHome();
+    } else if (user) {
+      // Limpiar antes de reiniciar para evitar duplicados
+      cleanupBarberoHome();
+      // Forzar re-render al volver a la app
+      lastRenderSig = null;
+      init();
+    }
+  });
+
+  init();
+</script>
+<script src="../assets/citas-estados.js" defer></script>
+</body>
+</html>

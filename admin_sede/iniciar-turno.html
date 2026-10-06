@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#111111">
+<title>Iniciar Turno · Admin Sede</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<style>
+  /* Variables heredadas de design-system.css */
+  body { background:var(--bg); min-height:100vh; min-height:100dvh; }
+
+  .container {
+    max-width:600px;
+    margin:0 auto;
+    padding:24px var(--page-padding-x) 80px;
+    padding-top:calc(24px + var(--safe-top));
+    padding-bottom:calc(var(--nav-height, 56px) + var(--safe-bottom) + 24px);
+  }
+
+  .header {
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:32px;
+  }
+
+  .back-btn {
+    width:44px; height:44px;
+    border-radius:14px;
+    background:var(--card);
+    border:1px solid var(--divider);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    color:var(--text);
+    text-decoration:none;
+  }
+  .back-btn svg { width:20px; height:20px; }
+
+  .header-text .title { font-size:22px; font-weight:800; }
+  .header-text .sub { font-size:13px; color:var(--text-secondary); margin-top:2px; }
+
+  .step-indicator {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    margin-bottom:32px;
+  }
+  .step-dot {
+    width:12px; height:12px;
+    border-radius:50%;
+    background:var(--divider);
+    transition:background 0.3s ease, transform 0.3s ease;
+  }
+  .step-dot.active {
+    background:var(--gold);
+    transform:scale(1.2);
+  }
+  .step-dot.completed {
+    background:var(--success);
+  }
+
+  .step-content {
+    display:none;
+    animation:fadeIn 0.3s ease;
+  }
+  .step-content.active { display:block; }
+
+  @keyframes fadeIn {
+    from { opacity:0; transform:translateY(10px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+
+  .section-title {
+    font-size:16px;
+    font-weight:800;
+    margin-bottom:8px;
+  }
+  .section-sub {
+    font-size:13px;
+    color:var(--text-secondary);
+    margin-bottom:20px;
+  }
+
+  /* Dinero inicial */
+  .money-input-wrap {
+    position:relative;
+    margin-bottom:24px;
+  }
+  .money-prefix {
+    position:absolute;
+    left:20px;
+    top:50%;
+    transform:translateY(-50%);
+    font-size:28px;
+    font-weight:800;
+    color:var(--gold);
+  }
+  .money-input {
+    width:100%;
+    padding:24px 24px 24px 48px;
+    font-size:32px;
+    font-weight:800;
+    background:var(--card);
+    border:2px solid var(--divider);
+    border-radius:20px;
+    color:var(--text);
+    text-align:right;
+    transition:border-color 0.2s ease;
+  }
+  .money-input:focus {
+    outline:none;
+    border-color:var(--gold);
+  }
+
+  .quick-amounts {
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:10px;
+    margin-bottom:24px;
+  }
+  .quick-amount {
+    padding:14px;
+    border-radius:14px;
+    background:var(--card);
+    border:1px solid var(--divider);
+    font-size:14px;
+    font-weight:700;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color 0.2s ease, background 0.2s ease;
+  }
+  .quick-amount:hover {
+    border-color:var(--gold);
+    background:rgba(200,160,90,0.1);
+  }
+
+  /* Inventario bebidas */
+  .bebidas-grid {
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-bottom:24px;
+  }
+
+  .bebida-row {
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 16px;
+    background:var(--card);
+    border:1px solid var(--divider);
+    border-radius:16px;
+  }
+
+  .bebida-icon {
+    width:44px; height:44px;
+    border-radius:12px;
+    background:var(--card-2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:22px;
+    flex-shrink:0;
+  }
+
+  .bebida-info { flex:1; min-width:0; }
+  .bebida-name { font-size:14px; font-weight:700; }
+  .bebida-stock { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+
+  .bebida-counter {
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+
+  .counter-btn {
+    width:36px; height:36px;
+    border-radius:10px;
+    background:var(--card-2);
+    border:1px solid var(--divider);
+    color:var(--text);
+    font-size:18px;
+    font-weight:700;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:background 0.15s ease;
+  }
+  .counter-btn:hover { background:var(--divider); }
+  .counter-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+  .counter-value {
+    width:40px;
+    text-align:center;
+    font-size:18px;
+    font-weight:800;
+  }
+
+  /* Resumen */
+  .summary-card {
+    background:var(--card);
+    border:1px solid var(--divider);
+    border-radius:20px;
+    padding:20px;
+    margin-bottom:24px;
+  }
+
+  .summary-row {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 0;
+    border-bottom:1px solid var(--divider);
+  }
+  .summary-row:last-child { border-bottom:none; }
+
+  .summary-label { font-size:14px; color:var(--text-secondary); }
+  .summary-value { font-size:16px; font-weight:700; }
+  .summary-value.gold { color:var(--gold); }
+
+  /* Botones de navegacion */
+  .nav-buttons {
+    display:flex;
+    gap:12px;
+    margin-top:24px;
+  }
+
+  .btn-secondary {
+    flex:1;
+    padding:16px;
+    border-radius:16px;
+    background:var(--card);
+    border:1px solid var(--divider);
+    color:var(--text);
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  .btn-primary {
+    flex:2;
+    padding:16px;
+    border-radius:16px;
+    border:none;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#141414;
+    font-size:15px;
+    font-weight:800;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:transform 0.15s ease;
+  }
+  .btn-primary:active { transform:scale(0.98); }
+  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+  .btn-primary svg { width:20px; height:20px; }
+
+  /* Fecha y hora */
+  .datetime-display {
+    text-align:center;
+    padding:20px;
+    background:var(--card);
+    border:1px solid var(--divider);
+    border-radius:16px;
+    margin-bottom:24px;
+  }
+  .datetime-time { font-size:48px; font-weight:800; color:var(--gold); }
+  .datetime-date { font-size:14px; color:var(--text-secondary); margin-top:4px; }
+
+  /* Toast */
+  #toast {
+    position:fixed;
+    bottom:calc(32px + var(--safe-bottom));
+    left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:rgba(250,250,250,0.95);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--divider);
+    border-radius:14px;
+    padding:12px 20px;
+    font-size:13px;
+    font-weight:600;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s ease, transform 0.3s ease;
+    z-index:200;
+    max-width:90%;
+  }
+  #toast.show {
+    opacity:1;
+    transform:translateX(-50%) translateY(0);
+  }
+
+  /* Loading overlay */
+  .loading-overlay {
+    position:fixed;
+    inset:0;
+    background:rgba(255,255,255,0.95);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:300;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s ease;
+  }
+  .loading-overlay.show {
+    opacity:1;
+    pointer-events:auto;
+  }
+  .loading-spinner {
+    width:48px; height:48px;
+    border:3px solid var(--divider);
+    border-top-color:var(--gold);
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-text { margin-top:16px; font-size:14px; color:var(--text-secondary); }
+
+  /* Personal de aseo */
+  .aseo-toggle-row {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px;
+    background:var(--card);
+    border:1px solid var(--divider);
+    border-radius:16px;
+    margin-bottom:20px;
+  }
+  .aseo-toggle-label {
+    font-size:15px;
+    font-weight:700;
+  }
+  .aseo-toggle {
+    display:flex;
+    background:var(--card-2);
+    border-radius:12px;
+    padding:4px;
+    gap:4px;
+  }
+  .aseo-toggle .toggle-option {
+    padding:10px 20px;
+    border-radius:10px;
+    font-size:13px;
+    font-weight:700;
+    cursor:pointer;
+    color:var(--text-secondary);
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .aseo-toggle .toggle-option.active {
+    background:var(--gold);
+    color:#141414;
+  }
+
+  .aseo-grid {
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    margin-bottom:24px;
+  }
+  .aseo-grid.hidden { display:none; }
+
+  .aseo-item {
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:14px 16px;
+    background:var(--card);
+    border:2px solid var(--divider);
+    border-radius:16px;
+    cursor:pointer;
+    transition:border-color 0.2s ease, background 0.2s ease;
+  }
+  .aseo-item.selected {
+    border-color:var(--gold);
+    background:rgba(200,160,90,0.08);
+  }
+
+  .aseo-avatar {
+    width:44px; height:44px;
+    border-radius:12px;
+    background:var(--success);
+    color:#111111;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    font-weight:700;
+    flex-shrink:0;
+  }
+  .aseo-avatar img {
+    width:100%; height:100%;
+    border-radius:12px;
+    object-fit:cover;
+  }
+
+  .aseo-info { flex:1; min-width:0; }
+  .aseo-name { font-size:14px; font-weight:700; }
+  .aseo-pago { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+
+  .aseo-check {
+    width:28px; height:28px;
+    border-radius:50%;
+    border:2px solid var(--divider);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    transition:background 0.2s ease, border-color 0.2s ease;
+  }
+  .aseo-item.selected .aseo-check {
+    background:var(--gold);
+    border-color:var(--gold);
+  }
+  .aseo-check svg {
+    width:14px; height:14px;
+    stroke:#141414;
+    opacity:0;
+    transition:opacity 0.2s ease;
+  }
+  .aseo-item.selected .aseo-check svg { opacity:1; }
+
+  .aseo-empty {
+    text-align:center;
+    color:var(--text-secondary);
+    padding:24px;
+    font-size:13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header class="header">
+    <a href="seleccionar-sede.html" class="back-btn">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+    </a>
+    <div class="header-text">
+      <div class="title">Iniciar Turno</div>
+      <div class="sub" id="sedeName">Cargando...</div>
+    </div>
+  </header>
+
+  <div class="step-indicator">
+    <div class="step-dot active" data-step="1"></div>
+    <div class="step-dot" data-step="2"></div>
+    <div class="step-dot" data-step="3"></div>
+  </div>
+
+  <!-- Paso 1: Dinero inicial -->
+  <div class="step-content active" data-step="1">
+    <div class="datetime-display">
+      <div class="datetime-time" id="currentTime">--:--</div>
+      <div class="datetime-date" id="currentDate">Cargando...</div>
+    </div>
+
+    <div class="section-title">Dinero en caja</div>
+    <div class="section-sub">Cuenta el efectivo disponible al iniciar el turno</div>
+
+    <div class="money-input-wrap">
+      <span class="money-prefix">$</span>
+      <input type="text" class="money-input" id="dineroInicial" placeholder="0" inputmode="numeric">
+    </div>
+
+    <div class="quick-amounts">
+      <div class="quick-amount" data-amount="100000">$100.000</div>
+      <div class="quick-amount" data-amount="200000">$200.000</div>
+      <div class="quick-amount" data-amount="300000">$300.000</div>
+      <div class="quick-amount" data-amount="500000">$500.000</div>
+      <div class="quick-amount" data-amount="750000">$750.000</div>
+      <div class="quick-amount" data-amount="1000000">$1.000.000</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn-primary" id="btnPaso2">
+        Siguiente
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Paso 2: Inventario de bebidas -->
+  <div class="step-content" data-step="2">
+    <div class="section-title">Inventario de bebidas</div>
+    <div class="section-sub">Registra las unidades disponibles de cada bebida</div>
+
+    <div class="bebidas-grid" id="bebidasGrid">
+      <!-- Se llena dinamicamente -->
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-row">
+        <span class="summary-label">Dinero inicial</span>
+        <span class="summary-value gold" id="summaryDinero">$0</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Total bebidas</span>
+        <span class="summary-value" id="summaryBebidas">0 unidades</span>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn-secondary" id="btnAtras1">Atrás</button>
+      <button class="btn-primary" id="btnPaso3">
+        Siguiente
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Paso 3: Personal de aseo -->
+  <div class="step-content" data-step="3">
+    <div class="section-title">Personal de aseo</div>
+    <div class="section-sub">Selecciona quién trabaja en aseo hoy</div>
+
+    <div class="aseo-toggle-row" id="aseoToggleRow">
+      <span class="aseo-toggle-label">¿Trabaja aseo hoy?</span>
+      <div class="aseo-toggle" id="aseoToggle">
+        <span class="toggle-option" data-val="no">No</span>
+        <span class="toggle-option active" data-val="si">Sí</span>
+      </div>
+    </div>
+
+    <div class="aseo-grid" id="aseoGrid">
+      <!-- Se llena dinámicamente con personal de aseo -->
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-row">
+        <span class="summary-label">Dinero inicial</span>
+        <span class="summary-value gold" id="summaryDineroFinal">$0</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Total bebidas</span>
+        <span class="summary-value" id="summaryBebidasFinal">0 unidades</span>
+      </div>
+      <div class="summary-row">
+        <span class="summary-label">Personal de aseo</span>
+        <span class="summary-value" id="summaryAseo">0 personas</span>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn-secondary" id="btnAtras2">Atrás</button>
+      <button class="btn-primary" id="btnIniciar">
+        Iniciar Turno
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Iniciando turno...</div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script src="../assets/mobile-nav.js"></script>
+<script>
+(async function() {
+  // Verificar sesion
+  const user = dnRequireAdmin('../index.html');
+  if (!user) return;
+
+  if (user.role !== 'admin_sede') {
+    window.location.href = '../auth.html';
+    return;
+  }
+
+  const sedeId = dnGetTurnoSedeActual();
+  if (!sedeId) {
+    window.location.href = 'seleccionar-sede.html';
+    return;
+  }
+
+  // Variables
+  let currentStep = 1;
+  let dineroInicial = 0;
+  let inventarioBebidas = {};
+  let bebidas = [];
+  let personalAseo = [];
+  let aseoSeleccionados = [];
+  let trabajaAseoHoy = true;
+
+  // Cargar datos de la sede
+  const { data: sede } = await sb.from('sucursales').select('nombre').eq('id', sedeId).single();
+  document.getElementById('sedeName').textContent = sede?.nombre || 'Sede';
+
+  // Actualizar reloj
+  function actualizarReloj() {
+    const ahora = new Date();
+    document.getElementById('currentTime').textContent =
+      ahora.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('currentDate').textContent =
+      ahora.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  actualizarReloj();
+  let clockInterval = setInterval(actualizarReloj, 1000);
+
+  // Cleanup al salir (para reloj de 1 segundo)
+  window.addEventListener('beforeunload', () => { if (clockInterval) clearInterval(clockInterval); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') { clearInterval(clockInterval); }
+    else { actualizarReloj(); clockInterval = setInterval(actualizarReloj, 1000); }
+  });
+
+  // Cargar bebidas
+  async function cargarBebidas() {
+    const { data } = await sb.from('bebidas_inventario').select('*').eq('activo', true).order('orden');
+    bebidas = data || [];
+
+    // Inicializar inventario con stock actual
+    bebidas.forEach(b => {
+      inventarioBebidas[b.id] = b.cantidad || 0;
+    });
+
+    renderBebidas();
+  }
+
+  function renderBebidas() {
+    const grid = document.getElementById('bebidasGrid');
+
+    if (bebidas.length === 0) {
+      grid.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No hay bebidas registradas</div>';
+      return;
+    }
+
+    grid.innerHTML = bebidas.map(b => `
+      <div class="bebida-row" data-id="${b.id}">
+        <div class="bebida-icon">${b.icono || '🥤'}</div>
+        <div class="bebida-info">
+          <div class="bebida-name">${b.nombre}</div>
+          <div class="bebida-stock">Stock sistema: ${b.cantidad || 0}</div>
+        </div>
+        <div class="bebida-counter">
+          <button class="counter-btn" data-action="minus" data-id="${b.id}">-</button>
+          <span class="counter-value" id="bebida-${b.id}">${inventarioBebidas[b.id] || 0}</span>
+          <button class="counter-btn" data-action="plus" data-id="${b.id}">+</button>
+        </div>
+      </div>
+    `).join('');
+
+    // Event listeners para contadores
+    grid.querySelectorAll('.counter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.id;
+        const action = btn.dataset.action;
+
+        if (action === 'plus') {
+          inventarioBebidas[id] = (inventarioBebidas[id] || 0) + 1;
+        } else if (action === 'minus' && inventarioBebidas[id] > 0) {
+          inventarioBebidas[id]--;
+        }
+
+        document.getElementById(`bebida-${id}`).textContent = inventarioBebidas[id];
+        actualizarResumen();
+      });
+    });
+  }
+
+  function actualizarResumen() {
+    document.getElementById('summaryDinero').textContent = dnFormatCOP(dineroInicial);
+
+    const totalBebidas = Object.values(inventarioBebidas).reduce((a, b) => a + b, 0);
+    document.getElementById('summaryBebidas').textContent = `${totalBebidas} unidades`;
+  }
+
+  function actualizarResumenFinal() {
+    document.getElementById('summaryDineroFinal').textContent = dnFormatCOP(dineroInicial);
+
+    const totalBebidas = Object.values(inventarioBebidas).reduce((a, b) => a + b, 0);
+    document.getElementById('summaryBebidasFinal').textContent = `${totalBebidas} unidades`;
+
+    const aseoCount = trabajaAseoHoy ? aseoSeleccionados.length : 0;
+    document.getElementById('summaryAseo').textContent = `${aseoCount} persona${aseoCount !== 1 ? 's' : ''}`;
+  }
+
+  // Cargar personal de aseo (trabajan en todas las sedes)
+  async function cargarPersonalAseo() {
+    try {
+      const { data, error } = await sb
+        .from('barberos')
+        .select('id, pago_diario, usuarios!inner(full_name, avatar_url)')
+        .eq('tipo_colaborador', 'aseo')
+        .eq('activo', true)
+        .order('usuarios(full_name)');
+
+      if (error) {
+        console.log('Error cargando personal de aseo:', error.message);
+        personalAseo = [];
+      } else {
+        personalAseo = data || [];
+      }
+    } catch (e) {
+      console.log('Personal de aseo no disponible');
+      personalAseo = [];
+    }
+    renderAseoGrid();
+  }
+
+  function renderAseoGrid() {
+    const grid = document.getElementById('aseoGrid');
+
+    if (personalAseo.length === 0) {
+      grid.innerHTML = '<div class="aseo-empty">No hay personal de aseo registrado</div>';
+      return;
+    }
+
+    grid.innerHTML = personalAseo.map(p => {
+      const nombre = p.usuarios?.full_name || 'Personal';
+      const avatar = p.usuarios?.avatar_url;
+      const pago = p.pago_diario || 0;
+      const selected = aseoSeleccionados.includes(p.id);
+
+      return `
+        <div class="aseo-item ${selected ? 'selected' : ''}" data-id="${p.id}" onclick="toggleAseo('${p.id}')">
+          <div class="aseo-avatar">
+            ${avatar ? `<img src="${avatar}" alt="">` : dnInitials(nombre)}
+          </div>
+          <div class="aseo-info">
+            <div class="aseo-name">${nombre}</div>
+            <div class="aseo-pago">Pago diario: ${dnFormatCOP(pago)}</div>
+          </div>
+          <div class="aseo-check">
+            <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Exponer toggleAseo al scope global para onclick inline
+  window.toggleAseo = function(id) {
+    const idx = aseoSeleccionados.indexOf(id);
+    if (idx > -1) {
+      aseoSeleccionados.splice(idx, 1);
+    } else {
+      aseoSeleccionados.push(id);
+    }
+    renderAseoGrid();
+    actualizarResumenFinal();
+  };
+
+  // Toggle de aseo sí/no
+  document.getElementById('aseoToggle').addEventListener('click', (e) => {
+    const option = e.target.closest('.toggle-option');
+    if (!option) return;
+
+    document.querySelectorAll('#aseoToggle .toggle-option').forEach(o => o.classList.remove('active'));
+    option.classList.add('active');
+
+    trabajaAseoHoy = option.dataset.val === 'si';
+    document.getElementById('aseoGrid').classList.toggle('hidden', !trabajaAseoHoy);
+
+    if (!trabajaAseoHoy) {
+      aseoSeleccionados = [];
+    }
+    actualizarResumenFinal();
+  });
+
+  // Navegacion entre pasos
+  function irAPaso(paso) {
+    currentStep = paso;
+
+    document.querySelectorAll('.step-content').forEach(el => {
+      el.classList.toggle('active', parseInt(el.dataset.step) === paso);
+    });
+
+    document.querySelectorAll('.step-dot').forEach(el => {
+      const stepNum = parseInt(el.dataset.step);
+      el.classList.toggle('active', stepNum === paso);
+      el.classList.toggle('completed', stepNum < paso);
+    });
+
+    if (paso === 2) {
+      actualizarResumen();
+    }
+    if (paso === 3) {
+      actualizarResumenFinal();
+    }
+  }
+
+  // Input de dinero
+  const dineroInput = document.getElementById('dineroInicial');
+
+  dineroInput.addEventListener('input', (e) => {
+    let value = e.target.value.replace(/\D/g, '');
+    dineroInicial = parseInt(value) || 0;
+    e.target.value = dineroInicial.toLocaleString('es-CO');
+  });
+
+  // Montos rapidos
+  document.querySelectorAll('.quick-amount').forEach(btn => {
+    btn.addEventListener('click', () => {
+      dineroInicial = parseInt(btn.dataset.amount);
+      dineroInput.value = dineroInicial.toLocaleString('es-CO');
+    });
+  });
+
+  // Botones de navegacion
+  document.getElementById('btnPaso2').addEventListener('click', () => irAPaso(2));
+  document.getElementById('btnPaso3').addEventListener('click', () => irAPaso(3));
+  document.getElementById('btnAtras1').addEventListener('click', () => irAPaso(1));
+  document.getElementById('btnAtras2').addEventListener('click', () => irAPaso(2));
+
+  // Iniciar turno
+  document.getElementById('btnIniciar').addEventListener('click', async () => {
+    const btn = document.getElementById('btnIniciar');
+    btn.disabled = true;
+    document.getElementById('loadingOverlay').classList.add('show');
+
+    try {
+      // Preparar datos de inventario
+      const inventarioData = bebidas.map(b => ({
+        bebida_id: b.id,
+        nombre: b.nombre,
+        cantidad_inicial: inventarioBebidas[b.id] || 0
+      }));
+
+      // Personal de aseo seleccionado
+      const personalAseoHoy = trabajaAseoHoy ? aseoSeleccionados : [];
+
+      // Crear turno
+      await dnCrearTurno(sedeId, dineroInicial, inventarioData, personalAseoHoy);
+
+      showToast('Turno iniciado correctamente');
+
+      setTimeout(() => {
+        window.location.href = 'ventas.html';
+      }, 1000);
+
+    } catch (err) {
+      console.error(err);
+      showToast('Error al iniciar turno: ' + (err.message || 'Intenta de nuevo'));
+      document.getElementById('loadingOverlay').classList.remove('show');
+      btn.disabled = false;
+    }
+  });
+
+  // Toast
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // Iniciar
+  cargarBebidas();
+  cargarPersonalAseo();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0a0a0a">
+<title>Recibo - Keicy Barbería</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A35B;
+    --gold-light: #D4B06A;
+    --bg: #0a0a0a;
+    --card: #141414;
+    --card-2: #1a1a1a;
+    --border: rgba(255,255,255,0.08);
+    --text: #ffffff;
+    --text-secondary: rgba(255,255,255,0.5);
+    --success: #4ECB71;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #app {
+    max-width: 440px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 24px 20px 40px;
+  }
+
+  /* Header con logo */
+  .header {
+    text-align: center;
+    padding: 20px 0 32px;
+  }
+  .brand-logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 20px;
+    filter: brightness(0);
+    background: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(78,203,113,0.15);
+    color: var(--success);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+  .header-badge svg { width: 14px; height: 14px; }
+  .header-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+  .header-sub {
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+
+  /* Tarjeta principal del recibo */
+  .receipt-card {
+    background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 0;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  /* Header del recibo */
+  .receipt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 24px;
+    background: rgba(201,163,91,0.06);
+    border-bottom: 1px dashed var(--border);
+  }
+  .receipt-number {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+    font-family: 'SF Mono', 'Consolas', monospace;
+  }
+  .receipt-date {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: right;
+    line-height: 1.5;
+  }
+
+  /* Contenido del recibo */
+  .receipt-content { padding: 24px; }
+
+  /* Info del cliente */
+  .client-section {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .client-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--gold) 0%, #B8860B 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #141414;
+    flex-shrink: 0;
+  }
+  .client-info { flex: 1; }
+  .client-name { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+  .client-phone { font-size: 13px; color: var(--text-secondary); }
+
+  /* Barbero */
+  .barber-section {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: rgba(201,163,91,0.08);
+    border-radius: 14px;
+    margin-bottom: 24px;
+    border: 1px solid rgba(201,163,91,0.15);
+  }
+  .barber-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--card);
+    border: 2px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .barber-label { font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+  .barber-name { font-size: 14px; font-weight: 700; color: var(--text); margin-top: 2px; }
+
+  /* Servicios */
+  .services-section { margin-bottom: 24px; }
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .service-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+  }
+  .service-name { font-size: 14px; font-weight: 500; color: var(--text); }
+  .service-price { font-size: 14px; font-weight: 700; color: var(--gold); }
+
+  /* Totales */
+  .totals-section {
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+  }
+  .total-row .label { font-size: 14px; color: var(--text-secondary); }
+  .total-row .value { font-size: 14px; font-weight: 600; color: var(--text); }
+  .total-row.propina .value { color: var(--success); }
+  .total-row.grand {
+    padding-top: 16px;
+    margin-top: 12px;
+    border-top: 2px solid var(--border);
+    background: linear-gradient(90deg, rgba(201,163,91,0.1) 0%, transparent 100%);
+    margin: 12px -24px 0;
+    padding: 16px 24px;
+  }
+  .total-row.grand .label {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .total-row.grand .value {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--gold);
+    text-shadow: 0 2px 8px rgba(201,163,91,0.3);
+  }
+
+  /* Método de pago */
+  .payment-method {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    margin-top: 16px;
+    border: 1px solid var(--border);
+  }
+  .payment-icon { width: 20px; height: 20px; color: var(--text-secondary); }
+  .payment-text { font-size: 13px; color: var(--text-secondary); }
+  .payment-text strong { color: var(--text); font-weight: 600; }
+
+  /* Info de sede */
+  .sede-card {
+    text-align: center;
+    padding: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 20px;
+  }
+  .sede-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .sede-address { font-size: 12px; color: var(--text-secondary); }
+
+  /* Acciones */
+  .actions { display: flex; flex-direction: column; gap: 12px; }
+  .action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 24px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.25s ease;
+  }
+  .action-btn.primary {
+    background: linear-gradient(180deg, #E5C158 0%, var(--gold) 50%, #B8860B 100%);
+    color: #141414;
+    box-shadow: 0 4px 20px rgba(201,163,91,0.35);
+  }
+  .action-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(201,163,91,0.5);
+  }
+  .action-btn.secondary {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .action-btn.secondary:hover {
+    background: var(--card-2);
+    border-color: rgba(255,255,255,0.15);
+  }
+  .action-btn svg { width: 18px; height: 18px; }
+
+  /* Estados */
+  .loading {
+    text-align: center;
+    padding: 80px 20px;
+  }
+  .loading-spinner {
+    width: 44px;
+    height: 44px;
+    border: 3px solid var(--border);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 14px; color: var(--text-secondary); }
+
+  .error-card {
+    text-align: center;
+    padding: 60px 24px;
+    background: var(--card);
+    border-radius: 24px;
+  }
+  .error-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    color: var(--text-secondary);
+    opacity: 0.5;
+  }
+  .error-title { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .error-text { font-size: 14px; color: var(--text-secondary); }
+
+  .hide { display: none !important; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="header">
+    <img src="../assets/logo-diego-neira.svg" alt="Keicy Barber" class="brand-logo" onerror="this.style.display='none'">
+    <div class="header-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+      Pagado
+    </div>
+    <div class="header-title">Tu recibo</div>
+    <div class="header-sub">Gracias por tu visita</div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loadingState" class="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Cargando recibo...</div>
+  </div>
+
+  <!-- Receipt -->
+  <div id="receiptCard" class="receipt-card hide">
+    <div class="receipt-header">
+      <div class="receipt-number" id="receiptNumber">#000000</div>
+      <div class="receipt-date" id="receiptDate">Fecha</div>
+    </div>
+
+    <div class="receipt-content">
+      <div class="client-section">
+        <div class="client-avatar" id="clientAvatar">C</div>
+        <div class="client-info">
+          <div class="client-name" id="clientName">Cliente</div>
+          <div class="client-phone" id="clientPhone"></div>
+        </div>
+      </div>
+
+      <div class="barber-section">
+        <div class="barber-avatar" id="barberAvatar">D</div>
+        <div>
+          <div class="barber-label">Atendido por</div>
+          <div class="barber-name" id="barberName">Barbero</div>
+        </div>
+      </div>
+
+      <div class="services-section">
+        <div class="section-title">Servicios</div>
+        <div id="servicesList"></div>
+      </div>
+
+      <div class="totals-section">
+        <div class="total-row" id="subtotalRow">
+          <span class="label">Subtotal</span>
+          <span class="value" id="subtotalValue">$0</span>
+        </div>
+        <div class="total-row propina" id="propinaRow" style="display:none;">
+          <span class="label">Propina</span>
+          <span class="value" id="propinaValue">$0</span>
+        </div>
+        <div class="total-row grand">
+          <span class="label">Total</span>
+          <span class="value" id="totalValue">$0</span>
+        </div>
+      </div>
+
+      <div class="payment-method" id="paymentMethod">
+        <svg class="payment-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        <span class="payment-text">Pagado con <strong id="paymentType">Efectivo</strong></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="sedeInfo" class="sede-card hide">
+    <div class="sede-name" id="sedeName">Keicy Barbería</div>
+    <div class="sede-address" id="sedeAddress"></div>
+  </div>
+
+  <div id="actionsSection" class="actions hide">
+    <a id="reviewBtn" href="#" class="action-btn primary">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1L12 2z"/></svg>
+      Calificar experiencia
+    </a>
+    <a href="../reservar/" class="action-btn secondary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      Reservar próxima cita
+    </a>
+  </div>
+
+  <!-- Error -->
+  <div id="errorCard" class="error-card hide">
+    <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+    <div class="error-title">Recibo no encontrado</div>
+    <div class="error-text" id="errorText">No pudimos encontrar este recibo.</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const citaId = urlParams.get('c');
+
+  function formatCurrency(amount) {
+    return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(amount || 0);
+  }
+
+  function formatDate(dateStr) {
+    const date = new Date(dateStr + 'T12:00:00');
+    return date.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function formatTime(timeStr) {
+    if (!timeStr) return '';
+    const [h, m] = timeStr.split(':');
+    const hour = parseInt(h);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${m} ${ampm}`;
+  }
+
+  function getInitials(name) {
+    if (!name) return 'C';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
+
+  async function loadReceipt() {
+    if (!citaId) {
+      showError('No se especificó un recibo.');
+      return;
+    }
+
+    try {
+      const { data: cita, error } = await sb.from('citas')
+        .select(`
+          id, fecha, hora_inicio, precio, propina, metodo_pago, pagada_at, estado,
+          servicios_adicionales, barbero_id,
+          usuarios!citas_cliente_id_fkey(full_name, username, phone),
+          servicios(nombre, precio),
+          sucursales(nombre, direccion)
+        `)
+        .eq('id', citaId)
+        .maybeSingle();
+
+      if (error || !cita) {
+        showError('No encontramos este recibo.');
+        return;
+      }
+
+      // Get barber name
+      let barberoNombre = 'Keicy Barbería';
+      let barberoInitial = 'D';
+      if (cita.barbero_id) {
+        const { data: barbero } = await sb.from('usuarios')
+          .select('full_name, username')
+          .eq('id', cita.barbero_id)
+          .maybeSingle();
+        if (barbero) {
+          barberoNombre = barbero.full_name || barbero.username || 'Barbero';
+          barberoInitial = barberoNombre.charAt(0).toUpperCase();
+        }
+      }
+
+      // Build services list
+      const services = [];
+      if (cita.servicios) {
+        services.push({ nombre: cita.servicios.nombre, precio: cita.servicios.precio });
+      }
+      if (cita.servicios_adicionales && Array.isArray(cita.servicios_adicionales)) {
+        cita.servicios_adicionales.forEach(s => {
+          services.push({ nombre: s.nombre || s.name, precio: s.precio || s.price || 0 });
+        });
+      }
+
+      // Calculate totals
+      const subtotal = cita.precio || services.reduce((sum, s) => sum + (s.precio || 0), 0);
+      const propina = cita.propina || 0;
+      const total = subtotal + propina;
+
+      // Update UI
+      const clientName = cita.usuarios?.full_name || cita.usuarios?.username || 'Cliente';
+      document.getElementById('receiptNumber').textContent = `#${citaId.slice(-6).toUpperCase()}`;
+      document.getElementById('receiptDate').innerHTML = `${formatDate(cita.fecha)}<br>${formatTime(cita.hora_inicio)}`;
+
+      document.getElementById('clientName').textContent = clientName;
+      document.getElementById('clientAvatar').textContent = getInitials(clientName);
+      const phone = cita.usuarios?.phone || '';
+      if (phone) {
+        document.getElementById('clientPhone').textContent = phone;
+      }
+
+      document.getElementById('barberName').textContent = barberoNombre;
+      document.getElementById('barberAvatar').textContent = barberoInitial;
+
+      // Services list
+      const servicesHtml = services.map(s => `
+        <div class="service-item">
+          <span class="service-name">${s.nombre}</span>
+          <span class="service-price">${formatCurrency(s.precio)}</span>
+        </div>
+      `).join('');
+      document.getElementById('servicesList').innerHTML = servicesHtml || `<div class="service-item"><span class="service-name">Servicio</span><span class="service-price">${formatCurrency(subtotal)}</span></div>`;
+
+      // Totals
+      document.getElementById('subtotalValue').textContent = formatCurrency(subtotal);
+      if (propina > 0) {
+        document.getElementById('propinaRow').style.display = 'flex';
+        document.getElementById('propinaValue').textContent = formatCurrency(propina);
+      }
+      document.getElementById('totalValue').textContent = formatCurrency(total);
+
+      // Payment method
+      const metodoPago = cita.metodo_pago || 'efectivo';
+      const metodoLabels = { efectivo: 'Efectivo', debito: 'Tarjeta Débito', credito: 'Tarjeta Crédito', transferencia: 'Transferencia' };
+      document.getElementById('paymentType').textContent = metodoLabels[metodoPago] || metodoPago;
+
+      // Sede info
+      if (cita.sucursales) {
+        document.getElementById('sedeName').textContent = cita.sucursales.nombre || 'Keicy Barbería';
+        document.getElementById('sedeAddress').textContent = cita.sucursales.direccion || '';
+        document.getElementById('sedeInfo').classList.remove('hide');
+      }
+
+      // Review button
+      const reviewUrl = `../resena/?c=${citaId}` + (cita.barbero_id ? `&b=${cita.barbero_id}` : '');
+      document.getElementById('reviewBtn').href = reviewUrl;
+
+      // Show content
+      document.getElementById('loadingState').classList.add('hide');
+      document.getElementById('receiptCard').classList.remove('hide');
+      document.getElementById('actionsSection').classList.remove('hide');
+
+    } catch (err) {
+      console.error('Error loading receipt:', err);
+      showError('Error al cargar el recibo.');
+    }
+  }
+
+  function showError(message) {
+    document.getElementById('loadingState').classList.add('hide');
+    document.getElementById('errorText').textContent = message;
+    document.getElementById('errorCard').classList.remove('hide');
+  }
+
+  loadReceipt();
+</script>
+</body>
+</html>

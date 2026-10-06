@@ -1,0 +1,1821 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Keicy Barbería · Configuración</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/mobile-admin.css">
+<style>
+  body { background: var(--bg); min-height: 100vh; overflow-x: hidden; }
+  #app { display: flex; min-height: 100vh; min-height: 100dvh; }
+
+  /* Sidebar */
+  .sidebar {
+    width:60px; flex-shrink:0;
+    background:#FAFAFA;
+    border-right:1px solid var(--divider);
+    display:flex; flex-direction:column; align-items:center;
+    padding:20px 6px;
+    padding-top: calc(20px + var(--safe-top));
+    position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden; overflow-y:auto;
+    transition:width 0.28s cubic-bezier(.4,0,.2,1), padding 0.28s ease;
+  }
+  .sidebar.expanded { width:230px; align-items:stretch; padding:22px 16px; }
+  .sidebar-logo { display:block; cursor:pointer; margin:0 auto; }
+  .sidebar-logo-icon{ width:48px; height:48px; border-radius:12px; margin-bottom:26px; }
+  .sidebar-logo-full{ height:56px; margin-bottom:28px; display:none; border-radius:12px; }
+  .sidebar.expanded .sidebar-logo-icon { display:none; }
+  .sidebar.expanded .sidebar-logo-full { display:block; }
+  .nav-group { flex:1; display:flex; flex-direction:column; gap:3px; width:100%; min-width:0; }
+  .nav-link {
+    display:flex; align-items:center; gap:11px; justify-content:center;
+    width:40px; height:40px; margin:0 auto; padding:0; border-radius:11px;
+    font-size:13px; font-weight:600; color:#8A8780;
+    cursor:pointer; transition:background 0.15s ease, color 0.15s ease;
+    text-decoration:none; white-space:nowrap;
+  }
+  .sidebar.expanded .nav-link { justify-content:flex-start; width:100%; height:auto; margin:0; padding:9.5px 12px; }
+  .nav-link svg { width:22px; height:22px; flex-shrink:0; }
+  .nav-link:hover { background:var(--card); color:#111111; }
+  .nav-link.active { background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; }
+  .nav-link.active svg { stroke:#141414; }
+  .nav-label { opacity:0; max-width:0; overflow:hidden; transition:opacity 0.16s ease, max-width 0.26s ease; }
+  .sidebar.expanded .nav-label { opacity:1; max-width:170px; }
+  .nav-section-label { display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
+  .sidebar.expanded .nav-section-label { display:block; }
+  .sidebar-card { display:none; position:relative; align-items:center; gap:9px; padding:9px; border-radius:14px; background:var(--glass-2); border:1px solid var(--glass-border); margin-bottom:8px; transition:background 0.15s ease; }
+  .sidebar-card:hover { background:var(--glass-3); }
+  .sidebar.expanded .sidebar-card { display:flex; }
+  .sidebar-card-icon { width:32px; height:32px; border-radius:8px; background:rgba(255,255,255,0.04); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .sidebar-card-info { flex:1; min-width:0; }
+  .sidebar-card-name { font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-card-sub { font-size:10.5px; color:var(--text-secondary); }
+  .sidebar-card-avatar { width:32px; height:32px; border-radius:50%; background:var(--gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:800; flex-shrink:0; }
+  .sidebar-card-chevron { width:14px; height:14px; color:var(--text-secondary); flex-shrink:0; }
+  .sidebar-card-menu { display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--card); border:1px solid var(--glass-border); border-radius:12px; padding:6px; z-index:60; max-height:220px; overflow-y:auto; box-shadow:0 12px 30px rgba(0,0,0,0.4); }
+  .sidebar-card-menu.show { display:block; }
+  .sidebar-card-menu-item { padding:9px 10px; border-radius:8px; font-size:12px; font-weight:600; color:var(--text-secondary); cursor:pointer; }
+  .sidebar-card-menu-item:hover { background:var(--glass-2); color:var(--text); }
+  .sidebar-card-menu-item.active { color:var(--gold); font-weight:700; }
+  .plan-card { margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0; display:none; }
+  .sidebar.expanded .plan-card { display:block; }
+  .plan-card .label { font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--gold); text-transform:uppercase; }
+  .plan-card .sub { font-size:12px; color:var(--text-secondary); margin-top:6px; }
+  .sidebar-bottom { margin-top:auto; padding-top:12px; border-top:1px solid var(--divider); display:flex; flex-direction:column; gap:8px; width:100%; }
+  .logout-btn { font-size:12px; color:#EF5350; display:flex; align-items:center; justify-content:center; gap:8px; padding:10px; cursor:pointer; width:40px; height:40px; border-radius:10px; background:rgba(239,83,80,0.1); border:1px solid rgba(239,83,80,0.2); transition:all 0.25s ease; margin:0 auto; }
+  .sidebar.expanded .logout-btn { justify-content:flex-start; width:100%; height:auto; padding:10px 12px; margin:0; }
+  .logout-btn:hover { background:rgba(239,83,80,0.2); }
+  .logout-btn svg { width:18px; height:18px; flex-shrink:0; }
+  .logout-label { display:none; }
+  .sidebar.expanded .logout-label { display:inline; }
+
+  .main { flex: 1; min-width: 0; padding: 26px 32px 100px; max-width: 900px; }
+
+  .header-row { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; flex-wrap: wrap; }
+  .back-btn { width: 44px; height: 44px; border-radius: 14px; background: var(--card); border: 1px solid var(--divider); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); text-decoration: none; flex-shrink: 0; }
+  .back-btn svg { width: 20px; height: 20px; }
+  .header-text .title { font-size: 22px; font-weight: 800; }
+  .header-text .sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+  /* Secciones */
+  .config-section { margin-bottom: 28px; }
+  .section-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gold); margin-bottom: 12px; padding-left: 4px; }
+
+  .config-card { background: var(--card); border: 1px solid var(--divider); border-radius: 16px; overflow: hidden; }
+
+  .config-item { display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-bottom: 1px solid var(--divider); cursor: pointer; transition: background 0.15s; text-decoration: none; color: var(--text); }
+  .config-item:last-child { border-bottom: none; }
+  .config-item:hover { background: var(--card-2); }
+  .config-item.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+  .config-item.disabled:hover { background: transparent; }
+
+  .config-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(201,163,91,0.12); color: var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .config-icon svg { width: 20px; height: 20px; }
+  .config-icon.purple { background: rgba(168,85,247,0.12); color: #a855f7; }
+  .config-icon.blue { background: rgba(59,130,246,0.12); color: #3b82f6; }
+  .config-icon.green { background: rgba(34,197,94,0.12); color: #22c55e; }
+  .config-icon.red { background: rgba(239,68,68,0.12); color: #ef4444; }
+  .config-icon.orange { background: rgba(249,115,22,0.12); color: #f97316; }
+
+  .config-info { flex: 1; min-width: 0; }
+  .config-name { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .config-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+  .config-arrow { width: 18px; height: 18px; color: var(--text-secondary); flex-shrink: 0; }
+
+  .badge-soon { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; padding: 3px 8px; border-radius: 20px; background: rgba(201,163,91,0.15); color: var(--gold); }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: var(--card); border: 1px solid var(--divider); border-radius: 20px; width: 100%; max-width: 500px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+  .modal-header { padding: 20px; border-bottom: 1px solid var(--divider); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .modal-title { font-size: 18px; font-weight: 700; }
+  .modal-close { width: 36px; height: 36px; border-radius: 10px; background: var(--card-2); border: 1px solid var(--divider); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .modal-close svg { width: 18px; height: 18px; }
+  .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+  .modal-footer { padding: 16px 20px; border-top: 1px solid var(--divider); display: flex; gap: 10px; flex-shrink: 0; }
+  .modal-footer .btn { flex: 1; }
+
+  /* Form fields */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-secondary); margin-bottom: 8px; }
+  .field input, .field select, .field textarea { width: 100%; height: 48px; border-radius: 12px; padding: 0 14px; background: var(--card-2); border: 1px solid var(--divider); color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s; font-family: inherit; }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--gold); }
+  .field textarea { height: 100px; padding: 12px 14px; resize: vertical; }
+
+  .field-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .field-row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+  /* Toggle switch */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--divider); }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-info { flex: 1; }
+  .toggle-label { font-size: 14px; font-weight: 600; }
+  .toggle-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+  .switch { position: relative; width: 48px; height: 28px; border-radius: 999px; background: var(--divider); cursor: pointer; transition: background 0.2s; flex-shrink: 0; }
+  .switch.on { background: var(--success); }
+  .switch .knob { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform 0.2s; }
+  .switch.on .knob { transform: translateX(20px); }
+
+  /* Theme toggle */
+  .theme-toggle { display: flex; gap: 6px; background: var(--card-2); border-radius: 12px; padding: 4px; }
+  .theme-option { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-secondary); transition: all 0.2s ease; }
+  .theme-option svg { width: 16px; height: 16px; }
+  .theme-option.active { background: var(--gold); color: #141414; }
+  .theme-option.active svg { stroke: #141414; }
+
+  /* Hours row */
+  .hours-row { display: grid; grid-template-columns: 100px 1fr 1fr 90px; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--divider); }
+  .hours-row:last-child { border-bottom: none; }
+  .hours-row .dname { font-size: 12.5px; font-weight: 700; }
+  .hours-row input[type=time] { height: 38px; border-radius: 10px; background: var(--card-2); border: 1px solid var(--divider); color: var(--text); padding: 0 10px; font-size: 12.5px; width: 100%; }
+  .hours-row input[disabled] { opacity: .4; }
+
+  /* Sede card */
+  .sede-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 15px; background: var(--card-2); border: 1px solid var(--divider); margin-bottom: 10px; }
+  .sede-card.inactive { opacity: .5; }
+  .sede-pin { width: 38px; height: 38px; border-radius: 11px; background: rgba(201,163,91,0.12); color: var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .sede-pin svg { width: 18px; height: 18px; }
+  .sede-info { flex: 1; min-width: 0; }
+  .sede-name-row { display: flex; align-items: center; gap: 8px; }
+  .sede-name { font-size: 13.5px; font-weight: 700; }
+  .sede-badge { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--gold); background: rgba(201,163,91,0.12); border-radius: 999px; padding: 2px 8px; }
+  .sede-addr { font-size: 11.5px; color: var(--text-secondary); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sede-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .sede-actions button { height: 34px; padding: 0 12px; border-radius: 10px; background: var(--card); border: 1px solid var(--divider); color: var(--text); font-size: 11.5px; font-weight: 700; cursor: pointer; }
+  .sede-actions button:hover { border-color: var(--gold); }
+  .sede-actions button.danger:hover { border-color: var(--error); color: var(--error); }
+
+  /* Pay grid */
+  .pay-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .pay-chip { display: flex; align-items: center; gap: 9px; padding: 12px 14px; border-radius: 13px; background: var(--card-2); border: 1px solid var(--divider); cursor: pointer; font-size: 12.5px; font-weight: 600; transition: border-color 0.2s; }
+  .pay-chip.on { border-color: var(--gold); background: rgba(201,163,91,0.1); color: var(--gold); }
+  .pay-chip input { display: none; }
+
+  /* Photo field grid */
+  .photo-field-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 8px; }
+  .photo-field { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .photo-preview { width: 100%; aspect-ratio: 3/4; border-radius: 14px; background: var(--card-2); border: 1px solid var(--divider); display: flex; align-items: center; justify-content: center; color: var(--text-secondary); overflow: hidden; }
+  .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-preview svg { width: 22px; height: 22px; }
+  .photo-field-name { font-size: 10.5px; font-weight: 700; text-align: center; color: var(--text-secondary); }
+  .photo-field-actions { display: flex; gap: 8px; align-items: center; }
+  .photo-upload-btn { font-size: 11px; font-weight: 700; color: var(--gold); cursor: pointer; }
+  .photo-remove-btn { font-size: 11px; font-weight: 700; color: var(--text-secondary); cursor: pointer; }
+
+  /* Invite row */
+  .invite-row { display: flex; gap: 10px; align-items: center; }
+  .invite-row input { flex: 1; }
+  .copy-btn { height: 48px; padding: 0 16px; border-radius: 12px; background: var(--card-2); border: 1px solid var(--divider); color: var(--text); font-size: 12px; font-weight: 700; cursor: pointer; flex-shrink: 0; }
+  .copy-btn:hover { border-color: var(--gold); }
+
+  /* Barber foto row */
+  .barber-foto-row { display: flex; align-items: center; gap: 13px; padding: 10px 0; border-bottom: 1px solid var(--divider); }
+  .barber-foto-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .barber-foto-row:first-child { padding-top: 0; }
+  .barber-foto-fallback { width: 48px; height: 48px; border-radius: 13px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: var(--gold); background: rgba(201,163,91,0.12); }
+  .barber-foto-mid { flex: 1; min-width: 0; }
+  .barber-foto-name { font-size: 13.5px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .barber-foto-sede { font-size: 11px; color: var(--text-secondary); margin-top: 1px; }
+  .barber-foto-actions { display: flex; gap: 10px; flex-shrink: 0; }
+  .barber-foto-actions label, .barber-foto-actions span { font-size: 11.5px; font-weight: 700; cursor: pointer; }
+  .barber-foto-actions label { color: var(--gold); }
+  .barber-foto-actions span { color: var(--text-secondary); }
+
+  /* Version card */
+  .version-card { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-secondary); padding: 16px 18px; background: var(--card); border: 1px solid var(--divider); border-radius: 16px; margin-top: 20px; }
+  .version-card b { color: var(--text); font-weight: 700; }
+
+  /* Toast */
+  #toast { position: fixed; left: 50%; bottom: calc(var(--bottom-nav-total, 56px) + 20px); transform: translate(-50%, 20px); background: rgba(32,32,32,0.95); backdrop-filter: blur(14px); border: 1px solid var(--divider); border-radius: 14px; padding: 12px 18px; font-size: 13px; display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: all 0.3s ease; z-index: 200; }
+  #toast.show { opacity: 1; transform: translate(-50%, 0); }
+  .toast-icon { width: 20px; height: 20px; color: var(--success); }
+
+  /* Ocultar logout móvil en escritorio */
+  .mobile-logout-section { display: none; }
+
+  @media (max-width: 1023px) {
+    .sidebar { position: fixed; left: 0; top: 0; transform: translateX(-100%); z-index: 70; }
+    .sidebar.open { transform: translateX(0); }
+    .main { padding: 18px 18px 120px; }
+    /* Mostrar logout en móvil/tablet */
+    .mobile-logout-section { display: block; margin-top: 20px; }
+  }
+  @media (max-width: 767px) {
+    .main { padding: calc(16px + var(--safe-top)) var(--page-padding-x) calc(100px + var(--safe-bottom)); }
+    .field-row, .field-row3 { grid-template-columns: 1fr; }
+    .pay-grid { grid-template-columns: repeat(2, 1fr); }
+    .photo-field-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .photo-field-name { font-size: 9.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <script>
+    if (localStorage.getItem('dnNavExpanded') === '1' && window.innerWidth > 767) {
+      document.write('<style>@media(min-width:768px){#sidebar{width:230px!important;align-items:stretch!important;padding:22px 16px!important;}}</style>');
+    }
+  </script>
+  <div class="sidebar" id="sidebar">
+    <img src="../assets/apple-touch-icon-v2.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
+    <img src="../assets/logo-transparent.png" class="sidebar-logo sidebar-logo-full" alt="Keicy Barbería" id="sidebarLogoFull">
+    <div class="sidebar-card" id="sidebarCard" title="Cambiar de sede">
+      <div class="sidebar-card-avatar">DN</div>
+      <div class="sidebar-card-info">
+        <div class="sidebar-card-name" id="sidebarCardName">Keicy Barbería</div>
+        <div class="sidebar-card-sub" id="sidebarCardSede">—</div>
+      </div>
+      <svg class="sidebar-card-chevron" id="sidebarCardChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="sidebar-card-menu" id="sidebarCardMenu"></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-section-label">Gestionar</div>
+      <a class="nav-link" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Resumen
+      </a>
+      <a class="nav-link" href="calendario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        Agenda
+      </a>
+      <a class="nav-link" href="clientes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg>
+        Clientes
+      </a>
+      <a class="nav-link" href="caja.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        Cuadre de caja
+      </a>
+      <a class="nav-link" href="fidelizacion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z" stroke-linejoin="round"/></svg>
+        Fidelización
+      </a>
+      <div class="nav-section-label">Desempeño</div>
+      <a class="nav-link" href="servicios.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
+        Servicios
+      </a>
+      <a class="nav-link" href="barberos.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2M14.5 14.8c2 .3 3.7 1.7 4.5 4.2" stroke-linecap="round"/></svg>
+        Colaboradores
+      </a>
+      <a class="nav-link" href="inventario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+        Inventario
+      </a>
+      <a class="nav-link" href="reportes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7" stroke-linecap="round"/></svg>
+        Reportes
+      </a>
+      <a class="nav-link" href="marketing.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4h4l6 5V5L7 10H3z"/></svg>
+        Marketing
+      </a>
+      <a class="nav-link active" href="configuracion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="logout-label">Cerrar sesión</span>
+      </div>
+      <div class="plan-card">
+        <div class="label">👑 Plan de por vida</div>
+        <div class="sub">✓ Crisbo</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="header-row">
+      <a href="dashboard.html" class="back-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </a>
+      <div class="header-text">
+        <div class="title">Configuración</div>
+        <div class="sub">Ajusta el flujo operativo de tu negocio</div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 1: Gestión del Negocio -->
+    <div class="config-section">
+      <div class="section-title">Gestión del negocio</div>
+      <div class="config-card">
+        <a class="config-item" href="#" onclick="openModal('negocio'); return false;">
+          <div class="config-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="10" width="18" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Información del negocio</div>
+            <div class="config-desc">Nombre e Instagram de la marca</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('sucursales'); return false;">
+          <div class="config-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.6 7-11.5A7 7 0 0 0 5 9.5C5 14.4 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Sucursales</div>
+            <div class="config-desc">Sedes, direcciones y horarios</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="barberos.html">
+          <div class="config-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Colaboradores</div>
+            <div class="config-desc">Gestionar equipo de trabajo</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('adminSede'); return false;">
+          <div class="config-icon red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Administradores de sede</div>
+            <div class="config-desc">Permisos y accesos por sede</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('reservas'); return false;">
+          <div class="config-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M8 7h8M8 11h5"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Página de reservas</div>
+            <div class="config-desc">Título y mensaje de bienvenida</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 2: Operación Diaria -->
+    <div class="config-section">
+      <div class="section-title">Operación diaria</div>
+      <div class="config-card">
+        <a class="config-item" href="#" onclick="openModal('citas'); return false;">
+          <div class="config-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M8 3v4M16 3v4"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Política de citas</div>
+            <div class="config-desc">Duración, anticipación, solo horas</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('notificaciones'); return false;">
+          <div class="config-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Notificaciones</div>
+            <div class="config-desc">WhatsApp y alertas de demora</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 3: Dinero y Cobros -->
+    <div class="config-section">
+      <div class="section-title">Dinero y cobros</div>
+      <div class="config-card">
+        <a class="config-item" href="#" onclick="openModal('metodosPago'); return false;">
+          <div class="config-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Métodos de pago</div>
+            <div class="config-desc">Efectivo, tarjeta, transferencia</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('pagoAdminSede'); return false;">
+          <div class="config-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18"/><circle cx="12" cy="14" r="2"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Pago Admin Sede</div>
+            <div class="config-desc">Salario y comisión de productos</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="#" onclick="openModal('codigos'); return false;">
+          <div class="config-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2M15 8h6M18 5v6"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Códigos de invitación</div>
+            <div class="config-desc">Códigos para barbero y admin</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 4: Marketing y Crecimiento -->
+    <div class="config-section">
+      <div class="section-title">Marketing y crecimiento</div>
+      <div class="config-card">
+        <a class="config-item" href="marketing.html">
+          <div class="config-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Marketing</div>
+            <div class="config-desc">WhatsApp, Pixel y campañas</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+        <a class="config-item" href="fidelizacion.html">
+          <div class="config-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Fidelización</div>
+            <div class="config-desc">Puntos, retos y recompensas</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 5: Datos e Integraciones -->
+    <div class="config-section">
+      <div class="section-title">Datos e integraciones</div>
+      <div class="config-card">
+        <a class="config-item" href="#" id="migrationItem" onclick="openModal('migracion'); return false;" style="display:none;">
+          <div class="config-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">Migración de imágenes</div>
+            <div class="config-desc">Migrar avatares a Storage</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: Mensajes Automatizados -->
+    <div class="config-section">
+      <div class="section-title">Mensajes automatizados</div>
+      <div class="config-card">
+        <a class="config-item" href="#" onclick="openModal('whatsapp'); return false;">
+          <div class="config-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name">WhatsApp y correos</div>
+            <div class="config-desc">Confirmaciones, recordatorios, recibos</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 6: Apariencia -->
+    <div class="config-section">
+      <div class="section-title">Apariencia</div>
+      <div class="config-card">
+        <div class="config-item" style="cursor:default;">
+          <div class="config-icon" style="background:linear-gradient(135deg, #FFD700, #1a1a1a);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          </div>
+          <div class="config-info" style="flex:1;">
+            <div class="config-name">Tema de la app</div>
+            <div class="config-desc">Elige entre tema claro u oscuro</div>
+          </div>
+          <div class="theme-toggle" id="themeToggle" onclick="toggleThemeOption()">
+            <div class="theme-option" data-theme="light">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              <span>Claro</span>
+            </div>
+            <div class="theme-option" data-theme="dark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              <span>Oscuro</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Versión -->
+    <div class="version-card">
+      <span>Versión de la app instalada</span>
+      <b id="versionLabel">v3.0.0</b>
+    </div>
+
+    <!-- Cerrar sesión (visible en móvil) -->
+    <div class="config-section mobile-logout-section">
+      <div class="config-card">
+        <div class="config-item" onclick="cerrarSesionMobile()" style="cursor:pointer;">
+          <div class="config-icon red">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="config-info">
+            <div class="config-name" style="color:#ef4444;">Cerrar sesión</div>
+            <div class="config-desc">Salir de la cuenta actual</div>
+          </div>
+          <svg class="config-arrow" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de navegación inferior -->
+    <div class="dn-bottom-nav">
+      <a href="calendario.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        Agenda
+      </a>
+      <a href="caja.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        Cuadre de caja
+      </a>
+      <a href="dashboard.html" class="dn-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        Resumen
+      </a>
+      <a href="configuracion.html" class="dn-nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        Configuración
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Modal genérico -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Configuración</div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<!-- Modal para editar permisos de admin_sede -->
+<div class="modal-overlay" id="permisosModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="permisosModalTitle">Permisos de acceso</div>
+      <button class="modal-close" onclick="document.getElementById('permisosModal').classList.remove('show')">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="permisosUserId">
+      <div id="permisosGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;"></div>
+      <div class="field">
+        <label>Sedes asignadas</label>
+        <div id="sedesAsignadasList" style="margin-top:8px;"></div>
+      </div>
+    </div>
+    <div class="modal-footer" style="flex-wrap:wrap;gap:10px;">
+      <button type="button" style="padding:12px 16px;border-radius:12px;border:none;background:var(--error);color:#111111;font-weight:700;cursor:pointer;" id="eliminarAdminSedeBtn" onclick="eliminarAdminSedeDesdeModal()">Eliminar admin</button>
+      <div style="flex:1;"></div>
+      <button type="button" style="padding:12px 16px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="document.getElementById('permisosModal').classList.remove('show')">Cancelar</button>
+      <button type="button" style="padding:12px 20px;border-radius:12px;border:none;background:var(--gold);color:#141414;font-weight:700;cursor:pointer;" id="guardarPermisosBtn" onclick="guardarPermisos()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para editar sede -->
+<div class="modal-overlay" id="sedeModal" onclick="if(event.target===this)closeSedeModal()">
+  <div class="modal-box" style="max-width:540px;">
+    <div class="modal-header">
+      <div class="modal-title" id="sedeModalTitle">Nueva sede</div>
+      <button class="modal-close" onclick="closeSedeModal()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="sfId">
+      <div class="field"><label>Nombre de la sede</label><input type="text" id="sfNombre" placeholder="Ej. Keicy Barber Chapinero"></div>
+      <div class="field"><label>Dirección</label><input type="text" id="sfDireccion" placeholder="Calle 00 # 00-00, Bogotá"></div>
+      <div class="field-row">
+        <div class="field"><label>Teléfono</label><input type="text" id="sfTelefono" placeholder="601 000 0000"></div>
+        <div class="field"><label>WhatsApp</label><input type="text" id="sfWhatsapp" placeholder="3001234567"></div>
+      </div>
+      <div class="field" style="margin-bottom:6px;"><label>Horario de atención</label></div>
+      <div id="sfHoursList" style="margin-bottom:14px;"></div>
+
+      <div class="field" style="margin-bottom:10px;"><label>Fotos de la página de reservas</label></div>
+      <div class="photo-field-grid">
+        <div class="photo-field">
+          <div class="photo-preview" id="sfFotoFachadaPreview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-6h6v6"/></svg></div>
+          <div class="photo-field-name">Tarjeta de sede</div>
+          <div class="photo-field-actions">
+            <label class="photo-upload-btn">Subir<input type="file" accept="image/*" style="display:none;" onchange="handleSedeFoto(this,'sfFotoFachada')"></label>
+            <span class="photo-remove-btn" onclick="clearSedeFoto('sfFotoFachada')">Quitar</span>
+          </div>
+        </div>
+        <div class="photo-field">
+          <div class="photo-preview" id="sfFotoServicioPreview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 8l10 10M8 16l10-10"/></svg></div>
+          <div class="photo-field-name">Paso 1 · Servicio</div>
+          <div class="photo-field-actions">
+            <label class="photo-upload-btn">Subir<input type="file" accept="image/*" style="display:none;" onchange="handleSedeFoto(this,'sfFotoServicio')"></label>
+            <span class="photo-remove-btn" onclick="clearSedeFoto('sfFotoServicio')">Quitar</span>
+          </div>
+        </div>
+        <div class="photo-field">
+          <div class="photo-preview" id="sfFotoFechaPreview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg></div>
+          <div class="photo-field-name">Paso 3 · Fecha</div>
+          <div class="photo-field-actions">
+            <label class="photo-upload-btn">Subir<input type="file" accept="image/*" style="display:none;" onchange="handleSedeFoto(this,'sfFotoFecha')"></label>
+            <span class="photo-remove-btn" onclick="clearSedeFoto('sfFotoFecha')">Quitar</span>
+          </div>
+        </div>
+        <div class="photo-field">
+          <div class="photo-preview" id="sfFotoConfirmacionPreview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12.5l4.8 4.8L19.5 7" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="photo-field-name">Paso 4 · Confirmación</div>
+          <div class="photo-field-actions">
+            <label class="photo-upload-btn">Subir<input type="file" accept="image/*" style="display:none;" onchange="handleSedeFoto(this,'sfFotoConfirmacion')"></label>
+            <span class="photo-remove-btn" onclick="clearSedeFoto('sfFotoConfirmacion')">Quitar</span>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--text-secondary);margin:0 0 14px;">Máximo 3MB por imagen.</p>
+
+      <div class="field" style="margin-bottom:10px;"><label>Características de la sede</label></div>
+      <div class="toggle-row">
+        <div class="toggle-info"><div class="toggle-label">Todos los servicios</div></div>
+        <div class="switch on" id="sfCaracTodos" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+      </div>
+      <div class="toggle-row">
+        <div class="toggle-info"><div class="toggle-label">Parqueadero para carro</div></div>
+        <div class="switch" id="sfCaracCarro" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+      </div>
+      <div class="toggle-row" style="border-bottom:none;margin-bottom:14px;">
+        <div class="toggle-info"><div class="toggle-label">Parqueadero para moto</div></div>
+        <div class="switch" id="sfCaracMoto" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label>Calificación (0-5)</label><input type="number" id="sfCalificacion" min="0" max="5" step="0.1" placeholder="4.9"></div>
+        <div class="field"><label>Cantidad de reseñas</label><input type="number" id="sfResenas" min="0" placeholder="0"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Latitud</label><input type="text" id="sfLat" placeholder="4.6926"></div>
+        <div class="field"><label>Longitud</label><input type="text" id="sfLng" placeholder="-74.0453"></div>
+      </div>
+      <p style="font-size:11px;color:var(--text-secondary);margin:-8px 0 14px;">Opcional — para mostrar "A x km de ti".</p>
+
+      <div class="toggle-row">
+        <div class="toggle-info"><div class="toggle-label">Sede activa</div><div class="toggle-desc">Las sedes inactivas no aparecen para reservar.</div></div>
+        <div class="switch on" id="sfActiva" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+      </div>
+      <div class="toggle-row" style="border-bottom:none;">
+        <div class="toggle-info"><div class="toggle-label">Marcar como sede principal</div></div>
+        <div class="switch" id="sfPrincipal" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button style="flex:1;padding:14px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="closeSedeModal()">Cancelar</button>
+      <button style="flex:1;padding:14px;border-radius:12px;border:none;background:var(--gold);color:#141414;font-weight:700;cursor:pointer;" id="sedeSaveBtn" onclick="saveSede()">Guardar sede</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Agregar Método de Pago -->
+<div class="modal-overlay" id="addPayMethodModal" onclick="if(event.target===this)closeAddPayMethodModal()">
+  <div class="modal-box" style="max-width:340px;">
+    <div class="modal-header">
+      <div class="modal-title">Agregar método de pago</div>
+      <button class="modal-close" onclick="closeAddPayMethodModal()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Nombre del método</label>
+        <input type="text" id="newPayMethodName" placeholder="Ej: Bancolombia, Bold, etc.">
+      </div>
+      <div class="field">
+        <label>Icono (emoji)</label>
+        <input type="text" id="newPayMethodIcon" placeholder="💳" maxlength="2" style="font-size:20px;text-align:center;">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button style="flex:1;padding:12px;border-radius:10px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="closeAddPayMethodModal()">Cancelar</button>
+      <button style="flex:1;padding:12px;border-radius:10px;border:none;background:var(--gold);color:#141414;font-weight:700;cursor:pointer;" onclick="saveNewPayMethod()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast">
+  <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+  <span id="toastMsg">Guardado correctamente</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+const APP_VERSION = '2.9.0';
+const APP_BUILD_DATE = '30 ago 2026';
+document.getElementById('versionLabel').textContent = `v${APP_VERSION} · ${APP_BUILD_DATE}`;
+
+// Toast
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// Sidebar
+const sidebarEl = document.getElementById('sidebar');
+document.querySelectorAll('.nav-link').forEach(el => {
+  const lastNode = el.lastChild;
+  if (lastNode && lastNode.nodeType === 3 && lastNode.textContent.trim()) {
+    const span = document.createElement('span');
+    span.className = 'nav-label';
+    span.textContent = lastNode.textContent.trim();
+    el.replaceChild(span, lastNode);
+  }
+});
+function dnSetNavExpanded(exp) {
+  sidebarEl.classList.toggle('expanded', exp);
+  localStorage.setItem('dnNavExpanded', exp ? '1' : '0');
+}
+dnSetNavExpanded(localStorage.getItem('dnNavExpanded') === '1');
+document.getElementById('sidebarLogoIcon').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+document.getElementById('sidebarLogoFull').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+
+// Logout
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
+  if (confirm('¿Seguro que deseas cerrar sesión?')) {
+    dnClearSession();
+    window.location.href = '../auth.html';
+  }
+});
+
+// Logout móvil
+window.cerrarSesionMobile = function() {
+  if (confirm('¿Seguro que deseas cerrar sesión?')) {
+    dnClearSession();
+    window.location.href = '../auth.html';
+  }
+};
+
+const user = dnRequireAdmin();
+dnInitSidebarCard();
+
+// Mostrar migración solo para admins
+if (user?.role === 'admin') {
+  document.getElementById('migrationItem').style.display = 'flex';
+}
+
+// Constantes
+const DIAS = [
+  ['lunes','Lunes'], ['martes','Martes'], ['miercoles','Miércoles'], ['jueves','Jueves'],
+  ['viernes','Viernes'], ['sabado','Sábado'], ['domingo','Domingo']
+];
+const PAY_METHODS = [
+  { id:'efectivo', label:'💵 Efectivo' }, { id:'tarjeta', label:'💳 Tarjeta' },
+  { id:'nequi', label:'📱 Nequi' }, { id:'qr', label:'📷 QR Transferencia' }
+];
+const SEDE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s7-6.6 7-11.5A7 7 0 0 0 5 9.5C5 14.4 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+
+// Estado
+let sedes = [];
+let metodosPago = [];
+let metodosPagoCustom = [];
+let configData = {};
+
+// ===== MODALES =====
+window.openModal = async function(tipo) {
+  const overlay = document.getElementById('modalOverlay');
+  const title = document.getElementById('modalTitle');
+  const body = document.getElementById('modalBody');
+  const footer = document.getElementById('modalFooter');
+
+  switch(tipo) {
+    case 'negocio':
+      title.textContent = 'Información del negocio';
+      body.innerHTML = `
+        <div class="field"><label>Nombre del negocio</label><input type="text" id="cfgNombre" value="${configData.nombre_negocio || ''}"></div>
+        <div class="field" style="margin-bottom:0;"><label>Instagram</label><input type="text" id="cfgInstagram" value="${configData.instagram || ''}" placeholder="@keicybarberia"></div>
+      `;
+      footer.innerHTML = `
+        <button style="flex:1;padding:14px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="closeModal()">Cancelar</button>
+        <button style="flex:1;padding:14px;border-radius:12px;border:none;background:var(--gold);color:#141414;font-weight:700;cursor:pointer;" onclick="guardarNegocio()">Guardar</button>
+      `;
+      break;
+
+    case 'reservas':
+      const welcomeTitle = configData.welcome_title || '';
+      const welcomeMessage = configData.welcome_message || '';
+      title.textContent = 'Página de reservas';
+      body.innerHTML = `
+        <div class="field"><label>Título de bienvenida</label><input type="text" id="cfgWelcomeTitle" value="${welcomeTitle}" placeholder="Bienvenido a Keicy Barber"></div>
+        <div class="field" style="margin-bottom:0;"><label>Mensaje de bienvenida</label><input type="text" id="cfgWelcomeMessage" value="${welcomeMessage}" placeholder="Agenda tu cita en segundos"></div>
+      `;
+      footer.innerHTML = `
+        <button style="flex:1;padding:14px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="closeModal()">Cancelar</button>
+        <button style="flex:1;padding:14px;border-radius:12px;border:none;background:var(--gold);color:#141414;font-weight:700;cursor:pointer;" onclick="guardarReservas()">Guardar</button>
+      `;
+      break;
+
+    case 'citas':
+      title.textContent = 'Política de citas';
+      body.innerHTML = `
+        <div class="field-row3">
+          <div class="field"><label>Duración turno (min)</label><input type="number" id="cfgDuracion" value="${configData.duracion_turno_min || 60}" min="15" step="15"></div>
+          <div class="field"><label>Anticipación mín (h)</label><input type="number" id="cfgAntMin" value="${configData.anticipacion_min_horas ?? 1}" min="0"></div>
+          <div class="field"><label>Anticipación máx (días)</label><input type="number" id="cfgAntMax" value="${configData.anticipacion_max_dias ?? 30}" min="1"></div>
+        </div>
+        <div class="toggle-row" style="border-bottom:none;">
+          <div class="toggle-info"><div class="toggle-label">Citas solo a la hora en punto</div><div class="toggle-desc">No se permiten horarios como 9:30</div></div>
+          <div class="switch ${configData.solo_horas_en_punto ? 'on' : ''}" id="cfgSoloHoras" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+        </div>
+      `;
+      footer.innerHTML = `
+        <button style="flex:1;padding:14px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="closeModal()">Cancelar</button>
+        <button style="flex:1;padding:14px;border-radius:12px;border:none;background:var(--gold);color:#141414;font-weight:700;cursor:pointer;" onclick="guardarCitas()">Guardar</button>
+      `;
+      break;
+
+    case 'notificaciones':
+      title.textContent = 'Notificaciones';
+      body.innerHTML = `
+        <div class="toggle-row">
+          <div class="toggle-info"><div class="toggle-label">Recordatorio por WhatsApp</div><div class="toggle-desc">Botón de confirmación WhatsApp habilitado</div></div>
+          <div class="switch ${configData.notif_recordatorio_whatsapp ? 'on' : ''}" id="cfgNotifWa" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+        </div>
+        <div class="toggle-row" style="border-bottom:none;">
+          <div class="toggle-info"><div class="toggle-label">Alertas de demora</div><div class="toggle-desc">Aviso de retraso en el Centro de control</div></div>
+          <div class="switch ${configData.notif_alerta_demora ? 'on' : ''}" id="cfgNotifDemora" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+        </div>
+      `;
+      footer.innerHTML = `
+        <button style="flex:1;padding:14px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="closeModal()">Cancelar</button>
+        <button style="flex:1;padding:14px;border-radius:12px;border:none;background:var(--gold);color:#141414;font-weight:700;cursor:pointer;" onclick="guardarNotificaciones()">Guardar</button>
+      `;
+      break;
+
+    case 'metodosPago':
+      title.textContent = 'Métodos de pago';
+      renderMetodosPagoModal(body, footer);
+      break;
+
+    case 'codigos':
+      title.textContent = 'Códigos de invitación';
+      body.innerHTML = `
+        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:16px;">Se piden al crear una nueva cuenta de barbero o administrador.</p>
+        <div class="field">
+          <label>Código para barberos</label>
+          <div class="invite-row">
+            <input type="text" id="cfgCodigoBarbero" value="${configData.codigo_invitacion_barbero || ''}">
+            <button class="copy-btn" onclick="copyField('cfgCodigoBarbero')">Copiar</button>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Código para administradores</label>
+          <div class="invite-row">
+            <input type="text" id="cfgCodigoAdmin" value="${configData.codigo_invitacion_admin || ''}">
+            <button class="copy-btn" onclick="copyField('cfgCodigoAdmin')">Copiar</button>
+          </div>
+        </div>
+      `;
+      footer.innerHTML = `
+        <button style="flex:1;padding:14px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="closeModal()">Cancelar</button>
+        <button style="flex:1;padding:14px;border-radius:12px;border:none;background:var(--gold);color:#141414;font-weight:700;cursor:pointer;" onclick="guardarCodigos()">Guardar</button>
+      `;
+      break;
+
+    case 'sucursales':
+      title.textContent = 'Sucursales';
+      await loadSedes();
+      body.innerHTML = sedes.length ? sedes.map(s => `
+        <div class="sede-card ${s.activa ? '' : 'inactive'}">
+          <div class="sede-pin">${SEDE_ICON}</div>
+          <div class="sede-info">
+            <div class="sede-name-row">
+              <div class="sede-name">${s.nombre}</div>
+              ${s.principal ? '<span class="sede-badge">Principal</span>' : ''}
+              ${s.activa ? '' : '<span class="sede-badge" style="color:var(--text-secondary);background:var(--card-2);">Inactiva</span>'}
+            </div>
+            <div class="sede-addr">${s.direccion || 'Sin dirección'}</div>
+          </div>
+          <div class="sede-actions">
+            <button onclick="closeModal();openSedeModal('${s.id}')">Editar</button>
+            <button class="danger" onclick="deleteSede('${s.id}')">Eliminar</button>
+          </div>
+        </div>`).join('') : '<p style="font-size:13px;color:var(--text-secondary);">No hay sedes creadas.</p>';
+      footer.innerHTML = `
+        <button style="flex:1;padding:14px;border-radius:12px;border:1px dashed var(--divider);background:transparent;color:var(--gold);font-weight:700;cursor:pointer;" onclick="closeModal();openSedeModal()">+ Agregar sede</button>
+      `;
+      break;
+
+    case 'adminSede':
+      title.textContent = 'Administradores de sede';
+      body.innerHTML = '<p style="font-size:13px;color:var(--text-secondary);">Cargando...</p>';
+      footer.innerHTML = `<button style="flex:1;padding:14px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="closeModal()">Cerrar</button>`;
+      await loadAdminsSede(body);
+      break;
+
+    case 'pagoAdminSede':
+      title.textContent = 'Pago Admin Sede';
+      body.innerHTML = '<p style="font-size:13px;color:var(--text-secondary);">Cargando...</p>';
+      footer.innerHTML = `<button style="flex:1;padding:14px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="closeModal()">Cerrar</button>`;
+      await loadPagoAdminSede(body);
+      break;
+
+    case 'migracion':
+      title.textContent = 'Migración de imágenes';
+      body.innerHTML = `
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;">Migra los avatares de base64 (pesados) a Supabase Storage (URLs ligeras).</p>
+        <div id="migrationStatus" style="font-size:13px;margin-bottom:16px;"></div>
+      `;
+      footer.innerHTML = `
+        <button style="flex:1;padding:14px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="checkMigrationStatus()">Verificar estado</button>
+        <button style="flex:1;padding:14px;border-radius:12px;border:none;background:var(--gold);color:#141414;font-weight:700;cursor:pointer;" id="migrateBtn" onclick="migrateAllAvatars()">Migrar todo</button>
+      `;
+      checkMigrationStatus();
+      break;
+
+    case 'whatsapp':
+      title.textContent = 'Mensajes automáticos';
+      body.innerHTML = '<p style="font-size:13px;color:var(--text-secondary);">Cargando configuración...</p>';
+      footer.innerHTML = `<button style="flex:1;padding:14px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="closeModal()">Cerrar</button>`;
+      await loadWhatsAppConfig(body);
+      break;
+
+    default:
+      title.textContent = 'Configuración';
+      body.innerHTML = '<p>Contenido no disponible.</p>';
+      footer.innerHTML = `<button style="flex:1;padding:14px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="closeModal()">Cerrar</button>`;
+  }
+
+  overlay.classList.add('show');
+};
+
+window.closeModal = function() {
+  document.getElementById('modalOverlay').classList.remove('show');
+};
+
+// ===== GUARDAR FUNCIONES =====
+window.guardarNegocio = async function() {
+  const payload = {
+    nombre_negocio: document.getElementById('cfgNombre').value.trim(),
+    instagram: document.getElementById('cfgInstagram').value.trim(),
+    updated_at: new Date().toISOString()
+  };
+  try {
+    await sb.from('configuracion_negocio').update(payload).eq('id', true);
+    Object.assign(configData, payload);
+    showToast('Información guardada');
+    closeModal();
+  } catch (err) {
+    console.error(err);
+    showToast('Error al guardar');
+  }
+};
+
+window.guardarReservas = async function() {
+  const welcomeTitle = document.getElementById('cfgWelcomeTitle').value.trim();
+  const welcomeMessage = document.getElementById('cfgWelcomeMessage').value.trim();
+  try {
+    await sb.from('app_config').upsert({ key: 'welcome_title', value: welcomeTitle }, { onConflict: 'key' });
+    await sb.from('app_config').upsert({ key: 'welcome_message', value: welcomeMessage }, { onConflict: 'key' });
+    configData.welcome_title = welcomeTitle;
+    configData.welcome_message = welcomeMessage;
+    showToast('Configuración guardada');
+    closeModal();
+  } catch (err) {
+    console.error(err);
+    showToast('Error al guardar');
+  }
+};
+
+window.guardarCitas = async function() {
+  const payload = {
+    duracion_turno_min: Number(document.getElementById('cfgDuracion').value) || 60,
+    anticipacion_min_horas: Number(document.getElementById('cfgAntMin').value) || 0,
+    anticipacion_max_dias: Number(document.getElementById('cfgAntMax').value) || 30,
+    solo_horas_en_punto: document.getElementById('cfgSoloHoras').classList.contains('on'),
+    updated_at: new Date().toISOString()
+  };
+  try {
+    await sb.from('configuracion_negocio').update(payload).eq('id', true);
+    Object.assign(configData, payload);
+    showToast('Política de citas guardada');
+    closeModal();
+  } catch (err) {
+    console.error(err);
+    showToast('Error al guardar');
+  }
+};
+
+window.guardarNotificaciones = async function() {
+  const payload = {
+    notif_recordatorio_whatsapp: document.getElementById('cfgNotifWa').classList.contains('on'),
+    notif_alerta_demora: document.getElementById('cfgNotifDemora').classList.contains('on'),
+    updated_at: new Date().toISOString()
+  };
+  try {
+    await sb.from('configuracion_negocio').update(payload).eq('id', true);
+    Object.assign(configData, payload);
+    showToast('Notificaciones guardadas');
+    closeModal();
+  } catch (err) {
+    console.error(err);
+    showToast('Error al guardar');
+  }
+};
+
+window.guardarCodigos = async function() {
+  const payload = {
+    codigo_invitacion_barbero: document.getElementById('cfgCodigoBarbero').value.trim(),
+    codigo_invitacion_admin: document.getElementById('cfgCodigoAdmin').value.trim(),
+    updated_at: new Date().toISOString()
+  };
+  try {
+    await sb.from('configuracion_negocio').update(payload).eq('id', true);
+    Object.assign(configData, payload);
+    showToast('Códigos guardados');
+    closeModal();
+  } catch (err) {
+    console.error(err);
+    showToast('Error al guardar');
+  }
+};
+
+// ===== MÉTODOS DE PAGO =====
+function renderMetodosPagoModal(body, footer) {
+  let html = '<p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Activa los métodos que aceptas.</p>';
+  html += '<div class="pay-grid">';
+  PAY_METHODS.forEach(m => {
+    const isActive = metodosPago.includes(m.id);
+    html += `<label class="pay-chip ${isActive ? 'on' : ''}" id="pay-${m.id}"><input type="checkbox" value="${m.id}" ${isActive?'checked':''} onchange="togglePay('${m.id}')">${m.label}</label>`;
+  });
+  html += '</div>';
+
+  if (metodosPagoCustom.length) {
+    html += '<div style="margin-top:10px;">';
+    metodosPagoCustom.forEach(m => {
+      const isActive = metodosPago.includes(m.id);
+      html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <label class="pay-chip ${isActive ? 'on' : ''}" id="pay-${m.id}" style="flex:1;margin:0;"><input type="checkbox" value="${m.id}" ${isActive?'checked':''} onchange="togglePay('${m.id}')">${m.icono} ${m.nombre}</label>
+        <button onclick="deletePayMethod('${m.id}')" style="padding:6px 10px;border-radius:8px;border:1px solid rgba(239,83,80,0.3);background:rgba(239,83,80,0.1);color:#EF5350;font-size:11px;cursor:pointer;">✕</button>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  html += `<button type="button" onclick="openAddPayMethodModal()" style="margin-top:12px;padding:10px 16px;border-radius:10px;border:1px dashed var(--divider);background:transparent;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;width:100%;justify-content:center;">
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+    Agregar método de pago
+  </button>`;
+
+  body.innerHTML = html;
+  footer.innerHTML = `
+    <button style="flex:1;padding:14px;border-radius:12px;border:1px solid var(--divider);background:var(--card-2);color:var(--text);font-weight:600;cursor:pointer;" onclick="closeModal()">Cancelar</button>
+    <button style="flex:1;padding:14px;border-radius:12px;border:none;background:var(--gold);color:#141414;font-weight:700;cursor:pointer;" onclick="guardarMetodosPago()">Guardar</button>
+  `;
+}
+
+window.togglePay = function(id) {
+  document.getElementById(`pay-${id}`).classList.toggle('on');
+};
+
+window.guardarMetodosPago = async function() {
+  const newMetodos = [...document.querySelectorAll('#modalBody input:checked')].map(i => i.value);
+  try {
+    await sb.from('configuracion_negocio').update({
+      metodos_pago: newMetodos,
+      metodos_pago_custom: metodosPagoCustom,
+      updated_at: new Date().toISOString()
+    }).eq('id', true);
+    metodosPago = newMetodos;
+    showToast('Métodos de pago guardados');
+    closeModal();
+  } catch (err) {
+    console.error(err);
+    showToast('Error al guardar');
+  }
+};
+
+window.openAddPayMethodModal = function() {
+  document.getElementById('newPayMethodName').value = '';
+  document.getElementById('newPayMethodIcon').value = '💳';
+  document.getElementById('addPayMethodModal').classList.add('show');
+};
+
+window.closeAddPayMethodModal = function() {
+  document.getElementById('addPayMethodModal').classList.remove('show');
+};
+
+window.saveNewPayMethod = async function() {
+  const nombre = document.getElementById('newPayMethodName').value.trim();
+  const icono = document.getElementById('newPayMethodIcon').value.trim() || '💳';
+  if (!nombre) { showToast('Escribe un nombre'); return; }
+
+  const id = 'custom_' + nombre.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  if (PAY_METHODS.some(m => m.id === id) || metodosPagoCustom.some(m => m.id === id)) {
+    showToast('Ya existe ese método'); return;
+  }
+
+  metodosPagoCustom.push({ id, nombre, icono });
+  metodosPago.push(id);
+
+  try {
+    await sb.from('configuracion_negocio').update({
+      metodos_pago: metodosPago,
+      metodos_pago_custom: metodosPagoCustom,
+      updated_at: new Date().toISOString()
+    }).eq('id', true);
+    closeAddPayMethodModal();
+    openModal('metodosPago');
+    showToast('Método agregado');
+  } catch (err) {
+    console.error(err);
+    showToast('Error al guardar');
+  }
+};
+
+window.deletePayMethod = async function(id) {
+  if (!confirm('¿Eliminar este método de pago?')) return;
+  metodosPagoCustom = metodosPagoCustom.filter(m => m.id !== id);
+  metodosPago = metodosPago.filter(m => m !== id);
+  try {
+    await sb.from('configuracion_negocio').update({
+      metodos_pago: metodosPago,
+      metodos_pago_custom: metodosPagoCustom,
+      updated_at: new Date().toISOString()
+    }).eq('id', true);
+    openModal('metodosPago');
+    showToast('Método eliminado');
+  } catch (err) {
+    console.error(err);
+    showToast('Error al eliminar');
+  }
+};
+
+// ===== SUCURSALES =====
+async function loadSedes() {
+  try {
+    const { data, error } = await sb.from('sucursales').select('*').order('orden', { ascending: true });
+    if (error) throw error;
+    sedes = data || [];
+  } catch (err) {
+    console.error(err);
+    showToast('Error al cargar sedes');
+  }
+}
+
+let sedeFotos = { sfFotoFachada: null, sfFotoServicio: null, sfFotoFecha: null, sfFotoConfirmacion: null };
+const SEDE_FOTO_ICONS = {
+  sfFotoFachada: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 21V9l9-6 9 6v12"/><path d="M9 21v-6h6v6"/></svg>',
+  sfFotoServicio: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M8 8l10 10M8 16l10-10"/></svg>',
+  sfFotoFecha: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>',
+  sfFotoConfirmacion: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12.5l4.8 4.8L19.5 7"/></svg>'
+};
+
+function renderSedeFotoPreview(key) {
+  const el = document.getElementById(key + 'Preview');
+  el.innerHTML = sedeFotos[key] ? `<img src="${sedeFotos[key]}">` : SEDE_FOTO_ICONS[key];
+}
+
+window.handleSedeFoto = async function(input, key) {
+  const file = input.files[0];
+  input.value = '';
+  if (!file) return;
+  try {
+    sedeFotos[key] = await dnReadImageAsDataURL(file, 3);
+    renderSedeFotoPreview(key);
+  } catch (err) {
+    showToast(err.message === 'too-large' ? 'Imagen muy grande (máx 3MB)' : 'Error al leer imagen');
+  }
+};
+
+window.clearSedeFoto = function(key) {
+  sedeFotos[key] = null;
+  renderSedeFotoPreview(key);
+};
+
+function renderHoursInto(containerId, horario) {
+  document.getElementById(containerId).innerHTML = DIAS.map(([key, label]) => {
+    const h = horario[key] || { abre:'08:00', cierra:'20:00', cerrado:false };
+    return `
+      <div class="hours-row">
+        <div class="dname">${label}</div>
+        <input type="time" id="${containerId}-${key}-abre" value="${h.abre}" ${h.cerrado?'disabled':''}>
+        <input type="time" id="${containerId}-${key}-cierra" value="${h.cierra}" ${h.cerrado?'disabled':''}>
+        <div class="switch ${h.cerrado?'':'on'}" id="${containerId}-${key}-open" onclick="toggleDayOpen('${containerId}','${key}')"><div class="knob"></div></div>
+      </div>`;
+  }).join('');
+}
+
+window.toggleDayOpen = function(containerId, key) {
+  const sw = document.getElementById(`${containerId}-${key}-open`);
+  const nowOpen = sw.classList.toggle('on');
+  document.getElementById(`${containerId}-${key}-abre`).disabled = !nowOpen;
+  document.getElementById(`${containerId}-${key}-cierra`).disabled = !nowOpen;
+};
+
+function readHoursFrom(containerId) {
+  const horario = {};
+  DIAS.forEach(([key]) => {
+    horario[key] = {
+      abre: document.getElementById(`${containerId}-${key}-abre`).value,
+      cierra: document.getElementById(`${containerId}-${key}-cierra`).value,
+      cerrado: !document.getElementById(`${containerId}-${key}-open`).classList.contains('on')
+    };
+  });
+  return horario;
+}
+
+window.openSedeModal = function(id) {
+  const s = id ? sedes.find(x => x.id === id) : null;
+  document.getElementById('sedeModalTitle').textContent = s ? 'Editar sede' : 'Nueva sede';
+  document.getElementById('sfId').value = s?.id || '';
+  document.getElementById('sfNombre').value = s?.nombre || '';
+  document.getElementById('sfDireccion').value = s?.direccion || '';
+  document.getElementById('sfTelefono').value = s?.telefono || '';
+  document.getElementById('sfWhatsapp').value = s?.whatsapp || '';
+  document.getElementById('sfActiva').classList.toggle('on', s ? !!s.activa : true);
+  document.getElementById('sfPrincipal').classList.toggle('on', !!s?.principal);
+  const carac = s?.caracteristicas || { todos_los_servicios:true, parqueadero_carro:false, parqueadero_moto:false };
+  document.getElementById('sfCaracTodos').classList.toggle('on', !!carac.todos_los_servicios);
+  document.getElementById('sfCaracCarro').classList.toggle('on', !!carac.parqueadero_carro);
+  document.getElementById('sfCaracMoto').classList.toggle('on', !!carac.parqueadero_moto);
+  document.getElementById('sfCalificacion').value = s?.calificacion ?? 5.0;
+  document.getElementById('sfResenas').value = s?.resenas_count ?? 0;
+  document.getElementById('sfLat').value = s?.lat ?? '';
+  document.getElementById('sfLng').value = s?.lng ?? '';
+  renderHoursInto('sfHoursList', s?.horario || {});
+  sedeFotos = {
+    sfFotoFachada: s?.foto_fachada || null,
+    sfFotoServicio: s?.foto_hero_servicio || null,
+    sfFotoFecha: s?.foto_hero_fecha || null,
+    sfFotoConfirmacion: s?.foto_hero_confirmacion || null
+  };
+  Object.keys(sedeFotos).forEach(renderSedeFotoPreview);
+  document.getElementById('sedeModal').classList.add('show');
+};
+
+window.closeSedeModal = function() {
+  document.getElementById('sedeModal').classList.remove('show');
+};
+
+window.saveSede = async function() {
+  const id = document.getElementById('sfId').value || null;
+  const nombre = document.getElementById('sfNombre').value.trim();
+  if (!nombre) { showToast('Ponle un nombre a la sede'); return; }
+
+  const btn = document.getElementById('sedeSaveBtn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+
+  const payload = {
+    nombre,
+    direccion: document.getElementById('sfDireccion').value.trim(),
+    telefono: document.getElementById('sfTelefono').value.trim(),
+    whatsapp: document.getElementById('sfWhatsapp').value.trim(),
+    horario: readHoursFrom('sfHoursList'),
+    foto_fachada: sedeFotos.sfFotoFachada,
+    foto_hero_servicio: sedeFotos.sfFotoServicio,
+    foto_hero_fecha: sedeFotos.sfFotoFecha,
+    foto_hero_confirmacion: sedeFotos.sfFotoConfirmacion,
+    caracteristicas: {
+      todos_los_servicios: document.getElementById('sfCaracTodos').classList.contains('on'),
+      parqueadero_carro: document.getElementById('sfCaracCarro').classList.contains('on'),
+      parqueadero_moto: document.getElementById('sfCaracMoto').classList.contains('on')
+    },
+    calificacion: Number(document.getElementById('sfCalificacion').value) || 5.0,
+    resenas_count: Number(document.getElementById('sfResenas').value) || 0,
+    lat: document.getElementById('sfLat').value.trim() ? Number(document.getElementById('sfLat').value) : null,
+    lng: document.getElementById('sfLng').value.trim() ? Number(document.getElementById('sfLng').value) : null,
+    activa: document.getElementById('sfActiva').classList.contains('on'),
+    principal: document.getElementById('sfPrincipal').classList.contains('on')
+  };
+
+  try {
+    if (payload.principal) {
+      await sb.from('sucursales').update({ principal:false }).neq('id', id || '00000000-0000-0000-0000-000000000000');
+    }
+    if (id) {
+      await sb.from('sucursales').update(payload).eq('id', id);
+    } else {
+      payload.orden = sedes.length;
+      await sb.from('sucursales').insert(payload);
+    }
+    closeSedeModal();
+    showToast('Sede guardada');
+  } catch (err) {
+    console.error(err);
+    showToast('Error al guardar');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar sede';
+  }
+};
+
+window.deleteSede = async function(id) {
+  const s = sedes.find(x => x.id === id);
+  if (!s) return;
+  if (sedes.length <= 1) { showToast('Debe existir al menos una sede'); return; }
+  if (!confirm(`¿Eliminar "${s.nombre}"?`)) return;
+  try {
+    await sb.from('sucursales').delete().eq('id', id);
+    showToast('Sede eliminada');
+    openModal('sucursales');
+  } catch (err) {
+    console.error(err);
+    showToast('No se pudo eliminar (puede tener citas o barberos asignados)');
+  }
+};
+
+// ===== ADMIN SEDE =====
+async function loadAdminsSede(container) {
+  try {
+    const { data: admins, error } = await sb.from('usuarios').select('id, full_name, username, phone').eq('role', 'admin_sede').order('full_name');
+    if (error) throw error;
+
+    if (!admins?.length) {
+      container.innerHTML = '<p style="font-size:13px;color:var(--text-secondary);">No hay administradores de sede. Puedes crear uno desde <a href="barberos.html" style="color:var(--gold);">Colaboradores</a>.</p>';
+      return;
+    }
+
+    const { data: asignaciones } = await sb.from('admin_sede_sedes_asignadas').select('usuario_id, sucursal_id, sucursales!inner(nombre)').eq('activo', true);
+    const sedesPorAdmin = {};
+    (asignaciones || []).forEach(a => {
+      if (!sedesPorAdmin[a.usuario_id]) sedesPorAdmin[a.usuario_id] = [];
+      sedesPorAdmin[a.usuario_id].push(a.sucursales.nombre);
+    });
+
+    container.innerHTML = admins.map(admin => {
+      const sedess = sedesPorAdmin[admin.id] || [];
+      return `
+        <div class="barber-foto-row">
+          <div class="barber-foto-fallback">${dnInitials(admin.full_name || admin.username)}</div>
+          <div class="barber-foto-mid">
+            <div class="barber-foto-name">${admin.full_name || admin.username}</div>
+            <div class="barber-foto-sede">${sedess.length ? sedess.join(', ') : 'Sin sedes asignadas'}</div>
+          </div>
+          <div class="barber-foto-actions">
+            <span style="color:var(--gold);cursor:pointer;" onclick="closeModal();editAdminSede('${admin.id}', '${(admin.full_name || admin.username).replace(/'/g, "\\'")}')">Editar</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = '<p style="color:var(--error);">Error al cargar</p>';
+  }
+}
+
+let sedesDisponibles = [];
+let currentAdminSedeName = '';
+
+window.editAdminSede = async function(userId, userName) {
+  document.getElementById('permisosUserId').value = userId;
+  currentAdminSedeName = userName || '';
+  document.getElementById('permisosModalTitle').textContent = 'Permisos de ' + (userName || 'Admin');
+
+  const permisos = await dnGetPermisosAdminSede(userId);
+  const grid = document.getElementById('permisosGrid');
+  grid.innerHTML = MODULOS_ADMIN_SEDE.map(m => `
+    <label style="display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--card-2);border:1px solid var(--divider);cursor:pointer;">
+      <input type="checkbox" id="perm_${m.id}" ${permisos[m.id] !== false ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--gold);">
+      <span style="font-size:16px;">${m.icono}</span>
+      <span style="font-size:13px;font-weight:600;">${m.nombre}</span>
+    </label>
+  `).join('');
+
+  if (!sedesDisponibles.length) {
+    const { data } = await sb.from('sucursales').select('id, nombre').eq('activa', true).order('orden');
+    sedesDisponibles = data || [];
+  }
+
+  const { data: asignadas } = await sb.from('admin_sede_sedes_asignadas').select('sucursal_id').eq('usuario_id', userId).eq('activo', true);
+  const sedesAsignadas = (asignadas || []).map(a => a.sucursal_id);
+
+  document.getElementById('sedesAsignadasList').innerHTML = sedesDisponibles.map(s => `
+    <label style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--divider);">
+      <input type="checkbox" class="sede-check" data-sede="${s.id}" ${sedesAsignadas.includes(s.id) ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--gold);">
+      <span style="font-size:13px;font-weight:600;">${s.nombre}</span>
+    </label>
+  `).join('');
+
+  document.getElementById('permisosModal').classList.add('show');
+};
+
+window.guardarPermisos = async function() {
+  const userId = document.getElementById('permisosUserId').value;
+  const btn = document.getElementById('guardarPermisosBtn');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+
+  try {
+    const permisos = {};
+    MODULOS_ADMIN_SEDE.forEach(m => {
+      permisos[m.id] = document.getElementById('perm_' + m.id).checked;
+    });
+    await dnGuardarPermisosAdminSede(userId, permisos);
+
+    await sb.from('admin_sede_sedes_asignadas').update({ activo: false }).eq('usuario_id', userId);
+    const checksSeleccionados = document.querySelectorAll('.sede-check:checked');
+    for (const check of checksSeleccionados) {
+      const sedeId = check.dataset.sede;
+      const { data: existing } = await sb.from('admin_sede_sedes_asignadas').select('id').eq('usuario_id', userId).eq('sucursal_id', sedeId).limit(1);
+      if (existing?.length) {
+        await sb.from('admin_sede_sedes_asignadas').update({ activo: true }).eq('id', existing[0].id);
+      } else {
+        await sb.from('admin_sede_sedes_asignadas').insert({ usuario_id: userId, sucursal_id: sedeId, activo: true });
+      }
+    }
+
+    showToast('Permisos guardados');
+    document.getElementById('permisosModal').classList.remove('show');
+  } catch (err) {
+    console.error(err);
+    showToast('Error al guardar');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Guardar';
+  }
+};
+
+window.eliminarAdminSedeDesdeModal = async function() {
+  const userId = document.getElementById('permisosUserId').value;
+  if (!userId) return;
+  if (!confirm('¿Eliminar a ' + (currentAdminSedeName || 'este admin') + ' como administrador de sede?')) return;
+
+  try {
+    await sb.from('admin_sede_permisos').delete().eq('usuario_id', userId);
+    await sb.from('admin_sede_sedes_asignadas').delete().eq('usuario_id', userId);
+    await sb.from('usuarios').update({ role: 'barbero', password_hash: null }).eq('id', userId);
+    showToast('Admin eliminado');
+    document.getElementById('permisosModal').classList.remove('show');
+  } catch (err) {
+    console.error(err);
+    showToast('Error al eliminar');
+  }
+};
+
+// ===== PAGO ADMIN SEDE =====
+async function loadPagoAdminSede(container) {
+  try {
+    const { data: admins, error } = await sb.from('usuarios').select('id, full_name, username, config_pago').eq('role', 'admin_sede').order('full_name');
+    if (error) throw error;
+
+    if (!admins?.length) {
+      container.innerHTML = '<p style="font-size:13px;color:var(--text-secondary);">No hay administradores de sede.</p>';
+      return;
+    }
+
+    container.innerHTML = admins.map(admin => {
+      const config = admin.config_pago || {};
+      const salario = config.salario_diario || 0;
+      const comision = config.comision_productos_pct || 0;
+      const nombre = admin.full_name || admin.username;
+      return `
+        <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--divider);">
+          <div class="barber-foto-fallback" style="width:40px;height:40px;font-size:12px;">${dnInitials(nombre)}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:8px;">${nombre}</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <label style="font-size:10px;color:var(--text-secondary);text-transform:uppercase;">Salario diario</label>
+                <input type="number" class="pago-salario" data-id="${admin.id}" value="${salario}" placeholder="50000" style="width:100%;height:36px;border-radius:10px;padding:0 10px;background:var(--card-2);border:1px solid var(--divider);color:var(--text);font-size:13px;margin-top:4px;">
+              </div>
+              <div>
+                <label style="font-size:10px;color:var(--text-secondary);text-transform:uppercase;">Comisión productos %</label>
+                <input type="number" class="pago-comision" data-id="${admin.id}" value="${comision}" placeholder="10" min="0" max="100" style="width:100%;height:36px;border-radius:10px;padding:0 10px;background:var(--card-2);border:1px solid var(--divider);color:var(--text);font-size:13px;margin-top:4px;">
+              </div>
+            </div>
+          </div>
+          <button onclick="guardarPagoAdmin('${admin.id}')" style="padding:10px 16px;border-radius:10px;border:none;background:var(--gold);color:#141414;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">Guardar</button>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = '<p style="color:var(--error);">Error al cargar</p>';
+  }
+}
+
+window.guardarPagoAdmin = async function(userId) {
+  const salarioInput = document.querySelector(`.pago-salario[data-id="${userId}"]`);
+  const comisionInput = document.querySelector(`.pago-comision[data-id="${userId}"]`);
+  const salario = parseInt(salarioInput.value) || 0;
+  const comision = parseInt(comisionInput.value) || 0;
+
+  try {
+    await sb.from('usuarios').update({ config_pago: { salario_diario: salario, comision_productos_pct: comision } }).eq('id', userId);
+    showToast('Pago configurado');
+  } catch (err) {
+    console.error(err);
+    showToast('Error al guardar');
+  }
+};
+
+// ===== MIGRACIÓN =====
+window.checkMigrationStatus = async function() {
+  const statusEl = document.getElementById('migrationStatus');
+  statusEl.innerHTML = '<span style="color:var(--text-secondary);">Verificando...</span>';
+
+  try {
+    const { data: usuarios, error } = await sb.from('usuarios').select('id, avatar_url').not('avatar_url', 'is', null);
+    if (error) throw error;
+
+    const base64Count = usuarios.filter(u => u.avatar_url?.startsWith('data:')).length;
+    const urlCount = usuarios.filter(u => u.avatar_url && !u.avatar_url.startsWith('data:')).length;
+
+    if (base64Count === 0) {
+      statusEl.innerHTML = `<span style="color:var(--success);">✓ Migración completa.</span> ${urlCount} avatares en Storage.`;
+      document.getElementById('migrateBtn').style.display = 'none';
+    } else {
+      statusEl.innerHTML = `<span style="color:var(--gold);">⚠ Pendiente:</span> ${base64Count} en base64, ${urlCount} migrados.`;
+    }
+  } catch (err) {
+    console.error(err);
+    statusEl.innerHTML = '<span style="color:var(--error);">Error al verificar</span>';
+  }
+};
+
+window.migrateAllAvatars = async function() {
+  const statusEl = document.getElementById('migrationStatus');
+  const btn = document.getElementById('migrateBtn');
+  btn.disabled = true; btn.textContent = 'Migrando...';
+
+  try {
+    const { data: usuarios, error } = await sb.from('usuarios').select('id, avatar_url').like('avatar_url', 'data:%');
+    if (error) throw error;
+
+    if (!usuarios?.length) {
+      statusEl.innerHTML = '<span style="color:var(--success);">✓ No hay avatares para migrar.</span>';
+      btn.style.display = 'none';
+      return;
+    }
+
+    let migrated = 0, failed = 0;
+    for (const u of usuarios) {
+      statusEl.innerHTML = `Migrando ${migrated + failed + 1}/${usuarios.length}...`;
+      try {
+        const newUrl = await dnMigrateAvatarToStorage(u.id, u.avatar_url);
+        if (newUrl) migrated++; else failed++;
+      } catch (e) {
+        console.error('Error migrando', u.id, e);
+        failed++;
+      }
+    }
+
+    statusEl.innerHTML = `<span style="color:var(--success);">✓ Completado:</span> ${migrated} exitosos, ${failed} fallidos.`;
+    if (failed === 0) btn.style.display = 'none';
+  } catch (err) {
+    console.error(err);
+    statusEl.innerHTML = '<span style="color:var(--error);">Error durante migración</span>';
+  } finally {
+    btn.disabled = false;
+    if (btn.textContent === 'Migrando...') btn.textContent = 'Migrar todo';
+  }
+};
+
+// ===== UTILS =====
+window.copyField = function(id) {
+  const el = document.getElementById(id);
+  el.select();
+  navigator.clipboard?.writeText(el.value).then(() => showToast('Copiado'));
+};
+
+// ===== CARGA INICIAL =====
+async function loadConfig() {
+  try {
+    const { data, error } = await sb.from('configuracion_negocio').select('*').eq('id', true).maybeSingle();
+    if (error) throw error;
+    if (!data) { showToast('No encontramos la configuración'); return; }
+
+    configData = data;
+    metodosPago = data.metodos_pago || [];
+    metodosPagoCustom = data.metodos_pago_custom || [];
+
+    const { data: welcomeData } = await sb.from('app_config').select('key, value').in('key', ['welcome_title', 'welcome_message']);
+    if (welcomeData) {
+      for (const item of welcomeData) {
+        configData[item.key] = item.value || '';
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    showToast('Error al cargar configuración');
+  }
+}
+
+loadConfig();
+
+// ===== THEME TOGGLE =====
+function initThemeToggle() {
+  const currentTheme = window.dnGetTheme ? window.dnGetTheme() : 'light';
+  const toggle = document.getElementById('themeToggle');
+  if (!toggle) return;
+
+  toggle.querySelectorAll('.theme-option').forEach(opt => {
+    opt.classList.toggle('active', opt.dataset.theme === currentTheme);
+  });
+}
+
+function toggleThemeOption() {
+  const toggle = document.getElementById('themeToggle');
+  const options = toggle.querySelectorAll('.theme-option');
+  const currentTheme = window.dnGetTheme ? window.dnGetTheme() : 'light';
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+  if (window.dnSetTheme) {
+    window.dnSetTheme(newTheme);
+  }
+
+  options.forEach(opt => {
+    opt.classList.toggle('active', opt.dataset.theme === newTheme);
+  });
+
+  showToast(`Tema ${newTheme === 'dark' ? 'oscuro' : 'claro'} activado`);
+}
+
+// Inicializar al cargar
+document.addEventListener('DOMContentLoaded', initThemeToggle);
+
+// ===== MENSAJES AUTOMATIZADOS =====
+const WHATSAPP_FUNCTIONS = [
+  {
+    id: 'whatsapp_post_pago_activo',
+    type: 'config',
+    name: 'WhatsApp post-pago',
+    desc: 'Envía mensaje de agradecimiento después de cobrar con link al recibo y a dejar reseña.',
+    icon: '💬',
+    category: 'whatsapp'
+  },
+  {
+    id: 'whatsapp-reminder-cron',
+    type: 'cron',
+    name: 'WhatsApp recordatorio 2h',
+    desc: 'Envía confirmación de cita 2 horas antes con botones para confirmar o cancelar.',
+    icon: '⏰',
+    category: 'whatsapp'
+  },
+  {
+    id: 'email_confirmacion_activo',
+    type: 'config',
+    name: 'Correo de confirmación',
+    desc: 'Envía email al agendar cita con detalles, links al calendario y opción de cancelar.',
+    icon: '📧',
+    category: 'email'
+  },
+  {
+    id: 'email_recibo_activo',
+    type: 'config',
+    name: 'Correo de recibo',
+    desc: 'Envía email después del servicio con el recibo digital y link para dejar reseña.',
+    icon: '🧾',
+    category: 'email'
+  }
+];
+
+let whatsappConfigCache = {};
+
+async function loadWhatsAppConfig(container) {
+  try {
+    // Cargar estado de configuracion_global
+    const { data: configs } = await sb.from('configuracion_global').select('key, value');
+    const configMap = {};
+    (configs || []).forEach(c => { configMap[c.key] = c.value; });
+
+    // Cargar estado de cron jobs via RPC
+    const { data: cronJobs } = await sb.rpc('get_whatsapp_cron_status');
+    const cronMap = {};
+    (cronJobs || []).forEach(j => { cronMap[j.jobname] = j.active; });
+
+    whatsappConfigCache = { configs: configMap, crons: cronMap };
+
+    const whatsappFns = WHATSAPP_FUNCTIONS.filter(fn => fn.category === 'whatsapp');
+    const emailFns = WHATSAPP_FUNCTIONS.filter(fn => fn.category === 'email');
+
+    const renderToggle = (fn) => {
+      const isActive = fn.type === 'config'
+        ? configMap[fn.id] === true
+        : cronMap[fn.id] === true;
+      return `
+        <div class="toggle-row">
+          <div class="toggle-info">
+            <div class="toggle-label">${fn.icon} ${fn.name}</div>
+            <div class="toggle-desc">${fn.desc}</div>
+          </div>
+          <div class="switch ${isActive ? 'on' : ''}" id="wa_${fn.id.replace(/-/g, '_')}" onclick="toggleWhatsAppFunction('${fn.id}', '${fn.type}', this)">
+            <div class="knob"></div>
+          </div>
+        </div>
+      `;
+    };
+
+    container.innerHTML = `
+      <p style="font-size:12px;color:var(--text-secondary);margin-bottom:20px;">
+        Activa o desactiva los mensajes automáticos. Los cambios se aplican inmediatamente.
+      </p>
+
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:16px;">💬</span> WhatsApp
+      </div>
+      ${whatsappFns.map(renderToggle).join('')}
+
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--gold);margin:24px 0 12px;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:16px;">📧</span> Correo electrónico
+      </div>
+      ${emailFns.map(renderToggle).join('')}
+
+      <div style="margin-top:24px;padding:16px;background:rgba(201,163,91,0.08);border:1px solid rgba(201,163,91,0.2);border-radius:12px;">
+        <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:10px;">💡 ¿Qué hace cada función?</div>
+        <div style="font-size:11.5px;color:var(--text-secondary);line-height:1.6;">
+          <strong>WhatsApp post-pago:</strong> Mensaje al cobrar con total, link al recibo y reseña.<br>
+          <strong>WhatsApp recordatorio:</strong> Confirmación 2h antes con botones para confirmar/cancelar.<br><br>
+          <strong>Correo confirmación:</strong> Email al agendar con detalles, calendario y opción de cancelar.<br>
+          <strong>Correo recibo:</strong> Email después del servicio con recibo digital y link a reseña.
+        </div>
+      </div>
+    `;
+  } catch (err) {
+    console.error('Error cargando config WhatsApp:', err);
+    container.innerHTML = `<p style="color:var(--error);">Error al cargar la configuración. ${err.message}</p>`;
+  }
+}
+
+window.toggleWhatsAppFunction = async function(id, type, switchEl) {
+  const isCurrentlyOn = switchEl.classList.contains('on');
+  const newValue = !isCurrentlyOn;
+
+  // Feedback visual inmediato
+  switchEl.classList.toggle('on', newValue);
+  switchEl.style.opacity = '0.5';
+  switchEl.style.pointerEvents = 'none';
+
+  try {
+    if (type === 'config') {
+      // Actualizar configuracion_global
+      await sb.from('configuracion_global')
+        .upsert({ key: id, value: newValue, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+    } else if (type === 'cron') {
+      // Activar/desactivar cron job via RPC
+      await sb.rpc('toggle_whatsapp_cron', { p_jobname: id, p_active: newValue });
+    }
+
+    showToast(newValue ? 'Función activada' : 'Función pausada');
+  } catch (err) {
+    console.error('Error toggling WhatsApp function:', err);
+    // Revertir cambio visual
+    switchEl.classList.toggle('on', isCurrentlyOn);
+    showToast('Error al cambiar estado');
+  } finally {
+    switchEl.style.opacity = '1';
+    switchEl.style.pointerEvents = 'auto';
+  }
+};
+</script>
+
+<script src="../assets/mobile-nav.js"></script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+</body>
+</html>

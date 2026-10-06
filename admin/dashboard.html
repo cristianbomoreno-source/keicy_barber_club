@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://qguxzopvfjmivbngccwz.supabase.co" crossorigin>
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#0A0A0C">
+<title>Keicy Barbería · Resumen</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/mobile-admin.css">
+<link rel="stylesheet" href="../assets/mobile-admin-premium.css">
+<style>
+  body{ overflow-x:hidden; }
+
+  #app{ display:flex; min-height:100vh; min-height:100dvh; }
+
+  /* ---- Sidebar: barra de íconos colapsable, se expande al tocar el logo ---- */
+  .sidebar{
+    width:60px; flex-shrink:0;
+    background:var(--surface);
+    border-right:1px solid var(--divider);
+    display:flex; flex-direction:column; align-items:center;
+    padding:20px 6px;
+    padding-top: calc(20px + var(--safe-top));
+    position:sticky; top:0; height:100vh; height:100dvh; overflow:hidden; overflow-y:auto;
+    transition:width 0.28s cubic-bezier(.4,0,.2,1), padding 0.28s ease;
+  }
+  .sidebar.expanded{ width:230px; align-items:stretch; padding:22px 16px; }
+  .sidebar-toggle-btn{ width:40px; height:40px; border-radius:12px; background:var(--card); border:1px solid var(--divider); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+  .sidebar-toggle-btn svg{ width:18px; height:18px; }
+  .sidebar-logo{ display:block; cursor:pointer; margin:0 auto; border-radius:12px; }
+  .sidebar-logo-icon{ width:48px; height:48px; border-radius:12px; margin-bottom:26px; }
+  .sidebar-logo-full{ height:56px; margin-bottom:28px; display:none; border-radius:12px; }
+  .sidebar.expanded .sidebar-logo-icon{ display:none; }
+  .sidebar.expanded .sidebar-logo-full{ display:block; }
+  .nav-group{ flex:1; display:flex; flex-direction:column; gap:3px; width:100%; min-width:0; }
+  .nav-link{
+    display:flex; align-items:center; gap:12px; justify-content:center;
+    width:40px; height:40px; margin:0 auto; padding:0; border-radius:12px;
+    font-size:13.5px; font-weight:600; color:var(--text-secondary);
+    cursor:pointer; transition:background 0.15s ease, color 0.15s ease; white-space:nowrap;
+  }
+  .sidebar.expanded .nav-link{ justify-content:flex-start; width:100%; height:auto; margin:0; padding:11px 12px; }
+  .nav-link svg{ width:23px; height:23px; flex-shrink:0; }
+  .nav-link:hover{ background:var(--card); color:var(--text); }
+  .nav-link.active{ background:var(--gold); color:#141414; }
+  .nav-link.active svg{ stroke:#141414; }
+  .nav-label{ opacity:0; max-width:0; overflow:hidden; transition:opacity 0.16s ease, max-width 0.26s ease; }
+  .sidebar.expanded .nav-label{ opacity:1; max-width:170px; }
+
+    .sidebar-card{ display:none; position:relative; align-items:center; gap:9px; padding:9px; border-radius:14px; background:var(--glass-2, rgba(255,255,255,0.04)); border:1px solid var(--glass-border); margin-bottom:16px; cursor:pointer; }
+  .sidebar.expanded .sidebar-card{ display:flex; }
+  .sidebar-card-avatar{ width:32px; height:32px; border-radius:50%; background:var(--gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:800; flex-shrink:0; }
+  .sidebar-card-info{ flex:1; min-width:0; }
+  .sidebar-card-name{ font-size:12px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sidebar-card-sub{ font-size:10.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+  .sidebar-card-chevron{ width:14px; height:14px; color:var(--text-secondary); flex-shrink:0; }
+  .sidebar-card-menu{ display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; background:var(--card, #1c1c1c); border:1px solid var(--glass-border); border-radius:12px; padding:6px; z-index:60; max-height:220px; overflow-y:auto; box-shadow:0 12px 30px rgba(0,0,0,0.4); }
+  .sidebar-card-menu.show{ display:block; }
+  .sidebar-card-menu-item{ padding:9px 10px; border-radius:8px; font-size:12px; font-weight:600; color:var(--text-secondary); cursor:pointer; }
+  .sidebar-card-menu-item:hover{ background:var(--glass-2, rgba(255,255,255,0.06)); color:var(--text); }
+  .sidebar-card-menu-item.active{ color:var(--gold); font-weight:700; }
+  .nav-section-label{ display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
+  .nav-section-label:first-of-type{ padding-top:2px; }
+  .sidebar.expanded .nav-section-label{ display:block; }
+
+  .plan-card{
+    margin-top:16px; padding:16px;
+    border:1px solid var(--gold); border-radius:16px;
+    background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0;
+    display:none;
+  }
+  .sidebar.expanded .plan-card{ display:block; }
+  .plan-card .label{ font-size:11px; font-weight:700; letter-spacing:0.5px; color:var(--gold); text-transform:uppercase; display:flex; align-items:center; gap:6px; }
+  .plan-card .sub{ font-size:12px; color:var(--text-secondary); margin-top:6px; display:flex; align-items:center; gap:5px; }
+
+  .help-link{
+    margin-top:14px; font-size:12.5px; color:var(--text-secondary); flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; gap:8px; padding:8px 12px; cursor:pointer; width:100%;
+  }
+  .sidebar.expanded .help-link{ justify-content:flex-start; }
+  .help-link:hover{ color:var(--text); }
+
+  /* Contenedor inferior del sidebar */
+  .sidebar-bottom {
+    margin-top:auto; padding-top:12px; border-top:1px solid var(--divider);
+    display:flex; flex-direction:column; gap:8px; width:100%;
+  }
+
+  .logout-btn {
+    font-size:12px; color:#EF5350; display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px; cursor:pointer; width:40px; height:40px; border-radius:10px; background:rgba(239,83,80,0.1);
+    border:1px solid rgba(239,83,80,0.2); transition:all 0.25s ease; margin:0 auto;
+  }
+  .sidebar.expanded .logout-btn {
+    justify-content:flex-start; width:100%; height:auto; padding:10px 12px; margin:0;
+  }
+  .logout-btn:hover { background:rgba(239,83,80,0.2); }
+  .logout-btn svg { width:18px; height:18px; flex-shrink:0; }
+  .logout-label { display:none; }
+  .sidebar.expanded .logout-label { display:inline; }
+
+  .plan-card .plan-icon { font-size:16px; text-align:center; }
+  .sidebar:not(.expanded) .plan-card { padding:8px; text-align:center; }
+  .sidebar:not(.expanded) .plan-card .label { display:none; }
+  .sidebar:not(.expanded) .plan-card .sub { display:none; }
+
+  /* ---- Main ---- */
+  .main{ flex:1; min-width:0; padding:26px 32px 60px; }
+
+  .header-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:26px; }
+  .header-greeting .title{ font-size:22px; font-weight:700; }
+  .header-greeting .sub{ font-size:13px; color:var(--text-secondary); margin-top:3px; }
+  .header-actions{ display:flex; align-items:center; gap:14px; }
+
+  .date-pill{
+    display:flex; align-items:center; gap:8px;
+    padding:10px 16px; border-radius:14px;
+    background:var(--card); border:1px solid var(--divider);
+    font-size:13px; font-weight:600; cursor:pointer;
+  }
+  .date-pill svg{ width:16px; height:16px; }
+
+  .icon-btn{
+    width:40px; height:40px; border-radius:50%;
+    background:var(--card); border:1px solid var(--divider);
+    display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer;
+  }
+  .icon-btn svg{ width:18px; height:18px; }
+  .badge-count{
+    position:absolute; top:-3px; right:-3px;
+    background:var(--gold); color:#141414; font-size:9.5px; font-weight:800;
+    width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  }
+
+  .user-chip{ display:flex; align-items:center; gap:10px; cursor:pointer; }
+  .user-chip .name{ font-size:13px; font-weight:700; }
+  .user-chip .role{ font-size:11px; color:var(--text-secondary); }
+
+  /* KPI row */
+  .kpi-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
+  .kpi-card{ padding:18px; }
+  .kpi-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .kpi-icon{ width:38px; height:38px; border-radius:11px; background:var(--card-2); display:flex; align-items:center; justify-content:center; }
+  .kpi-icon svg{ width:18px; height:18px; }
+  .kpi-value{ font-size:22px; font-weight:700; }
+  .kpi-label{ font-size:12px; color:var(--text-secondary); margin-top:2px; }
+  .kpi-delta{ font-size:11.5px; font-weight:700; margin-top:8px; display:flex; align-items:center; gap:4px; }
+  .kpi-delta.up{ color:var(--success); }
+
+  /* Content grid */
+  .grid-2{ display:grid; grid-template-columns:1.5fr 1fr; gap:16px; margin-bottom:16px; }
+  .grid-2b{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+
+  .panel{ padding:20px; }
+  .panel-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; }
+  .panel-title{ font-size:14.5px; font-weight:700; }
+  .panel-select{ font-size:12px; color:var(--text-secondary); display:flex; align-items:center; gap:4px; cursor:pointer; }
+
+  /* Revenue chart */
+  .revenue-big{ font-size:26px; font-weight:700; }
+  .revenue-delta{ font-size:12px; color:var(--success); font-weight:700; margin:2px 0 14px; }
+
+  /* Donut */
+  .donut-wrap{ display:flex; align-items:center; gap:18px; }
+  .donut-legend{ display:flex; flex-direction:column; gap:9px; flex:1; }
+  .legend-row{ display:flex; align-items:center; justify-content:space-between; font-size:12px; }
+  .legend-left{ display:flex; align-items:center; gap:8px; color:var(--text-secondary); }
+  .legend-dot{ width:8px; height:8px; border-radius:50%; }
+  .legend-val{ font-weight:700; color:var(--text); }
+
+  /* Recurring clients */
+  .clients-bar{ height:8px; border-radius:6px; background:var(--divider); overflow:hidden; margin-bottom:16px; }
+  .clients-bar-fill{ height:100%; background:linear-gradient(90deg, var(--gold), var(--gold-bright)); }
+  .avatars-row{ display:flex; align-items:center; gap:-6px; }
+  .avatars-row .avatar{ width:40px; height:40px; font-size:13px; margin-right:-8px; border:2.5px solid var(--card); }
+  .avatars-more{ width:40px; height:40px; border-radius:50%; background:var(--card-2); border:2.5px solid var(--card); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--text-secondary); }
+  .client-names{ display:flex; gap:16px; margin-top:10px; font-size:10.5px; color:var(--text-secondary); }
+
+  /* Gauge */
+  .gauge-wrap{ display:flex; flex-direction:column; align-items:center; }
+  .gauge-num{ font-size:24px; font-weight:700; margin-top:-8px; }
+  .gauge-sub{ font-size:11.5px; color:var(--text-secondary); }
+  .gauge-split{ display:flex; gap:20px; margin-top:14px; font-size:12px; }
+  .gauge-split div{ text-align:center; }
+  .gauge-split b{ display:block; font-size:14px; }
+
+  /* Quick summary */
+  .summary-block{ margin-bottom:14px; }
+  .summary-block:last-child{ margin-bottom:0; }
+  .summary-block .k-label{ font-size:11px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+  .rank-row{ display:flex; align-items:center; justify-content:space-between; font-size:12.5px; padding:5px 0; }
+  .rank-row .num{ color:var(--text-secondary); margin-right:8px; }
+
+  /* Appointments list */
+  .appt-row{ display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid var(--divider); }
+  .appt-row:last-child{ border-bottom:none; }
+  .appt-time-col{ width:56px; font-size:12px; font-weight:700; color:var(--text-secondary); }
+  .appt-avatar{ width:36px; height:36px; font-size:11.5px; }
+  .appt-mid{ flex:1; min-width:0; }
+  .appt-mid .name{ font-size:13px; font-weight:600; }
+  .appt-mid .service{ font-size:11px; color:var(--text-secondary); }
+  .appt-barber{ font-size:11px; color:var(--text-secondary); text-align:right; }
+  .see-btn{ font-size:11.5px; font-weight:700; padding:6px 12px; }
+
+  /* Activity feed */
+  .activity-row{ display:flex; align-items:flex-start; gap:12px; padding:10px 0; }
+  .activity-icon{ width:32px; height:32px; border-radius:9px; background:var(--card-2); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .activity-icon svg{ width:15px; height:15px; }
+  .activity-mid{ flex:1; }
+  .activity-mid .t{ font-size:12.5px; font-weight:600; }
+  .activity-mid .s{ font-size:11px; color:var(--text-secondary); margin-top:1px; }
+  .activity-time{ font-size:10.5px; color:var(--text-secondary); white-space:nowrap; }
+
+  #toast{
+    position:fixed; left:50%; bottom:calc(var(--bottom-nav-total) + 16px); transform:translate(-50%, 16px);
+    background:rgba(250,250,250,0.95); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--divider); border-radius:14px; padding:12px 18px;
+    font-size:13px; display:flex; align-items:center; gap:8px;
+    opacity:0; pointer-events:none; transition:opacity 0.3s ease, transform 0.3s ease;
+    z-index:200; max-width:90%;
+  }
+  #toast.show{ opacity:1; transform:translate(-50%, 0); }
+  .toast-dot{ width:8px; height:8px; border-radius:50%; background:var(--success); flex-shrink:0; }
+
+
+
+  @media (max-width:1080px){
+    .grid-2, .grid-2b{ grid-template-columns:1fr; }
+    .kpi-grid{ grid-template-columns:repeat(2,1fr); }
+  }
+
+  /* ============ Vista móvil (≤640px) ============ */
+  .mobile-only{ display:none; }
+  @media (max-width:767px){
+    .sidebar{ display:none; }
+    .desktop-only{ display:none !important; }
+    .mobile-only{ display:block; }
+    .main{ padding:calc(16px + var(--safe-top)) var(--page-padding-x) calc(96px + var(--safe-bottom)); }
+
+    .m-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    .m-header-left{ display:flex; align-items:center; gap:11px; }
+    .m-logo{ width:38px; height:38px; border-radius:11px; flex-shrink:0; }
+    .m-greeting{ font-size:16.5px; font-weight:700; }
+    .m-date{ font-size:12px; color:var(--text-secondary); margin-top:1px; }
+    .m-header-right{ display:flex; align-items:center; gap:10px; }
+    .m-icon-btn{ width:38px; height:38px; border-radius:50%; background:var(--card); border:1px solid var(--divider); display:flex; align-items:center; justify-content:center; position:relative; cursor:pointer; }
+    .m-icon-btn svg{ width:17px; height:17px; }
+    .m-avatar{ width:38px; height:38px; font-size:13px; border:2px solid var(--gold); }
+
+    .m-cta{ display:flex; align-items:center; justify-content:center; gap:8px; width:100%; height:52px; border-radius:16px; background:linear-gradient(135deg, var(--gold), var(--gold-bright)); color:#141414; font-size:15px; font-weight:700; text-decoration:none; margin-bottom:18px; }
+
+    .m-kpi-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px; }
+    .m-kpi-card{ padding:16px; border-radius:18px; }
+    .m-kpi-value{ font-size:24px; font-weight:700; line-height:1.1; }
+    .m-kpi-label{ font-size:11.5px; color:var(--text-secondary); margin-top:5px; }
+
+    .m-card{ padding:18px; border-radius:20px; margin-bottom:14px; }
+    .m-card-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+    .m-card-title{ font-size:14.5px; font-weight:700; }
+    .m-card-link{ font-size:12px; font-weight:700; color:var(--gold); cursor:pointer; }
+
+    .m-appt-row{ display:flex; align-items:center; gap:11px; padding:10px 0; border-bottom:1px solid var(--divider); }
+    .m-appt-row:last-child{ border-bottom:none; padding-bottom:0; }
+    .m-appt-row:first-child{ padding-top:0; }
+    .m-appt-dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+    .m-appt-time{ width:48px; font-size:12px; font-weight:700; color:var(--text-secondary); flex-shrink:0; }
+    .m-appt-mid{ flex:1; min-width:0; }
+    .m-appt-mid .n{ font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .m-appt-mid .s{ font-size:11.5px; color:var(--text-secondary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .m-appt-barber{ font-size:11px; color:var(--text-secondary); text-align:right; flex-shrink:0; max-width:80px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+    .m-caja-value{ font-size:28px; font-weight:700; }
+    .m-caja-delta{ font-size:12.5px; font-weight:700; margin:3px 0 12px; }
+    .m-caja-delta.up{ color:var(--success); }
+    .m-caja-delta.down{ color:var(--error); }
+
+    .m-summary-row{ display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--divider); font-size:13px; }
+    .m-summary-row:last-child{ border-bottom:none; padding-bottom:0; }
+    .m-summary-row:first-child{ padding-top:0; }
+    .m-summary-row .lbl{ color:var(--text-secondary); }
+    .m-summary-row .val{ font-weight:700; text-align:right; max-width:60%; }
+
+    .m-alert-row{ display:flex; align-items:flex-start; gap:11px; padding:11px 0; border-bottom:1px solid var(--divider); }
+    .m-alert-row:last-child{ border-bottom:none; padding-bottom:0; }
+    .m-alert-row:first-child{ padding-top:0; }
+    .m-alert-icon{ width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:15px; }
+    .m-alert-mid .t{ font-size:13px; font-weight:700; }
+    .m-alert-mid .s{ font-size:11.5px; color:var(--text-secondary); margin-top:1px; }
+  }
+</style>
+</head>
+<body>
+<script src="../assets/splash-screen.js"></script>
+
+<div id="app">
+
+  <script>
+    // Solo aplicar estilos de sidebar expandido en desktop (> 767px)
+    if (localStorage.getItem('dnNavExpanded') === '1' && window.innerWidth > 767) {
+      document.write('<style>@media(min-width:768px){#sidebar{width:230px!important;align-items:stretch!important;padding:22px 16px!important;}}</style>');
+    }
+  </script>
+  <div class="sidebar" id="sidebar">
+    <img src="../assets/apple-touch-icon-v2.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
+    <img src="../assets/logo-transparent.png" class="sidebar-logo sidebar-logo-full" alt="Keicy Barbería" id="sidebarLogoFull">
+    <div class="sidebar-card" id="sidebarCard" title="Cambiar de sede">
+      <div class="sidebar-card-avatar">DN</div>
+      <div class="sidebar-card-info">
+        <div class="sidebar-card-name" id="sidebarCardName">Keicy Barbería</div>
+        <div class="sidebar-card-sub" id="sidebarCardSede">—</div>
+      </div>
+      <svg class="sidebar-card-chevron" id="sidebarCardChevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="sidebar-card-menu" id="sidebarCardMenu"></div>
+    </div>
+        <div class="nav-group">
+      <div class="nav-section-label">Gestionar</div>
+      <a class="nav-link active" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg>
+        <span class="nav-label">Resumen</span>
+      </a>
+      <a class="nav-link" href="calendario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2" stroke-linecap="round"/></svg>
+        <span class="nav-label">Agenda</span>
+      </a>
+      <a class="nav-link" href="clientes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg>
+        <span class="nav-label">Clientes</span>
+      </a>
+      <a class="nav-link" href="caja.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M3 11h18M9 15h2" stroke-linecap="round"/><path d="M8 7V5.5A2.5 2.5 0 0 1 10.5 3h3A2.5 2.5 0 0 1 16 5.5V7"/></svg>
+        <span class="nav-label">Cuadre de caja</span>
+      </a>
+      <a class="nav-link" href="fidelizacion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z" stroke-linejoin="round"/></svg>
+        <span class="nav-label">Fidelización</span>
+      </a>
+      <div class="nav-section-label">Desempeño</div>
+      <a class="nav-link" href="servicios.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
+        <span class="nav-label">Servicios</span>
+      </a>
+      <a class="nav-link" href="barberos.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2M14.5 14.8c2 .3 3.7 1.7 4.5 4.2" stroke-linecap="round"/></svg>
+        <span class="nav-label">Colaboradores</span>
+      </a>
+      <a class="nav-link" href="inventario.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+        <span class="nav-label">Inventario</span>
+      </a>
+      <a class="nav-link" href="reportes.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7" stroke-linecap="round"/></svg>
+        <span class="nav-label">Reportes</span>
+      </a>
+      <a class="nav-link" href="historial-cierres.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <span class="nav-label">Cierres</span>
+      </a>
+      <a class="nav-link" href="marketing.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4h4l6 5V5L7 10H3z"/></svg>
+        <span class="nav-label">Marketing</span>
+      </a>
+      <a class="nav-link" href="configuracion.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        <span class="nav-label">Configuración</span>
+      </a>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="plan-card">
+        <div class="plan-icon">👑</div>
+        <div class="label">Plan de por vida</div>
+        <div class="sub">✓ Crisbo</div>
+      </div>
+
+      <div class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="logout-label">Cerrar sesión</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ============ VISTA MÓVIL PREMIUM ============ -->
+    <div class="premium-mobile-view">
+
+      <!-- Header Premium -->
+      <header class="premium-header">
+        <div class="premium-header-left">
+          <div class="premium-greeting-label" id="mGreetingText">BUENOS DÍAS</div>
+          <div class="premium-greeting-name" id="mGreetingName">Keicy Barber</div>
+        </div>
+      </header>
+
+      <!-- Tarjeta Principal de Ventas -->
+      <div class="premium-sales-card">
+        <div class="premium-sales-bg"></div>
+        <div class="premium-sales-overlay"></div>
+        <div class="premium-sales-content">
+          <div class="premium-sales-label">TUS VENTAS ESTE MES</div>
+          <div class="premium-sales-amount" id="mVentasMes">$0</div>
+          <div class="premium-sales-delta">
+            <span class="premium-sales-delta-value" id="mSalesDeltaValue">↑ +0%</span>
+            <span class="premium-sales-delta-label">vs. mes anterior</span>
+          </div>
+          <a href="reportes.html" class="premium-sales-btn">
+            Ver resumen
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
+        <img src="../assets/logo-transparent.png" class="premium-sales-logo" alt="">
+      </div>
+
+      <!-- Progreso del Mes -->
+      <div class="premium-progress-card">
+        <div class="premium-progress-top">
+          <div class="premium-progress-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+          <div class="premium-progress-info">
+            <div class="premium-progress-title" id="mMonthProgressLabel">Día 18 de 30</div>
+            <div class="premium-progress-subtitle" id="mMonthProgressSubtitle">Vas por buen camino</div>
+          </div>
+          <div class="premium-progress-pct" id="mMonthProgressPct">60%</div>
+        </div>
+        <div class="premium-progress-bar">
+          <div class="premium-progress-fill" id="mMonthProgressFill" style="width: 60%"></div>
+        </div>
+      </div>
+
+      <!-- Selector de Sede -->
+      <div class="premium-sede-card" id="mSedeSelector">
+        <div class="premium-sede-logo">
+          <img src="../assets/logo-transparent.png" alt="Keicy Barber">
+        </div>
+        <div class="premium-sede-info">
+          <div class="premium-sede-label">SEDE ACTUAL</div>
+          <div class="premium-sede-current" id="mSedeCurrent">Todas las sedes</div>
+        </div>
+        <svg class="premium-sede-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="premium-sede-menu" id="mSedeMenu"></div>
+      </div>
+
+      <!-- NUEVO: Accesos Rápidos -->
+      <div class="premium-shortcuts">
+        <a href="barberos.html" class="premium-shortcut">
+          <div class="premium-shortcut-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2M14.5 14.8c2 .3 3.7 1.7 4.5 4.2" stroke-linecap="round"/></svg>
+          </div>
+          <span class="premium-shortcut-label">Barberos</span>
+        </a>
+        <a href="calendario.html" class="premium-shortcut">
+          <div class="premium-shortcut-icon purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M4 10h16M9 14h2M13 14h2M9 17h2"/></svg>
+          </div>
+          <span class="premium-shortcut-label">Agenda</span>
+          <span class="premium-shortcut-badge" id="mShortcutCitas">0</span>
+        </a>
+        <a href="fidelizacion.html" class="premium-shortcut">
+          <div class="premium-shortcut-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 17.3 6.2 21l1.6-6.9L2.5 9.5l7-.6L12 2.3l2.5 6.6 7 .6-5.3 4.6 1.6 6.9z" stroke-linejoin="round"/></svg>
+          </div>
+          <span class="premium-shortcut-label">Fidelizar</span>
+        </a>
+        <a href="inventario.html" class="premium-shortcut">
+          <div class="premium-shortcut-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
+          </div>
+          <span class="premium-shortcut-label">Inventario</span>
+        </a>
+        <a href="reportes.html" class="premium-shortcut">
+          <div class="premium-shortcut-icon orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7" stroke-linecap="round"/></svg>
+          </div>
+          <span class="premium-shortcut-label">Reportes</span>
+        </a>
+        <a href="#resenasHoy" class="premium-shortcut" onclick="document.getElementById('resenasHoySection').scrollIntoView({behavior:'smooth'}); return false;">
+          <div class="premium-shortcut-icon" style="background:linear-gradient(135deg,#C9A35B,#E8D5A3);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <span class="premium-shortcut-label">Reseñas</span>
+        </a>
+      </div>
+
+      <!-- NUEVO: Tarjeta de Citas de Hoy -->
+      <div class="premium-today-card">
+        <div class="premium-today-header">
+          <div class="premium-today-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+          <div class="premium-today-info">
+            <div class="premium-today-count" id="mTodayCitas">0</div>
+            <div class="premium-today-label" id="mTodayLabel">citas hoy</div>
+          </div>
+          <div class="premium-today-badge" id="mTodayFirstTime">--</div>
+        </div>
+        <div class="premium-today-stats">
+          <div class="premium-today-stat">
+            <div class="premium-today-stat-value" id="mTodayCuposLibres">--</div>
+            <div class="premium-today-stat-label">Cupos libres</div>
+          </div>
+          <div class="premium-today-stat">
+            <div class="premium-today-stat-value" id="mTodayProyeccion">$0</div>
+            <div class="premium-today-stat-label">Podrías facturar</div>
+          </div>
+        </div>
+        <div class="premium-today-goal">
+          <div class="premium-today-goal-header">
+            <span class="premium-today-goal-label">Meta del día</span>
+            <span class="premium-today-goal-value" id="mTodayGoalText">$0 / $0</span>
+          </div>
+          <div class="premium-today-goal-bar">
+            <div class="premium-today-goal-fill" id="mTodayGoalFill" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de Métricas 2x2 -->
+      <div class="premium-metrics-grid">
+        <!-- Crecimiento -->
+        <div class="premium-metric-card">
+          <div class="premium-metric-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 6l-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+          </div>
+          <div class="premium-metric-label">Crecimiento</div>
+          <div class="premium-metric-value" id="mFavCrecimiento">+0%</div>
+          <div class="premium-metric-delta up" id="mFavCrecimientoDelta">
+            <span>vs. mes anterior</span>
+          </div>
+          <div class="premium-metric-bars">
+            <div class="premium-metric-bar" style="height: 12px;"></div>
+            <div class="premium-metric-bar" style="height: 18px;"></div>
+            <div class="premium-metric-bar" style="height: 14px;"></div>
+            <div class="premium-metric-bar" style="height: 24px;"></div>
+            <div class="premium-metric-bar" style="height: 20px;"></div>
+          </div>
+        </div>
+
+        <!-- Reservas -->
+        <a href="calendario.html" class="premium-metric-card" style="text-decoration:none;">
+          <div class="premium-metric-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+          <div class="premium-metric-label">Reservas</div>
+          <div class="premium-metric-value" id="mFavReservas">0</div>
+          <div class="premium-metric-delta up" id="mFavReservasDelta">
+            <span>↑</span>
+            <span id="mReservasDeltaPct">+0%</span>
+          </div>
+          <div class="premium-metric-bars">
+            <div class="premium-metric-bar" style="height: 16px;"></div>
+            <div class="premium-metric-bar" style="height: 22px;"></div>
+            <div class="premium-metric-bar" style="height: 18px;"></div>
+            <div class="premium-metric-bar" style="height: 28px;"></div>
+            <div class="premium-metric-bar" style="height: 24px;"></div>
+          </div>
+        </a>
+
+        <!-- Clientes -->
+        <a href="clientes.html" class="premium-metric-card" style="text-decoration:none;">
+          <div class="premium-metric-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+          </div>
+          <div class="premium-metric-label">Clientes</div>
+          <div class="premium-metric-value" id="mFavClientesNuevos">0</div>
+          <div class="premium-metric-delta up" id="mFavClientesDelta">
+            <span>↑</span>
+            <span id="mClientesDeltaPct">+0%</span>
+          </div>
+          <div class="premium-metric-bars">
+            <div class="premium-metric-bar" style="height: 14px;"></div>
+            <div class="premium-metric-bar" style="height: 20px;"></div>
+            <div class="premium-metric-bar" style="height: 16px;"></div>
+            <div class="premium-metric-bar" style="height: 26px;"></div>
+            <div class="premium-metric-bar" style="height: 22px;"></div>
+          </div>
+        </a>
+
+        <!-- Visitas al sitio -->
+        <div class="premium-metric-card">
+          <div class="premium-metric-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <div class="premium-metric-label">Visitas al sitio</div>
+          <div class="premium-metric-value" id="mWebVisits">Sin datos</div>
+          <div class="premium-metric-delta" id="mWebVisitsDelta">
+            <span class="premium-metric-delta-text">Este mes</span>
+          </div>
+          <div class="premium-metric-bars">
+            <div class="premium-metric-bar" style="height: 10px;"></div>
+            <div class="premium-metric-bar" style="height: 16px;"></div>
+            <div class="premium-metric-bar" style="height: 12px;"></div>
+            <div class="premium-metric-bar" style="height: 20px;"></div>
+            <div class="premium-metric-bar" style="height: 18px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NUEVO: Tarjeta de Gastos -->
+      <a href="caja.html?resumen=1" class="premium-expenses-card" style="text-decoration:none;">
+        <div class="premium-expenses-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <div class="premium-expenses-info">
+          <div class="premium-expenses-label">Gastos del mes</div>
+          <div class="premium-expenses-value" id="mGastosMes">$0</div>
+        </div>
+        <div class="premium-expenses-delta" id="mGastosDelta">
+          <span>↑ +0%</span>
+        </div>
+        <svg class="premium-expenses-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+
+      <!-- Últimas Visitas -->
+      <div class="premium-section-header">
+        <h2 class="premium-section-title">Últimas visitas</h2>
+        <a href="clientes.html" class="premium-section-link">
+          Ver todas
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+      <div class="premium-visits-card" id="mUltimasVisitas">
+        <div class="premium-empty">Cargando...</div>
+      </div>
+
+      <!-- Reseñas del día -->
+      <div class="premium-section-header" id="resenasHoySection" style="margin-top:24px;">
+        <h2 class="premium-section-title">⭐ Reseñas</h2>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <input type="date" id="resenasDatePicker" style="background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;padding:4px 8px;color:var(--text-primary);font-size:12px;font-family:inherit;">
+          <span class="premium-section-link" id="resenasHoyCount" style="background:linear-gradient(135deg,#C9A35B,#E8D5A3);color:#111;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">0 reseñas</span>
+        </div>
+      </div>
+      <div class="premium-visits-card" id="resenasHoyList" style="max-height:400px;overflow-y:auto;">
+        <div class="premium-empty">Cargando reseñas...</div>
+      </div>
+
+    </div>
+    <!-- ============ FIN VISTA MÓVIL PREMIUM ============ -->
+
+    <!-- Navegación móvil inferior premium (solo móvil) -->
+    <nav class="premium-bottom-nav">
+      <a href="dashboard.html" class="premium-nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Inicio</span>
+      </a>
+      <a href="calendario.html" class="premium-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span>Agenda</span>
+      </a>
+      <a href="caja.html?resumen=1" class="premium-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20M6 14h4"/></svg>
+        <span>Caja</span>
+      </a>
+      <a href="clientes.html" class="premium-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+        <span>Clientes</span>
+      </a>
+      <a href="configuracion.html" class="premium-nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+        <span>Config</span>
+      </a>
+    </nav>
+
+    <!-- Navegación móvil (inyectada por mobile-nav.js) -->
+
+    <div class="header-row fade-in desktop-only">
+      <div class="header-greeting" style="display:flex; align-items:center; gap:14px;">
+        <div class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Mostrar/ocultar menú">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="title" id="adminGreeting">Buenos días 👋</div>
+          <div class="sub">Aquí tienes el resumen de tu negocio.</div>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="date-pill" onclick="toast('Selector de fecha')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg>
+          <span id="todayLabel"></span>
+        </div>
+        <a href="../reservar/index.html" target="_blank" class="btn-gold" style="height:40px; padding:0 16px; display:flex; align-items:center; gap:8px; text-decoration:none; font-size:13px;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#141414" stroke-width="2"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg>
+          Agendar cita
+        </a>
+        <div class="user-chip" onclick="toast('Perfil')">
+          <div class="avatar" id="adminAvatar" style="width:38px;height:38px;font-size:13px;">--</div>
+          <div><div class="name" id="adminName">Administrador</div><div class="role">Administrador</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-grid fade-in desktop-only">
+      <div class="card kpi-card">
+        <div class="kpi-top">
+          <div><div class="kpi-value" id="kpiIngresos">–</div><div class="kpi-label">Ingresos hoy</div></div>
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D4AF55" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 15s1 1.5 3 1.5 3-1 3-2-1-1.7-3-2.2-3-1.2-3-2.3 1-2 3-2 3 1.5 3 1.5" stroke-linecap="round"/></svg></div>
+        </div>
+        <div class="kpi-delta" style="color:var(--text-secondary);" id="kpiIngresosNote">Hoy</div>
+      </div>
+      <div class="card kpi-card">
+        <div class="kpi-top">
+          <div><div class="kpi-value" id="kpiCitas">–</div><div class="kpi-label">Citas hoy</div></div>
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D4AF55" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg></div>
+        </div>
+        <div class="kpi-delta" style="color:var(--text-secondary);" id="kpiCitasNote">Hoy</div>
+      </div>
+      <div class="card kpi-card">
+        <div class="kpi-top">
+          <div><div class="kpi-value" id="kpiClientes">–</div><div class="kpi-label">Clientes nuevos</div></div>
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D4AF55" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg></div>
+        </div>
+        <div class="kpi-delta" style="color:var(--text-secondary);">Hoy</div>
+      </div>
+      <div class="card kpi-card">
+        <div class="kpi-top">
+          <div><div class="kpi-value" id="kpiCalificacion">–</div><div class="kpi-label">Calificación</div></div>
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D4AF55" stroke-width="1.8"><path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6-4.4-4.2 6-.8L12 3z"/></svg></div>
+        </div>
+        <div class="kpi-delta" style="color:var(--text-secondary);" id="kpiCalificacionNote">Promedio de barberos</div>
+      </div>
+    </div>
+
+    <div class="grid-2 fade-in desktop-only">
+      <div class="card panel">
+        <div class="panel-head">
+          <div class="panel-title">Ingresos</div>
+          <div class="panel-select">Esta semana ⌄</div>
+        </div>
+        <div class="revenue-big" id="revenueBig">–</div>
+        <div class="revenue-delta" id="revenueDelta">Últimos 7 días</div>
+        <svg viewBox="0 0 560 180" style="width:100%; height:150px;" id="revenueSvg">
+          <defs>
+            <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#D4AF55" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#D4AF55" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <g id="revenueChartContent"></g>
+        </svg>
+        <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-secondary); margin-top:-6px;" id="revenueDayLabels"></div>
+      </div>
+
+      <div class="card panel">
+        <div class="panel-head">
+          <div class="panel-title">Citas por servicio</div>
+          <div class="panel-select">Últimos 7 días</div>
+        </div>
+        <div class="donut-wrap">
+          <svg viewBox="0 0 120 120" style="width:120px; height:120px; flex-shrink:0;" id="serviceDonutSvg"></svg>
+          <div class="donut-legend" id="serviceDonutLegend"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2b fade-in desktop-only">
+      <div class="card panel">
+        <div class="panel-head"><div class="panel-title">Clientes recurrentes</div><div style="font-weight:700; font-size:13px;" id="recurrentesPct">–</div></div>
+        <div class="clients-bar"><div class="clients-bar-fill" id="recurrentesBar" style="width:0%;"></div></div>
+        <div class="avatars-row" id="recurrentesAvatars"></div>
+        <div class="client-names" id="recurrentesNames"></div>
+      </div>
+
+      <div class="card panel">
+        <div class="panel-head"><div class="panel-title">Citas completadas</div><div class="panel-select">Últimos 7 días</div></div>
+        <div class="gauge-wrap">
+          <svg viewBox="0 0 140 80" style="width:150px;" id="gaugeSvg">
+            <path d="M10 75 A60 60 0 0 1 130 75" fill="none" stroke="#2B2B2B" stroke-width="14"/>
+            <path d="M10 75 A60 60 0 0 1 113 27" fill="none" stroke="#D4AF55" stroke-width="14" stroke-linecap="round" id="gaugeArc"/>
+          </svg>
+          <div class="gauge-num" id="gaugeNum">– <span style="font-size:13px; color:var(--text-secondary); font-weight:500;"></span></div>
+          <div class="gauge-sub" id="gaugeSub"></div>
+          <div class="gauge-split">
+            <div><b id="gaugeCompletadas">–</b>Completadas</div>
+            <div><b id="gaugePendientes">–</b>Pendientes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2b fade-in desktop-only">
+      <div class="card panel">
+        <div class="panel-head"><div class="panel-title">Ingresos por canal</div><div class="panel-select" style="color:var(--text-secondary);">Datos de ejemplo</div></div>
+        <div class="donut-wrap">
+          <svg viewBox="0 0 120 120" style="width:110px; height:110px; flex-shrink:0;">
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#2B2B2B" stroke-width="16"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#D4AF55" stroke-width="16" stroke-dasharray="188 101" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#8A8780" stroke-width="16" stroke-dasharray="72 217" stroke-dashoffset="-188" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#4a4a4a" stroke-width="16" stroke-dasharray="29 260" stroke-dashoffset="-260" transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:#D4AF55;"></span>App móvil</div><span class="legend-val">$9.522.500</span></div>
+            <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:#8A8780;"></span>WhatsApp</div><span class="legend-val">$3.656.250</span></div>
+            <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:#4a4a4a;"></span>Sitio web</div><span class="legend-val">$1.471.250</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card panel">
+        <div class="panel-head"><div class="panel-title">Resumen rápido</div></div>
+        <div class="summary-block">
+          <div class="k-label">Servicios más vendidos</div>
+          <div id="topServicios"><div class="rank-row">Cargando…</div></div>
+        </div>
+        <div class="summary-block">
+          <div class="k-label">Mejor barbero</div>
+          <div id="topBarbero" style="display:flex; align-items:center; gap:10px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2 fade-in desktop-only" style="margin-bottom:0;">
+      <div class="card panel">
+        <div class="panel-head">
+          <div class="panel-title">Próximas citas</div>
+          <button class="btn-ghost see-btn" onclick="toast('Abriendo calendario completo…')">Ver calendario</button>
+        </div>
+        <div id="proximasCitas">
+          <div class="appt-row">Cargando…</div>
+        </div>
+      </div>
+
+      <div class="card panel">
+        <div class="panel-head"><div class="panel-title">Actividad reciente</div></div>
+        <div id="actividadReciente">
+          <div class="activity-row">Cargando…</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="toast"><span class="toast-dot"></span><span id="toastText"></span></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+  const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const now = new Date();
+  document.getElementById('todayLabel').textContent = `Hoy, ${now.getDate()} ${months[now.getMonth()]}`;
+
+  const sidebarEl = document.getElementById('sidebar');
+  document.querySelectorAll('.nav-link, .help-link').forEach(el => {
+    const lastNode = el.lastChild;
+    if (lastNode && lastNode.nodeType === 3 && lastNode.textContent.trim()) {
+      const span = document.createElement('span');
+      span.className = 'nav-label';
+      span.textContent = lastNode.textContent.trim();
+      el.replaceChild(span, lastNode);
+    }
+  });
+  function dnSetNavExpanded(exp){
+    sidebarEl.classList.toggle('expanded', exp);
+    localStorage.setItem('dnNavExpanded', exp ? '1' : '0');
+  }
+  dnSetNavExpanded(localStorage.getItem('dnNavExpanded') === '1');
+  document.getElementById('sidebarLogoIcon').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+  document.getElementById('sidebarLogoFull').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+  document.getElementById('sidebarToggleBtn').addEventListener('click', () => dnSetNavExpanded(!sidebarEl.classList.contains('expanded')));
+
+  const toastEl = document.getElementById('toast');
+  const toastText = document.getElementById('toastText');
+  function toast(msg){
+    toastText.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(window._t);
+    window._t = setTimeout(() => toastEl.classList.remove('show'), 2200);
+  }
+
+  const user = dnRequireAdmin();
+
+  // Si es admin_sede, redirigir a su dashboard
+  if (user && user.role === 'admin_sede') {
+    window.location.href = '../admin_sede/dashboard.html';
+  }
+
+  if (user && user.role !== 'admin_sede') {
+    dnInitSidebarCard();
+  }
+
+  // Cerrar sesión
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    if (confirm('¿Seguro que deseas cerrar sesión?')) {
+      dnClearSession();
+      window.location.href = '../auth.html';
+    }
+  });
+
+  function last7Dates(){
+    const out = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      out.push(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'));
+    }
+    return out;
+  }
+
+  // Fecha de corte para estadísticas reales (datos antes de esta fecha no se cuentan)
+  const FECHA_CORTE_ESTADISTICAS = '2026-10-01';
+
+  async function loadDashboard(){
+    if (!user) return;
+
+    document.getElementById('adminGreeting').textContent = `Buenos días, ${(user.full_name || user.username || '').split(' ')[0]} 👋`;
+    document.getElementById('adminName').textContent = user.full_name || user.username;
+    document.getElementById('adminAvatar').textContent = dnInitials(user.full_name || user.username);
+
+    const today = dnTodayISO();
+    const week = last7Dates();
+
+    // Filtrar semana solo con fechas >= fecha de corte
+    const weekFiltered = week.filter(d => d >= FECHA_CORTE_ESTADISTICAS);
+
+    // AISLAMIENTO TEST: Obtener IDs de sedes TEST para excluirlas
+    const sedesTestIds = await dnGetSedesTestIds();
+
+    // Pull the week's appointments once, joined, and derive everything from it.
+    // Solo incluir citas desde FECHA_CORTE_ESTADISTICAS
+    let citas = [];
+    try {
+      // Usar la mayor entre week[0] y FECHA_CORTE_ESTADISTICAS
+      const fechaMinima = week[0] > FECHA_CORTE_ESTADISTICAS ? week[0] : FECHA_CORTE_ESTADISTICAS;
+      let citasQuery = sb
+        .from('citas')
+        .select('id, fecha, hora_inicio, estado, precio, cliente_id, barbero_id, sucursal_id, created_at, usuarios!citas_cliente_id_fkey(username, full_name), servicios(nombre, categoria_id, categorias_servicio(nombre)), barberos(usuarios!barberos_id_fkey(username, full_name))')
+        .gte('fecha', fechaMinima)
+        .order('fecha', { ascending: true })
+        .order('hora_inicio', { ascending: true });
+      // Excluir sedes TEST de métricas del dashboard
+      if (sedesTestIds.length > 0) {
+        citasQuery = citasQuery.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+      }
+      const { data, error } = await citasQuery;
+      if (error) throw error;
+      // Filtrar adicionalmente para asegurar que solo se incluyen datos >= fecha de corte
+      citas = (data || []).filter(c => c.fecha >= FECHA_CORTE_ESTADISTICAS);
+    } catch (err) {
+      console.error(err);
+    }
+
+    // ---- KPIs ----
+    const citasHoy = citas.filter(c => c.fecha === today && c.estado !== 'cancelada');
+    // Solo sumar ingresos de citas FINALIZADAS (cobradas)
+    const citasFinalizadasHoy = citas.filter(c => c.fecha === today && c.estado === 'finalizada');
+    const ingresosHoy = citasFinalizadasHoy.reduce((s,c) => s + Number(c.precio||0), 0);
+    document.getElementById('kpiIngresos').textContent = dnFormatCOP(ingresosHoy);
+    document.getElementById('kpiCitas').textContent = citasHoy.length;
+
+    try {
+      const todayRange = dnLocalDayRangeUTC(today); // Rango UTC para día Colombia
+      const { count, error } = await sb
+        .from('usuarios')
+        .select('id', { count: 'exact', head: true })
+        .eq('role', 'cliente')
+        .gte('created_at', todayRange.start)
+        .lte('created_at', todayRange.end);
+      if (error) throw error;
+      document.getElementById('kpiClientes').textContent = count ?? 0;
+    } catch (err) {
+      console.error(err);
+      document.getElementById('kpiClientes').textContent = '–';
+    }
+
+    try {
+      const { data: barberos, error } = await sb.from('barberos').select('calificacion').eq('activo', true);
+      if (error) throw error;
+      const avg = barberos.length ? (barberos.reduce((s,b) => s + Number(b.calificacion||0), 0) / barberos.length) : 0;
+      document.getElementById('kpiCalificacion').textContent = avg.toFixed(1);
+    } catch (err) {
+      console.error(err);
+    }
+
+    // ---- Revenue chart (last 7 days) ----
+    const dayTotals = week.map(d => citas.filter(c => c.fecha === d && c.estado !== 'cancelada').reduce((s,c) => s + Number(c.precio||0), 0));
+    const maxVal = Math.max(...dayTotals, 1);
+    const weekTotal = dayTotals.reduce((a,b) => a+b, 0);
+    document.getElementById('revenueBig').textContent = dnFormatCOP(weekTotal);
+
+    const chartW = 560, chartH = 180, padX = 10, padTop = 20, padBottom = 30;
+    const usableW = chartW - padX*2;
+    const usableH = chartH - padTop - padBottom;
+    const points = dayTotals.map((v,i) => {
+      const x = padX + (usableW * i/(dayTotals.length-1));
+      const y = padTop + usableH - (v/maxVal)*usableH;
+      return [x,y];
+    });
+    const polyPoints = points.map(p => p.join(',')).join(' ');
+    const polygonPoints = polyPoints + ` ${points[points.length-1][0]},${chartH-10} ${points[0][0]},${chartH-10}`;
+    const dots = points.map(([x,y]) => `<circle cx="${x}" cy="${y}" r="3.5" fill="#D4AF55"/>`).join('');
+    document.getElementById('revenueChartContent').innerHTML = `
+      <polyline points="${polyPoints}" fill="none" stroke="#D4AF55" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <polygon points="${polygonPoints}" fill="url(#areaFill)"/>
+      ${dots}
+    `;
+    const dayLabels = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+    document.getElementById('revenueDayLabels').innerHTML = week.map(d => `<span>${dayLabels[new Date(d+'T00:00:00').getDay()]}</span>`).join('');
+
+    // ---- Citas por servicio (donut, últimos 7 días) ----
+    const catCounts = {};
+    citas.forEach(c => {
+      const cat = c.servicios?.categorias_servicio?.nombre || 'Otro';
+      catCounts[cat] = (catCounts[cat] || 0) + 1;
+    });
+    const catEntries = Object.entries(catCounts).sort((a,b) => b[1]-a[1]).slice(0,5);
+    const totalCitasSemana = citas.length;
+    const colors = ['#D4AF55','#8A8780','#6b6b6b','#E8C66A','#4a4a4a'];
+    const circumference = 2 * Math.PI * 46;
+    let offsetAcc = 0;
+    const arcs = catEntries.map(([name, count], i) => {
+      const frac = totalCitasSemana ? count/totalCitasSemana : 0;
+      const len = frac * circumference;
+      const arc = `<circle cx="60" cy="60" r="46" fill="none" stroke="${colors[i]}" stroke-width="16" stroke-dasharray="${len} ${circumference-len}" stroke-dashoffset="${-offsetAcc}" transform="rotate(-90 60 60)"/>`;
+      offsetAcc += len;
+      return arc;
+    }).join('');
+    document.getElementById('serviceDonutSvg').innerHTML = `
+      <circle cx="60" cy="60" r="46" fill="none" stroke="#2B2B2B" stroke-width="16"/>
+      ${arcs}
+      <text x="60" y="57" text-anchor="middle" fill="#FFFFFF" font-size="20" font-weight="700">${totalCitasSemana}</text>
+      <text x="60" y="73" text-anchor="middle" fill="#8A8780" font-size="9">Total</text>
+    `;
+    document.getElementById('serviceDonutLegend').innerHTML = catEntries.map(([name,count], i) => `
+      <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:${colors[i]};"></span>${name}</div><span class="legend-val">${totalCitasSemana ? Math.round(count/totalCitasSemana*100) : 0}%</span></div>
+    `).join('') || '<div style="font-size:12px; color:var(--text-secondary);">Sin datos aún</div>';
+
+    // ---- Clientes recurrentes ----
+    const byClient = {};
+    citas.forEach(c => { if (c.cliente_id) byClient[c.cliente_id] = (byClient[c.cliente_id]||0)+1; });
+    const totalClientesSemana = Object.keys(byClient).length;
+    const recurrentes = Object.values(byClient).filter(n => n > 1).length;
+    const pct = totalClientesSemana ? Math.round(recurrentes/totalClientesSemana*100) : 0;
+    document.getElementById('recurrentesPct').textContent = pct + '%';
+    document.getElementById('recurrentesBar').style.width = pct + '%';
+
+    const clientNames = {};
+    citas.forEach(c => {
+      if (c.cliente_id) clientNames[c.cliente_id] = c.usuarios?.full_name || c.usuarios?.username || 'Cliente';
+    });
+    const topClientIds = Object.entries(byClient).sort((a,b) => b[1]-a[1]).slice(0,5).map(e => e[0]);
+    document.getElementById('recurrentesAvatars').innerHTML =
+      topClientIds.map(id => `<div class="avatar">${dnInitials(clientNames[id])}</div>`).join('') +
+      (totalClientesSemana > 5 ? `<div class="avatars-more">+${totalClientesSemana-5}</div>` : '');
+    document.getElementById('recurrentesNames').innerHTML = topClientIds.map(id => `<span>${clientNames[id]}</span>`).join('');
+
+    // ---- Citas completadas gauge ----
+    const completadasSemana = citas.filter(c => c.estado === 'finalizada').length;
+    const pendientesSemana = totalCitasSemana - completadasSemana;
+    const gaugePct = totalCitasSemana ? completadasSemana/totalCitasSemana : 0;
+    const gaugeLen = gaugePct * 163; // approx path length of the half-donut arc
+    document.getElementById('gaugeArc').setAttribute('stroke-dasharray', `${gaugeLen} 300`);
+    document.getElementById('gaugeNum').innerHTML = `${completadasSemana} <span style="font-size:13px; color:var(--text-secondary); font-weight:500;">de ${totalCitasSemana}</span>`;
+    document.getElementById('gaugeSub').textContent = `${Math.round(gaugePct*100)}% Completadas`;
+    document.getElementById('gaugeCompletadas').textContent = completadasSemana;
+    document.getElementById('gaugePendientes').textContent = pendientesSemana;
+
+    // ---- Resumen rápido: servicios más vendidos ----
+    const svcCounts = {};
+    citas.forEach(c => { const n = c.servicios?.nombre; if (n) svcCounts[n] = (svcCounts[n]||0)+1; });
+    const topSvc = Object.entries(svcCounts).sort((a,b) => b[1]-a[1]).slice(0,3);
+    document.getElementById('topServicios').innerHTML = topSvc.length
+      ? topSvc.map(([name,count],i) => `<div class="rank-row"><span><span class="num">${i+1}.</span>${name}</span><b>${count}</b></div>`).join('')
+      : '<div class="rank-row">Sin datos aún</div>';
+
+    // ---- Mejor barbero (por calificación) ----
+    try {
+      const { data: barberos, error } = await sb
+        .from('barberos')
+        .select('id, calificacion, usuarios!barberos_id_fkey(username, full_name)')
+        .eq('activo', true)
+        .order('calificacion', { ascending: false })
+        .limit(1);
+      if (error) throw error;
+      if (barberos && barberos[0]) {
+        const b = barberos[0];
+        const name = b.usuarios?.full_name || b.usuarios?.username;
+        const citasBarbero = citas.filter(c => c.barbero_id === b.id).length;
+        document.getElementById('topBarbero').innerHTML = `
+          <div class="avatar" style="width:34px;height:34px;font-size:11px;">${dnInitials(name)}</div>
+          <div><div style="font-size:12.5px; font-weight:600;">${name}</div><div style="font-size:11px; color:var(--gold);">${Number(b.calificacion).toFixed(1)} ★ · ${citasBarbero} citas esta semana</div></div>
+        `;
+        const mResumenBarberoEl = document.getElementById('mResumenBarbero');
+        if (mResumenBarberoEl) mResumenBarberoEl.textContent = `${name} (${Number(b.calificacion).toFixed(1)} ★)`;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+
+    // ---- Próximas citas (desde ahora) ----
+    const nowHM = now.toTimeString().slice(0,8);
+    const proximas = citas.filter(c =>
+      c.estado !== 'cancelada' && c.estado !== 'finalizada' &&
+      (c.fecha > today || (c.fecha === today && c.hora_inicio >= nowHM))
+    ).slice(0,5);
+
+    document.getElementById('proximasCitas').innerHTML = proximas.length ? proximas.map(c => {
+      const clientName = c.usuarios?.full_name || c.usuarios?.username || 'Cliente';
+      const barberName = c.barberos?.usuarios?.full_name || c.barberos?.usuarios?.username || '—';
+      let [h,m] = c.hora_inicio.split(':');
+      let hour = parseInt(h,10); const ampm = hour >= 12 ? 'PM' : 'AM'; hour = hour % 12 || 12;
+      return `
+        <div class="appt-row">
+          <div class="appt-time-col">${String(hour).padStart(2,'0')}:${m}<br>${ampm}</div>
+          <div class="avatar appt-avatar">${dnInitials(clientName)}</div>
+          <div class="appt-mid"><div class="name">${clientName}</div><div class="service">${c.servicios?.nombre || ''}</div></div>
+          <div class="appt-barber">${barberName}</div>
+          <button class="btn-ghost see-btn" onclick="toast('Abriendo cita de ${clientName}…')">Ver</button>
+        </div>`;
+    }).join('') : '<div class="appt-row" style="color:var(--text-secondary);">No hay próximas citas</div>';
+
+    // ---- Actividad reciente (últimas citas creadas) ----
+    const recientes = [...citas].filter(c => c.created_at).sort((a,b) => new Date(b.created_at)-new Date(a.created_at)).slice(0,4);
+    document.getElementById('actividadReciente').innerHTML = recientes.length ? recientes.map(c => {
+      const clientName = c.usuarios?.full_name || c.usuarios?.username || 'Cliente';
+      const mins = Math.max(1, Math.round((Date.now() - new Date(c.created_at))/60000));
+      const timeLabel = mins < 60 ? `Hace ${mins} min` : `Hace ${Math.round(mins/60)} h`;
+      return `
+        <div class="activity-row">
+          <div class="activity-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#D4AF55" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/></svg></div>
+          <div class="activity-mid"><div class="t">Cita ${c.estado}</div><div class="s">${clientName} · ${c.servicios?.nombre || ''}</div></div>
+          <div class="activity-time">${timeLabel}</div>
+        </div>`;
+    }).join('') : '<div class="activity-row" style="color:var(--text-secondary);">Sin actividad reciente</div>';
+
+    // ================= VISTA MÓVIL PREMIUM =================
+    const hour = now.getHours();
+    const greetingText = hour < 12 ? 'BUENOS DÍAS' : hour < 18 ? 'BUENAS TARDES' : 'BUENAS NOCHES';
+    document.getElementById('mGreetingText').textContent = greetingText;
+    document.getElementById('mGreetingName').textContent = user.full_name || user.username || 'Usuario';
+
+    // Fechas del mes (solo días transcurridos)
+    // Usar la mayor entre inicio del mes y FECHA_CORTE_ESTADISTICAS
+    const rawMonthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    const monthStart = rawMonthStart > FECHA_CORTE_ESTADISTICAS ? rawMonthStart : FECHA_CORTE_ESTADISTICAS;
+    const todayDate = today; // Solo hasta hoy, no hasta fin de mes
+
+    // Inicializar selector de sedes móvil
+    const sedeActual = dnGetSedeActual();
+    let sedeNombre = 'Todas las sedes';
+    let todasLasSedes = [];
+    try {
+      const { data: sedes } = await sb.from('sucursales').select('id, nombre').eq('activa', true).order('orden', { ascending: true });
+      todasLasSedes = sedes || [];
+      if (sedeActual) {
+        const sedeEncontrada = todasLasSedes.find(s => s.id === sedeActual);
+        if (sedeEncontrada) sedeNombre = sedeEncontrada.nombre;
+      }
+      // Construir menú de sedes (incluye opción "Todas las sedes")
+      const menuEl = document.getElementById('mSedeMenu');
+      if (menuEl && todasLasSedes.length > 0) {
+        const todasOption = `<div class="premium-sede-menu-item${!sedeActual ? ' active' : ''}" data-id="">Todas las sedes</div>`;
+        const sedesOptions = todasLasSedes.map(s =>
+          `<div class="premium-sede-menu-item${s.id === sedeActual ? ' active' : ''}" data-id="${s.id}">${s.nombre}</div>`
+        ).join('');
+        menuEl.innerHTML = todasOption + sedesOptions;
+      }
+    } catch (err) { console.error(err); }
+    document.getElementById('mSedeCurrent').textContent = sedeNombre;
+
+    // Inicializar eventos del selector de sedes (usando delegación)
+    initMobileSedeSelector();
+
+    // Ventas del mes (solo citas FINALIZADAS/COBRADAS - ventas reales)
+    // AISLAMIENTO TEST: Excluir sedes TEST de métricas
+    let ventasMes = 0;
+    try {
+      let query = sb
+        .from('citas')
+        .select('precio')
+        .gte('fecha', monthStart)
+        .lte('fecha', todayDate)
+        .in('estado', ['finalizada', 'cobrada']);
+      if (sedeActual) {
+        query = query.eq('sucursal_id', sedeActual);
+      } else if (sedesTestIds.length > 0) {
+        query = query.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+      }
+      const { data: citasMes } = await query;
+      ventasMes = (citasMes || []).reduce((sum, c) => sum + Number(c.precio || 0), 0);
+    } catch (err) { console.error(err); }
+    document.getElementById('mVentasMes').textContent = dnFormatCOP(ventasMes);
+
+    // Progreso del mes
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const currentDay = now.getDate();
+    const monthPct = Math.round((currentDay / daysInMonth) * 100);
+    document.getElementById('mMonthProgressLabel').textContent = `Día ${currentDay} de ${daysInMonth}`;
+    document.getElementById('mMonthProgressPct').textContent = `${monthPct}%`;
+    document.getElementById('mMonthProgressFill').style.width = `${monthPct}%`;
+    // Subtítulo del progreso
+    const subtitleEl = document.getElementById('mMonthProgressSubtitle');
+    if (subtitleEl) {
+      if (monthPct >= 50) {
+        subtitleEl.textContent = 'Vas por buen camino';
+      } else if (monthPct >= 25) {
+        subtitleEl.textContent = 'Sigue así';
+      } else {
+        subtitleEl.textContent = 'Inicio del mes';
+      }
+    }
+
+    // Visitas web (placeholder por ahora)
+    const webVisitsEl = document.getElementById('mWebVisits');
+    if (webVisitsEl) webVisitsEl.textContent = 'Sin datos';
+
+    // Favoritos: Crecimiento (comparación con días equivalentes del mes anterior)
+    // Solo comparar si el mes anterior está después de FECHA_CORTE_ESTADISTICAS
+    let ventasMesAnterior = 0;
+    try {
+      const rawPrevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
+      const prevMonthStart = rawPrevMonthStart > FECHA_CORTE_ESTADISTICAS ? rawPrevMonthStart : FECHA_CORTE_ESTADISTICAS;
+      // Comparar con los mismos días del mes anterior (día 1 hasta el día actual)
+      const prevMonthSameDay = new Date(now.getFullYear(), now.getMonth() - 1, currentDay).toISOString().split('T')[0];
+      // Solo consultar si el rango es válido (después de la fecha de corte)
+      if (prevMonthSameDay >= FECHA_CORTE_ESTADISTICAS) {
+        let queryPrev = sb
+          .from('citas')
+          .select('precio')
+          .gte('fecha', prevMonthStart)
+          .lte('fecha', prevMonthSameDay)
+          .in('estado', ['finalizada', 'cobrada']);
+        if (sedeActual) {
+          queryPrev = queryPrev.eq('sucursal_id', sedeActual);
+        } else if (sedesTestIds.length > 0) {
+          queryPrev = queryPrev.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+        }
+        const { data: citasPrev } = await queryPrev;
+        ventasMesAnterior = (citasPrev || []).reduce((sum, c) => sum + Number(c.precio || 0), 0);
+      }
+    } catch (err) {}
+    const crecimientoPct = ventasMesAnterior > 0 ? Math.round(((ventasMes - ventasMesAnterior) / ventasMesAnterior) * 100) : 0;
+    document.getElementById('mFavCrecimiento').textContent = `${crecimientoPct >= 0 ? '+' : ''}${crecimientoPct}%`;
+    const deltaEl = document.getElementById('mFavCrecimientoDelta');
+    if (deltaEl) {
+      deltaEl.innerHTML = `<span class="premium-metric-delta-text">vs. mes anterior</span>`;
+    }
+    // Actualizar delta de ventas en la tarjeta principal
+    const salesDeltaEl = document.getElementById('mSalesDeltaValue');
+    if (salesDeltaEl) {
+      salesDeltaEl.textContent = `↑ ${crecimientoPct >= 0 ? '+' : ''}${crecimientoPct}%`;
+    }
+
+    // Favoritos: Reservas del mes (filtrado por sede y días transcurridos)
+    let reservasMes = 0;
+    try {
+      let queryRes = sb.from('citas').select('id', { count: 'exact', head: true }).gte('fecha', monthStart).lte('fecha', todayDate).neq('estado', 'cancelada');
+      if (sedeActual) {
+        queryRes = queryRes.eq('sucursal_id', sedeActual);
+      } else if (sedesTestIds.length > 0) {
+        queryRes = queryRes.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+      }
+      const { count } = await queryRes;
+      reservasMes = count || 0;
+    } catch (err) {}
+    document.getElementById('mFavReservas').textContent = reservasMes;
+
+    // Calcular delta de reservas vs mes anterior (solo si está después de FECHA_CORTE)
+    let reservasMesAnterior = 0;
+    try {
+      const prevMonthSameDay = new Date(now.getFullYear(), now.getMonth() - 1, currentDay).toISOString().split('T')[0];
+      if (prevMonthSameDay >= FECHA_CORTE_ESTADISTICAS) {
+        const rawPrevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
+        const prevMonthStart = rawPrevMonthStart > FECHA_CORTE_ESTADISTICAS ? rawPrevMonthStart : FECHA_CORTE_ESTADISTICAS;
+        let queryResPrev = sb.from('citas').select('id', { count: 'exact', head: true }).gte('fecha', prevMonthStart).lte('fecha', prevMonthSameDay).neq('estado', 'cancelada');
+        if (sedeActual) queryResPrev = queryResPrev.eq('sucursal_id', sedeActual);
+        else if (sedesTestIds.length > 0) queryResPrev = queryResPrev.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+        const { count: countPrev } = await queryResPrev;
+        reservasMesAnterior = countPrev || 0;
+      }
+    } catch (err) {}
+    const reservasDeltaPct = reservasMesAnterior > 0 ? Math.round(((reservasMes - reservasMesAnterior) / reservasMesAnterior) * 100) : 0;
+    const mReservasDeltaPctEl = document.getElementById('mReservasDeltaPct');
+    if (mReservasDeltaPctEl) mReservasDeltaPctEl.textContent = `${reservasDeltaPct >= 0 ? '+' : ''}${reservasDeltaPct}%`;
+
+    // Favoritos: Clientes nuevos del mes (días transcurridos)
+    let clientesNuevosMes = 0;
+    try {
+      const monthRange = dnLocalDayRangeUTC(monthStart);
+      const todayEndRange = dnLocalDayRangeUTC(todayDate);
+      const { count } = await sb.from('usuarios').select('id', { count: 'exact', head: true }).eq('role', 'cliente').gte('created_at', monthRange.start).lte('created_at', todayEndRange.end);
+      clientesNuevosMes = count || 0;
+    } catch (err) {}
+    document.getElementById('mFavClientesNuevos').textContent = clientesNuevosMes;
+
+    // Calcular delta de clientes vs mes anterior (solo si está después de FECHA_CORTE)
+    let clientesMesAnterior = 0;
+    try {
+      const prevMonthSameDay = new Date(now.getFullYear(), now.getMonth() - 1, currentDay).toISOString().split('T')[0];
+      if (prevMonthSameDay >= FECHA_CORTE_ESTADISTICAS) {
+        const rawPrevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
+        const prevMonthStartStr = rawPrevMonthStart > FECHA_CORTE_ESTADISTICAS ? rawPrevMonthStart : FECHA_CORTE_ESTADISTICAS;
+        const prevMonthRange = dnLocalDayRangeUTC(prevMonthStartStr);
+        const prevMonthEndRange = dnLocalDayRangeUTC(prevMonthSameDay);
+        const { count: countPrev } = await sb.from('usuarios').select('id', { count: 'exact', head: true }).eq('role', 'cliente').gte('created_at', prevMonthRange.start).lte('created_at', prevMonthEndRange.end);
+        clientesMesAnterior = countPrev || 0;
+      }
+    } catch (err) {}
+    const clientesDeltaPct = clientesMesAnterior > 0 ? Math.round(((clientesNuevosMes - clientesMesAnterior) / clientesMesAnterior) * 100) : 0;
+    const mClientesDeltaPctEl = document.getElementById('mClientesDeltaPct');
+    if (mClientesDeltaPctEl) mClientesDeltaPctEl.textContent = `${clientesDeltaPct >= 0 ? '+' : ''}${clientesDeltaPct}%`;
+
+    // Favoritos: Gastos del mes (filtrado por sede y días transcurridos)
+    let gastosMes = 0;
+    let gastosMesAnterior = 0;
+    try {
+      let queryGastos = sb.from('gastos').select('monto').gte('fecha', monthStart).lte('fecha', todayDate);
+      if (sedeActual) queryGastos = queryGastos.eq('sucursal_id', sedeActual);
+      const { data: gastosData } = await queryGastos;
+      gastosMes = (gastosData || []).reduce((sum, g) => sum + Number(g.monto || 0), 0);
+
+      // Gastos mes anterior para delta (solo si está después de FECHA_CORTE)
+      const prevMonthSameDay = new Date(now.getFullYear(), now.getMonth() - 1, currentDay).toISOString().split('T')[0];
+      if (prevMonthSameDay >= FECHA_CORTE_ESTADISTICAS) {
+        const rawPrevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
+        const prevMonthStart = rawPrevMonthStart > FECHA_CORTE_ESTADISTICAS ? rawPrevMonthStart : FECHA_CORTE_ESTADISTICAS;
+        let queryGastosPrev = sb.from('gastos').select('monto').gte('fecha', prevMonthStart).lte('fecha', prevMonthSameDay);
+        if (sedeActual) queryGastosPrev = queryGastosPrev.eq('sucursal_id', sedeActual);
+        const { data: gastosPrevData } = await queryGastosPrev;
+        gastosMesAnterior = (gastosPrevData || []).reduce((sum, g) => sum + Number(g.monto || 0), 0);
+      }
+    } catch (err) {}
+    const mFavGastosEl = document.getElementById('mFavGastos');
+    if (mFavGastosEl) mFavGastosEl.textContent = dnFormatCOP(gastosMes);
+    // Actualizar tarjeta de gastos premium
+    const mGastosMesEl = document.getElementById('mGastosMes');
+    if (mGastosMesEl) mGastosMesEl.textContent = dnFormatCOP(gastosMes);
+    const mGastosDeltaEl = document.getElementById('mGastosDelta');
+    if (mGastosDeltaEl) {
+      const gastosDeltaPct = gastosMesAnterior > 0 ? Math.round(((gastosMes - gastosMesAnterior) / gastosMesAnterior) * 100) : 0;
+      const isDown = gastosDeltaPct < 0;
+      mGastosDeltaEl.innerHTML = `<span>${isDown ? '↓' : '↑'} ${gastosDeltaPct >= 0 ? '+' : ''}${gastosDeltaPct}%</span>`;
+      mGastosDeltaEl.classList.toggle('down', isDown);
+    }
+
+    // NUEVO: Citas de hoy (para tarjeta premium)
+    let citasHoyCount = 0;
+    let citasHoyData = [];
+    let proyeccionHoy = 0;
+    try {
+      let queryCitasHoy = sb.from('citas').select('id, hora_inicio, precio, estado').eq('fecha', todayDate).neq('estado', 'cancelada');
+      if (sedeActual) queryCitasHoy = queryCitasHoy.eq('sucursal_id', sedeActual);
+      else if (sedesTestIds.length > 0) queryCitasHoy = queryCitasHoy.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+      const { data } = await queryCitasHoy.order('hora_inicio');
+      citasHoyData = data || [];
+      citasHoyCount = citasHoyData.length;
+      proyeccionHoy = citasHoyData.reduce((sum, c) => sum + Number(c.precio || 0), 0);
+    } catch (err) { console.error(err); }
+
+    // Actualizar UI de citas de hoy
+    const mTodayCitasEl = document.getElementById('mTodayCitas');
+    if (mTodayCitasEl) mTodayCitasEl.textContent = citasHoyCount;
+
+    const mTodayLabelEl = document.getElementById('mTodayLabel');
+    if (mTodayLabelEl) mTodayLabelEl.textContent = citasHoyCount === 1 ? 'cita hoy' : 'citas hoy';
+
+    // Primera cita del día
+    const mTodayFirstTimeEl = document.getElementById('mTodayFirstTime');
+    if (mTodayFirstTimeEl) {
+      if (citasHoyData.length > 0) {
+        const firstTime = citasHoyData[0].hora_inicio;
+        const [h, m] = firstTime.split(':');
+        const hour = parseInt(h);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+        mTodayFirstTimeEl.textContent = `${hour12}:${m} ${ampm}`;
+      } else {
+        mTodayFirstTimeEl.textContent = 'Sin citas';
+      }
+    }
+
+    // Proyección de facturación
+    const mTodayProyeccionEl = document.getElementById('mTodayProyeccion');
+    if (mTodayProyeccionEl) mTodayProyeccionEl.textContent = dnFormatCOP(proyeccionHoy);
+
+    // Cupos libres (estimación: barberos activos * 10 slots - citas agendadas)
+    let cuposLibres = 0;
+    try {
+      let queryBarberos = sb.from('barberos').select('id', { count: 'exact', head: true }).eq('activo', true);
+      if (sedeActual) queryBarberos = queryBarberos.eq('sucursal_id', sedeActual);
+      const { count: barberosActivos } = await queryBarberos;
+      const slotsEstimados = (barberosActivos || 1) * 10; // 10 slots por barbero aprox
+      cuposLibres = Math.max(0, slotsEstimados - citasHoyCount);
+    } catch (err) {}
+    const mTodayCuposLibresEl = document.getElementById('mTodayCuposLibres');
+    if (mTodayCuposLibresEl) mTodayCuposLibresEl.textContent = cuposLibres;
+
+    // Meta del día (estimación: ventas mes / días transcurridos * 1.1 para un target)
+    const metaDiaria = ventasMes > 0 && currentDay > 0 ? Math.round((ventasMes / currentDay) * 1.1) : 1000000;
+    const ventasHoy = citasHoyData.filter(c => c.estado === 'finalizada').reduce((sum, c) => sum + Number(c.precio || 0), 0);
+    const metaPct = metaDiaria > 0 ? Math.min(100, Math.round((ventasHoy / metaDiaria) * 100)) : 0;
+
+    const mTodayGoalTextEl = document.getElementById('mTodayGoalText');
+    if (mTodayGoalTextEl) mTodayGoalTextEl.textContent = `${dnFormatCOP(ventasHoy)} / ${dnFormatCOP(metaDiaria)}`;
+
+    const mTodayGoalFillEl = document.getElementById('mTodayGoalFill');
+    if (mTodayGoalFillEl) mTodayGoalFillEl.style.width = `${metaPct}%`;
+
+    // Badge de citas en accesos rápidos
+    const mShortcutCitasEl = document.getElementById('mShortcutCitas');
+    if (mShortcutCitasEl) {
+      mShortcutCitasEl.textContent = citasHoyCount;
+      mShortcutCitasEl.style.display = citasHoyCount > 0 ? 'flex' : 'none';
+    }
+
+    // Últimas visitas por sede
+    try {
+      let sedesQuery = sb.from('sucursales').select('id, nombre').eq('activa', true);
+      // Si hay sede seleccionada, solo mostrar esa sede
+      if (sedeActual) sedesQuery = sedesQuery.eq('id', sedeActual);
+      const { data: sedes } = await sedesQuery;
+
+      let ultimasHtml = '';
+      for (const sede of (sedes || [])) {
+        const { data: ultimaCita } = await sb
+          .from('citas')
+          .select('id, fecha, hora_inicio, precio, cliente_id, usuarios!citas_cliente_id_fkey(full_name, username), servicios(nombre)')
+          .eq('sucursal_id', sede.id)
+          .eq('estado', 'finalizada')
+          .order('fecha', { ascending: false })
+          .order('hora_inicio', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (ultimaCita) {
+          const clientName = ultimaCita.usuarios?.full_name || ultimaCita.usuarios?.username || 'Cliente';
+          const serviceName = ultimaCita.servicios?.nombre || '';
+          const fechaCita = new Date(ultimaCita.fecha + 'T' + ultimaCita.hora_inicio);
+          const diffMs = Date.now() - fechaCita.getTime();
+          const diffMins = Math.round(diffMs / 60000);
+          let timeAgo = diffMins < 60 ? `Hace ${diffMins} min` : diffMins < 1440 ? `Hace ${Math.round(diffMins/60)} h` : `Hace ${Math.round(diffMins/1440)} días`;
+
+          ultimasHtml += `
+            <div class="premium-visit-item">
+              <div class="premium-visit-avatar">${dnInitials(clientName)}</div>
+              <div class="premium-visit-info">
+                <div class="premium-visit-name">${clientName}</div>
+                <div class="premium-visit-sede">${sede.nombre}</div>
+                <div class="premium-visit-time">${timeAgo}</div>
+              </div>
+              <svg class="premium-visit-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>`;
+        }
+      }
+      document.getElementById('mUltimasVisitas').innerHTML = ultimasHtml || '<div class="premium-empty">No hay visitas recientes</div>';
+    } catch (err) {
+      console.error(err);
+      document.getElementById('mUltimasVisitas').innerHTML = '<div class="premium-empty">Error al cargar</div>';
+    }
+  }
+
+  // Función para inicializar el selector de sedes móvil (usa delegación de eventos)
+  let sedeEventsInit = false;
+  function initMobileSedeSelector() {
+    if (sedeEventsInit) return;
+    sedeEventsInit = true;
+
+    const selectorEl = document.getElementById('mSedeSelector');
+    const menuEl = document.getElementById('mSedeMenu');
+    if (!selectorEl || !menuEl) return;
+
+    // Click en el selector (pero no en el menú) para abrir/cerrar
+    selectorEl.addEventListener('click', (e) => {
+      // Si el click fue en un item del menú, no hacer toggle
+      if (e.target.closest('.premium-sede-menu-item')) return;
+      e.stopPropagation();
+      selectorEl.classList.toggle('open');
+    });
+
+    // Click en items del menú usando delegación
+    menuEl.addEventListener('click', (e) => {
+      const item = e.target.closest('.premium-sede-menu-item');
+      if (!item) return;
+      e.stopPropagation();
+      const sedeId = item.dataset.id;
+      // Si sedeId está vacío, limpiar la sede (mostrar todas)
+      if (sedeId) {
+        dnSetSedeActual(sedeId);
+      } else {
+        localStorage.removeItem('dn_sede_actual');
+      }
+      location.reload();
+    });
+
+    // Click fuera cierra el menú
+    document.addEventListener('click', (e) => {
+      if (!selectorEl.contains(e.target)) {
+        selectorEl.classList.remove('open');
+      }
+    });
+  }
+
+  // Cargar reseñas del día
+  async function loadResenasHoy(fecha = null) {
+    const listEl = document.getElementById('resenasHoyList');
+    const countEl = document.getElementById('resenasHoyCount');
+    if (!listEl) return;
+
+    try {
+      const selectedDate = fecha || dnTodayISO();
+      const todayRange = dnLocalDayRangeUTC(selectedDate);
+      const sedeActual = dnGetSedeActual();
+
+      const { data, error } = await sb.from('resenas')
+        .select(`
+          id, calificacion, comentario, created_at,
+          usuarios!resenas_cliente_id_fkey(full_name),
+          barberos!resenas_barbero_id_fkey(id, usuarios!barberos_id_fkey(full_name)),
+          citas!resenas_cita_id_fkey(sucursal_id)
+        `)
+        .gte('created_at', todayRange.start)
+        .lte('created_at', todayRange.end)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Filtrar por sede si hay una seleccionada
+      let filteredData = data || [];
+      if (sedeActual && filteredData.length > 0) {
+        filteredData = filteredData.filter(r => r.citas?.sucursal_id === sedeActual);
+      }
+
+      const total = filteredData.length;
+      countEl.textContent = `${total} reseña${total !== 1 ? 's' : ''}`;
+
+      if (filteredData.length === 0) {
+        listEl.innerHTML = '<div class="premium-empty">No hay reseñas en esta fecha</div>';
+        return;
+      }
+
+      listEl.innerHTML = filteredData.map(r => {
+        const hora = new Date(r.created_at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
+        const cliente = r.usuarios?.full_name || 'Cliente';
+        const barbero = r.barberos?.usuarios?.full_name || 'Barbero';
+        const stars = '⭐'.repeat(r.calificacion || 0);
+
+        return `
+          <div class="premium-visit-item" style="padding:14px;border-bottom:1px solid var(--glass-border);">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C9A35B,#E8D5A3);display:flex;align-items:center;justify-content:center;font-size:18px;">⭐</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-weight:700;font-size:13px;margin-bottom:2px;">${cliente}</div>
+                <div style="font-size:11px;color:var(--text-secondary);">para <span style="color:var(--gold);font-weight:600;">${barbero}</span></div>
+                <div style="font-size:12px;margin-top:4px;">${stars}</div>
+                ${r.comentario ? `<div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:4px;line-height:1.3;">"${r.comentario}"</div>` : ''}
+              </div>
+              <div style="font-size:10px;color:var(--text-secondary);white-space:nowrap;">${hora}</div>
+            </div>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      console.error('Error cargando reseñas:', err);
+      listEl.innerHTML = '<div class="premium-empty">Error al cargar reseñas</div>';
+    }
+  }
+
+  // Inicializar date picker de reseñas
+  const resenasDatePicker = document.getElementById('resenasDatePicker');
+  if (resenasDatePicker) {
+    resenasDatePicker.value = dnTodayISO();
+    resenasDatePicker.addEventListener('change', function() {
+      loadResenasHoy(this.value);
+    });
+  }
+
+  loadDashboard();
+  loadResenasHoy();
+</script>
+
+<script src="../assets/citas-estados.js" defer></script>
+<script src="../assets/mobile-nav.js"></script>
+<script src="../assets/admin-sede-sidebar.js"></script>
+</body>
+</html>
