@@ -152,6 +152,7 @@
   .badge-warning { background: rgba(242, 201, 76, 0.15); color: var(--warning); }
   .badge-error { background: rgba(239, 83, 80, 0.15); color: var(--error); }
   .badge-gold { background: rgba(201, 163, 91, 0.15); color: var(--gold); }
+  .badge-red { background: rgba(255, 107, 94, 0.15); color: #FF6B5E; }
 
   .download-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 12px; background: var(--card-2); border: 1px solid var(--divider); color: var(--text); font-size: 13px; font-weight: 600; cursor: pointer; }
   .download-btn:hover { border-color: var(--gold); color: var(--gold); }
@@ -949,7 +950,7 @@
     document.getElementById('gastosCount').textContent = `${count || 0} gastos`;
 
     const container = document.getElementById('gastosContent');
-    if (!data || data.length === 0) {
+    if (error || !data || data.length === 0) {
       container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg><div>No hay gastos registrados</div></div>';
       return;
     }
@@ -977,8 +978,8 @@
       .order('created_at', { ascending: false })
       .limit(50);
 
-    const retiros = (data || []).filter(m => m.tipo === 'retiro');
-    const depositos = (data || []).filter(m => m.tipo === 'deposito');
+    const retiros = error ? [] : (data || []).filter(m => m.tipo === 'retiro');
+    const depositos = error ? [] : (data || []).filter(m => m.tipo === 'deposito');
 
     document.getElementById('retirosCount').textContent = `${retiros.length} retiros`;
     document.getElementById('depositosCount').textContent = `${depositos.length} depósitos`;
@@ -1021,7 +1022,7 @@
     const { inicio, fin } = getDateRange();
     const { data, error, count } = await sb
       .from('garantias')
-      .select('*, clientes(nombre)', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('sucursal_id', sedeId)
       .gte('created_at', inicio)
       .lte('created_at', fin + 'T23:59:59')
@@ -1031,7 +1032,7 @@
     document.getElementById('garantiasCount').textContent = `${count || 0} garantías`;
 
     const container = document.getElementById('garantiasContent');
-    if (!data || data.length === 0) {
+    if (error || !data || data.length === 0) {
       container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><div>No hay garantías registradas</div></div>';
       return;
     }
@@ -1039,7 +1040,7 @@
     container.innerHTML = data.map(g => `
       <div class="history-row">
         <div class="history-info">
-          <div class="history-main">${g.clientes?.nombre || 'Cliente'}</div>
+          <div class="history-main">${g.cliente_nombre || 'Cliente'}</div>
           <div class="history-sub">${formatDateTime(g.created_at)} · ${g.motivo || 'Sin motivo'}</div>
         </div>
         <span class="badge badge-warning">${g.estado || 'Pendiente'}</span>
@@ -1052,7 +1053,7 @@
     const { inicio, fin } = getDateRange();
     const { data, error, count } = await sb
       .from('ventas')
-      .select('*, clientes(nombre)', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('sucursal_id', sedeId)
       .gte('created_at', inicio)
       .lte('created_at', fin + 'T23:59:59')
@@ -1063,7 +1064,7 @@
     document.getElementById('ventasCount').textContent = `${count || 0} ventas`;
 
     const container = document.getElementById('ventasContent');
-    if (!data || data.length === 0) {
+    if (error || !data || data.length === 0) {
       container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg><div>No hay ventas en este período</div></div>';
       return;
     }
@@ -1071,7 +1072,7 @@
     container.innerHTML = data.map(v => `
       <div class="history-row">
         <div class="history-info">
-          <div class="history-main">${v.clientes?.nombre || 'Cliente'}</div>
+          <div class="history-main">${v.cliente_nombre || 'Cliente'}</div>
           <div class="history-sub">${formatDateTime(v.created_at)}</div>
         </div>
         <div class="history-amount positive">${formatMoney(v.total)}</div>
@@ -1095,7 +1096,7 @@
     document.getElementById('internasCount').textContent = `${count || 0} ventas internas`;
 
     const container = document.getElementById('internasContent');
-    if (!data || data.length === 0) {
+    if (error || !data || data.length === 0) {
       container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3 20c1.3-3.6 3.7-5.2 6-5.2s4.7 1.6 6 5.2"/></svg><div>No hay ventas internas</div></div>';
       return;
     }
@@ -1116,7 +1117,7 @@
     const { inicio, fin } = getDateRange();
     const { data, error, count } = await sb
       .from('prestamos_clientes')
-      .select('*, clientes(nombre)', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .eq('sucursal_id', sedeId)
       .gte('created_at', inicio)
       .lte('created_at', fin + 'T23:59:59')
@@ -1126,7 +1127,7 @@
     document.getElementById('prestamosCount').textContent = `${count || 0} préstamos`;
 
     const container = document.getElementById('prestamosContent');
-    if (!data || data.length === 0) {
+    if (error || !data || data.length === 0) {
       container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><div>No hay préstamos registrados</div></div>';
       return;
     }
@@ -1134,7 +1135,7 @@
     container.innerHTML = data.map(p => `
       <div class="history-row">
         <div class="history-info">
-          <div class="history-main">${p.clientes?.nombre || 'Cliente'}</div>
+          <div class="history-main">${p.cliente_nombre || 'Cliente'}</div>
           <div class="history-sub">${formatDateTime(p.created_at)} · ${p.estado || 'Activo'}</div>
         </div>
         <div class="history-amount">${formatMoney(p.monto)}</div>
@@ -1147,8 +1148,7 @@
     const { inicio, fin } = getDateRange();
     const { data, error, count } = await sb
       .from('resenas')
-      .select('*, clientes(nombre)', { count: 'exact' })
-      .eq('sucursal_id', sedeId)
+      .select('*, usuarios!resenas_cliente_id_fkey(full_name, phone)', { count: 'exact' })
       .gte('created_at', inicio)
       .lte('created_at', fin + 'T23:59:59')
       .order('created_at', { ascending: false })
@@ -1164,16 +1164,33 @@
 
     container.innerHTML = data.map(r => {
       const stars = '★'.repeat(r.calificacion || 0) + '☆'.repeat(5 - (r.calificacion || 0));
+      const clienteNombre = r.usuarios?.full_name || 'Cliente';
+      const clientePhone = r.usuarios?.phone || '';
+      const isLowRating = r.calificacion < 3;
+      const clickable = isLowRating && clientePhone ? 'style="cursor:pointer;background:rgba(255,107,94,0.08);border-left:3px solid #FF6B5E;"' : '';
+      const onclick = isLowRating && clientePhone ? `onclick="contactarClienteResena('${clientePhone}', '${clienteNombre.split(' ')[0]}')"` : '';
+      const hint = isLowRating && clientePhone ? '<span style="font-size:10px;color:#FF6B5E;margin-left:8px;">Clic para contactar</span>' : '';
+
       return `
-        <div class="history-row">
+        <div class="history-row" ${clickable} ${onclick}>
           <div class="history-info">
-            <div class="history-main">${r.clientes?.nombre || 'Cliente'}</div>
+            <div class="history-main">${clienteNombre}${hint}</div>
             <div class="history-sub">${r.comentario || 'Sin comentario'}</div>
           </div>
-          <span class="badge badge-gold">${stars}</span>
+          <span class="badge ${isLowRating ? 'badge-red' : 'badge-gold'}">${stars}</span>
         </div>
       `;
     }).join('');
+  }
+
+  // Contactar cliente por reseña negativa
+  function contactarClienteResena(phone, nombre) {
+    let phoneClean = phone.replace(/\D/g, '');
+    if (!phoneClean.startsWith('57') && phoneClean.length === 10) {
+      phoneClean = '57' + phoneClean;
+    }
+    const mensaje = `Hola ${nombre}, soy del equipo de Keicy Barber. Vimos que tu última visita no fue la mejor experiencia. Queremos saber qué pasó y cómo podemos mejorar. ¿Nos cuentas?`;
+    window.open(`https://wa.me/${phoneClean}?text=${encodeURIComponent(mensaje)}`, '_blank');
   }
 
   // Cargar pagos a colaboradores
@@ -1211,13 +1228,13 @@
   async function loadCuentasColaboradores() {
     const { data, error } = await sb
       .from('usuarios')
-      .select('id, full_name, saldo_pendiente')
+      .select('id, full_name')
       .eq('sucursal_id', sedeId)
       .in('role', ['barbero', 'colaborador'])
       .order('full_name');
 
     const container = document.getElementById('cuentasContent');
-    if (!data || data.length === 0) {
+    if (error || !data || data.length === 0) {
       container.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><div>No hay colaboradores</div></div>';
       return;
     }
@@ -1398,5 +1415,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') dnCloseModal();
 });
 </script>
+<script src="/assets/turbo-loader.js" defer></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

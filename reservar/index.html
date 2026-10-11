@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- VERSIÓN: 2026-09-07-v4 - Log barbero al guardar -->
+<!-- VERSIÓN: 2026-10-06-v1 - Fix habilitacion barberos -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -13,6 +13,9 @@
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
 <meta name="theme-color" content="#F6F6F4">
 <title>Keicy Barbería · Reservar cita</title>
+<link rel="preconnect" href="https://ygrmammcaupnygdxmgth.supabase.co">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
 <script src="../assets/theme-manager.js"></script>
 <link rel="stylesheet" href="../assets/design-system.css">
 <style>
@@ -28,11 +31,11 @@
     --card-2:#F8F8F6;
     --bg-hover:#F0F0EE;
 
-    /* Dorados Premium (mantener) */
-    --gold:#C9A227;
-    --gold-primary:#C9A227;
-    --gold-bright:#D4AF37;
-    --gold-dark:#A68523;
+    /* Dorados Premium con mejor contraste */
+    --gold:#B8942A;
+    --gold-primary:#B8942A;
+    --gold-bright:#C9A535;
+    --gold-dark:#9A7A20;
     --gold-glow:rgba(201,162,39,0.15);
     --accent:var(--gold);
     --accent-bright:var(--gold-bright);
@@ -2072,9 +2075,45 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../assets/supabase-client.js"></script>
+<script src="/assets/utils.js"></script>
 <script>
-  // ============ SPLASH PREMIUM CONTROLLER ============
-  // Duración total: ~5 segundos - Se muestra cada vez que se carga la página
+  // ============ SPLASH INTELIGENTE ============
+  // Tiempo mínimo: 1.5s (para mostrar la marca)
+  // Termina automáticamente cuando: datos listos + tiempo mínimo pasado
+  // Tiempo máximo: 3s (si los datos tardan mucho)
+  let _splashDataReady = false;
+  let _splashMinPassed = false;
+  let _splashHidden = false;
+
+  function markDataReady() {
+    _splashDataReady = true;
+    tryHideSplash();
+  }
+
+  function tryHideSplash() {
+    if (_splashHidden) return;
+    if (!_splashDataReady || !_splashMinPassed) return;
+    _splashHidden = true;
+
+    const splash = document.getElementById('splash');
+    const splashLogo = document.getElementById('splashLogo');
+    const splashLabel = document.getElementById('splashLabel');
+    const app = document.getElementById('app');
+
+    if (splashLogo) splashLogo.classList.add('leaving');
+    if (splashLabel) splashLabel.classList.add('leaving');
+    if (app) app.classList.add('ready');
+
+    setTimeout(() => {
+      if (splash) splash.classList.add('leaving');
+    }, 200);
+
+    setTimeout(() => {
+      if (splash) splash.classList.add('hidden');
+      document.body.style.overflow = '';
+    }, 800);
+  }
+
   (function initSplash(){
     const splash = document.getElementById('splash');
     const splashLogo = document.getElementById('splashLogo');
@@ -2083,53 +2122,32 @@
 
     if (!splash) {
       if (app) app.classList.add('no-splash');
+      _splashHidden = true;
       return;
     }
 
-    // Bloquear scroll durante splash
     document.body.style.overflow = 'hidden';
 
-    // Iniciar animaciones - Tiempos extendidos para experiencia premium de bienvenida
-    let cleanupTimeout1, cleanupTimeout2, cleanupTimeout3, cleanupTimeout4;
-
-    // 200ms: Iniciar animación del logo
-    cleanupTimeout1 = setTimeout(() => {
+    // Iniciar animaciones inmediatamente
+    setTimeout(() => {
       if (splashLogo) splashLogo.classList.add('animate');
-    }, 200);
-
-    // Label: el delay está en CSS
-    cleanupTimeout2 = setTimeout(() => {
       if (splashLabel) splashLabel.classList.add('animate');
-    }, 200);
+    }, 100);
 
-    // 3800ms: Iniciar transición de salida
-    cleanupTimeout3 = setTimeout(() => {
-      // Iniciar animación de salida elegante
-      if (splashLogo) splashLogo.classList.add('leaving');
-      if (splashLabel) splashLabel.classList.add('leaving');
+    // Tiempo mínimo: 1.5s
+    setTimeout(() => {
+      _splashMinPassed = true;
+      tryHideSplash();
+    }, 1500);
 
-      // Revelar contenido principal con transición coordinada
-      if (app) app.classList.add('ready');
-
-      // Fade out del splash
-      setTimeout(() => {
-        if (splash) splash.classList.add('leaving');
-      }, 200);
-    }, 3800);
-
-    // 4800ms: Ocultar completamente y restaurar scroll
-    cleanupTimeout4 = setTimeout(() => {
-      if (splash) splash.classList.add('hidden');
-      document.body.style.overflow = '';
-    }, 4800);
-
-    // Cleanup en caso de que el usuario navegue antes de terminar
-    window.addEventListener('beforeunload', () => {
-      clearTimeout(cleanupTimeout1);
-      clearTimeout(cleanupTimeout2);
-      clearTimeout(cleanupTimeout3);
-      clearTimeout(cleanupTimeout4);
-    });
+    // Tiempo máximo: 3s (forzar ocultar aunque datos no estén)
+    setTimeout(() => {
+      if (!_splashHidden) {
+        _splashDataReady = true;
+        _splashMinPassed = true;
+        tryHideSplash();
+      }
+    }, 3000);
   })();
   // ============ END SPLASH CONTROLLER ============
 
@@ -2169,7 +2187,7 @@
   }
 
   // VERSIÓN DEL CÓDIGO - para verificar cache
-  console.log('[DN] Reservas v2026-09-07-v11 - Chips categoria con !important');
+  console.log('[DN] Reservas v2026-10-06-v2 - Debug habilitacion');
 
   const state = {
     serviciosSeleccionados: [], barbero: null, anyBarber: false, fecha: null, hora: null,
@@ -2182,6 +2200,16 @@
   let sedeActualObj = null;
   let fromClientApp = false; // Flag para saber si viene desde la app de cliente
   let urlBarberoId = null; // Barbero preseleccionado desde URL (link directo del barbero)
+
+  // Configuración del negocio (cargada dinámicamente)
+  let configNegocio = {
+    duracion_turno_min: 60,
+    solo_horas_en_punto: true,
+    anticipacion_min_horas: 0,
+    anticipacion_max_dias: 365,
+    hora_cierre_festivos: '17:00',
+    festivos_colombia: ['01-01','01-12','03-23','04-02','04-03','05-01','05-18','06-08','06-15','06-29','07-20','08-07','08-17','10-12','11-02','11-16','12-08','12-25']
+  };
 
   // Textos de email personalizados
   let emailTextos = {};
@@ -2500,6 +2528,37 @@
 
   let servicioMasElegidoId = null;
 
+  // Cargar "más elegido" en background sin bloquear la UI
+  function loadServicioMasElegido(){
+    (async () => {
+      try {
+        const hace90 = new Date(); hace90.setDate(hace90.getDate() - 90);
+        const hace90ISO = hace90.toISOString().slice(0,10);
+        const sedesTestIds = await dnGetSedesTestIds();
+        let popQuery = sb.from('citas').select('servicio_id').not('estado', 'in', '(cancelada,sin_respuesta)').gte('fecha', hace90ISO).limit(500);
+        if (sedesTestIds.length > 0) popQuery = popQuery.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+        const { data: popData } = await popQuery;
+        const counts = {};
+        (popData || []).forEach(c => { if (c.servicio_id) counts[c.servicio_id] = (counts[c.servicio_id]||0)+1; });
+        const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+        servicioMasElegidoId = top ? top[0] : null;
+        // Actualizar badge si ya se renderizó la lista
+        if (servicioMasElegidoId) {
+          const card = document.querySelector(`.svc-card[data-id="${servicioMasElegidoId}"]`);
+          if (card && !card.querySelector('.svc-badge')) {
+            const photoWrap = card.querySelector('.svc-photo-wrap');
+            if (photoWrap) {
+              const badge = document.createElement('span');
+              badge.className = 'svc-badge';
+              badge.textContent = 'Más elegido';
+              photoWrap.appendChild(badge);
+            }
+          }
+        }
+      } catch (e) { console.warn('[DN] Error cargando más elegido:', e); }
+    })();
+  }
+
   async function loadServicios(){
     try {
       const [svcRes, catRes] = await Promise.all([
@@ -2514,21 +2573,8 @@
       );
       state.categorias = catRes.data || [];
 
-      // El "más elegido" es un extra decorativo: OPTIMIZADO - solo últimos 90 días
-      try {
-        const hace90 = new Date(); hace90.setDate(hace90.getDate() - 90);
-        const hace90ISO = hace90.toISOString().slice(0,10);
-        const sedesTestIds = await dnGetSedesTestIds();
-        let popQuery = sb.from('citas').select('servicio_id').not('estado', 'in', '(cancelada,sin_respuesta)').gte('fecha', hace90ISO).limit(500);
-        if (sedesTestIds.length > 0) popQuery = popQuery.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
-        const { data: popData } = await popQuery;
-        const counts = {};
-        (popData || []).forEach(c => { if (c.servicio_id) counts[c.servicio_id] = (counts[c.servicio_id]||0)+1; });
-        const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
-        servicioMasElegidoId = top ? top[0] : null;
-      } catch (popErr) {
-        console.error(popErr);
-      }
+      // El "más elegido" es decorativo - cargar en background sin bloquear
+      loadServicioMasElegido();
 
       // Solo mostrar categorías que efectivamente tienen servicios activos.
       const usedCatIds = new Set(state.servicios.map(s => s.categoria_id));
@@ -2757,54 +2803,62 @@
     });
   }
 
-  async function loadWelcomeMessage(){
+  async function loadConfigNegocio(){
     try {
-      const { data } = await sb.from('app_config').select('key, value').in('key', ['welcome_title', 'welcome_message']);
+      const { data } = await sb.from('configuracion_negocio')
+        .select('duracion_turno_min, solo_horas_en_punto, anticipacion_min_horas, anticipacion_max_dias, hora_cierre_festivos, festivos_colombia')
+        .eq('id', true)
+        .maybeSingle();
       if (data) {
-        for (const item of data) {
-          if (item.key === 'welcome_title' && item.value) {
-            document.getElementById('welcomeTitle').textContent = item.value;
-          }
-          if (item.key === 'welcome_message' && item.value) {
-            document.getElementById('welcomeMessage').textContent = item.value;
-          }
-        }
+        configNegocio.duracion_turno_min = data.duracion_turno_min ?? 60;
+        configNegocio.solo_horas_en_punto = data.solo_horas_en_punto ?? true;
+        configNegocio.anticipacion_min_horas = data.anticipacion_min_horas ?? 0;
+        configNegocio.anticipacion_max_dias = data.anticipacion_max_dias ?? 365;
+        configNegocio.hora_cierre_festivos = data.hora_cierre_festivos ?? '17:00';
+        configNegocio.festivos_colombia = data.festivos_colombia ?? configNegocio.festivos_colombia;
       }
-    } catch (e) { console.error('Error loading welcome message:', e); }
+    } catch (e) { console.warn('[DN] Error cargando config negocio:', e); }
   }
 
-  async function loadEmailTextos(){
+  async function loadWelcomeAndEmailTextos(){
     try {
+      // Una sola query para todo el app_config
       const { data } = await sb.from('app_config').select('key, value').in('key', [
+        'welcome_title', 'welcome_message',
         'email_asunto', 'email_titulo', 'email_subtitulo',
         'email_recordatorio_titulo', 'email_recordatorio_texto',
         'email_calendario_texto', 'email_cancelar_texto'
       ]);
       if (data) {
+        const emailKeyMap = {
+          'email_asunto': 'asunto', 'email_titulo': 'titulo', 'email_subtitulo': 'subtitulo',
+          'email_recordatorio_titulo': 'recordatorio_titulo', 'email_recordatorio_texto': 'recordatorio_texto',
+          'email_calendario_texto': 'calendario_texto', 'email_cancelar_texto': 'cancelar_texto'
+        };
         data.forEach(item => {
-          const keyMap = {
-            'email_asunto': 'asunto',
-            'email_titulo': 'titulo',
-            'email_subtitulo': 'subtitulo',
-            'email_recordatorio_titulo': 'recordatorio_titulo',
-            'email_recordatorio_texto': 'recordatorio_texto',
-            'email_calendario_texto': 'calendario_texto',
-            'email_cancelar_texto': 'cancelar_texto'
-          };
-          if (keyMap[item.key] && item.value) {
-            emailTextos[keyMap[item.key]] = item.value;
+          if (item.key === 'welcome_title' && item.value) {
+            document.getElementById('welcomeTitle').textContent = item.value;
+          } else if (item.key === 'welcome_message' && item.value) {
+            document.getElementById('welcomeMessage').textContent = item.value;
+          } else if (emailKeyMap[item.key] && item.value) {
+            emailTextos[emailKeyMap[item.key]] = item.value;
           }
         });
       }
-    } catch (err) {
-      console.warn('[DN] No se pudieron cargar textos de email:', err);
-    }
+    } catch (e) { console.warn('[DN] Error cargando config:', e); }
   }
 
   async function initSedeFlow(){
     try {
-      loadWelcomeMessage();
-      loadEmailTextos();
+      // Registrar visita (sin bloquear la carga)
+      sb.from('visitas_reservas').insert({
+        user_agent: navigator.userAgent,
+        referrer: document.referrer || null
+      }).then(() => {}).catch(() => {});
+
+      // Cargar configuración del negocio y textos en paralelo
+      loadWelcomeAndEmailTextos();
+      loadConfigNegocio();
       const sedes = await dnLoadSucursalesPublico(false);
       sedesCargadas = sedes;
 
@@ -2819,11 +2873,15 @@
 
       if (!sedes.length) {
         document.getElementById('sedeChoiceList').innerHTML = '<div class="svc-card">Todavía no hay sedes disponibles para reservar.</div>';
+        markDataReady();
         return;
       }
 
       // Pre-render sede list for when they continue
       renderSedeChoiceList(sedes);
+
+      // Notificar que los datos críticos están listos (ocultar splash)
+      markDataReady();
 
       // Detectar parámetros de URL
       const urlParams = new URLSearchParams(window.location.search);
@@ -2869,6 +2927,7 @@
     } catch (err) {
       console.error(err);
       document.getElementById('sedeChoiceList').innerHTML = '<div class="svc-card">No pudimos cargar las sedes.</div>';
+      markDataReady();
     }
   }
 
@@ -2988,7 +3047,7 @@
     carousel.innerHTML = '<div class="barber-card">Cargando barberos…</div>';
     try {
       const { data, error } = await sb.from('barberos')
-        .select('id, especialidad, calificacion, activo, puesto, dia_descanso')
+        .select('id, especialidad, calificacion, activo, puesto, dia_descanso, horario_personalizado')
         .eq('sucursal_id', dnGetSedeActual())
         .eq('activo', true)
         .eq('tipo_colaborador', 'barbero');
@@ -3150,7 +3209,7 @@
   function buildDayScroller(){
     const el = document.getElementById('dayScroller');
     el.innerHTML = '';
-    const DIAS_DISPONIBLES = 365; // Un año completo
+    const DIAS_DISPONIBLES = configNegocio.anticipacion_max_dias || 365;
     let lastMonth = -1;
 
     for (let i = 0; i < DIAS_DISPONIBLES; i++) {
@@ -3190,15 +3249,23 @@
   // Generar TIME_SLOTS dinámicamente según horario de la sede
   const DIAS_SEMANA_RESERVA = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
 
+  // Festivos colombianos (cargados desde configuración)
+  function esFestivo(fechaISO) {
+    const mmdd = fechaISO.slice(5); // Extrae MM-DD de YYYY-MM-DD
+    const festivos = configNegocio.festivos_colombia || [];
+    return festivos.includes(mmdd);
+  }
+
   function getTimeSlotsForDate(fechaISO) {
     // Obtener horario de la sede para el día seleccionado
     const horario = sedeActualObj?.horario;
     const fechaObj = new Date(fechaISO + 'T12:00:00');
     const esDomingo = fechaObj.getDay() === 0;
+    const esHolidayOrDomingo = esDomingo || esFestivo(fechaISO);
 
     if (!horario) {
-      // Fallback: horario por defecto 10:00 - 19:00 (domingos hasta las 16:00)
-      if (esDomingo) {
+      // Fallback: horario por defecto 10:00 - 19:00 (domingos y festivos hasta las 17:00)
+      if (esHolidayOrDomingo) {
         return ['10:00:00','11:00:00','12:00:00','14:00:00','15:00:00','16:00:00'];
       }
       return ['10:00:00','11:00:00','12:00:00','14:00:00','15:00:00','16:00:00','17:00:00','18:00:00','19:00:00'];
@@ -3214,16 +3281,25 @@
     const [abreH] = (horarioDia.abre || '10:00').split(':').map(Number);
     let [cierraH] = (horarioDia.cierra || '20:00').split(':').map(Number);
 
-    // Domingos: citas solo hasta las 5 PM (17:00), no se puede agendar de 17:00 a 20:00
-    if (esDomingo && cierraH > 17) {
-      cierraH = 17;
+    // Domingos y festivos: aplicar hora de cierre configurada
+    if (esHolidayOrDomingo) {
+      const [cierreFestivoH] = (configNegocio.hora_cierre_festivos || '17:00').split(':').map(Number);
+      if (cierraH > cierreFestivoH) {
+        cierraH = cierreFestivoH;
+      }
     }
 
     const slots = [];
-    // Generar slots de hora en hora, excluir almuerzo 13:00-14:00
-    for (let h = abreH; h < cierraH; h++) {
+    const duracion = configNegocio.duracion_turno_min || 60;
+    const soloEnPunto = configNegocio.solo_horas_en_punto !== false;
+    const intervalo = soloEnPunto ? 60 : duracion;
+
+    // Generar slots según intervalo configurado, excluir almuerzo 13:00-14:00
+    for (let minutos = abreH * 60; minutos < cierraH * 60; minutos += intervalo) {
+      const h = Math.floor(minutos / 60);
+      const m = minutos % 60;
       if (h === 13) continue; // Saltar hora de almuerzo
-      slots.push(`${String(h).padStart(2,'0')}:00:00`);
+      slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00`);
     }
     return slots;
   }
@@ -3248,6 +3324,11 @@
         .select('barbero_id, tipo, hora_inicio, hora_fin')
         .eq('fecha', state.fecha);
 
+      // DEBUG TEMPORAL - verificar bloqueos cargados
+      console.log('%c[BLOQUEOS CARGADOS]', 'background:blue;color:white;padding:4px', { fecha: state.fecha, total: bloqueos?.length, bloqueos });
+      const orlandoBlqs = (bloqueos||[]).filter(b => b.barbero_id === 'bfaf33b8-8378-48d7-8bbb-2cfa3be12a06');
+      console.log('%c[ORLANDO BLOQUEOS]', 'background:green;color:white;padding:4px', orlandoBlqs);
+
       // Crear mapa de bloqueos por barbero
       const bloqueosPorBarbero = {};
       (bloqueos || []).forEach(b => {
@@ -3257,14 +3338,38 @@
 
       // Función para verificar si un barbero está bloqueado en un horario
       function isBarberoBlocked(barberoId, hora) {
-        // Verificar día de descanso del barbero
+        const bqs = bloqueosPorBarbero[barberoId] || [];
+
+        // Verificar si hay una habilitación para este día (tipo 'habilitado')
+        const tieneHabilitacion = bqs.some(bq => bq.tipo === 'habilitado');
+
+        // Verificar día de descanso del barbero (pero permitir si hay habilitación)
         const barbero = state.barberos.find(b => b.id === barberoId);
         if (barbero && barbero.dia_descanso !== null && barbero.dia_descanso !== undefined) {
           const weekday = new Date(state.fecha + 'T00:00:00').getDay();
-          if (Number(barbero.dia_descanso) === weekday) return true;
+          if (Number(barbero.dia_descanso) === weekday && !tieneHabilitacion) return true;
         }
-        // Verificar bloqueos específicos
-        const bqs = bloqueosPorBarbero[barberoId] || [];
+        // Si tiene habilitación, está disponible (ignora otros bloqueos del día)
+        if (tieneHabilitacion) return false;
+
+        // Verificar horario personalizado del barbero
+        if (barbero?.horario_personalizado) {
+          const weekday = new Date(state.fecha + 'T00:00:00').getDay();
+          const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+          const diaConfig = barbero.horario_personalizado[diasSemana[weekday]];
+
+          // Si el día no está activo, bloquear
+          if (diaConfig && !diaConfig.activo) return true;
+
+          // Si tiene rangos definidos, verificar que la hora esté dentro de algún rango
+          if (diaConfig?.rangos?.length > 0) {
+            const horaStr = hora.slice(0, 5); // "09:00"
+            const dentroDeRango = diaConfig.rangos.some(r => horaStr >= r.desde && horaStr < r.hasta);
+            if (!dentroDeRango) return true;
+          }
+        }
+
+        // Verificar bloqueos específicos (solo si NO tiene habilitación)
         for (const bq of bqs) {
           if (bq.tipo === 'dia') return true;
           if (bq.tipo === 'horas' && bq.hora_inicio && bq.hora_fin) {
@@ -3313,19 +3418,24 @@
         });
       }
 
-      // Verificar si es el día actual para marcar horas pasadas
+      // Verificar anticipación mínima para citas
+      const anticipacionMinHoras = configNegocio.anticipacion_min_horas || 0;
       const MARGEN_MINUTOS_CITA = 15; // Margen de 15 minutos después de la hora para poder reservar
       const ahora = new Date();
       const fechaHoy = ahora.getFullYear() + '-' + String(ahora.getMonth()+1).padStart(2,'0') + '-' + String(ahora.getDate()).padStart(2,'0');
       const horaActualMin = ahora.getHours() * 60 + ahora.getMinutes();
       const esHoy = state.fecha === fechaHoy;
 
-      // Función para verificar si una hora ya pasó (con margen de 15 min)
+      // Función para verificar si una hora no cumple anticipación mínima
       function isHoraPasada(horaStr) {
         if (!esHoy) return false;
-        const [hh] = horaStr.split(':').map(Number);
-        const horaMin = hh * 60;
-        // Permitir si estamos dentro del margen de 15 minutos después de la hora
+        const [hh, mm] = horaStr.split(':').map(Number);
+        const horaMin = hh * 60 + (mm || 0);
+        // Si hay anticipación mínima configurada, requerir esas horas de adelanto
+        if (anticipacionMinHoras > 0) {
+          return horaMin < horaActualMin + (anticipacionMinHoras * 60);
+        }
+        // Sin anticipación mínima: permitir si estamos dentro del margen de 15 min
         return horaMin + MARGEN_MINUTOS_CITA < horaActualMin;
       }
 
@@ -3602,7 +3712,7 @@
           const sedeActual = sedesCargadas?.find(s => s.id === dnGetSedeActual());
           const barberoNombre = state.barbero?.nombre || null;
 
-          await fetch('https://zzmtnjlfrlqmouijfste.supabase.co/functions/v1/send-confirmation-email', {
+          await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/send-confirmation-email', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -3964,6 +4074,7 @@
   initMarketingPixels();
   initCarouselNavs();
 </script>
-
+<script src="/assets/turbo-loader.js" defer></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

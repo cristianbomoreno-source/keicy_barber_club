@@ -3,10 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<!-- Preconnect críticos -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preconnect" href="https://zzmtnjlfrlqmouijfste.supabase.co" crossorigin>
-<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" as="script">
-<link rel="dns-prefetch" href="https://zzmtnjlfrlqmouijfste.supabase.co">
+<link rel="preconnect" href="https://ygrmammcaupnygdxmgth.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
+<!-- Preload CSS críticos -->
+<link rel="preload" href="../assets/design-system.css" as="style">
+<link rel="preload" href="../assets/barbero-nav.css" as="style">
+<!-- Preload JS críticos -->
+<link rel="preload" href="../assets/supabase-client.js" as="script">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
 <link rel="icon" href="../assets/favicon-32.png">
@@ -770,6 +777,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
 <script src="../assets/supabase-client.js"></script>
+<script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/mobile-nav.js"></script>
 <script>
   const toastEl = document.getElementById('toast');
@@ -1472,5 +1480,6 @@ TOTAL PAGADO:   ${dnFormatCOP(pagoActual.total_pagado)}
   // Inicializar link después de cargar el perfil
   setTimeout(initShareLink, 500);
 </script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

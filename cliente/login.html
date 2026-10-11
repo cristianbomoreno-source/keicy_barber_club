@@ -426,6 +426,63 @@
       letter-spacing: 12px;
     }
   }
+
+  /* Policy checkbox */
+  .policy-checkbox {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--club-text-secondary);
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    display: none;
+  }
+
+  .checkmark {
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    border: 2px solid var(--club-divider);
+    border-radius: 6px;
+    background: var(--club-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .checkbox-label input:checked + .checkmark {
+    background: var(--club-gold);
+    border-color: var(--club-gold);
+  }
+
+  .checkbox-label input:checked + .checkmark::after {
+    content: '';
+    width: 6px;
+    height: 10px;
+    border: solid #1A1A1A;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-bottom: 2px;
+  }
+
+  .checkbox-text a {
+    color: var(--club-gold);
+    text-decoration: underline;
+  }
+
+  .checkbox-label.error .checkmark {
+    border-color: var(--club-error);
+  }
 </style>
 </head>
 <body>
@@ -541,6 +598,16 @@
               autocomplete="new-password"
               required
             >
+          </div>
+
+          <div class="policy-checkbox">
+            <label class="checkbox-label">
+              <input type="checkbox" id="acceptPolicy" required>
+              <span class="checkmark"></span>
+              <span class="checkbox-text">
+                Acepto la <a href="politica-datos.html" target="_blank">Política de Tratamiento de Datos</a> conforme a la Ley 1581 de 2012
+              </span>
+            </label>
           </div>
 
           <div class="error-message" id="createPinError"></div>
@@ -806,10 +873,19 @@
     if (e) e.preventDefault();
 
     const pin = document.getElementById('createPinInput').value.replace(/\D/g, '');
+    const acceptPolicy = document.getElementById('acceptPolicy').checked;
     const btn = document.getElementById('btnCreatePin');
     const pinInput = document.getElementById('createPinInput');
+    const checkboxLabel = document.getElementById('acceptPolicy').closest('.checkbox-label');
 
     hideError('createPinError');
+    checkboxLabel.classList.remove('error');
+
+    if (!acceptPolicy) {
+      showError('createPinError', 'Debes aceptar la política de tratamiento de datos');
+      checkboxLabel.classList.add('error');
+      return;
+    }
 
     if (pin.length !== 4) {
       showError('createPinError', 'El PIN debe tener 4 digitos');
@@ -824,7 +900,9 @@
     try {
       const { data, error } = await sb.rpc('crear_pin_cliente', {
         p_cliente_id: currentClienteId,
-        p_pin: pin
+        p_pin: pin,
+        p_acepto_politica: true,
+        p_version_politica: '1.0'
       });
 
       if (error) throw error;
@@ -977,5 +1055,7 @@
   setTimeout(tryAutoFill, 500);
 </script>
 
+<script src="/assets/turbo-loader.js" defer></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

@@ -256,7 +256,7 @@
   /* Stats */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     padding: 20px;
     background: var(--surface);
@@ -533,10 +533,6 @@
         <div class="stat-label">Visitas</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value" id="statGastado">$0</div>
-        <div class="stat-label">Total gastado</div>
-      </div>
-      <div class="stat-item">
         <div class="stat-value" id="statMiembro">--</div>
         <div class="stat-label">Cliente desde</div>
       </div>
@@ -580,6 +576,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../assets/supabase-client.js"></script>
+<script src="/assets/utils.js"></script>
 <script>
   let currentUser = null;
   let newAvatarFile = null;
@@ -701,7 +698,6 @@
 
     // Stats
     document.getElementById('statVisitas').textContent = currentUser.total_visitas_weibook || currentUser.total_visitas || 0;
-    document.getElementById('statGastado').textContent = formatCOP(currentUser.total_gastado_weibook || currentUser.total_gastado || 0);
 
     const createdAt = currentUser.created_at || currentUser.cliente_desde;
     if (createdAt) {
@@ -828,5 +824,7 @@
   loadProfile();
 </script>
 
+<script src="/assets/turbo-loader.js" defer></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

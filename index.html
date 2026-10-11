@@ -209,7 +209,7 @@
         "name": "¿Cuáles son las mejores barberías del norte de Cali?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "En el norte de Cali destacan Keicy Barber Club (Colina y Calle 165), Lords, Mustaches, Gentleman, Royal Kingdom y Shave Club. Keicy Barber ofrece servicios premium de corte, barba, cejas y ambiente de club."
+          "text": "En el norte de Cali destacan Keicy Barber Club (La Flora), Lords, Mustaches, Gentleman, Royal Kingdom y Shave Club. Keicy Barber ofrece servicios premium de corte, barba, cejas y ambiente de club."
         }
       },
       {
@@ -239,6 +239,11 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link rel="preconnect" href="https://ygrmammcaupnygdxmgth.supabase.co">
+
+  <!-- Preload imagen crítica LCP -->
+  <link rel="preload" as="image" href="assets/pingpong-club.jpg" fetchpriority="high">
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
@@ -252,9 +257,9 @@
       --text-muted: #999999;
       --divider: #E5E5E5;
       --divider-light: #F0F0F0;
-      --gold: #C9A45C;
-      --gold-bright: #D4B366;
-      --gold-dark: #B8944D;
+      --gold: #E5C066;
+      --gold-bright: #F0D080;
+      --gold-dark: #D4A855;
       --gold-glow: rgba(201, 164, 92, 0.1);
 
       /* Variables legacy para compatibilidad */
@@ -1148,8 +1153,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
       flex-shrink: 0;
+    }
+    .club-feature-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--gold);
     }
 
     .club-feature-text {
@@ -2210,28 +2219,44 @@
       color: var(--gold);
     }
 
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
     .testimonial-card {
       background: var(--gray-card);
       border: 1px solid rgba(255,255,255,0.06);
       border-radius: 16px;
-      padding: 32px;
-      max-width: 500px;
-      margin: 0 auto;
+      padding: 24px;
     }
 
     .testimonial-header {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 16px;
+      gap: 12px;
+      margin-bottom: 12px;
     }
 
-    .testimonial-avatar {
-      width: 56px;
-      height: 56px;
+    .testimonial-avatar, .testimonial-avatar-fallback {
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      object-fit: cover;
       border: 2px solid var(--gold);
+      flex-shrink: 0;
+    }
+
+    .testimonial-avatar-fallback {
+      background: rgba(201,163,91,0.15);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
     }
 
     .testimonial-info {
@@ -2240,64 +2265,51 @@
 
     .testimonial-stars {
       color: var(--gold);
-      font-size: 14px;
-      letter-spacing: 2px;
+      display: flex;
+      gap: 2px;
       margin-bottom: 4px;
+    }
+    .testimonial-stars svg {
+      width: 14px;
+      height: 14px;
     }
 
     .testimonial-name {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
     }
 
     .testimonial-text {
-      font-size: 14px;
-      line-height: 1.7;
+      font-size: 13px;
+      line-height: 1.6;
       color: var(--gray-text);
-      font-style: italic;
+      margin-bottom: 12px;
     }
 
-    .testimonial-text::before {
-      content: '"';
+    .testimonial-barber {
+      font-size: 11px;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      display: block;
+      transition: color 0.2s;
+    }
+    .testimonial-barber:hover {
       color: var(--gold);
-      font-size: 24px;
-      font-weight: bold;
     }
-
-    .testimonial-dots {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 24px;
-    }
-
-    .testimonial-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.2);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .testimonial-dot.active {
-      background: var(--gold);
+    .testimonial-barber strong {
+      color: var(--gold);
     }
 
     @media (max-width: 768px) {
       .testimonials {
         padding: 48px 0;
       }
+      .testimonials-grid {
+        grid-template-columns: 1fr;
+        padding: 0 16px;
+      }
       .testimonial-card {
-        margin: 0 20px;
-        padding: 24px;
-      }
-      .testimonial-avatar {
-        width: 48px;
-        height: 48px;
-      }
-      .testimonial-text {
-        font-size: 13px;
+        padding: 20px;
       }
     }
 
@@ -2880,7 +2892,7 @@
   <header class="header" id="header">
     <div class="header-inner">
       <a href="#" class="logo">
-        <img src="assets/logo-transparent.png" alt="Keicy Barber">
+        <img src="assets/logo-transparent.png" alt="Keicy Barber" width="300" height="300">
       </a>
 
       <nav class="nav-desktop">
@@ -2933,12 +2945,14 @@
   <!-- Hero -->
   <section class="hero" id="inicio">
     <div class="hero-bg">
-      <img src="assets/pingpong-club.jpg" alt="Keicy Barber Club - La mejor barbería premium en Cali Colombia - Cortes de cabello, barba y más" loading="eager">
+      <picture>
+        <img src="assets/pingpong-club.jpg" alt="Keicy Barber Club - La mejor barbería premium en Cali Colombia - Cortes de cabello, barba y más" loading="eager" fetchpriority="high" width="900" height="1200">
+      </picture>
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <!-- Logo grande centrado -->
-      <img src="assets/logo-transparent.png" alt="Keicy Barber Club" class="hero-logo-large">
+      <img src="assets/logo-transparent.png" alt="Keicy Barber Club" class="hero-logo-large" width="300" height="300">
 
       <span class="hero-badge">LA MEJOR BARBERÍA EN CALI</span>
 
@@ -3076,7 +3090,7 @@
             <div class="service-name"><span class="num">3.</span> BARBA</div>
             <div class="service-desc">Diseño, perfilado y acabado profesional de barba con técnicas premium.</div>
             <div class="service-footer">
-              <span class="service-price">$25.000</span>
+              <span class="service-price">$30.000</span>
               <span class="service-btn">→</span>
             </div>
           </div>
@@ -3087,10 +3101,10 @@
             <img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=400&h=300&fit=crop" alt="Perfilado de cejas masculinas en barbería Keicy Barber Cali" loading="lazy">
           </div>
           <div class="service-content">
-            <div class="service-name"><span class="num">4.</span> CEJAS</div>
-            <div class="service-desc">Perfilado y limpieza profesional de cejas masculinas.</div>
+            <div class="service-name"><span class="num">4.</span> CORTE + CEJAS</div>
+            <div class="service-desc">Corte profesional más perfilado y limpieza de cejas masculinas.</div>
             <div class="service-footer">
-              <span class="service-price">$15.000</span>
+              <span class="service-price">$42.000</span>
               <span class="service-btn">→</span>
             </div>
           </div>
@@ -3101,10 +3115,10 @@
             <img src="https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=400&h=300&fit=crop" alt="Platinado y coloración de cabello en barbería Keicy Barber Cali" loading="lazy">
           </div>
           <div class="service-content">
-            <div class="service-name"><span class="num">5.</span> PLATINADO</div>
-            <div class="service-desc">Coloración y platinado profesional. Transforma tu estilo con los mejores productos.</div>
+            <div class="service-name"><span class="num">5.</span> CORTE + BARBA + CEJAS</div>
+            <div class="service-desc">El paquete completo. Corte, diseño de barba y perfilado de cejas.</div>
             <div class="service-footer">
-              <span class="service-price">Desde $120.000</span>
+              <span class="service-price">$57.000</span>
               <span class="service-btn">→</span>
             </div>
           </div>
@@ -3145,7 +3159,7 @@
               </div>
               <div class="sede-info-row">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-                Lunes - Sábado · 10:00 am - 8:00 pm
+                Lun - Sáb · 10am - 8pm | Dom y Festivos · 10am - 5pm
               </div>
             </div>
             <div class="sede-actions">
@@ -3162,7 +3176,9 @@
   <section class="section club" id="club">
     <div class="club-grid">
       <div class="club-image">
-        <img src="assets/pingpong-club.jpg" alt="Keicy Barber Club - Mejor barbería exclusiva para hombres en Cali con zona de entretenimiento" loading="lazy">
+        <picture>
+            <img src="assets/pingpong-club.jpg" alt="Keicy Barber Club - Mejor barbería exclusiva para hombres en Cali con zona de entretenimiento" loading="lazy" width="900" height="1200">
+          </picture>
       </div>
       <div class="club-content">
         <span class="club-label">MÁS QUE UNA BARBERÍA EN CALI</span>
@@ -3172,19 +3188,19 @@
         </p>
         <div class="club-features">
           <div class="club-feature">
-            <div class="club-feature-icon">🎮</div>
+            <div class="club-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="11" width="12" height="8" rx="1"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/><circle cx="12" cy="15" r="1"/></svg></div>
             <div class="club-feature-text">ZONA DE<br>ENTRETENIMIENTO</div>
           </div>
           <div class="club-feature">
-            <div class="club-feature-icon">👕</div>
+            <div class="club-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><path d="M12 3v4M8 7h8"/><path d="M8 7l-1 10h10L16 7"/></svg></div>
             <div class="club-feature-text">MERCH</div>
           </div>
           <div class="club-feature">
-            <div class="club-feature-icon">📅</div>
+            <div class="club-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg></div>
             <div class="club-feature-text">EVENTOS<br>Y TORNEOS</div>
           </div>
           <div class="club-feature">
-            <div class="club-feature-icon">👥</div>
+            <div class="club-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
             <div class="club-feature-text">COMUNIDAD</div>
           </div>
         </div>
@@ -3208,31 +3224,31 @@
 
       <div class="gallery-scroll">
         <div class="gallery-item">
-          <img src="https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=300&h=400&fit=crop" alt="Corte fade">
+          <img src="https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=300&h=400&fit=crop" alt="Corte fade" loading="lazy">
         </div>
         <div class="gallery-item">
-          <img src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=300&h=400&fit=crop" alt="Estilo moderno">
+          <img src="https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=300&h=400&fit=crop" alt="Estilo moderno" loading="lazy">
         </div>
         <div class="gallery-item">
-          <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=300&h=400&fit=crop" alt="Barba profesional">
+          <img src="https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=300&h=400&fit=crop" alt="Barba profesional" loading="lazy">
         </div>
         <div class="gallery-item">
-          <img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=300&h=400&fit=crop" alt="Detalle">
+          <img src="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=300&h=400&fit=crop" alt="Detalle" loading="lazy">
         </div>
         <div class="gallery-item">
-          <img src="https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=300&h=400&fit=crop" alt="Platinado">
+          <img src="https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=300&h=400&fit=crop" alt="Platinado" loading="lazy">
         </div>
         <div class="gallery-item">
-          <img src="https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?w=300&h=400&fit=crop" alt="Ambiente">
+          <img src="https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?w=300&h=400&fit=crop" alt="Ambiente" loading="lazy">
         </div>
         <div class="gallery-item">
-          <img src="https://images.unsplash.com/photo-1634302086887-13b5281d6f75?w=300&h=400&fit=crop" alt="Resultado">
+          <img src="https://images.unsplash.com/photo-1634302086887-13b5281d6f75?w=300&h=400&fit=crop" alt="Resultado" loading="lazy">
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Testimonials -->
+  <!-- Testimonials - Reseñas reales de clientes -->
   <section class="testimonials" id="testimonios">
     <div class="container">
       <div class="testimonials-header">
@@ -3240,21 +3256,17 @@
         <h2 class="testimonials-title">NUESTROS <span class="gold">CLIENTES</span></h2>
       </div>
 
-      <div class="testimonial-card">
-        <div class="testimonial-header">
-          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" alt="Cliente Keicy Barber" class="testimonial-avatar">
-          <div class="testimonial-info">
-            <div class="testimonial-stars">★★★★★</div>
-            <div class="testimonial-name">Andrés M.</div>
+      <div class="testimonials-grid" id="testimonialsGrid">
+        <div class="testimonial-card">
+          <div class="testimonial-header">
+            <div class="testimonial-avatar-fallback">AM</div>
+            <div class="testimonial-info">
+              <div class="testimonial-stars"><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+              <div class="testimonial-name">Andrés M.</div>
+            </div>
           </div>
+          <p class="testimonial-text">"El mejor ambiente de barbería en Cali, no es solo un corte, es toda una experiencia."</p>
         </div>
-        <p class="testimonial-text">El mejor ambiente de barbería en Cali, no es solo un corte, es toda una experiencia."</p>
-      </div>
-
-      <div class="testimonial-dots">
-        <span class="testimonial-dot active"></span>
-        <span class="testimonial-dot"></span>
-        <span class="testimonial-dot"></span>
       </div>
     </div>
   </section>
@@ -3353,7 +3365,7 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <div class="logo">
-          <img src="assets/logo-transparent.png" alt="Keicy Barber">
+          <img src="assets/logo-transparent.png" alt="Keicy Barber" width="300" height="300">
         </div>
         <p class="footer-tagline">KEICY BARBER CLUB®</p>
         <p class="footer-location">Cali, Colombia</p>
@@ -3373,8 +3385,8 @@
       <div>
         <h4 class="footer-title">HORARIO</h4>
         <div class="footer-links">
-          <span>Lunes - Sábado</span>
-          <span>10:00 am - 8:00 pm</span>
+          <span>Lunes - Sábado · 10am - 8pm</span>
+          <span>Dom y Festivos · 10am - 5pm</span>
         </div>
       </div>
 
@@ -3545,5 +3557,6 @@
       observer.observe(el);
     });
   </script>
+<script src="/assets/turbo-loader.js" defer></script>
 </body>
 </html>

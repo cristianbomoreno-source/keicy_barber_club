@@ -4,7 +4,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-const FROM_EMAIL = "citas@keicybarberclub.com";
+const FROM_EMAIL = "hjok273@gmail.com";
 const FROM_NAME = "Keicy Barber Club";
 
 interface ServicioCompletadoData {
@@ -70,7 +70,7 @@ function generateEmailHTML(data: ServicioCompletadoData): string {
     : "";
 
   const resenaLink = `https://www.keicybarberclub.com/resena/?c=${encodeURIComponent(data.cita_id)}`;
-  const googleMapsLink = data.google_maps_link || "https://g.page/r/Cac1YymF3Bu0EBM/review";
+  const googleMapsLink = data.google_maps_link || "https://maps.app.goo.gl/LtQEdMyrWLx41i5C8";
 
   return `
 <!DOCTYPE html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0A0A0C">
+<title>Cancelar Cita - Keicy Barbería</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<style>
+  html, body {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  #app {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 20px;
+    box-sizing: border-box;
+  }
+  .cancel-container {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+  #citasList {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  .cancel-logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 24px;
+  }
+  .cancel-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 8px;
+  }
+  .cancel-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+  }
+  .cancel-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .phone-input-group {
+    display: flex;
+    gap: 8px;
+  }
+  .country-code {
+    flex: 0 0 70px;
+    height: 48px;
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-size: 14px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .phone-input {
+    flex: 1;
+    height: 48px;
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #FFFFFF;
+    font-size: 16px;
+    padding: 0 14px;
+    outline: none;
+  }
+  .phone-input:focus {
+    border-color: var(--gold);
+  }
+  .search-btn {
+    width: 100%;
+    height: 48px;
+    margin-top: 16px;
+    background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+    border: none;
+    border-radius: 12px;
+    color: #111;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .search-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .citas-list {
+    margin-top: 24px;
+  }
+  .cita-card {
+    background: var(--card);
+    border: 1px solid var(--divider);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 12px;
+    text-align: left;
+  }
+  .cita-fecha {
+    font-size: 16px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 4px;
+  }
+  .cita-hora {
+    font-size: 14px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .cita-servicio {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .cita-barbero {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+  .cancel-cita-btn {
+    width: 100%;
+    height: 40px;
+    background: rgba(239,83,80,0.15);
+    border: 1px solid rgba(239,83,80,0.3);
+    border-radius: 10px;
+    color: var(--error);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .cancel-cita-btn:hover {
+    background: rgba(239,83,80,0.25);
+  }
+  .no-citas {
+    color: var(--text-secondary);
+    font-size: 14px;
+    padding: 20px;
+  }
+  .success-msg {
+    background: rgba(78,203,113,0.15);
+    border: 1px solid rgba(78,203,113,0.3);
+    border-radius: 12px;
+    padding: 16px;
+    color: var(--success);
+    font-size: 14px;
+    margin-top: 16px;
+  }
+  .back-link {
+    margin-top: 24px;
+    color: var(--gold);
+    font-size: 14px;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="cancel-container">
+    <img src="../assets/logo-transparent.png" alt="Keicy Barber" class="cancel-logo">
+    <h1 class="cancel-title">Cancelar Cita</h1>
+    <p class="cancel-subtitle">Ingresa tu número de teléfono para ver tus citas</p>
+
+    <div class="cancel-card">
+      <div class="phone-input-group">
+        <div class="country-code">🇨🇴 +57</div>
+        <input type="tel" class="phone-input" id="phoneInput" placeholder="Número de teléfono" inputmode="numeric">
+      </div>
+      <button class="search-btn" id="searchBtn">Buscar mis citas</button>
+    </div>
+
+    <div id="citasList"></div>
+    <div id="successMsg" class="success-msg" style="display:none;"></div>
+
+    <a href="../reservar/" class="back-link">← Volver a agendar</a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+(async function(){
+  const phoneInput = document.getElementById('phoneInput');
+  const searchBtn = document.getElementById('searchBtn');
+  const citasList = document.getElementById('citasList');
+  const successMsg = document.getElementById('successMsg');
+
+  // Obtener teléfono de URL si viene
+  const urlParams = new URLSearchParams(window.location.search);
+  let phoneFromUrl = urlParams.get('phone');
+  if (phoneFromUrl) {
+    // Limpiar solo dígitos
+    phoneFromUrl = phoneFromUrl.replace(/\D/g, '');
+    // Si viene con código 57 y tiene más de 10 dígitos, mostrar sin el código
+    if (phoneFromUrl.startsWith('57') && phoneFromUrl.length > 10) {
+      phoneFromUrl = phoneFromUrl.substring(2);
+    }
+    phoneInput.value = phoneFromUrl;
+    searchCitas();
+  }
+
+  searchBtn.addEventListener('click', searchCitas);
+  phoneInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') searchCitas();
+  });
+
+  async function searchCitas() {
+    let phone = phoneInput.value.replace(/\D/g, '');
+    if (phone.length < 7) {
+      alert('Ingresa un número de teléfono válido');
+      return;
+    }
+
+    searchBtn.disabled = true;
+    searchBtn.textContent = 'Buscando...';
+    citasList.innerHTML = '';
+    successMsg.style.display = 'none';
+
+    try {
+      // Normalizar teléfono: si viene con 57, también buscar sin él
+      let phoneWithout57 = phone;
+      let phoneWith57 = '57' + phone;
+
+      // Si el teléfono empieza con 57 y tiene más de 10 dígitos, extraer sin el código
+      if (phone.startsWith('57') && phone.length > 10) {
+        phoneWithout57 = phone.substring(2);
+        phoneWith57 = phone;
+      }
+
+      // Buscar cliente por teléfono (todas las variantes posibles)
+      const { data: cliente } = await sb.from('usuarios')
+        .select('id')
+        .or(`phone.eq.${phone},phone.eq.${phoneWith57},phone.eq.${phoneWithout57}`)
+        .maybeSingle();
+
+      if (!cliente) {
+        citasList.innerHTML = '<div class="no-citas">No encontramos citas con ese número</div>';
+        return;
+      }
+
+      // Buscar citas pendientes del cliente
+      const today = new Date().toISOString().split('T')[0];
+      const { data: citas } = await sb.from('citas')
+        .select(`
+          id,
+          fecha,
+          hora_inicio,
+          precio,
+          estado,
+          barbero_id,
+          servicios:servicio_id(nombre),
+          sucursal:sucursal_id(nombre)
+        `)
+        .eq('cliente_id', cliente.id)
+        .gte('fecha', today)
+        .in('estado', ['agendada', 'confirmada'])
+        .order('fecha', { ascending: true })
+        .order('hora_inicio', { ascending: true });
+
+      if (!citas || citas.length === 0) {
+        citasList.innerHTML = '<div class="no-citas">No tienes citas pendientes</div>';
+        return;
+      }
+
+      // Obtener nombres de barberos
+      const barberoIds = [...new Set(citas.map(c => c.barbero_id).filter(Boolean))];
+      let barberosMap = {};
+      if (barberoIds.length > 0) {
+        const { data: barberos } = await sb.from('usuarios')
+          .select('id, full_name')
+          .in('id', barberoIds);
+        if (barberos) {
+          barberos.forEach(b => barberosMap[b.id] = b.full_name);
+        }
+      }
+
+      citasList.innerHTML = citas.map(cita => {
+        const fecha = new Date(cita.fecha + 'T12:00:00');
+        const fechaStr = fecha.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+        const hora = formatHora(cita.hora_inicio);
+        const barberoNombre = barberosMap[cita.barbero_id] || 'Primer barbero disponible';
+
+        return `
+          <div class="cita-card" data-id="${cita.id}">
+            <div class="cita-fecha">${capitalize(fechaStr)}</div>
+            <div class="cita-hora">${hora}</div>
+            <div class="cita-servicio">📍 ${cita.sucursal?.nombre || 'Keicy Barbería'}</div>
+            <div class="cita-servicio">✂️ ${cita.servicios?.nombre || 'Servicio'}</div>
+            <div class="cita-barbero">💈 ${barberoNombre}</div>
+            <button class="cancel-cita-btn" onclick="cancelarCita('${cita.id}')">Cancelar esta cita</button>
+          </div>
+        `;
+      }).join('');
+
+    } catch (err) {
+      console.error(err);
+      citasList.innerHTML = '<div class="no-citas">Error buscando citas. Intenta de nuevo.</div>';
+    } finally {
+      searchBtn.disabled = false;
+      searchBtn.textContent = 'Buscar mis citas';
+    }
+  }
+
+  window.cancelarCita = async function(citaId) {
+    if (!confirm('¿Estás seguro de que deseas cancelar esta cita?')) return;
+
+    try {
+      const { error } = await sb.from('citas')
+        .update({ estado: 'cancelada' })
+        .eq('id', citaId);
+
+      if (error) throw error;
+
+      // Remover la tarjeta de la cita
+      const card = document.querySelector(`[data-id="${citaId}"]`);
+      if (card) card.remove();
+
+      // Mostrar mensaje de éxito
+      successMsg.textContent = '✓ Cita cancelada exitosamente';
+      successMsg.style.display = 'block';
+
+      // Si no quedan más citas, mostrar mensaje
+      if (citasList.querySelectorAll('.cita-card').length === 0) {
+        citasList.innerHTML = '<div class="no-citas">No tienes más citas pendientes</div>';
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert('Error cancelando la cita. Intenta de nuevo.');
+    }
+  };
+
+  function formatHora(hora) {
+    if (!hora) return '';
+    const [h, m] = hora.split(':');
+    const hour = parseInt(h);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${m} ${ampm}`;
+  }
+
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+})();
+</script>
+<script src="/assets/turbo-loader.js" defer></script>
+</body>
+</html>

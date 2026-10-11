@@ -1255,7 +1255,7 @@
       const propina = Number(cita.propina) || 0;
       const precioTotal = precioServicio + propina + (cita.servicios_adicionales || []).reduce((sum, s) => sum + (Number(s.precio) || 0), 0);
 
-      await fetch('https://zzmtnjlfrlqmouijfste.supabase.co/functions/v1/send-service-completed-email', {
+      await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/send-service-completed-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sb.supabaseKey}` },
         body: JSON.stringify({
@@ -1344,5 +1344,7 @@
   });
 </script>
 <script src="../assets/citas-estados.js"></script>
+<script src="/assets/turbo-loader.js" defer></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

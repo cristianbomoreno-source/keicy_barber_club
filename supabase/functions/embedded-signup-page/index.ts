@@ -40,7 +40,7 @@ serve(async (req) => {
   }
 
   const url = new URL(req.url);
-  const baseUrl = Deno.env.get('SUPABASE_URL') || 'https://zzmtnjlfrlqmouijfste.supabase.co';
+  const baseUrl = Deno.env.get('SUPABASE_URL') || 'https://ygrmammcaupnygdxmgth.supabase.co';
   const callbackUrl = `${baseUrl}/functions/v1/embedded-signup-callback`;
 
   // Modo de operación: 'live' o 'dry-run'

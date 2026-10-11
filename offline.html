@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sin conexión - Keicy Barber</title>
+  <link rel="icon" type="image/png" href="/assets/favicon-32.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      padding: 20px;
+    }
+    .container {
+      text-align: center;
+      max-width: 400px;
+    }
+    .icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 30px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    .icon svg {
+      width: 60px;
+      height: 60px;
+      stroke: #ffd700;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.8; }
+    }
+    h1 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      color: #ffd700;
+    }
+    p {
+      font-size: 16px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px 25px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #ff4444;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+    .status-dot.online {
+      background: #00c853;
+      animation: none;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .status-text {
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+    }
+    .btn {
+      display: inline-block;
+      padding: 15px 30px;
+      background: #ffd700;
+      color: #1a1a2e;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255,215,0,0.3);
+    }
+    .btn:active {
+      transform: translateY(0);
+    }
+    .tips {
+      margin-top: 40px;
+      text-align: left;
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 12px;
+    }
+    .tips h3 {
+      font-size: 14px;
+      color: #ffd700;
+      margin-bottom: 15px;
+    }
+    .tips ul {
+      list-style: none;
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+    }
+    .tips li {
+      padding: 8px 0;
+      padding-left: 25px;
+      position: relative;
+    }
+    .tips li::before {
+      content: "•";
+      position: absolute;
+      left: 8px;
+      color: #ffd700;
+    }
+    .logo {
+      margin-top: 40px;
+      opacity: 0.5;
+    }
+    .logo img {
+      height: 40px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.58 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>
+      </svg>
+    </div>
+
+    <h1>Sin conexión a Internet</h1>
+    <p>No te preocupes, la aplicación guardará tus cambios y se sincronizará automáticamente cuando vuelva la conexión.</p>
+
+    <div class="status">
+      <div class="status-dot" id="statusDot"></div>
+      <span class="status-text" id="statusText">Esperando conexión...</span>
+    </div>
+
+    <button class="btn" onclick="location.reload()">Reintentar conexión</button>
+
+    <div class="tips">
+      <h3>Mientras tanto puedes:</h3>
+      <ul>
+        <li>Ver las citas que ya fueron cargadas</li>
+        <li>Revisar el historial guardado</li>
+        <li>Los cambios se guardarán localmente</li>
+        <li>Todo se sincronizará al reconectar</li>
+      </ul>
+    </div>
+
+    <div class="logo">
+      <img src="/assets/logo-transparent.png" alt="Keicy Barber" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <script>
+    // Detectar cuando vuelve la conexión
+    function checkConnection() {
+      if (navigator.onLine) {
+        document.getElementById('statusDot').classList.add('online');
+        document.getElementById('statusText').textContent = '¡Conexión restaurada!';
+        setTimeout(() => {
+          // Volver a la página anterior o al dashboard
+          const returnUrl = sessionStorage.getItem('offlineReturnUrl') || '/';
+          window.location.href = returnUrl;
+        }, 1500);
+      }
+    }
+
+    window.addEventListener('online', checkConnection);
+
+    // Verificar cada 3 segundos
+    setInterval(() => {
+      fetch('/assets/favicon-32.png', { method: 'HEAD', cache: 'no-store' })
+        .then(() => {
+          if (!navigator.onLine) return;
+          checkConnection();
+        })
+        .catch(() => {});
+    }, 3000);
+
+    // Guardar URL de retorno
+    if (document.referrer && !document.referrer.includes('offline.html')) {
+      sessionStorage.setItem('offlineReturnUrl', document.referrer);
+    }
+  </script>
+</body>
+</html>

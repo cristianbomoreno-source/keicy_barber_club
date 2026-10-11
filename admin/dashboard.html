@@ -3,8 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- Preconnect críticos -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preconnect" href="https://qguxzopvfjmivbngccwz.supabase.co" crossorigin>
+<link rel="preconnect" href="https://ygrmammcaupnygdxmgth.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
+<!-- Preload CSS críticos -->
+<link rel="preload" href="../assets/design-system.css" as="style">
+<link rel="preload" href="../assets/mobile-admin.css" as="style">
+<link rel="preload" href="../assets/mobile-admin-premium.css" as="style">
+<!-- Preload JS críticos -->
+<link rel="preload" href="../assets/supabase-client.js" as="script">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
 <link rel="icon" href="../assets/favicon-32.png">
@@ -845,6 +855,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../assets/supabase-client.js"></script>
+<script src="../assets/turbo-loader.js" defer></script>
 <script>
   const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
   const now = new Date();
@@ -982,8 +993,8 @@
       console.error(err);
     }
 
-    // ---- Revenue chart (last 7 days) ----
-    const dayTotals = week.map(d => citas.filter(c => c.fecha === d && c.estado !== 'cancelada').reduce((s,c) => s + Number(c.precio||0), 0));
+    // ---- Revenue chart (last 7 days) - solo citas finalizadas (cobradas) ----
+    const dayTotals = week.map(d => citas.filter(c => c.fecha === d && c.estado === 'finalizada').reduce((s,c) => s + Number(c.precio||0), 0));
     const maxVal = Math.max(...dayTotals, 1);
     const weekTotal = dayTotals.reduce((a,b) => a+b, 0);
     document.getElementById('revenueBig').textContent = dnFormatCOP(weekTotal);
@@ -1210,9 +1221,14 @@
       }
     }
 
-    // Visitas web (placeholder por ahora)
+    // Visitas web del mes (entradas a la página de reservas - siempre todas las sedes)
     const webVisitsEl = document.getElementById('mWebVisits');
-    if (webVisitsEl) webVisitsEl.textContent = 'Sin datos';
+    try {
+      const { count: visitasMes } = await sb.from('visitas_reservas').select('id', { count: 'exact', head: true }).gte('fecha', monthStart).lte('fecha', todayDate);
+      if (webVisitsEl) webVisitsEl.textContent = visitasMes || 0;
+    } catch (err) {
+      if (webVisitsEl) webVisitsEl.textContent = '0';
+    }
 
     // Favoritos: Crecimiento (comparación con días equivalentes del mes anterior)
     // Solo comparar si el mes anterior está después de FECHA_CORTE_ESTADISTICAS
@@ -1310,11 +1326,13 @@
     const mClientesDeltaPctEl = document.getElementById('mClientesDeltaPct');
     if (mClientesDeltaPctEl) mClientesDeltaPctEl.textContent = `${clientesDeltaPct >= 0 ? '+' : ''}${clientesDeltaPct}%`;
 
-    // Favoritos: Gastos del mes (filtrado por sede y días transcurridos)
+    // Favoritos: Gastos del mes (desde caja_movimientos con tipo='gasto')
     let gastosMes = 0;
     let gastosMesAnterior = 0;
     try {
-      let queryGastos = sb.from('gastos').select('monto').gte('fecha', monthStart).lte('fecha', todayDate);
+      const monthStartRange = dnLocalDayRangeUTC(monthStart);
+      const todayEndRange = dnLocalDayRangeUTC(todayDate);
+      let queryGastos = sb.from('caja_movimientos').select('monto').eq('tipo', 'gasto').gte('created_at', monthStartRange.start).lte('created_at', todayEndRange.end);
       if (sedeActual) queryGastos = queryGastos.eq('sucursal_id', sedeActual);
       const { data: gastosData } = await queryGastos;
       gastosMes = (gastosData || []).reduce((sum, g) => sum + Number(g.monto || 0), 0);
@@ -1324,7 +1342,9 @@
       if (prevMonthSameDay >= FECHA_CORTE_ESTADISTICAS) {
         const rawPrevMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().split('T')[0];
         const prevMonthStart = rawPrevMonthStart > FECHA_CORTE_ESTADISTICAS ? rawPrevMonthStart : FECHA_CORTE_ESTADISTICAS;
-        let queryGastosPrev = sb.from('gastos').select('monto').gte('fecha', prevMonthStart).lte('fecha', prevMonthSameDay);
+        const prevMonthStartRange = dnLocalDayRangeUTC(prevMonthStart);
+        const prevMonthEndRange = dnLocalDayRangeUTC(prevMonthSameDay);
+        let queryGastosPrev = sb.from('caja_movimientos').select('monto').eq('tipo', 'gasto').gte('created_at', prevMonthStartRange.start).lte('created_at', prevMonthEndRange.end);
         if (sedeActual) queryGastosPrev = queryGastosPrev.eq('sucursal_id', sedeActual);
         const { data: gastosPrevData } = await queryGastosPrev;
         gastosMesAnterior = (gastosPrevData || []).reduce((sum, g) => sum + Number(g.monto || 0), 0);
@@ -1343,28 +1363,106 @@
       mGastosDeltaEl.classList.toggle('down', isDown);
     }
 
-    // NUEVO: Citas de hoy (para tarjeta premium)
+    // NUEVO: Citas de hoy + cupos libres (optimizado en paralelo)
     let citasHoyCount = 0;
     let citasHoyData = [];
     let proyeccionHoy = 0;
+    let cuposLibres = 0;
     try {
-      let queryCitasHoy = sb.from('citas').select('id, hora_inicio, precio, estado').eq('fecha', todayDate).neq('estado', 'cancelada');
-      if (sedeActual) queryCitasHoy = queryCitasHoy.eq('sucursal_id', sedeActual);
-      else if (sedesTestIds.length > 0) queryCitasHoy = queryCitasHoy.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
-      const { data } = await queryCitasHoy.order('hora_inicio');
-      citasHoyData = data || [];
+      const diaHoy = new Date().getDay();
+      const diasSemana = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
+      const diaHoyNombre = diasSemana[diaHoy];
+
+      // Ejecutar queries en paralelo
+      let queryCitasHoy = sb.from('citas').select('id, hora_inicio, precio, estado, barbero_id').eq('fecha', todayDate).neq('estado', 'cancelada');
+      let queryBarberos = sb.from('barberos').select('id, dia_descanso, tipo_colaborador').eq('activo', true);
+      let queryBloqueos = sb.from('bloqueos_barbero').select('barbero_id, tipo, hora_inicio, hora_fin').eq('fecha', todayDate);
+      let querySede = sedeActual ? sb.from('sucursales').select('horario').eq('id', sedeActual).single() : null;
+
+      if (sedeActual) {
+        queryCitasHoy = queryCitasHoy.eq('sucursal_id', sedeActual);
+        queryBarberos = queryBarberos.eq('sucursal_id', sedeActual);
+      } else if (sedesTestIds.length > 0) {
+        queryCitasHoy = queryCitasHoy.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+      }
+
+      const queries = [
+        queryCitasHoy.order('hora_inicio'),
+        queryBarberos,
+        queryBloqueos
+      ];
+      if (querySede) queries.push(querySede);
+
+      const results = await Promise.all(queries);
+      const [citasRes, barberosRes, bloqueosRes] = results;
+      const sedeRes = querySede ? results[3] : null;
+
+      citasHoyData = citasRes.data || [];
       citasHoyCount = citasHoyData.length;
       proyeccionHoy = citasHoyData.reduce((sum, c) => sum + Number(c.precio || 0), 0);
+
+      // Calcular slots del día basándose en horario real de la sede
+      let slotsDelDia = 9; // default
+      if (sedeRes?.data?.horario) {
+        const horario = sedeRes.data.horario;
+        const horarioDia = horario[diaHoyNombre];
+        if (horarioDia && !horarioDia.cerrado) {
+          const [abreH] = horarioDia.abre.split(':').map(Number);
+          const [cierraH] = horarioDia.cierra.split(':').map(Number);
+          let horasTrabajo = cierraH - abreH;
+          // Restar hora de almuerzo si existe
+          if (horario.almuerzo_inicio && horario.almuerzo_fin) {
+            const [almInicioH] = horario.almuerzo_inicio.split(':').map(Number);
+            const [almFinH] = horario.almuerzo_fin.split(':').map(Number);
+            horasTrabajo -= (almFinH - almInicioH);
+          }
+          slotsDelDia = Math.max(0, horasTrabajo);
+        }
+      }
+
+      // Calcular cupos libres
+      const barberos = barberosRes.data || [];
+      const bloqueos = bloqueosRes.data || [];
+
+      const bloqueadosHoy = new Set();
+      const habilitadosHoy = new Set();
+      const horasBloqueadasPorBarbero = {}; // Horas bloqueadas por barbero (tipo="horas")
+
+      bloqueos.forEach(bl => {
+        if (bl.tipo === 'dia') bloqueadosHoy.add(bl.barbero_id);
+        if (bl.tipo === 'habilitado') habilitadosHoy.add(bl.barbero_id);
+        if (bl.tipo === 'horas' && bl.hora_inicio && bl.hora_fin) {
+          // Calcular horas bloqueadas
+          const [hiH, hiM] = bl.hora_inicio.split(':').map(Number);
+          const [hfH, hfM] = bl.hora_fin.split(':').map(Number);
+          const horasBloqueadas = (hfH + hfM/60) - (hiH + hiM/60);
+          horasBloqueadasPorBarbero[bl.barbero_id] = (horasBloqueadasPorBarbero[bl.barbero_id] || 0) + Math.max(0, horasBloqueadas);
+        }
+      });
+
+      const citasPorBarbero = {};
+      citasHoyData.forEach(c => {
+        citasPorBarbero[c.barbero_id] = (citasPorBarbero[c.barbero_id] || 0) + 1;
+      });
+
+      barberos.forEach(b => {
+        if (b.tipo_colaborador === 'aseo') return;
+        if (bloqueadosHoy.has(b.id) && !habilitadosHoy.has(b.id)) return;
+        const descansaHoy = b.dia_descanso !== null && Number(b.dia_descanso) === diaHoy;
+        if (descansaHoy && !habilitadosHoy.has(b.id)) return;
+        const citasBarbero = citasPorBarbero[b.id] || 0;
+        const horasBloqueadas = Math.floor(horasBloqueadasPorBarbero[b.id] || 0);
+        cuposLibres += Math.max(0, slotsDelDia - citasBarbero - horasBloqueadas);
+      });
     } catch (err) { console.error(err); }
 
-    // Actualizar UI de citas de hoy
+    // Actualizar UI
     const mTodayCitasEl = document.getElementById('mTodayCitas');
     if (mTodayCitasEl) mTodayCitasEl.textContent = citasHoyCount;
 
     const mTodayLabelEl = document.getElementById('mTodayLabel');
     if (mTodayLabelEl) mTodayLabelEl.textContent = citasHoyCount === 1 ? 'cita hoy' : 'citas hoy';
 
-    // Primera cita del día
     const mTodayFirstTimeEl = document.getElementById('mTodayFirstTime');
     if (mTodayFirstTimeEl) {
       if (citasHoyData.length > 0) {
@@ -1379,19 +1477,9 @@
       }
     }
 
-    // Proyección de facturación
     const mTodayProyeccionEl = document.getElementById('mTodayProyeccion');
     if (mTodayProyeccionEl) mTodayProyeccionEl.textContent = dnFormatCOP(proyeccionHoy);
 
-    // Cupos libres (estimación: barberos activos * 10 slots - citas agendadas)
-    let cuposLibres = 0;
-    try {
-      let queryBarberos = sb.from('barberos').select('id', { count: 'exact', head: true }).eq('activo', true);
-      if (sedeActual) queryBarberos = queryBarberos.eq('sucursal_id', sedeActual);
-      const { count: barberosActivos } = await queryBarberos;
-      const slotsEstimados = (barberosActivos || 1) * 10; // 10 slots por barbero aprox
-      cuposLibres = Math.max(0, slotsEstimados - citasHoyCount);
-    } catch (err) {}
     const mTodayCuposLibresEl = document.getElementById('mTodayCuposLibres');
     if (mTodayCuposLibresEl) mTodayCuposLibresEl.textContent = cuposLibres;
 
@@ -1580,5 +1668,6 @@
 <script src="../assets/citas-estados.js" defer></script>
 <script src="../assets/mobile-nav.js"></script>
 <script src="../assets/admin-sede-sidebar.js"></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

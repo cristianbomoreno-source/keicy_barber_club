@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#111111">
+<title>Confirmar Cita - Keicy Barberia</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<style>
+  html, body {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+  #app {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 20px;
+    box-sizing: border-box;
+  }
+  .confirm-container {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+  }
+  .confirm-logo {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 24px;
+  }
+  .confirm-title {
+    font-size: 24px;
+    font-weight: 700;
+    color:var(--text);
+    margin-bottom: 8px;
+  }
+  .confirm-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+  }
+  .confirm-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  .cita-detail {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .cita-detail:last-child {
+    border-bottom: none;
+  }
+  .cita-label {
+    font-size: 12px;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .cita-value {
+    font-size: 14px;
+    color:var(--text);
+    font-weight: 600;
+    text-align: right;
+  }
+  .success-msg {
+    background: rgba(78,203,113,0.15);
+    border: 1px solid rgba(78,203,113,0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .success-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(180deg, #4ECB71, #3BA55D);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .success-icon svg {
+    width: 24px;
+    height: 24px;
+    color:var(--text);
+  }
+  .success-text {
+    color: var(--success);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .success-subtext {
+    color: var(--text-secondary);
+    font-size: 13px;
+  }
+  .info-msg {
+    background: rgba(66,133,244,0.15);
+    border: 1px solid rgba(66,133,244,0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .info-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(180deg, #4285F4, #2563EB);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .info-icon svg {
+    width: 24px;
+    height: 24px;
+    color:var(--text);
+  }
+  .info-text {
+    color: #4285F4;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .info-subtext {
+    color: var(--text-secondary);
+    font-size: 13px;
+  }
+  .error-msg {
+    background: rgba(239,83,80,0.15);
+    border: 1px solid rgba(239,83,80,0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .error-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(180deg, #EF5350, #D32F2F);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+  .error-icon svg {
+    width: 24px;
+    height: 24px;
+    color:var(--text);
+  }
+  .error-text {
+    color: var(--error);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .error-subtext {
+    color: var(--text-secondary);
+    font-size: 13px;
+  }
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 0;
+  }
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(201,163,91,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .loading-text {
+    margin-top: 16px;
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+  .back-link {
+    margin-top: 24px;
+    color: var(--gold);
+    font-size: 14px;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="confirm-container">
+    <img src="../assets/logo-transparent.png" alt="Keicy Barber" class="confirm-logo">
+    <h1 class="confirm-title">Confirmar Cita</h1>
+    <p class="confirm-subtitle" id="subtitle">Confirmando tu asistencia...</p>
+
+    <div id="loadingState" class="loading">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">Procesando...</p>
+    </div>
+
+    <div id="successState" style="display:none;">
+      <div class="success-msg">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <path d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <p class="success-text">Asistencia Confirmada</p>
+        <p class="success-subtext">Te esperamos en la barberia</p>
+      </div>
+      <div id="citaDetails" class="confirm-card" style="display:none;"></div>
+    </div>
+
+    <div id="alreadyState" style="display:none;">
+      <div class="info-msg">
+        <div class="info-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <path d="M5 13l4 4L19 7"/>
+          </svg>
+        </div>
+        <p class="info-text">Cita Ya Confirmada</p>
+        <p class="info-subtext">Tu asistencia ya habia sido confirmada anteriormente</p>
+      </div>
+      <div id="citaDetailsAlready" class="confirm-card" style="display:none;"></div>
+    </div>
+
+    <div id="errorState" style="display:none;">
+      <div class="error-msg">
+        <div class="error-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </div>
+        <p class="error-text" id="errorTitle">Cita No Encontrada</p>
+        <p class="error-subtext" id="errorText">No pudimos encontrar esta cita o ya no esta disponible</p>
+      </div>
+    </div>
+
+    <a href="../reservar/" class="back-link">Agendar una nueva cita</a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js"></script>
+<script>
+(async function(){
+  const loadingState = document.getElementById('loadingState');
+  const successState = document.getElementById('successState');
+  const alreadyState = document.getElementById('alreadyState');
+  const errorState = document.getElementById('errorState');
+  const subtitle = document.getElementById('subtitle');
+  const citaDetails = document.getElementById('citaDetails');
+  const citaDetailsAlready = document.getElementById('citaDetailsAlready');
+
+  // Obtener ID de la cita de la URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const citaId = urlParams.get('id');
+
+  if (!citaId) {
+    showError('Link Invalido', 'El link de confirmacion no es valido');
+    return;
+  }
+
+  try {
+    // Buscar la cita
+    const { data: cita, error } = await sb.from('citas')
+      .select(`
+        id,
+        fecha,
+        hora_inicio,
+        estado,
+        precio,
+        barbero_id,
+        servicios:servicio_id(nombre),
+        sucursal:sucursal_id(nombre, direccion)
+      `)
+      .eq('id', citaId)
+      .single();
+
+    if (error || !cita) {
+      showError('Cita No Encontrada', 'No pudimos encontrar esta cita');
+      return;
+    }
+
+    // Verificar si la cita ya paso
+    const today = new Date().toISOString().split('T')[0];
+    if (cita.fecha < today) {
+      showError('Cita Pasada', 'Esta cita ya paso y no puede ser confirmada');
+      return;
+    }
+
+    // Verificar estado
+    if (cita.estado === 'cancelada') {
+      showError('Cita Cancelada', 'Esta cita fue cancelada');
+      return;
+    }
+
+    if (cita.estado === 'completada') {
+      showError('Cita Completada', 'Esta cita ya fue completada');
+      return;
+    }
+
+    // Obtener nombre del barbero si existe
+    let barberoNombre = 'Primer barbero disponible';
+    if (cita.barbero_id) {
+      const { data: barbero } = await sb.from('usuarios')
+        .select('full_name')
+        .eq('id', cita.barbero_id)
+        .single();
+      if (barbero) barberoNombre = barbero.full_name;
+    }
+
+    // Si ya esta confirmada, mostrar mensaje informativo
+    if (cita.estado === 'confirmada') {
+      loadingState.style.display = 'none';
+      alreadyState.style.display = 'block';
+      subtitle.textContent = 'Tu cita ya estaba confirmada';
+      renderCitaDetails(citaDetailsAlready, cita, barberoNombre);
+      return;
+    }
+
+    // Confirmar la cita (cambiar estado de 'agendada' a 'confirmada')
+    const { error: updateError } = await sb.from('citas')
+      .update({ estado: 'confirmada' })
+      .eq('id', citaId)
+      .eq('estado', 'agendada');
+
+    if (updateError) {
+      showError('Error', 'No pudimos confirmar tu cita. Intenta de nuevo.');
+      return;
+    }
+
+    // Mostrar exito
+    loadingState.style.display = 'none';
+    successState.style.display = 'block';
+    subtitle.textContent = 'Gracias por confirmar';
+    renderCitaDetails(citaDetails, cita, barberoNombre);
+
+  } catch (err) {
+    console.error(err);
+    showError('Error', 'Ocurrio un error. Intenta de nuevo.');
+  }
+
+  function showError(title, text) {
+    loadingState.style.display = 'none';
+    errorState.style.display = 'block';
+    subtitle.textContent = 'No se pudo confirmar';
+    document.getElementById('errorTitle').textContent = title;
+    document.getElementById('errorText').textContent = text;
+  }
+
+  function renderCitaDetails(container, cita, barberoNombre) {
+    const fecha = new Date(cita.fecha + 'T12:00:00');
+    const fechaStr = fecha.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+    const hora = formatHora(cita.hora_inicio);
+
+    container.innerHTML = `
+      <div class="cita-detail">
+        <span class="cita-label">Fecha</span>
+        <span class="cita-value">${capitalize(fechaStr)}</span>
+      </div>
+      <div class="cita-detail">
+        <span class="cita-label">Hora</span>
+        <span class="cita-value">${hora}</span>
+      </div>
+      <div class="cita-detail">
+        <span class="cita-label">Sede</span>
+        <span class="cita-value">${cita.sucursal?.nombre || 'Keicy Barberia'}</span>
+      </div>
+      <div class="cita-detail">
+        <span class="cita-label">Servicio</span>
+        <span class="cita-value">${cita.servicios?.nombre || 'Servicio'}</span>
+      </div>
+      <div class="cita-detail">
+        <span class="cita-label">Barbero</span>
+        <span class="cita-value">${barberoNombre}</span>
+      </div>
+    `;
+    container.style.display = 'block';
+  }
+
+  function formatHora(hora) {
+    if (!hora) return '';
+    const [h, m] = hora.split(':');
+    const hour = parseInt(h);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    return `${hour12}:${m} ${ampm}`;
+  }
+
+  function capitalize(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
+})();
+</script>
+</body>
+</html>

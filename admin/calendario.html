@@ -3,6 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<!-- Preconnect críticos -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://ygrmammcaupnygdxmgth.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
+<!-- Preload CSS críticos -->
+<link rel="preload" href="../assets/design-system.css" as="style">
+<link rel="preload" href="../assets/mobile-admin.css" as="style">
+<link rel="preload" href="../assets/agenda-mobile-unified.css" as="style">
+<!-- Preload JS críticos -->
+<link rel="preload" href="../assets/supabase-client.js" as="script">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
 <link rel="icon" href="../assets/favicon-32.png">
@@ -2068,6 +2080,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../assets/supabase-client.js"></script>
+<script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/admin-sede-nav.js"></script>
 
 <script>
@@ -2133,8 +2146,7 @@
   (function initSedeTabsInstant() {
     // Fallback con sedes conocidas para carga instantánea
     const sedesFallback = [
-      { id: '4b1e04a6-9a1b-4cff-a116-916e07b97455', nombre: 'Barber calle 165' },
-      { id: 'bf5d9d4e-58a2-44ab-919f-89e43c193b26', nombre: 'Colina' }
+      { id: '46c99064-8218-41a0-a8c7-a81103f658fa', nombre: 'Sede La Flora' }
     ];
 
     let loaded = false;
@@ -2655,7 +2667,7 @@
     try {
       const sedeId = dnGetSedeActual();
       // Queries base
-      let barberosQuery = sb.from('barberos').select('id, comision_pct, dia_descanso, orden, sucursal_id, tipo_colaborador, usuarios!barberos_id_fkey(username, full_name, avatar_url, avatar_focus_y_agenda)').eq('activo', true).or('tipo_colaborador.is.null,tipo_colaborador.neq.aseo').order('orden');
+      let barberosQuery = sb.from('barberos').select('id, comision_pct, dia_descanso, orden, sucursal_id, tipo_colaborador, horario_personalizado, usuarios!barberos_id_fkey(username, full_name, avatar_url, avatar_focus_y_agenda)').eq('activo', true).or('tipo_colaborador.is.null,tipo_colaborador.neq.aseo').order('orden');
       let citasQuery = sb.from('citas')
           .select(`id, hora_inicio, hora_fin, estado, precio, cliente_id, barbero_id, servicio_id, sucursal_id,
                     pasos_servicio, inicio_servicio_at, fin_servicio_at, propina, pagada_at, metodo_pago, servicios_adicionales,
@@ -2744,19 +2756,49 @@
     // Verificar si hay una habilitación para este día (tipo 'habilitado')
     const habilitacion = allBloqueos.find(x => x.barbero_id === barberoId && x.tipo === 'habilitado');
 
-    // Si es día de descanso pero hay habilitación, retornar info de habilitación
+    // Si hay habilitación, siempre retornar como habilitado (tiene prioridad)
+    if (habilitacion) {
+      return { motivo: 'Día habilitado ✓', tipo: 'habilitado', id: habilitacion.id };
+    }
+
+    // Si es día de descanso sin habilitación
     if (b.dia_descanso !== null && b.dia_descanso !== undefined && Number(b.dia_descanso) === weekday) {
-      if (habilitacion) {
-        return { motivo: 'Día habilitado ✓', tipo: 'habilitado', id: habilitacion.id };
-      }
       return { motivo: 'Día de descanso', tipo: 'descanso' };
     }
+
+    // Verificar si tiene horario personalizado y el día está inactivo
+    if (b.horario_personalizado) {
+      const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+      const diaConfig = b.horario_personalizado[diasSemana[weekday]];
+      if (diaConfig && !diaConfig.activo) {
+        return { motivo: 'Día libre (horario personalizado)', tipo: 'horario_personalizado' };
+      }
+    }
+
+    // Verificar bloqueo de día completo
     const bloqueoDia = allBloqueos.find(x => x.barbero_id === barberoId && x.tipo === 'dia');
     if (bloqueoDia) return { motivo: bloqueoDia.motivo || 'Bloqueado', id: bloqueoDia.id, tipo: 'dia' };
     return null;
   }
   function barberoBloqueosHoras(barberoId){
     return allBloqueos.filter(x => x.barbero_id === barberoId && x.tipo === 'horas');
+  }
+
+  // Verificar si una hora está fuera del horario personalizado del barbero
+  function isHoraFueraDeHorarioPersonalizado(barberoId, hora) {
+    const b = allBarberos.find(x => x.id === barberoId);
+    if (!b || !b.horario_personalizado) return false;
+
+    const weekday = new Date(selectedDate + 'T00:00:00').getDay();
+    const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+    const diaConfig = b.horario_personalizado[diasSemana[weekday]];
+
+    if (!diaConfig || !diaConfig.activo) return true;
+    if (!diaConfig.rangos || diaConfig.rangos.length === 0) return false;
+
+    const horaStr = hora.slice(0, 5); // "09:00"
+    const dentroDeRango = diaConfig.rangos.some(r => horaStr >= r.desde && horaStr < r.hasta);
+    return !dentroDeRango;
   }
 
   // ---- Desktop / tablet board ----
@@ -2927,8 +2969,65 @@
         intervals.push([start, end]);
       });
 
-      // Bloqueo de almuerzo (13:00 - 14:00)
-      if (!diaBloqueado) {
+      // Bloqueos visuales por horario personalizado (horas fuera de su horario)
+      if (b.horario_personalizado && (!diaBloqueado || diaBloqueado.tipo === 'habilitado')) {
+        const weekday = new Date(selectedDate + 'T00:00:00').getDay();
+        const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+        const diaConfig = b.horario_personalizado[diasSemana[weekday]];
+        if (diaConfig && diaConfig.activo && diaConfig.rangos && diaConfig.rangos.length > 0) {
+          // Generar bloques para las horas fuera del horario personalizado
+          const rangosMin = diaConfig.rangos.map(r => ({
+            start: parseInt(r.desde.split(':')[0]) * 60 + parseInt(r.desde.split(':')[1] || 0),
+            end: parseInt(r.hasta.split(':')[0]) * 60 + parseInt(r.hasta.split(':')[1] || 0)
+          })).sort((a, b) => a.start - b.start);
+
+          // Antes del primer rango
+          if (rangosMin[0].start > START_MIN) {
+            const top = 0;
+            const height = (rangosMin[0].start - START_MIN) * PX_PER_MIN - 2;
+            if (height > 10) {
+              blocks += `<div class="hour-block" style="top:${top}px; height:${height}px; opacity:0.6;" onclick="event.stopPropagation()">⏰ Fuera de horario</div>`;
+              intervals.push([START_MIN, rangosMin[0].start]);
+            }
+          }
+
+          // Entre rangos
+          for (let i = 0; i < rangosMin.length - 1; i++) {
+            const gapStart = rangosMin[i].end;
+            const gapEnd = rangosMin[i + 1].start;
+            if (gapEnd > gapStart) {
+              const top = (gapStart - START_MIN) * PX_PER_MIN;
+              const height = (gapEnd - gapStart) * PX_PER_MIN - 2;
+              if (height > 10) {
+                blocks += `<div class="hour-block" style="top:${top}px; height:${height}px; opacity:0.6;" onclick="event.stopPropagation()">⏰ Fuera de horario</div>`;
+                intervals.push([gapStart, gapEnd]);
+              }
+            }
+          }
+
+          // Después del último rango
+          const lastEnd = rangosMin[rangosMin.length - 1].end;
+          if (lastEnd < END_MIN) {
+            const top = (lastEnd - START_MIN) * PX_PER_MIN;
+            const height = (END_MIN - lastEnd) * PX_PER_MIN - 2;
+            if (height > 10) {
+              blocks += `<div class="hour-block" style="top:${top}px; height:${height}px; opacity:0.6;" onclick="event.stopPropagation()">⏰ Fuera de horario</div>`;
+              intervals.push([lastEnd, END_MIN]);
+            }
+          }
+        }
+      }
+
+      // Bloqueo de almuerzo (13:00 - 14:00) - Solo si NO tiene horario personalizado activo
+      // Si tiene horario personalizado, el almuerzo ya está contemplado en los rangos (gap entre rangos)
+      const tieneHorarioPersonalizadoActivo = b.horario_personalizado && (() => {
+        const weekday = new Date(selectedDate + 'T00:00:00').getDay();
+        const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+        const diaConfig = b.horario_personalizado[diasSemana[weekday]];
+        return diaConfig && diaConfig.activo && diaConfig.rangos && diaConfig.rangos.length > 0;
+      })();
+
+      if ((!diaBloqueado || diaBloqueado.tipo === 'habilitado') && !tieneHorarioPersonalizadoActivo) {
         const almTop = (ALMUERZO_START - START_MIN) * PX_PER_MIN;
         const almHeight = (ALMUERZO_END - ALMUERZO_START) * PX_PER_MIN - 2;
         blocks += `
@@ -2940,10 +3039,10 @@
 
       // "Libre" hint per empty hour slot
       let libres = '';
-      if (!diaBloqueado) {
+      if (!diaBloqueado || diaBloqueado.tipo === 'habilitado') {
         for (let m = START_MIN; m < END_MIN; m += 60) {
-          // Skip almuerzo hour
-          if (m >= ALMUERZO_START && m < ALMUERZO_END) continue;
+          // Skip almuerzo hour solo si NO tiene horario personalizado (el horario personalizado ya maneja sus propios gaps)
+          if (!tieneHorarioPersonalizadoActivo && m >= ALMUERZO_START && m < ALMUERZO_END) continue;
           const covered = intervals.some(([s,e]) => m < e && (m+60) > s);
           if (!covered) {
             const top = (m - START_MIN) * PX_PER_MIN;
@@ -3147,6 +3246,12 @@
     });
     if (blockedByHour) { toast('Ese horario está bloqueado para este barbero.'); return; }
 
+    // Verificar que la hora esté dentro del horario personalizado del barbero
+    const toHHMMSSCheck = (m) => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:00`;
+    if (isHoraFueraDeHorarioPersonalizado(newBarberoId, toHHMMSSCheck(startMin))) {
+      toast('Ese horario está fuera del horario de trabajo del barbero.'); return;
+    }
+
     const overlap = allCitas.some(c => {
       if (c.id === citaId || c.barbero_id !== newBarberoId || ['cancelada','sin_respuesta'].includes(c.estado)) return false;
       const s = toMin(c.hora_inicio);
@@ -3288,15 +3393,11 @@
   // Escuchar mensajes del iframe para cerrar el popup cuando se complete el pago
   window.addEventListener('message', (e) => {
     if (e.data && e.data.type === 'ventaCompletada') {
-      console.log('[Calendario] Recibido ventaCompletada, citaId:', e.data.citaId);
       closeVentasPopup();
       toast('Pago registrado correctamente');
       // Enviar email de servicio completado si hay citaId
       if (e.data.citaId) {
-        console.log('[Calendario] Llamando enviarEmailServicioCompletado con citaId:', e.data.citaId);
         enviarEmailServicioCompletado(e.data.citaId);
-      } else {
-        console.warn('[Calendario] No se recibió citaId en ventaCompletada');
       }
     }
   });
@@ -3399,7 +3500,7 @@
   async function enviarConfirmacionesPendientes() {
     try {
       toast('Enviando confirmaciones pendientes...');
-      const res = await fetch('https://zzmtnjlfrlqmouijfste.supabase.co/functions/v1/whatsapp-confirmation-cron', {
+      const res = await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/whatsapp-confirmation-cron', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tipo: 'immediate', manual: true })
@@ -3426,6 +3527,7 @@
 
   function setBadge(id, count){
     const el = document.getElementById(id);
+    if (!el) return;
     el.textContent = count;
     el.style.display = count ? 'flex' : 'none';
   }
@@ -3628,7 +3730,7 @@
           cortes = clienteData.lealtad_info.cortes_total || 0;
           categoria = clienteData.lealtad_info.categoria;
         }
-      } catch (err) { console.log('Error cargando lealtad:', err); }
+      } catch (err) { /* silenciar error de lealtad */ }
     }
 
     // Colores de categorías
@@ -3833,7 +3935,6 @@
     document.getElementById('detActions').innerHTML = actions;
     const modal = document.getElementById('detailModal');
     modal.classList.add('show');
-    console.log('Modal show añadido, display:', getComputedStyle(modal).display, 'zIndex:', getComputedStyle(modal).zIndex);
   }
   function toggleDetEstadoRow(citaId){
     const row = document.getElementById('detEstadoRow');
@@ -5174,7 +5275,6 @@
   });
 
   async function confirmNewAppt(){
-    console.log('[confirmNewAppt] Iniciando...');
     const barberoId = document.getElementById('naBarbero').value;
     const hora = document.getElementById('naHora').value;
     const phoneDigits = document.getElementById('naPhone').value.trim().replace(/\D/g, '');
@@ -5182,28 +5282,12 @@
     // Para Colombia (+57) guardar solo los dígitos, para otros países incluir el código
     const phone = countryCode === '57' ? phoneDigits : countryCode + phoneDigits;
     const services = getSelectedServices();
-    console.log('[confirmNewAppt] barberoId:', barberoId, 'hora:', hora, 'phone:', phone, 'countryCode:', countryCode, 'services:', services.length);
     if (!barberoId || !hora || !phoneDigits) { toast('Completa todos los campos.'); return; }
     if (!services.length) { toast('Selecciona al menos un servicio.'); return; }
 
-    // Validar que no sea una fecha/hora pasada
-    // Margen de 15 minutos después de la hora para poder agendar (ej: hasta las 11:15 se puede agendar a las 11:00)
-    const MARGEN_MINUTOS_CITA = 15;
-    const ahora = new Date();
-    const fechaHoy = dnTodayISO();
-    const horaActual = ahora.getHours() * 60 + ahora.getMinutes();
+    // ADMINS: Sin restricciones de fecha/hora - pueden agendar en cualquier momento
     const [hh, mm] = hora.split(':').map(Number);
-    const horaSeleccionada = hh * 60 + mm;
-
-    if (selectedDate < fechaHoy) {
-      showAlertModal('No se puede agendar en una fecha pasada.', '📅 Fecha no válida');
-      return;
-    }
-    // Permitir agendar si estamos dentro del margen de 15 minutos después de la hora
-    if (selectedDate === fechaHoy && horaSeleccionada + MARGEN_MINUTOS_CITA < horaActual) {
-      showAlertModal('No se puede agendar en un horario que ya pasó.', '🕐 Horario no válido');
-      return;
-    }
+    const horaSeleccionada = hh * 60 + (mm || 0);
 
     try {
       let clienteId = naFoundClient?.id;
@@ -5243,6 +5327,11 @@
         return startMin < be && endMin > bs;
       });
       if (blockedByHour) { toast('Ese horario está bloqueado para este barbero.'); return; }
+
+      // Verificar que la hora esté dentro del horario personalizado del barbero
+      if (isHoraFueraDeHorarioPersonalizado(barberoId, horaInicio)) {
+        toast('Ese horario está fuera del horario de trabajo del barbero.'); return;
+      }
 
       // Verificar que no cruce con otra cita existente
       const cruzaConExistente = allCitas.some(c => {
@@ -5302,7 +5391,7 @@
             }
           }
 
-          await fetch('https://zzmtnjlfrlqmouijfste.supabase.co/functions/v1/send-confirmation-email', {
+          await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/send-confirmation-email', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -5323,9 +5412,8 @@
               sede_direccion: sedeDireccion
             })
           });
-          console.log('[Admin] Email de confirmación enviado');
         } catch (emailErr) {
-          console.warn('[Admin] No se pudo enviar email de confirmación:', emailErr);
+          // Silenciar error de email - no es crítico
         }
       }
 
@@ -5483,20 +5571,15 @@
       const bl = barberoBloqueoDia(b.id);
       return bl && bl.tipo !== 'habilitado';
     });
-    console.log('[m2] descansanHoy:', descansanHoy.length, descansanHoy.map(b => b.usuarios?.full_name));
     const bannerEl = document.getElementById('m2DescansanHoy');
     const nombresEl = document.getElementById('m2DescansanNombres');
-    console.log('[m2] bannerEl:', bannerEl, 'nombresEl:', nombresEl);
     if (bannerEl && nombresEl) {
       if (descansanHoy.length > 0) {
         nombresEl.textContent = descansanHoy.map(b => b.usuarios?.full_name?.split(' ')[0] || 'Barbero').join(', ');
         bannerEl.style.display = 'block';
-        console.log('[m2] Banner mostrado');
       } else {
         bannerEl.style.display = 'none';
       }
-    } else {
-      console.log('[m2] ERROR: No se encontró el banner');
     }
 
     carousel.innerHTML = horas.map(hora => {
@@ -5680,6 +5763,12 @@
     });
     if (blockedByHour) { toast('Ese horario está bloqueado para este barbero.'); return; }
 
+    // Verificar que la hora esté dentro del horario personalizado del barbero
+    const toHHMMSSCheck = (m) => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:00`;
+    if (isHoraFueraDeHorarioPersonalizado(newBarberoId, toHHMMSSCheck(startMin))) {
+      toast('Ese horario está fuera del horario de trabajo del barbero.'); return;
+    }
+
     const overlap = allCitas.some(c => {
       if (c.id === citaId || c.barbero_id !== newBarberoId || ['cancelada','sin_respuesta'].includes(c.estado)) return false;
       const s = toMin(c.hora_inicio), en = c.hora_fin ? toMin(c.hora_fin) : s + (c.servicios?.duracion_min || 30);
@@ -5804,16 +5893,11 @@
 
   // ---- Actions (shared) ----
   async function setEstado(citaId, estado){
-    console.log('[setEstado] Iniciando cambio de estado:', { citaId, estado });
     try {
       // Guardar estado anterior para deshacer
       const citaAnterior = allCitas.find(c => c.id === citaId);
-      console.log('[setEstado] Cita encontrada:', citaAnterior ? 'Sí' : 'No');
       const prevEstado = citaAnterior?.estado;
       const clienteName = citaAnterior?.usuarios?.full_name || citaAnterior?.usuarios?.username || 'Cliente';
-
-      // Admin puede cambiar cualquier estado - sin restricciones
-      console.log(`[setEstado] Cambiando de ${prevEstado} a ${estado}`);
 
       const ahora = new Date().toISOString();
       const payload = { estado };
@@ -5828,30 +5912,22 @@
 
       // Si se cambia de finalizada/pagada a pendiente_pago, anular los pagos asociados
       if (estado === 'pendiente_pago' && ['finalizada', 'pagada'].includes(prevEstado)) {
-        console.log('[setEstado] Anulando pagos asociados a la cita:', citaId);
-
-        // Primero verificar cuántos pagos hay
-        const { data: pagosExistentes, error: checkError } = await sb.from('pagos')
+        const { data: pagosExistentes } = await sb.from('pagos')
           .select('id, monto, estado')
           .eq('cita_id', citaId);
-        console.log('[setEstado] Pagos encontrados para cita:', pagosExistentes);
 
         if (pagosExistentes && pagosExistentes.length > 0) {
-          const { data: pagosAnulados, error: pagoError } = await sb.from('pagos')
+          const { error: pagoError } = await sb.from('pagos')
             .update({ estado: 'anulado' })
             .eq('cita_id', citaId)
-            .eq('estado', 'pagado')
-            .select();
+            .eq('estado', 'pagado');
 
           if (pagoError) {
             console.error('[setEstado] Error anulando pagos:', pagoError);
             toast('Advertencia: No se pudo anular el pago en caja');
           } else {
-            console.log('[setEstado] Pagos anulados:', pagosAnulados);
             toast('Pago anulado en caja');
           }
-        } else {
-          console.log('[setEstado] No hay pagos asociados a esta cita');
         }
       }
 
@@ -5874,7 +5950,6 @@
       loadAll();
     } catch (err) {
       console.error('[setEstado] Error:', err);
-      console.error('[setEstado] Error details:', JSON.stringify(err, null, 2));
       toast('No pudimos actualizar la cita.');
     }
   }
@@ -5893,16 +5968,10 @@
         .eq('id', citaId)
         .maybeSingle();
 
-      if (error || !cita) {
-        console.warn('[Email] No se pudo obtener la cita:', error);
-        return;
-      }
+      if (error || !cita) return;
 
       const clienteEmail = cita.usuarios?.email;
-      if (!clienteEmail) {
-        console.log('[Email] Cliente sin email, no se envía correo');
-        return;
-      }
+      if (!clienteEmail) return;
 
       // Obtener nombre del barbero (barberos.id = usuarios.id)
       let barberoNombre = 'Keicy Barbería';
@@ -5941,7 +6010,7 @@
         cita_id: citaId
       };
 
-      const response = await fetch('https://zzmtnjlfrlqmouijfste.supabase.co/functions/v1/send-service-completed-email', {
+      const response = await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/send-service-completed-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -5950,20 +6019,16 @@
         body: JSON.stringify(payload)
       });
 
-      if (response.ok) {
-        console.log('[Email] Email de servicio completado enviado');
-      } else {
-        console.warn('[Email] Error enviando email:', await response.text());
-      }
+      // Silenciar resultado de email
     } catch (err) {
-      console.warn('[Email] Error enviando email de servicio completado:', err);
+      // Silenciar error de email - no es crítico
     }
   }
 
   // Enviar WhatsApp post-pago con link a recibo y reseña
   async function enviarWhatsAppPostPago(citaId) {
     try {
-      const response = await fetch('https://zzmtnjlfrlqmouijfste.supabase.co/functions/v1/whatsapp-post-pago', {
+      const response = await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/whatsapp-post-pago', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -5972,13 +6037,9 @@
         body: JSON.stringify({ cita_id: citaId })
       });
 
-      if (response.ok) {
-        console.log('[WhatsApp] Mensaje post-pago enviado');
-      } else {
-        console.warn('[WhatsApp] Error enviando mensaje:', await response.text());
-      }
+      // Silenciar resultado de WhatsApp
     } catch (err) {
-      console.warn('[WhatsApp] Error enviando mensaje post-pago:', err);
+      // Silenciar error de WhatsApp - no es crítico
     }
   }
 
@@ -6693,11 +6754,11 @@
     toast(`🔄 Sincronizando ${selectedDate} con WeiBook...`, 'info');
 
     try {
-      const response = await fetch('https://zzmtnjlfrlqmouijfste.supabase.co/functions/v1/sync-weibook-citas', {
+      const response = await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/sync-weibook-citas', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sb.supabaseKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6bXRuamxmcmxxbW91aWpmc3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDI1OTQ0NzYsImV4cCI6MjA1ODE3MDQ3Nn0.DP8S4h1JIb3SgMd-6JOeahCBoVpNJxSYAFH5M27eJMw'}`
+          'Authorization': `Bearer ${sb.supabaseKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlncm1hbW1jYXVwbnlnZHhtZ3RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTA5MjksImV4cCI6MjEwNjgyNjkyOX0.PCOjKijvxVdhwe6h2wPbhZR6ZSahfJYHfkef2OwKPi0'}`
         },
         body: JSON.stringify({ fecha: selectedDate })
       });
@@ -6752,5 +6813,6 @@
 <script src="../assets/mobile-nav.js"></script>
 <script src="../assets/admin-sede-sidebar.js"></script>
 <script src="../assets/agenda-mobile-unified.js"></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>
