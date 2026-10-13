@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<title>Redirigiendo... - Keicy Barber</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0a0a0a;
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .container { text-align: center; padding: 20px; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: #FFAC48;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .text { font-size: 14px; color: rgba(255,255,255,0.6); }
+  .error { color: #ef4444; margin-top: 20px; }
+  .error a { color: #FFAC48; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="spinner"></div>
+  <div class="text" id="status">Cargando tu recibo...</div>
+  <div class="error" id="error" style="display:none;">
+    <p>Link no válido o expirado.</p>
+    <p><a href="/">Volver al inicio</a></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://ygrmammcaupnygdxmgth.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlncm1hbW1jYXVwbnlnZHhtZ3RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTA5MjksImV4cCI6MjEwNjgyNjkyOX0.PCOjKijvxVdhwe6h2wPbhZR6ZSahfJYHfkef2OwKPi0';
+
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function redirect() {
+    // Obtener código del path: /r/ABC123 -> ABC123
+    const path = window.location.pathname;
+    const code = path.split('/').filter(Boolean).pop();
+
+    if (!code || code === 'r') {
+      showError();
+      return;
+    }
+
+    try {
+      const { data, error } = await sb
+        .from('short_urls')
+        .select('cita_id, tipo')
+        .eq('code', code.toUpperCase())
+        .eq('tipo', 'recibo')
+        .maybeSingle();
+
+      if (error || !data) {
+        showError();
+        return;
+      }
+
+      // Redirigir a la página de recibo
+      window.location.href = `/recibo/?c=${data.cita_id}`;
+
+    } catch (err) {
+      console.error('Error:', err);
+      showError();
+    }
+  }
+
+  function showError() {
+    document.getElementById('status').style.display = 'none';
+    document.querySelector('.spinner').style.display = 'none';
+    document.getElementById('error').style.display = 'block';
+  }
+
+  redirect();
+</script>
+</body>
+</html>

@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
-<meta name="theme-color" content="#0A0A0C">
+<meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Barberos</title>
 <script src="../assets/theme-manager.js"></script>
 <link rel="stylesheet" href="../assets/design-system.css">
@@ -52,7 +52,7 @@
   .nav-section-label{ display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
   .nav-section-label:first-of-type{ padding-top:2px; }
   .sidebar.expanded .nav-section-label{ display:block; }
-  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0; display:none; }
+  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(255,172,72,0.06); min-width:196px; flex-shrink:0; display:none; }
   .sidebar.expanded .plan-card{ display:block; }
   .plan-card .label{ font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--gold); text-transform:uppercase; display:flex; align-items:center; gap:6px; }
   .plan-card .sub{ font-size:12px; color:var(--text-secondary); margin-top:6px; }
@@ -105,7 +105,7 @@
   .role-tag{ font-size:10px; font-weight:800; padding:2px 8px; border-radius:999px; text-transform:uppercase; letter-spacing:.3px; }
   .role-tag.barbero{ background:rgba(78,140,203,0.18); color:#9FCBFA; }
   .role-tag.aseo{ background:rgba(155,111,224,0.18); color:#C9AFF5; }
-  .role-tag.admin{ background:rgba(201,163,91,0.18); color:var(--gold); }
+  .role-tag.admin{ background:rgba(255,172,72,0.18); color:var(--gold); }
 
   /* ---- Photo preview grid ---- */
   .pp-grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px; }
@@ -166,7 +166,7 @@
     transition:transform .18s ease, border-color .2s ease, box-shadow .2s ease;
     position:relative;
   }
-  .barber-card:hover{ transform:translateY(-4px); border-color:rgba(201,163,91,0.4); box-shadow:0 12px 28px rgba(0,0,0,0.3); }
+  .barber-card:hover{ transform:translateY(-4px); border-color:rgba(255,172,72,0.4); box-shadow:0 12px 28px rgba(0,0,0,0.3); }
   .barber-card .card-avatar{
     width:80px; height:80px; border-radius:50%; margin:0 auto 12px;
     background:var(--card); display:flex; align-items:center; justify-content:center;
@@ -357,10 +357,10 @@
   }
   .add-bloqueo-btn{
     width:100%; padding:10px; border-radius:10px; border:1px dashed var(--gold);
-    background:rgba(201,163,91,0.08); color:var(--gold); font-size:12px; font-weight:700;
+    background:rgba(255,172,72,0.08); color:var(--gold); font-size:12px; font-weight:700;
     cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;
   }
-  .add-bloqueo-btn:hover{ background:rgba(201,163,91,0.15); }
+  .add-bloqueo-btn:hover{ background:rgba(255,172,72,0.15); }
 
   /* ---- Reseñas del colaborador ---- */
   .resenas-section{ margin-top:20px; padding-top:16px; border-top:1px solid var(--glass-border); }
@@ -372,8 +372,12 @@
   .resenas-list{ max-height:250px; overflow-y:auto; }
   .resena-item{
     padding:12px; background:var(--glass-2); border:1px solid var(--glass-border);
-    border-radius:12px; margin-bottom:8px;
+    border-radius:12px; margin-bottom:8px; transition: all 0.2s;
   }
+  .resena-item.clickable{
+    cursor:pointer; border-color:rgba(255,107,94,0.3); background:rgba(255,107,94,0.05);
+  }
+  .resena-item.clickable:hover{ background:rgba(255,107,94,0.12); border-color:rgba(255,107,94,0.5); }
   .resena-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; }
   .resena-cliente{ font-size:12px; font-weight:700; }
   .resena-fecha{ font-size:10px; color:var(--text-secondary); }
@@ -381,8 +385,52 @@
   .resena-stars svg{ width:14px; height:14px; }
   .resena-stars svg.filled{ fill:var(--gold); stroke:var(--gold); }
   .resena-stars svg.empty{ fill:none; stroke:var(--text-secondary); }
+  .resena-stars.low svg.filled{ fill:#FF6B5E; stroke:#FF6B5E; }
   .resena-comentario{ font-size:12px; color:var(--text-secondary); font-style:italic; line-height:1.4; }
+  .resena-contactar{ font-size:10px; color:#FF6B5E; margin-top:6px; display:flex; align-items:center; gap:4px; }
+  .resena-contactar svg{ width:12px; height:12px; stroke:#FF6B5E; fill:none; }
   .resenas-empty{ font-size:12px; color:var(--text-secondary); text-align:center; padding:20px; }
+
+  /* ---- Horarios personalizados por día ---- */
+  .horarios-personalizados-section{ margin-top:20px; padding-top:16px; border-top:1px solid var(--glass-border); }
+  .horarios-personalizados-title{ font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.4px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+  .horarios-container{ display:flex; flex-direction:column; gap:10px; }
+  .horario-dia-card{
+    background:var(--glass-2); border:1px solid var(--glass-border); border-radius:14px;
+    padding:12px; transition:border-color .2s ease;
+  }
+  .horario-dia-card.activo{ border-color:rgba(78,203,113,0.4); }
+  .horario-dia-card.inactivo{ opacity:0.6; }
+  .horario-dia-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+  .horario-dia-nombre{ font-size:13px; font-weight:700; text-transform:capitalize; }
+  .horario-dia-toggle{ display:flex; align-items:center; gap:8px; }
+  .horario-dia-toggle .lbl{ font-size:11px; color:var(--text-secondary); }
+  .horario-rangos{ display:flex; flex-direction:column; gap:8px; }
+  .horario-rango-row{ display:flex; align-items:center; gap:8px; }
+  .horario-rango-row input[type="time"]{
+    flex:1; padding:8px 10px; border-radius:8px; background:var(--bg);
+    border:1px solid var(--glass-border); color:var(--text); font-size:12px;
+  }
+  .horario-rango-row input[type="time"]:focus{ border-color:var(--gold); outline:none; }
+  .horario-rango-separator{ font-size:12px; color:var(--text-secondary); }
+  .horario-rango-delete{
+    width:28px; height:28px; border-radius:8px; border:none;
+    background:rgba(239,83,80,0.12); color:var(--error); cursor:pointer;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .horario-rango-delete:hover{ background:rgba(239,83,80,0.25); }
+  .horario-add-rango{
+    padding:8px; border-radius:8px; border:1px dashed var(--gold);
+    background:rgba(255,172,72,0.08); color:var(--gold); font-size:11px; font-weight:700;
+    cursor:pointer; display:flex; align-items:center; justify-content:center; gap:4px;
+    margin-top:4px;
+  }
+  .horario-add-rango:hover{ background:rgba(255,172,72,0.15); }
+  .horario-sin-rangos{ font-size:11px; color:var(--text-secondary); text-align:center; padding:8px; }
+  .switch-small{ position:relative; width:36px; height:20px; border-radius:999px; background:var(--glass-border); cursor:pointer; transition:background .2s ease; flex-shrink:0; }
+  .switch-small.on{ background:#4ECB71; }
+  .switch-small .knob{ position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:#fff; transition:transform .2s ease; }
+  .switch-small.on .knob{ transform:translateX(16px); }
 
   /* ========== RESPONSIVE ========== */
   @media (max-width: 1200px) {
@@ -647,6 +695,21 @@
           <option value="6">Sábado</option>
           <option value="0">Domingo</option>
         </select>
+      </div>
+
+      <!-- Horarios personalizados por día -->
+      <div class="horarios-personalizados-section">
+        <div class="horarios-personalizados-title">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          Horarios por día de la semana
+        </div>
+        <div class="toggle-row" style="margin-bottom:12px;">
+          <span class="lbl">Usar horario personalizado</span>
+          <div class="switch" id="editHorarioPersonalizadoSwitch" onclick="toggleHorarioPersonalizado()"><div class="knob"></div></div>
+        </div>
+        <div id="horariosContainer" class="horarios-container" style="display:none;">
+          <!-- Se genera dinámicamente con JS -->
+        </div>
       </div>
 
       <div class="toggle-row">
@@ -920,6 +983,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
 <script src="../assets/supabase-client.js"></script>
+<script src="/assets/utils.js"></script>
+<script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/admin-sede-nav.js"></script>
 
 <script>
@@ -1185,7 +1250,7 @@
     try {
       let query = sb
         .from('barberos')
-        .select('id, especialidad, puesto, comision_pct, pago_diario, calificacion, activo, anos_experiencia, dia_descanso, sucursal_id, tipo_colaborador, sucursales(nombre), usuarios!barberos_id_fkey(id, username, full_name, avatar_url, instagram, password_hash, avatar_focus_y, avatar_focus_y_reservas, avatar_focus_y_agenda, avatar_focus_y_barbero)');
+        .select('id, especialidad, puesto, comision_pct, pago_diario, calificacion, activo, anos_experiencia, dia_descanso, sucursal_id, tipo_colaborador, horario_personalizado, sucursales(nombre), usuarios!barberos_id_fkey(id, username, full_name, avatar_url, instagram, password_hash, avatar_focus_y, avatar_focus_y_reservas, avatar_focus_y_agenda, avatar_focus_y_barbero)');
 
       // Filtrar por sede seleccionada (tanto para admin_sede como admin general)
       if (sedeActualId) {
@@ -1327,6 +1392,9 @@
       setTimeout(mostrarCredenciales, 100);
     }
 
+    // Cargar horarios personalizados
+    loadHorarioPersonalizadoInModal(b.horario_personalizado);
+
     // Cargar bloqueos y reseñas
     loadBloqueos(id);
     loadResenas(id);
@@ -1400,7 +1468,7 @@
 
     try {
       const { data, error } = await sb.from('resenas')
-        .select('id, calificacion, comentario, created_at, cliente_id, usuarios!resenas_cliente_id_fkey(full_name)')
+        .select('id, calificacion, comentario, created_at, cliente_id, usuarios!resenas_cliente_id_fkey(full_name, phone)')
         .eq('barbero_id', barberoId)
         .order('created_at', { ascending: false })
         .limit(20);
@@ -1423,26 +1491,50 @@
         const fecha = new Date(r.created_at);
         const fechaStr = fecha.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
         const clienteNombre = r.usuarios?.full_name || 'Cliente';
+        const clientePhone = r.usuarios?.phone || '';
+        const isLowRating = r.calificacion < 3;
         const stars = Array.from({ length: 5 }, (_, i) =>
           i < r.calificacion
             ? '<svg class="filled" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
             : '<svg class="empty" viewBox="0 0 24 24" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
         ).join('');
 
+        const clickable = isLowRating && clientePhone ? 'clickable' : '';
+        const onclick = isLowRating && clientePhone ? `onclick="contactarClienteResena('${clientePhone}', '${clienteNombre.split(' ')[0]}')"` : '';
+        const contactarHint = isLowRating && clientePhone
+          ? `<div class="resena-contactar"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>Clic para contactar al cliente</div>`
+          : '';
+
         return `
-          <div class="resena-item">
+          <div class="resena-item ${clickable}" ${onclick}>
             <div class="resena-header">
               <span class="resena-cliente">${clienteNombre}</span>
               <span class="resena-fecha">${fechaStr}</span>
             </div>
-            <div class="resena-stars">${stars}</div>
+            <div class="resena-stars ${isLowRating ? 'low' : ''}">${stars}</div>
             ${r.comentario ? `<div class="resena-comentario">"${r.comentario}"</div>` : ''}
+            ${contactarHint}
           </div>`;
       }).join('');
     } catch (err) {
       console.error('Error cargando reseñas:', err);
       list.innerHTML = '<div class="resenas-empty" style="color:var(--error);">Error cargando reseñas</div>';
     }
+  }
+
+  // Contactar cliente por reseña negativa
+  function contactarClienteResena(phone, nombre) {
+    // Formatear teléfono para WhatsApp
+    let phoneClean = phone.replace(/\D/g, '');
+    if (phoneClean.startsWith('57')) {
+      // Ya tiene código de país
+    } else if (phoneClean.length === 10) {
+      phoneClean = '57' + phoneClean;
+    }
+
+    const mensaje = `Hola ${nombre}, soy del equipo de Keicy Barber. Vimos que tu última visita no fue la mejor experiencia. Queremos saber qué pasó y cómo podemos mejorar. ¿Nos cuentas?`;
+    const url = `https://wa.me/${phoneClean}?text=${encodeURIComponent(mensaje)}`;
+    window.open(url, '_blank');
   }
 
   // Agregar bloqueo
@@ -1682,11 +1774,15 @@
 
       console.log('Colaborador actualizado:', rpcResult);
 
+      // Recolectar horario personalizado
+      const horarioPersonalizado = collectHorarioPersonalizado();
+
       const updateData = {
         tipo_colaborador: tipo, especialidad: tipo === 'barbero' ? (especialidad || null) : null,
         puesto: puesto || null, comision_pct: tipo === 'barbero' ? comision : 0,
         pago_diario: tipo === 'aseo' ? pagoDiario : null,
-        anos_experiencia: anos, dia_descanso: dia, activo, sucursal_id: sedeId
+        anos_experiencia: anos, dia_descanso: dia, activo, sucursal_id: sedeId,
+        horario_personalizado: horarioPersonalizado
       };
       console.log('Actualizando barbero id:', currentEditId, 'con datos:', updateData);
 
@@ -1949,7 +2045,7 @@
       const sedesText = sedesArr.length > 0 ? sedesArr.join(', ') : 'Sin sedes asignadas';
       return `
         <div class="admin-row" onclick="openEditAdminSedeModal('${a.id}')">
-          <div class="avatar" style="background:rgba(201,163,91,0.2);color:var(--gold);">${dnInitials(name)}</div>
+          <div class="avatar" style="background:rgba(255,172,72,0.2);color:var(--gold);">${dnInitials(name)}</div>
           <div class="admin-mid">
             <div class="name">${name} <span class="role-tag admin">Admin Sede</span></div>
             <div class="meta">@${a.username} · ${sedesText}</div>
@@ -2157,9 +2253,155 @@
     }
   }
 
+  // ---- Horarios personalizados por día ----
+  const DIAS_SEMANA = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+  const DIAS_SEMANA_DISPLAY = { lunes: 'Lunes', martes: 'Martes', miercoles: 'Miércoles', jueves: 'Jueves', viernes: 'Viernes', sabado: 'Sábado', domingo: 'Domingo' };
+  let currentHorarioPersonalizado = null;
+
+  function toggleHorarioPersonalizado() {
+    const sw = document.getElementById('editHorarioPersonalizadoSwitch');
+    sw.classList.toggle('on');
+    const container = document.getElementById('horariosContainer');
+    if (sw.classList.contains('on')) {
+      container.style.display = 'flex';
+      if (!currentHorarioPersonalizado) {
+        currentHorarioPersonalizado = getDefaultHorarioPersonalizado();
+      }
+      renderHorariosPersonalizados();
+    } else {
+      container.style.display = 'none';
+    }
+  }
+
+  function getDefaultHorarioPersonalizado() {
+    const horario = {};
+    DIAS_SEMANA.forEach(dia => {
+      const esDomingo = dia === 'domingo';
+      horario[dia] = {
+        activo: !esDomingo,
+        rangos: !esDomingo
+          ? [{ desde: '10:00', hasta: '13:00' }, { desde: '14:00', hasta: '20:00' }]
+          : [] // Domingos inactivos por defecto, pero si se activan usarán horario hasta las 17:00
+      };
+    });
+    return horario;
+  }
+
+  function getRangosPorDefecto(dia) {
+    // Domingos: 10:00am-1:00pm y 2:00pm-5:00pm (hasta las 17:00)
+    // Otros días: 10:00am-1:00pm y 2:00pm-8:00pm (hasta las 20:00)
+    // Nota: Los festivos heredan la hora de cierre configurada en config negocio (hora_cierre_festivos)
+    if (dia === 'domingo') {
+      return [{ desde: '10:00', hasta: '13:00' }, { desde: '14:00', hasta: '17:00' }];
+    }
+    return [{ desde: '10:00', hasta: '13:00' }, { desde: '14:00', hasta: '20:00' }];
+  }
+
+  function renderHorariosPersonalizados() {
+    const container = document.getElementById('horariosContainer');
+    if (!currentHorarioPersonalizado) {
+      container.innerHTML = '<div class="horario-sin-rangos">Sin horario configurado</div>';
+      return;
+    }
+
+    container.innerHTML = DIAS_SEMANA.map(dia => {
+      const config = currentHorarioPersonalizado[dia] || { activo: false, rangos: [] };
+      const isActivo = config.activo;
+      const rangosHtml = config.rangos.length > 0 ? config.rangos.map((r, idx) => `
+        <div class="horario-rango-row">
+          <input type="time" value="${r.desde}" onchange="updateRangoHorario('${dia}', ${idx}, 'desde', this.value)">
+          <span class="horario-rango-separator">a</span>
+          <input type="time" value="${r.hasta}" onchange="updateRangoHorario('${dia}', ${idx}, 'hasta', this.value)">
+          <button type="button" class="horario-rango-delete" onclick="removeRangoHorario('${dia}', ${idx})" title="Eliminar rango">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      `).join('') : '<div class="horario-sin-rangos">Día libre</div>';
+
+      return `
+        <div class="horario-dia-card ${isActivo ? 'activo' : 'inactivo'}" id="horarioDia_${dia}">
+          <div class="horario-dia-header">
+            <span class="horario-dia-nombre">${DIAS_SEMANA_DISPLAY[dia]}</span>
+            <div class="horario-dia-toggle">
+              <span class="lbl">${isActivo ? 'Trabaja' : 'Libre'}</span>
+              <div class="switch-small ${isActivo ? 'on' : ''}" onclick="toggleDiaActivo('${dia}')"><div class="knob"></div></div>
+            </div>
+          </div>
+          <div class="horario-rangos" style="${isActivo ? '' : 'display:none;'}">
+            ${rangosHtml}
+            ${isActivo ? `<button type="button" class="horario-add-rango" onclick="addRangoHorario('${dia}')">+ Agregar rango</button>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function toggleDiaActivo(dia) {
+    if (!currentHorarioPersonalizado) currentHorarioPersonalizado = getDefaultHorarioPersonalizado();
+    if (!currentHorarioPersonalizado[dia]) currentHorarioPersonalizado[dia] = { activo: false, rangos: [] };
+
+    currentHorarioPersonalizado[dia].activo = !currentHorarioPersonalizado[dia].activo;
+    if (currentHorarioPersonalizado[dia].activo && currentHorarioPersonalizado[dia].rangos.length === 0) {
+      currentHorarioPersonalizado[dia].rangos = getRangosPorDefecto(dia);
+    }
+    renderHorariosPersonalizados();
+  }
+
+  function addRangoHorario(dia) {
+    if (!currentHorarioPersonalizado || !currentHorarioPersonalizado[dia]) return;
+    const rangos = currentHorarioPersonalizado[dia].rangos;
+    const lastRango = rangos[rangos.length - 1];
+    const nuevaHoraDesde = lastRango ? lastRango.hasta : '10:00';
+    const nuevaHoraHasta = sumarHoras(nuevaHoraDesde, 4);
+    rangos.push({ desde: nuevaHoraDesde, hasta: nuevaHoraHasta });
+    renderHorariosPersonalizados();
+  }
+
+  function removeRangoHorario(dia, index) {
+    if (!currentHorarioPersonalizado || !currentHorarioPersonalizado[dia]) return;
+    currentHorarioPersonalizado[dia].rangos.splice(index, 1);
+    renderHorariosPersonalizados();
+  }
+
+  function updateRangoHorario(dia, index, campo, valor) {
+    if (!currentHorarioPersonalizado || !currentHorarioPersonalizado[dia]) return;
+    if (!currentHorarioPersonalizado[dia].rangos[index]) return;
+    currentHorarioPersonalizado[dia].rangos[index][campo] = valor;
+  }
+
+  function sumarHoras(hora, horas) {
+    const [h, m] = hora.split(':').map(Number);
+    let nuevaHora = h + horas;
+    if (nuevaHora > 23) nuevaHora = 23;
+    return String(nuevaHora).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+  }
+
+  function collectHorarioPersonalizado() {
+    const sw = document.getElementById('editHorarioPersonalizadoSwitch');
+    if (!sw.classList.contains('on')) return null;
+    return currentHorarioPersonalizado;
+  }
+
+  function loadHorarioPersonalizadoInModal(horario) {
+    const sw = document.getElementById('editHorarioPersonalizadoSwitch');
+    const container = document.getElementById('horariosContainer');
+
+    if (horario && Object.keys(horario).length > 0) {
+      currentHorarioPersonalizado = horario;
+      sw.classList.add('on');
+      container.style.display = 'flex';
+      renderHorariosPersonalizados();
+    } else {
+      currentHorarioPersonalizado = null;
+      sw.classList.remove('on');
+      container.style.display = 'none';
+    }
+  }
+
 </script>
 
 <script src="../assets/mobile-nav.js"></script>
 <script src="../assets/admin-sede-sidebar.js"></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

@@ -94,10 +94,10 @@
   }
   [data-theme="dark"] .nav-link { color: var(--text-secondary, #B8B5AE) !important; }
   [data-theme="dark"] .nav-link svg { stroke: currentColor !important; }
-  [data-theme="dark"] .nav-link:hover { background: var(--glass-2, rgba(255,255,255,0.06)) !important; color: var(--text, #F5F2EA) !important; }
-  [data-theme="dark"] .nav-link.active { background: var(--gold, #D4AF55) !important; color: #141414 !important; }
+  [data-theme="dark"] .nav-link:hover { background: var(--glass-2, rgba(255,255,255,0.06)) !important; color: var(--text, #FFFFFF) !important; }
+  [data-theme="dark"] .nav-link.active { background: var(--gold, #FFAC48) !important; color: #141414 !important; }
   [data-theme="dark"] .nav-link.active svg { stroke: #141414 !important; }
-  [data-theme="dark"] .sidebar-card-name { color: #F5F2EA !important; }
+  [data-theme="dark"] .sidebar-card-name { color: #FFFFFF !important; }
 
   /* Main content */
   .main {
@@ -143,7 +143,7 @@
     border-radius:16px; padding:16px 20px;
     cursor:pointer; transition:all 0.15s ease;
   }
-  .orden-card:hover { border-color:var(--gold); background:rgba(201,163,91,0.05); }
+  .orden-card:hover { border-color:var(--gold); background:rgba(255,172,72,0.05); }
   .orden-card-header {
     display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;
   }
@@ -176,8 +176,8 @@
     transition: background 0.15s ease, transform 0.1s ease;
   }
   .orden-card-action:hover { transform:scale(1.02); }
-  .orden-card-action.cobrar { background:rgba(201,163,91,0.15); color:var(--gold); }
-  .orden-card-action.cobrar:hover { background:rgba(201,163,91,0.25); }
+  .orden-card-action.cobrar { background:rgba(255,172,72,0.15); color:var(--gold); }
+  .orden-card-action.cobrar:hover { background:rgba(255,172,72,0.25); }
   .orden-card-action.delete { background:rgba(231,76,60,0.1); color:#e74c3c; }
   .orden-card-action.delete:hover { background:rgba(231,76,60,0.2); }
 
@@ -379,5 +379,7 @@
   setInterval(loadOrdenes, 15000);
 })();
 </script>
+<script src="/assets/turbo-loader.js" defer></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

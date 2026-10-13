@@ -16,9 +16,9 @@
     --premium-text-secondary: #6F6F6F;
     --premium-text-muted: #9A9A9A;
     --premium-border: #EAE8E3;
-    --premium-gold: #D6AE4A;
-    --premium-gold-soft: #F7F1E4;
-    --premium-gold-dark: #C49B35;
+    --premium-gold: #FFAC48;
+    --premium-gold-soft: #FFF4E6;
+    --premium-gold-dark: #CC7A14;
     --premium-success: #34C759;
     --premium-shadow: 0 2px 12px rgba(0,0,0,0.04);
     --premium-shadow-md: 0 4px 20px rgba(0,0,0,0.08);
@@ -29,20 +29,20 @@
      VARIABLES DE TEMA PREMIUM - TEMA OSCURO
      ================================================================ */
   [data-theme="dark"] {
-    --premium-bg: #0A0A0C;
-    --premium-surface: #16181D;
-    --premium-card: #1C1E24;
-    --premium-text: #F5F2EA;
+    --premium-bg: #000000;
+    --premium-surface: #141414;
+    --premium-card: #1C1C1C;
+    --premium-text: #FFFFFF;
     --premium-text-secondary: #A0A0A0;
     --premium-text-muted: #6B6B6B;
-    --premium-border: #2A2D35;
-    --premium-gold: #D9B872;
-    --premium-gold-soft: rgba(217, 184, 114, 0.12);
-    --premium-gold-dark: #C9A55A;
+    --premium-border: #2A2A2A;
+    --premium-gold: #FFAC48;
+    --premium-gold-soft: rgba(255, 172, 72, 0.12);
+    --premium-gold-dark: #CC7A14;
     --premium-success: #34C759;
     --premium-shadow: 0 2px 12px rgba(0,0,0,0.2);
     --premium-shadow-md: 0 4px 20px rgba(0,0,0,0.3);
-    --premium-logo-bg: #F5F2EA;
+    --premium-logo-bg: #FFFFFF;
   }
 
   /* Aliases para compatibilidad */

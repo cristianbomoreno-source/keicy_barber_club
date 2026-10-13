@@ -193,7 +193,7 @@
     width: 44px;
     height: 44px;
     border-radius: 12px;
-    background: rgba(201, 163, 91, 0.12);
+    background: rgba(255, 172, 72, 0.12);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -706,7 +706,7 @@
 
   .mobile-sede-menu-item.active {
     color: var(--gold);
-    background: rgba(201, 163, 91, 0.1);
+    background: rgba(255, 172, 72, 0.1);
   }
 
   .mobile-sede-menu-item.active::after {
@@ -735,7 +735,7 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: rgba(201, 163, 91, 0.12);
+    background: rgba(255, 172, 72, 0.12);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1110,7 +1110,7 @@
   }
 
   .mobile-cita-status.agendada {
-    background: rgba(201, 163, 91, 0.15);
+    background: rgba(255, 172, 72, 0.15);
     color: var(--gold);
   }
 
@@ -1520,7 +1520,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 6px 24px rgba(201, 163, 91, 0.4);
+    box-shadow: 0 6px 24px rgba(255, 172, 72, 0.4);
     z-index: 99;
   }
 

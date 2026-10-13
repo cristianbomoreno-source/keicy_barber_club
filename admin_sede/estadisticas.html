@@ -114,7 +114,7 @@
   .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
   .kpi-card { background: var(--card); border: 1px solid var(--divider); border-radius: 16px; padding: 20px; }
   .kpi-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .kpi-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(201,163,91,0.12); color: var(--gold); display: flex; align-items: center; justify-content: center; }
+  .kpi-icon { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,172,72,0.12); color: var(--gold); display: flex; align-items: center; justify-content: center; }
   .kpi-icon svg { width: 20px; height: 20px; }
   .kpi-delta { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
   .kpi-delta.up { background: rgba(78,203,113,0.15); color: var(--success); }
@@ -157,9 +157,9 @@
   .heatmap-row-label { font-size: 11px; color: var(--text-secondary); display: flex; align-items: center; padding-right: 8px; }
   .heatmap-cell { aspect-ratio: 1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; }
   .heatmap-cell.level-0 { background: var(--card-2); color: var(--text-muted); }
-  .heatmap-cell.level-1 { background: rgba(201,163,91,0.2); color: var(--gold); }
-  .heatmap-cell.level-2 { background: rgba(201,163,91,0.4); color: var(--gold); }
-  .heatmap-cell.level-3 { background: rgba(201,163,91,0.6); color: #141414; }
+  .heatmap-cell.level-1 { background: rgba(255,172,72,0.2); color: var(--gold); }
+  .heatmap-cell.level-2 { background: rgba(255,172,72,0.4); color: var(--gold); }
+  .heatmap-cell.level-3 { background: rgba(255,172,72,0.6); color: #141414; }
   .heatmap-cell.level-4 { background: var(--gold); color: #141414; }
 
   /* Rankings */
@@ -516,15 +516,16 @@
   async function loadVentasStats() {
     const { inicio, fin } = getDateRange();
 
-    // Total ventas
-    const { data: ventas } = await sb
-      .from('ventas')
+    // Total ventas (usando tickets)
+    const { data: ventas, error: ventasErr } = await sb
+      .from('tickets')
       .select('total, created_at')
       .eq('sucursal_id', sedeId)
-      .gte('created_at', inicio)
+      .eq('anulado', false)
+      .gte('created_at', inicio + 'T00:00:00')
       .lte('created_at', fin + 'T23:59:59');
 
-    const totalVentas = (ventas || []).reduce((sum, v) => sum + (v.total || 0), 0);
+    const totalVentas = (ventas || []).reduce((sum, v) => sum + (parseFloat(v.total) || 0), 0);
     const numVentas = (ventas || []).length;
     const ticketPromedio = numVentas > 0 ? totalVentas / numVentas : 0;
 
@@ -533,14 +534,14 @@
     document.getElementById('ticketPromedio').textContent = formatMoney(ticketPromedio);
 
     // Comisiones
-    const { data: comisiones } = await sb
+    const { data: comisiones, error: comErr } = await sb
       .from('comisiones')
-      .select('monto')
+      .select('valor_comision')
       .eq('sucursal_id', sedeId)
-      .gte('created_at', inicio)
+      .gte('created_at', inicio + 'T00:00:00')
       .lte('created_at', fin + 'T23:59:59');
 
-    const totalComisiones = (comisiones || []).reduce((sum, c) => sum + (c.monto || 0), 0);
+    const totalComisiones = (comisiones || []).reduce((sum, c) => sum + (parseFloat(c.valor_comision) || 0), 0);
     document.getElementById('comisionesTotal').textContent = formatMoney(totalComisiones);
 
     // Ventas por día (bar chart)
@@ -555,7 +556,7 @@
     (ventas || []).forEach(v => {
       const key = v.created_at.split('T')[0];
       if (ventasPorDia[key] !== undefined) {
-        ventasPorDia[key] += v.total || 0;
+        ventasPorDia[key] += parseFloat(v.total) || 0;
       }
     });
 
@@ -575,18 +576,21 @@
       `;
     }).join('');
 
-    // Ventas por categoría (servicios vs productos)
-    const { data: detalles } = await sb
-      .from('venta_items')
-      .select('tipo, subtotal')
+    // Ventas por categoría (servicios vs productos) - query desde tickets con items embebidos
+    const { data: ticketsConItems } = await sb
+      .from('tickets')
+      .select('id, ticket_items(tipo, subtotal)')
       .eq('sucursal_id', sedeId)
-      .gte('created_at', inicio)
+      .eq('anulado', false)
+      .gte('created_at', inicio + 'T00:00:00')
       .lte('created_at', fin + 'T23:59:59');
 
     const categorias = { servicios: 0, productos: 0 };
-    (detalles || []).forEach(d => {
-      if (d.tipo === 'servicio') categorias.servicios += d.subtotal || 0;
-      else categorias.productos += d.subtotal || 0;
+    (ticketsConItems || []).forEach(t => {
+      (t.ticket_items || []).forEach(d => {
+        if (d.tipo === 'servicio') categorias.servicios += parseFloat(d.subtotal) || 0;
+        else categorias.productos += parseFloat(d.subtotal) || 0;
+      });
     });
 
     const totalCat = categorias.servicios + categorias.productos || 1;
@@ -622,20 +626,23 @@
       </div>
     `;
 
-    // Top servicios
-    const { data: serviciosVendidos } = await sb
-      .from('venta_items')
-      .select('servicio_id, servicios(nombre), subtotal')
+    // Top servicios - query desde tickets con items embebidos
+    const { data: ticketsServicios } = await sb
+      .from('tickets')
+      .select('id, ticket_items(nombre, subtotal, tipo)')
       .eq('sucursal_id', sedeId)
-      .eq('tipo', 'servicio')
-      .not('servicio_id', 'is', null)
-      .gte('created_at', inicio)
+      .eq('anulado', false)
+      .gte('created_at', inicio + 'T00:00:00')
       .lte('created_at', fin + 'T23:59:59');
 
     const serviciosMap = {};
-    (serviciosVendidos || []).forEach(s => {
-      const nombre = s.servicios?.nombre || 'Servicio';
-      serviciosMap[nombre] = (serviciosMap[nombre] || 0) + (s.subtotal || 0);
+    (ticketsServicios || []).forEach(t => {
+      (t.ticket_items || []).forEach(s => {
+        if (s.tipo === 'servicio') {
+          const nombre = s.nombre || 'Servicio';
+          serviciosMap[nombre] = (serviciosMap[nombre] || 0) + (parseFloat(s.subtotal) || 0);
+        }
+      });
     });
 
     const topServicios = Object.entries(serviciosMap)
@@ -655,17 +662,17 @@
       : '<div class="empty-state"><div>No hay datos de servicios</div></div>';
 
     // Comisiones por barbero
-    const { data: comisionesBarbero } = await sb
+    const { data: comisionesBarbero, error: cbErr } = await sb
       .from('comisiones')
-      .select('usuario_id, usuarios(full_name), monto')
+      .select('barbero_id, barberos(usuarios!barberos_id_fkey(full_name)), valor_comision')
       .eq('sucursal_id', sedeId)
-      .gte('created_at', inicio)
+      .gte('created_at', inicio + 'T00:00:00')
       .lte('created_at', fin + 'T23:59:59');
 
     const barberosMap = {};
     (comisionesBarbero || []).forEach(c => {
-      const nombre = c.usuarios?.full_name || 'Colaborador';
-      barberosMap[nombre] = (barberosMap[nombre] || 0) + (c.monto || 0);
+      const nombre = c.barberos?.usuarios?.full_name || 'Colaborador';
+      barberosMap[nombre] = (barberosMap[nombre] || 0) + (parseFloat(c.valor_comision) || 0);
     });
 
     const topBarberos = Object.entries(barberosMap)
@@ -689,17 +696,19 @@
   async function loadReservasStats() {
     const { inicio, fin } = getDateRange();
 
-    const { data: citas } = await sb
+    const { data: citas, error: citasErr } = await sb
       .from('citas')
-      .select('estado, fecha, hora, origen, barbero_id, usuarios(full_name)')
+      .select('estado, fecha, hora_inicio, origen, barbero_id, barberos(usuarios!barberos_id_fkey(full_name))')
       .eq('sucursal_id', sedeId)
       .gte('fecha', inicio)
       .lte('fecha', fin);
 
+    if (citasErr) console.error('Error cargando citas:', citasErr);
+
     const total = (citas || []).length;
-    const completadas = (citas || []).filter(c => c.estado === 'completada' || c.estado === 'pagada').length;
+    const completadas = (citas || []).filter(c => c.estado === 'finalizada').length;
     const canceladas = (citas || []).filter(c => c.estado === 'cancelada').length;
-    const noShows = (citas || []).filter(c => c.estado === 'no_asistio').length;
+    const noShows = (citas || []).filter(c => c.estado === 'no_asistio' || c.estado === 'no_show').length;
 
     document.getElementById('totalReservas').textContent = total;
     document.getElementById('completadas').textContent = completadas;
@@ -716,7 +725,7 @@
     (citas || []).forEach(c => {
       const d = new Date(c.fecha + 'T12:00:00');
       const dia = (d.getDay() + 6) % 7; // Lunes = 0
-      const hora = parseInt(c.hora?.split(':')[0] || 0);
+      const hora = parseInt(c.hora_inicio?.split(':')[0] || 0);
       let franja;
       if (hora < 10) franja = '8-10';
       else if (hora < 12) franja = '10-12';
@@ -829,7 +838,7 @@
     // Reservas por barbero
     const barberosCitas = {};
     (citas || []).forEach(c => {
-      const nombre = c.usuarios?.full_name || 'Sin asignar';
+      const nombre = c.barberos?.usuarios?.full_name || 'Sin asignar';
       barberosCitas[nombre] = (barberosCitas[nombre] || 0) + 1;
     });
 
@@ -855,26 +864,30 @@
     const { inicio, fin } = getDateRange();
 
     // Clientes atendidos
-    const { data: citas } = await sb
+    const { data: citas, error: citasErr } = await sb
       .from('citas')
-      .select('cliente_id, estado, clientes(nombre)')
+      .select('cliente_id, estado, usuarios!citas_cliente_id_fkey(full_name)')
       .eq('sucursal_id', sedeId)
-      .in('estado', ['completada', 'pagada'])
+      .eq('estado', 'finalizada')
       .gte('fecha', inicio)
       .lte('fecha', fin);
 
     const clientesUnicos = new Set((citas || []).map(c => c.cliente_id).filter(Boolean));
     document.getElementById('totalClientes').textContent = clientesUnicos.size;
 
-    // Clientes nuevos (primera visita en el período)
-    const { data: clientesNuevos } = await sb
-      .from('clientes')
-      .select('id')
-      .eq('sucursal_id', sedeId)
-      .gte('created_at', inicio)
-      .lte('created_at', fin + 'T23:59:59');
+    // Clientes nuevos - usuarios creados desde oct 1 que fueron atendidos en esta sede
+    const clienteIdsArray = [...clientesUnicos];
+    let cantidadNuevos = 0;
+    if (clienteIdsArray.length > 0) {
+      const { data: clientesNuevos } = await sb
+        .from('usuarios')
+        .select('id')
+        .in('id', clienteIdsArray)
+        .gte('created_at', '2026-10-01T00:00:00');
+      cantidadNuevos = (clientesNuevos || []).length;
+    }
 
-    document.getElementById('clientesNuevos').textContent = (clientesNuevos || []).length;
+    document.getElementById('clientesNuevos').textContent = cantidadNuevos;
 
     // Clientes recurrentes (más de 1 visita)
     const visitasPorCliente = {};
@@ -891,7 +904,7 @@
       .from('resenas')
       .select('calificacion')
       .eq('sucursal_id', sedeId)
-      .gte('created_at', inicio)
+      .gte('created_at', inicio + 'T00:00:00')
       .lte('created_at', fin + 'T23:59:59');
 
     const promedio = (resenas || []).length > 0
@@ -902,9 +915,9 @@
     // Top 10 clientes
     const clientesData = {};
     (citas || []).forEach(c => {
-      if (c.cliente_id && c.clientes) {
+      if (c.cliente_id && c.usuarios) {
         if (!clientesData[c.cliente_id]) {
-          clientesData[c.cliente_id] = { nombre: c.clientes.nombre, visitas: 0 };
+          clientesData[c.cliente_id] = { nombre: c.usuarios.full_name, visitas: 0 };
         }
         clientesData[c.cliente_id].visitas++;
       }
@@ -927,9 +940,9 @@
       : '<div class="empty-state"><div>No hay datos</div></div>';
 
     // Clientes no show
-    const { data: noShows } = await sb
+    const { data: noShows, error: nsErr } = await sb
       .from('citas')
-      .select('cliente_id, clientes(nombre)')
+      .select('cliente_id, usuarios!citas_cliente_id_fkey(full_name)')
       .eq('sucursal_id', sedeId)
       .eq('estado', 'no_asistio')
       .gte('fecha', inicio)
@@ -937,9 +950,9 @@
 
     const noShowsMap = {};
     (noShows || []).forEach(c => {
-      if (c.cliente_id && c.clientes) {
+      if (c.cliente_id && c.usuarios) {
         if (!noShowsMap[c.cliente_id]) {
-          noShowsMap[c.cliente_id] = { nombre: c.clientes.nombre, count: 0 };
+          noShowsMap[c.cliente_id] = { nombre: c.usuarios.full_name, count: 0 };
         }
         noShowsMap[c.cliente_id].count++;
       }
@@ -961,37 +974,45 @@
       `).join('')
       : '<div class="empty-state"><div>No hay inasistencias registradas</div></div>';
 
-    // Cumpleaños este mes
+    // Cumpleaños este mes - buscar clientes que hayan sido atendidos en esta sede
     const hoy = new Date();
     const mesActual = String(hoy.getMonth() + 1).padStart(2, '0');
-    const { data: cumpleanos } = await sb
-      .from('clientes')
-      .select('id, nombre, fecha_nacimiento')
-      .eq('sucursal_id', sedeId)
-      .not('fecha_nacimiento', 'is', null);
 
-    const cumpleanosEsteMes = (cumpleanos || [])
-      .filter(c => {
-        if (!c.fecha_nacimiento) return false;
-        const mes = c.fecha_nacimiento.split('-')[1];
-        return mes === mesActual;
-      })
-      .sort((a, b) => {
-        const diaA = parseInt(a.fecha_nacimiento.split('-')[2]);
-        const diaB = parseInt(b.fecha_nacimiento.split('-')[2]);
-        return diaA - diaB;
-      })
-      .slice(0, 10);
+    // Obtener IDs de clientes que han visitado esta sede
+    const clienteIds = [...clientesUnicos];
+
+    let cumpleanosEsteMes = [];
+    if (clienteIds.length > 0) {
+      const { data: cumpleanos } = await sb
+        .from('usuarios')
+        .select('id, full_name, fecha_nacimiento')
+        .in('id', clienteIds)
+        .not('fecha_nacimiento', 'is', null);
+
+      cumpleanosEsteMes = (cumpleanos || [])
+        .filter(c => {
+          if (!c.fecha_nacimiento) return false;
+          const mes = c.fecha_nacimiento.split('-')[1];
+          return mes === mesActual;
+        })
+        .sort((a, b) => {
+          const diaA = parseInt(a.fecha_nacimiento.split('-')[2]);
+          const diaB = parseInt(b.fecha_nacimiento.split('-')[2]);
+          return diaA - diaB;
+        })
+        .slice(0, 10);
+    }
 
     document.getElementById('cumpleanos').innerHTML = cumpleanosEsteMes.length > 0
       ? cumpleanosEsteMes.map(c => {
         const [, , dia] = c.fecha_nacimiento.split('-');
-        const iniciales = c.nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+        const nombre = c.full_name || 'Cliente';
+        const iniciales = nombre.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
         return `
           <div class="birthday-item">
             <div class="birthday-avatar">${iniciales}</div>
             <div class="birthday-info">
-              <div class="birthday-name">${c.nombre}</div>
+              <div class="birthday-name">${nombre}</div>
               <div class="birthday-date">${dia} de este mes</div>
             </div>
           </div>
@@ -1014,5 +1035,7 @@
   loadAll();
 })();
 </script>
+<script src="/assets/turbo-loader.js" defer></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

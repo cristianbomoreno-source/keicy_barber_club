@@ -9,15 +9,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
-<meta name="theme-color" content="#0A0A0C">
+<meta name="theme-color" content="#000000">
 <title>Acceso Admin · Keicy Barber</title>
 <style>
   :root{
-    --bg:#0A0A0C;
-    --surface:#101112;
-    --card:#16181D;
-    --gold:#D4AF55;
-    --gold-bright:#E8C66A;
+    --bg:#000000;
+    --surface:#0E0E0E;
+    --card:#141414;
+    --gold:#FFAC48;
+    --gold-bright:#FFC27A;
     --text:#FFFFFF;
     --text-secondary:#8A8780;
     --divider:#2B2B2B;
@@ -105,7 +105,7 @@
 
   .field-input:focus-within{
     border-color:var(--gold);
-    box-shadow:0 0 0 3px rgba(201,163,91,0.14);
+    box-shadow:0 0 0 3px rgba(255,172,72,0.14);
   }
 
   .field-input.error{
@@ -270,7 +270,7 @@
 
 <div id="app">
   <div class="login-top">
-    <img src="../index.htmllogo.png" alt="Keicy Barber" class="login-logo">
+    <img src="../assets/logo-oro.png" alt="Keicy Barber" class="login-logo">
     <div class="login-heading">Acceso Administrador</div>
     <div class="login-sub">Ingresa con tu usuario y contraseña</div>
   </div>
@@ -319,6 +319,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="../assets/supabase-client.js"></script>
+<script src="../assets/turbo-loader.js" defer></script>
 <script>
 // Si ya hay sesión de admin, redirigir
 (function(){
@@ -453,5 +454,6 @@ form.addEventListener('submit', async (e) => {
 </script>
 
 <script src="../assets/admin-sede-sidebar.js"></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

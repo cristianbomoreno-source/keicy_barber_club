@@ -29,7 +29,7 @@
 }
 .dn-modal-icon.warning { background: rgba(220,53,69,0.15); }
 .dn-modal-icon.success { background: rgba(78,203,113,0.15); }
-.dn-modal-icon.info { background: rgba(200,160,90,0.15); }
+.dn-modal-icon.info { background: rgba(255,172,72,0.15); }
 .dn-modal-title { font-size: 17px; font-weight: 800; }
 
 /* Modal body */
@@ -63,7 +63,7 @@
 }
 .dn-modal-btn.cancel:hover { border-color: var(--text-secondary); }
 .dn-modal-btn.confirm {
-  background: linear-gradient(180deg, var(--gold-bright, #d4af37), var(--gold, #c9a35b)); color: #141414;
+  background: linear-gradient(180deg, var(--gold-bright, #FFAC48), var(--gold, #FFAC48)); color: #141414;
 }
 .dn-modal-btn.confirm:hover { filter: brightness(1.1); }
 .dn-modal-btn.danger {

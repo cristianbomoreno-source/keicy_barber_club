@@ -40,7 +40,7 @@ serve(async (req) => {
   }
 
   const url = new URL(req.url);
-  const baseUrl = Deno.env.get('SUPABASE_URL') || 'https://zzmtnjlfrlqmouijfste.supabase.co';
+  const baseUrl = Deno.env.get('SUPABASE_URL') || 'https://ygrmammcaupnygdxmgth.supabase.co';
   const callbackUrl = `${baseUrl}/functions/v1/embedded-signup-callback`;
 
   // Modo de operación: 'live' o 'dry-run'
@@ -82,7 +82,7 @@ serve(async (req) => {
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      background: linear-gradient(135deg, #1A1A1A 0%, #16213e 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -103,7 +103,7 @@ serve(async (req) => {
     }
     .logo h1 {
       font-size: 24px;
-      color: #1a1a2e;
+      color: #1A1A1A;
       margin-bottom: 8px;
     }
     .logo p {

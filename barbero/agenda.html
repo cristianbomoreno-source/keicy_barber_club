@@ -3,10 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<!-- Preconnect críticos -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preconnect" href="https://zzmtnjlfrlqmouijfste.supabase.co" crossorigin>
-<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" as="script">
-<link rel="dns-prefetch" href="https://zzmtnjlfrlqmouijfste.supabase.co">
+<link rel="preconnect" href="https://ygrmammcaupnygdxmgth.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
+<!-- Preload CSS críticos -->
+<link rel="preload" href="../assets/design-system.css" as="style">
+<link rel="preload" href="../assets/barbero-nav.css" as="style">
+<!-- Preload JS críticos -->
+<link rel="preload" href="../assets/supabase-client.js" as="script">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
 <link rel="icon" href="../assets/favicon-32.png">
@@ -14,7 +21,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
-<meta name="theme-color" content="#0A0A0C">
+<meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Mi agenda</title>
 <script src="../assets/theme-manager.js"></script>
 <link rel="stylesheet" href="../assets/design-system.css">
@@ -28,7 +35,7 @@
   }
   [data-theme="dark"] body{
     background:
-      radial-gradient(ellipse 120% 60% at 50% -10%, rgba(217,184,114,0.08), transparent 60%),
+      radial-gradient(ellipse 120% 60% at 50% -10%, rgba(255,172,72,0.08), transparent 60%),
       radial-gradient(ellipse 100% 50% at 90% 110%, rgba(255,255,255,0.035), transparent 55%),
       #000000;
   }
@@ -54,7 +61,7 @@
   .hdr-avatar-wrap{ position:relative; flex-shrink:0; width:44px; height:44px; }
   .hdr-avatar{ width:44px; height:44px; border-radius:50%; object-fit:cover; display:block; }
   .hdr-avatar-fallback{ width:44px; height:44px; font-size:14px; }
-  .hdr-avatar-ring{ position:absolute; inset:-2px; border-radius:50%; border:1.5px solid rgba(217,184,114,0.55); pointer-events:none; }
+  .hdr-avatar-ring{ position:absolute; inset:-2px; border-radius:50%; border:1.5px solid rgba(255,172,72,0.55); pointer-events:none; }
   .hdr-textcol{ min-width:0; }
   .hdr-name{ font-size:15px; font-weight:700; line-height:1.2; letter-spacing:-0.1px; color:var(--text); }
   .hdr-puesto{ font-size:10.5px; color:var(--text-muted); font-weight:500; margin-top:1px; }
@@ -63,9 +70,9 @@
     padding:3.5px 9px 3.5px 7px; border-radius:999px; letter-spacing:0.2px;
     background:rgba(52,211,153,0.14); border:1px solid rgba(52,211,153,0.25); color:#5EEAB2;
   }
-  .hdr-estado.busy{ background:rgba(217,184,114,0.15); border-color:rgba(217,184,114,0.3); color:var(--ring-gold); }
+  .hdr-estado.busy{ background:rgba(255,172,72,0.15); border-color:rgba(255,172,72,0.3); color:var(--ring-gold); }
   .hdr-estado .dot{ width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; }
-  .hdr-logo{ height:32px; border-radius:8px; flex-shrink:0; margin:0 8px; opacity:0.96; filter:drop-shadow(0 0 12px rgba(217,184,114,0.18)); }
+  .hdr-logo{ height:32px; border-radius:8px; flex-shrink:0; margin:0 8px; opacity:0.96; filter:drop-shadow(0 0 12px rgba(255,172,72,0.18)); }
   .bell-btn{
     width:40px; height:40px; border-radius:14px; position:relative; cursor:pointer; flex-shrink:0;
     background:var(--glass-card-2); border:1px solid var(--glass-border);
@@ -91,8 +98,8 @@
   .page-title{ font-size:21px; font-weight:800; letter-spacing:-0.4px; color:var(--text); }
   .page-sub{ font-size:12px; color:var(--text-muted); margin-top:1px; }
   .today-btn{
-    font-size:11.5px; font-weight:700; color:var(--gold); background:rgba(217,184,114,0.12);
-    border:1px solid rgba(217,184,114,0.3); padding:7px 13px; border-radius:12px; cursor:pointer;
+    font-size:11.5px; font-weight:700; color:var(--gold); background:rgba(255,172,72,0.12);
+    border:1px solid rgba(255,172,72,0.3); padding:7px 13px; border-radius:12px; cursor:pointer;
     transition:transform .14s var(--ease-ios);
   }
   .today-btn:active{ transform:scale(0.93); }
@@ -114,8 +121,8 @@
   .week-nav-arrows{ display:flex; align-items:center; gap:6px; }
   .week-range-label{ font-size:14px; font-weight:700; color:var(--text); text-align:center; flex:1; }
   .week-today-btn{
-    font-size:11px; font-weight:700; color:var(--gold); background:rgba(217,184,114,0.12);
-    border:1px solid rgba(217,184,114,0.3); padding:6px 10px; border-radius:10px; cursor:pointer;
+    font-size:11px; font-weight:700; color:var(--gold); background:rgba(255,172,72,0.12);
+    border:1px solid rgba(255,172,72,0.3); padding:6px 10px; border-radius:10px; cursor:pointer;
     transition:transform .14s var(--ease-ios);
   }
   .week-today-btn:active{ transform:scale(0.93); }
@@ -219,14 +226,14 @@
   .month-day:active{ transform:scale(0.9); }
   .month-day.other-month{ opacity:0.3; }
   .month-day.today{ border:1.5px solid var(--gold); }
-  .month-day.selected{ background:rgba(217,184,114,0.2); }
+  .month-day.selected{ background:rgba(255,172,72,0.2); }
   .month-day .d{ font-size:13px; font-weight:700; color:var(--text); }
   .month-day .s{
     position:absolute; bottom:3px; font-size:8px; font-weight:700;
     padding:1px 4px; border-radius:4px; background:rgba(52,211,153,0.2); color:#5EEAB2;
   }
   .month-day .s.busy{ background:rgba(255,107,94,0.2); color:#FF8A7E; }
-  .month-day .s.some{ background:rgba(242,201,76,0.2); color:#F5D373; }
+  .month-day .s.some{ background:rgba(242,201,76,0.2); color:#FFC27A; }
   .month-day.cerrado{ opacity:0.5; }
   .month-day.cerrado .s{ background:rgba(100,100,120,0.2); color:rgba(255,255,255,0.5); font-size:10px; }
 
@@ -291,7 +298,7 @@
   .tl-block .pagada-badge svg{ width:10px; height:10px; }
   .tl-block.st-nueva{ background:rgba(159,159,159,0.18); border-color:rgba(159,159,159,0.4); color:#C7C7C7; }
   .tl-block.st-agendada{ background:rgba(78,140,203,0.24); border-color:rgba(78,140,203,0.45); color:#9FCBFA; }
-  .tl-block.st-espera{ background:rgba(242,201,76,0.24); border-color:rgba(242,201,76,0.45); color:#F5D373; }
+  .tl-block.st-espera{ background:rgba(242,201,76,0.24); border-color:rgba(242,201,76,0.45); color:#FFC27A; }
   .tl-block.st-servicio{ background:rgba(155,111,224,0.26); border-color:rgba(155,111,224,0.5); color:#CDB0F5; }
   .tl-block.st-pago{ background:rgba(242,153,74,0.24); border-color:rgba(242,153,74,0.45); color:#F7B67D; }
   .tl-block.st-fin{ background:rgba(78,203,113,0.20); border-color:rgba(78,203,113,0.4); color:#8FE3A8; }
@@ -369,9 +376,9 @@
     color:#059669;
   }
   [data-theme="light"] .hdr-estado.busy {
-    background:rgba(212,175,85,0.12);
-    border-color:rgba(212,175,85,0.35);
-    color:#B8860B;
+    background:rgba(255,172,72,0.12);
+    border-color:rgba(255,172,72,0.35);
+    color:#CC7A14;
   }
   [data-theme="light"] .view-tabs {
     background:rgba(0,0,0,0.04);
@@ -380,7 +387,7 @@
     background:rgba(0,0,0,0.03);
     border-color:rgba(0,0,0,0.08);
   }
-  [data-theme="light"] .day-chip.today .num { color:#B8860B; }
+  [data-theme="light"] .day-chip.today .num { color:#CC7A14; }
   [data-theme="light"] .day-nav-btn,
   [data-theme="light"] .cal-btn,
   [data-theme="light"] .bell-btn {
@@ -400,7 +407,7 @@
   }
   [data-theme="light"] .tl-block.st-nueva { background:rgba(159,159,159,0.15); border-color:rgba(159,159,159,0.35); color:#555; }
   [data-theme="light"] .tl-block.st-agendada { background:rgba(78,140,203,0.15); border-color:rgba(78,140,203,0.4); color:#2563EB; }
-  [data-theme="light"] .tl-block.st-espera { background:rgba(242,201,76,0.18); border-color:rgba(242,201,76,0.5); color:#B8860B; }
+  [data-theme="light"] .tl-block.st-espera { background:rgba(242,201,76,0.18); border-color:rgba(242,201,76,0.5); color:#CC7A14; }
   [data-theme="light"] .tl-block.st-servicio { background:rgba(155,111,224,0.15); border-color:rgba(155,111,224,0.4); color:#7C3AED; }
   [data-theme="light"] .tl-block.st-pago { background:rgba(242,153,74,0.15); border-color:rgba(242,153,74,0.4); color:#D97706; }
   [data-theme="light"] .tl-block.st-fin { background:rgba(78,203,113,0.12); border-color:rgba(78,203,113,0.35); color:#059669; }
@@ -430,7 +437,7 @@
     background:rgba(0,0,0,0.02);
   }
   [data-theme="light"] .month-day.today { border-color:var(--gold); }
-  [data-theme="light"] .month-day.selected { background:rgba(212,175,85,0.15); }
+  [data-theme="light"] .month-day.selected { background:rgba(255,172,72,0.15); }
   [data-theme="light"] .month-day .s { background:rgba(52,211,153,0.15); color:#059669; }
   [data-theme="light"] .month-day .s.busy { background:rgba(239,68,68,0.12); color:#DC2626; }
   [data-theme="light"] .month-day .s.some { background:rgba(245,158,11,0.15); color:#D97706; }
@@ -506,7 +513,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
     <div class="cal-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#FFAC48" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg>
       <input type="date" id="jumpDateInput">
     </div>
   </div>
@@ -567,6 +574,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../assets/supabase-client.js"></script>
+<script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/mobile-nav.js"></script>
 <script>
   const toastEl = document.getElementById('toast');
@@ -814,7 +822,7 @@
 
       if (!citas.length) {
         el.innerHTML = `<div class="empty-state fade-in">
-          <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.6"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg></div>
+          <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#FFAC48" stroke-width="1.6"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg></div>
           <div class="empty-title">Sin citas este día</div>
           <div class="empty-sub">No tienes servicios agendados para esta fecha.</div>
         </div>`;
@@ -1470,5 +1478,6 @@
   init();
 </script>
 <script src="../assets/citas-estados.js"></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

@@ -1018,7 +1018,7 @@
 
     // Botón de pagar cita
     var btnPagarCita = (cita.estado !== 'finalizada' && cita.estado !== 'pendiente_pago' && cita.estado !== 'cancelada')
-      ? '<button class="apple-btn" style="background:rgba(201,163,91,0.15);color:var(--gold);justify-content:center;width:100%;height:46px;border-radius:14px;font-size:13px;" data-action="pagar">Pagar cita</button>'
+      ? '<button class="apple-btn" style="background:rgba(255,172,72,0.15);color:var(--gold);justify-content:center;width:100%;height:46px;border-radius:14px;font-size:13px;" data-action="pagar">Pagar cita</button>'
       : '';
 
     // Acciones según estado
@@ -1547,7 +1547,7 @@
     feedback.textContent = horaStr;
     feedback.style.cssText = 'position:fixed;left:' + x + 'px;top:' + y + 'px;' +
       'transform:translate(-50%,-100%);' +
-      'background:var(--gold);color:#0A0A0C;' +
+      'background:var(--gold);color:#000000;' +
       'padding:6px 12px;border-radius:8px;' +
       'font-size:14px;font-weight:700;' +
       'pointer-events:none;z-index:9999;' +

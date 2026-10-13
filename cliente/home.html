@@ -7,20 +7,23 @@
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
 <link rel="icon" href="../assets/favicon-32.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
-<meta name="theme-color" content="#FFFFFF">
+<meta name="theme-color" content="#000000">
 <title>Mi Perfil | Keicy Barbería</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Trirong:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #FFFFFF;
-    --surface: #F8F8F8;
-    --card: #FFFFFF;
-    --text: #1A1A1A;
-    --text-secondary: #666666;
-    --gold: #C9A35B;
-    --gold-bright: #D4B06A;
-    --divider: rgba(0,0,0,0.08);
+    --bg: #000000;
+    --surface: #141414;
+    --card: #0E0E0E;
+    --text: #FFFFFF;
+    --text-secondary: #B3B3B3;
+    --gold: #FFAC48;
+    --gold-bright: #FFC27A;
+    --divider: rgba(255,255,255,0.1);
     --error: #E53935;
     --success: #43A047;
     --safe-top: env(safe-area-inset-top, 0px);
@@ -30,7 +33,7 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Trirong', Georgia, serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -52,7 +55,7 @@
     display: flex;
     align-items: center;
     padding: max(16px, var(--safe-top)) 20px 14px;
-    background: rgba(255,255,255,0.92);
+    background: rgba(0,0,0,0.92);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--divider);
@@ -127,7 +130,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(201,163,91,0.4);
+    box-shadow: 0 4px 12px rgba(255,172,72,0.4);
   }
 
   .avatar-edit svg { width: 16px; height: 16px; }
@@ -160,7 +163,7 @@
     font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
-    background: rgba(201,163,91,0.15);
+    background: rgba(255,172,72,0.15);
     color: var(--gold);
   }
 
@@ -256,7 +259,7 @@
   /* Stats */
   .stats-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     padding: 20px;
     background: var(--surface);
@@ -300,13 +303,13 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: 0 4px 16px rgba(201,163,91,0.35);
+    box-shadow: 0 4px 16px rgba(255,172,72,0.35);
     transition: all 0.2s ease;
   }
 
   .btn-save:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 24px rgba(201,163,91,0.45);
+    box-shadow: 0 6px 24px rgba(255,172,72,0.45);
   }
 
   .btn-save:disabled {
@@ -387,7 +390,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(255,255,255,0.98);
+    background: rgba(0,0,0,0.95);
     backdrop-filter: blur(16px);
     border-top: 1px solid var(--divider);
     display: flex;
@@ -416,7 +419,7 @@
   }
 
   .nav-item svg { width: 22px; height: 22px; }
-  .nav-item.active { color: var(--gold); background: rgba(201, 163, 91, 0.1); }
+  .nav-item.active { color: var(--gold); background: rgba(255, 172, 72, 0.1); }
   .nav-item:hover { background: rgba(0,0,0,0.04); }
 
   /* Responsive */
@@ -533,10 +536,6 @@
         <div class="stat-label">Visitas</div>
       </div>
       <div class="stat-item">
-        <div class="stat-value" id="statGastado">$0</div>
-        <div class="stat-label">Total gastado</div>
-      </div>
-      <div class="stat-item">
         <div class="stat-value" id="statMiembro">--</div>
         <div class="stat-label">Cliente desde</div>
       </div>
@@ -580,6 +579,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../assets/supabase-client.js"></script>
+<script src="/assets/utils.js"></script>
 <script>
   let currentUser = null;
   let newAvatarFile = null;
@@ -686,10 +686,10 @@
       const colors = {
         bronce: 'rgba(205,127,50,0.15)',
         plata: 'rgba(160,160,160,0.15)',
-        oro: 'rgba(212,175,55,0.15)',
+        oro: 'rgba(255,172,72,0.15)',
         black: 'rgba(26,26,26,0.9)'
       };
-      const textColors = { bronce: '#CD7F32', plata: '#808080', oro: '#D4AF37', black: '#FFFFFF' };
+      const textColors = { bronce: '#CD7F32', plata: '#808080', oro: '#FFAC48', black: '#FFFFFF' };
 
       document.getElementById('badgeIcon').textContent = icons[cat] || '⭐';
       document.getElementById('badgeText').textContent = cat.toUpperCase();
@@ -701,7 +701,6 @@
 
     // Stats
     document.getElementById('statVisitas').textContent = currentUser.total_visitas_weibook || currentUser.total_visitas || 0;
-    document.getElementById('statGastado').textContent = formatCOP(currentUser.total_gastado_weibook || currentUser.total_gastado || 0);
 
     const createdAt = currentUser.created_at || currentUser.cliente_desde;
     if (createdAt) {
@@ -828,5 +827,7 @@
   loadProfile();
 </script>
 
+<script src="/assets/turbo-loader.js" defer></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

@@ -3,10 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
+<!-- Preconnect críticos -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preconnect" href="https://zzmtnjlfrlqmouijfste.supabase.co" crossorigin>
-<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" as="script">
-<link rel="dns-prefetch" href="https://zzmtnjlfrlqmouijfste.supabase.co">
+<link rel="preconnect" href="https://ygrmammcaupnygdxmgth.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
+<!-- Preload CSS críticos -->
+<link rel="preload" href="../assets/design-system.css" as="style">
+<link rel="preload" href="../assets/barbero-nav.css" as="style">
+<link rel="preload" href="../assets/barbero-white.css" as="style">
+<!-- Preload JS críticos -->
+<link rel="preload" href="../assets/supabase-client.js" as="script">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
 <link rel="icon" href="../assets/favicon-32.png">
@@ -14,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
-<meta name="theme-color" content="#0A0A0C">
+<meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Barbero</title>
 <script src="../assets/theme-manager.js"></script>
 <link rel="stylesheet" href="../assets/design-system.css">
@@ -30,7 +38,7 @@
   }
   [data-theme="dark"] body{
     background:
-      radial-gradient(ellipse 120% 60% at 50% -10%, rgba(217,184,114,0.08), transparent 60%),
+      radial-gradient(ellipse 120% 60% at 50% -10%, rgba(255,172,72,0.08), transparent 60%),
       radial-gradient(ellipse 100% 50% at 90% 110%, rgba(255,255,255,0.035), transparent 55%),
       #000000;
   }
@@ -59,8 +67,8 @@
   .hero-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
   .hero-fallback{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    font-size:52px; font-weight:800; color:rgba(217,184,114,0.35);
-    background:radial-gradient(ellipse 90% 60% at 50% 20%, rgba(217,184,114,0.1), transparent 60%), linear-gradient(165deg, #1c1c1c, #0a0a0a);
+    font-size:52px; font-weight:800; color:rgba(255,172,72,0.35);
+    background:radial-gradient(ellipse 90% 60% at 50% 20%, rgba(255,172,72,0.1), transparent 60%), linear-gradient(165deg, #1c1c1c, #0a0a0a);
   }
   .hero-overlay{
     position:absolute; inset:0; pointer-events:none;
@@ -96,7 +104,7 @@
     background:rgba(52,211,153,0.2); border:1px solid rgba(52,211,153,0.4); color:#5EEAB2;
     transition:background .3s ease, border-color .3s ease, color .3s ease;
   }
-  .hdr-estado.busy{ background:rgba(217,184,114,0.18); border-color:rgba(217,184,114,0.35); color:var(--ring-gold); }
+  .hdr-estado.busy{ background:rgba(255,172,72,0.18); border-color:rgba(255,172,72,0.35); color:var(--ring-gold); }
   .hdr-estado .dot{ width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; }
   .hero-chips{ display:flex; gap:6px; margin-top:8px; }
   .hero-chip{
@@ -107,7 +115,7 @@
   .hero-chip:active{ transform:scale(0.96); background:rgba(255,255,255,0.15); }
   .hero-chip.off .hero-chip-icon{ background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.4); }
   .hero-chip.off .v{ color:rgba(255,255,255,0.45); }
-  .hero-chip-icon{ width:24px; height:24px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(217,184,114,0.25); color:var(--ring-gold); }
+  .hero-chip-icon{ width:24px; height:24px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(255,172,72,0.25); color:var(--ring-gold); }
   .hero-chip-icon svg{ width:12px; height:12px; }
   .hero-chip-txt{ min-width:0; }
   .hero-chip-txt .l{ display:block; font-size:7px; font-weight:800; letter-spacing:.5px; color:rgba(255,255,255,0.55); text-transform:uppercase; }
@@ -167,9 +175,11 @@
   .client-eyebrow-row svg{ width:10px; height:10px; opacity:.85; color:var(--ring-gold); }
   .client-eyebrow{ font-size:9px; font-weight:700; letter-spacing:0.8px; color:var(--ring-gold); text-transform:uppercase; }
   .client-name{ font-size:17px; font-weight:800; margin-top:3px; letter-spacing:-0.3px; line-height:1.15; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .client-avatar-float{ width:72px; height:72px; border-radius:50%; background:var(--ring-gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:800; margin-bottom:8px; overflow:hidden; border:3px solid rgba(255,172,72,0.3); box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+  .client-avatar-float img{ width:100%; height:100%; object-fit:cover; }
   .client-service{
     display:inline-flex; margin-top:4px; font-size:10px; color:var(--ring-gold); font-weight:700;
-    background:rgba(217,184,114,0.1); border:1px solid rgba(217,184,114,0.25); padding:2px 8px; border-radius:999px;
+    background:rgba(255,172,72,0.1); border:1px solid rgba(255,172,72,0.25); padding:2px 8px; border-radius:999px;
   }
   .client-time{ font-size:10px; color:rgba(255,255,255,0.4); margin-top:1px; display:flex; align-items:center; gap:4px; font-weight:500; }
   .client-time svg{ width:10px; height:10px; opacity:0.75; }
@@ -185,7 +195,7 @@
   .time-segbar{ display:flex; gap:3.5px; margin-top:11px; }
   .time-seg{ flex:1; height:6px; border-radius:3px; background:rgba(255,255,255,0.08); transition:background .4s ease; }
   .time-seg.filled{ background:linear-gradient(90deg,#34D399,#5EEAB2); }
-  .time-seg.filled.gold{ background:linear-gradient(90deg,var(--ring-gold),#E6CB90); }
+  .time-seg.filled.gold{ background:linear-gradient(90deg,var(--ring-gold),#FFC27A); }
   .time-seg.filled.red{ background:linear-gradient(90deg,#FF6B5E,#FF8A7E); }
   .time-ring-wrap{ position:relative; width:60px; height:60px; flex-shrink:0; }
   .time-ring{ transform:rotate(-90deg); transform-origin:50% 50%; }
@@ -211,7 +221,7 @@
     transition:transform .14s var(--ease-ios), background .2s ease, border-color .2s ease, opacity .3s ease;
   }
   .step-tile.pending{ opacity:0.5; }
-  .step-tile.active{ cursor:pointer; border-color:rgba(217,184,114,0.5); }
+  .step-tile.active{ cursor:pointer; border-color:rgba(255,172,72,0.5); }
   .step-tile.active:active{ transform:scale(0.93); }
   .step-tile.done{ background:rgba(52,211,153,0.09); border-color:rgba(52,211,153,0.4); }
   .step-tile-icon{
@@ -222,8 +232,8 @@
   .step-tile.done .step-tile-icon{ background:rgba(52,211,153,0.18); border-color:rgba(52,211,153,0.55); color:#5EEAB2; animation:stepDone .4s var(--ease-ios); }
   @keyframes stepDone{ 0%{ transform:scale(0.7); } 60%{ transform:scale(1.12); } 100%{ transform:scale(1); } }
   .step-tile.active .step-tile-icon{
-    background:rgba(217,184,114,0.16); border-color:rgba(217,184,114,0.65); color:var(--ring-gold);
-    box-shadow:0 0 0 1px rgba(217,184,114,0.35), 0 0 16px 3px rgba(217,184,114,0.22);
+    background:rgba(255,172,72,0.16); border-color:rgba(255,172,72,0.65); color:var(--ring-gold);
+    box-shadow:0 0 0 1px rgba(255,172,72,0.35), 0 0 16px 3px rgba(255,172,72,0.22);
     animation:haloPulse 2.2s ease-in-out infinite;
   }
   @keyframes haloPulse{ 0%,100%{ opacity:0.65; } 50%{ opacity:1; } }
@@ -256,10 +266,10 @@
     flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:8px 6px;
     border-radius:18px; cursor:pointer; text-align:center;
     background:linear-gradient(165deg, var(--gold-bright), var(--gold));
-    box-shadow:0 6px 16px rgba(217,184,114,0.22);
+    box-shadow:0 6px 16px rgba(255,172,72,0.22);
     transition:transform .15s var(--ease-ios), box-shadow .2s ease;
   }
-  .add-service-btn:active{ transform:scale(0.95); box-shadow:0 4px 12px rgba(217,184,114,0.18); }
+  .add-service-btn:active{ transform:scale(0.95); box-shadow:0 4px 12px rgba(255,172,72,0.18); }
   .add-service-btn .plus-circle{
     width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,0.14);
     display:flex; align-items:center; justify-content:center;
@@ -279,11 +289,11 @@
   }
   .swipe-track::before{
     content:''; position:absolute; inset:0; border-radius:22px; padding:1px;
-    background:linear-gradient(120deg, rgba(217,184,114,0.5), rgba(217,184,114,0) 40%, rgba(217,184,114,0) 60%, rgba(217,184,114,0.35));
+    background:linear-gradient(120deg, rgba(255,172,72,0.5), rgba(255,172,72,0) 40%, rgba(255,172,72,0) 60%, rgba(255,172,72,0.35));
     -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none;
   }
-  .swipe-fill{ position:absolute; left:0; top:0; bottom:0; width:50px; background:linear-gradient(90deg, rgba(217,184,114,0.22), rgba(217,184,114,0.02)); pointer-events:none; transition:width .1s linear; }
+  .swipe-fill{ position:absolute; left:0; top:0; bottom:0; width:50px; background:linear-gradient(90deg, rgba(255,172,72,0.22), rgba(255,172,72,0.02)); pointer-events:none; transition:width .1s linear; }
   .swipe-shimmer{
     position:absolute; inset:0; pointer-events:none; opacity:0.5;
     background:linear-gradient(100deg, transparent 40%, rgba(255,255,255,0.09) 50%, transparent 60%);
@@ -299,7 +309,7 @@
     position:absolute; left:3px; top:3px; width:40px; height:40px; border-radius:50%;
     background:linear-gradient(165deg, var(--gold-bright), var(--gold));
     display:flex; align-items:center; justify-content:center;
-    cursor:grab; touch-action:none; box-shadow:0 4px 14px rgba(217,184,114,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset;
+    cursor:grab; touch-action:none; box-shadow:0 4px 14px rgba(255,172,72,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset;
     transition:left 0.28s cubic-bezier(.2,.9,.3,1.3), transform .15s var(--ease-ios); z-index:2;
   }
   .swipe-handle.dragging{ transition:transform .1s ease; cursor:grabbing; transform:scale(1.06); }
@@ -368,7 +378,7 @@
   .type-card:active{ transform:scale(0.96); }
   .type-card .type-icon{ font-size:32px; }
   .type-card .type-label{ font-size:14px; font-weight:800; }
-  .type-card.selected{ border-color:var(--gold); background:rgba(217,184,114,0.12); }
+  .type-card.selected{ border-color:var(--gold); background:rgba(255,172,72,0.12); }
 
   .add-back-btn{
     display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:12px; margin-bottom:14px;
@@ -385,7 +395,7 @@
     transition:transform .14s var(--ease-ios), border-color .15s ease, background .15s ease;
   }
   .cat-chip:active{ transform:scale(0.94); }
-  .cat-chip.selected{ border-color:var(--gold); background:rgba(217,184,114,0.12); }
+  .cat-chip.selected{ border-color:var(--gold); background:rgba(255,172,72,0.12); }
   .cat-chip .ic{ font-size:20px; }
   .cat-chip .t{ font-size:11px; font-weight:700; }
 
@@ -417,6 +427,14 @@
   }
   .added-row .trash-btn:active{ background:rgba(255,107,94,0.35); transform:scale(0.9); }
   .added-row .trash-btn svg{ width:14px; height:14px; stroke:#FF6B5E; }
+  .added-row .edit-btn{
+    width:28px; height:28px; border-radius:8px; cursor:pointer;
+    background:rgba(255,172,72,0.15); border:1px solid rgba(255,172,72,0.35);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-left:8px;
+    transition:background .15s ease, transform .12s ease;
+  }
+  .added-row .edit-btn:active{ background:rgba(255,172,72,0.35); transform:scale(0.9); }
+  .added-row .edit-btn svg{ width:14px; height:14px; stroke:var(--gold); }
 
   .order-total-row{ display:flex; justify-content:space-between; align-items:center; padding-top:14px; margin-top:6px; border-top:1px solid rgba(255,255,255,0.08); }
   .order-total-row .l{ font-size:13px; font-weight:700; }
@@ -452,7 +470,7 @@
     width:64px; height:64px; border-radius:50%; margin:0 auto 16px;
     display:flex; align-items:center; justify-content:center;
     font-size:22px; font-weight:800; color:var(--ring-gold);
-    background:rgba(217,184,114,0.15); border:2px solid rgba(217,184,114,0.3);
+    background:rgba(255,172,72,0.15); border:2px solid rgba(255,172,72,0.3);
   }
   .ganancias-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
   .ganancias-name { text-align:center; font-size:16px; font-weight:700; margin-bottom:20px; }
@@ -532,7 +550,7 @@
           <div class="hero-chip-txt"><span class="l">Tu bebida</span><span class="v" id="heroDrinkVal">Registrar</span></div>
         </div>
         <div class="hero-chip" onclick="openResenasModal()">
-          <span class="hero-chip-icon" style="background:rgba(255,215,0,0.2); color:#FFD700;"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
+          <span class="hero-chip-icon" style="background:rgba(255,172,72,0.2); color:#FFAC48;"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
           <div class="hero-chip-txt"><span class="l">Calificacion</span><span class="v" id="heroResenasVal">—</span></div>
         </div>
       </div>
@@ -607,7 +625,7 @@
       <div class="ganancias-modal-close" onclick="closeResenasModal()">✕</div>
     </div>
     <div style="text-align:center; margin-bottom:16px;">
-      <div id="resenasPromedio" style="font-size:48px; font-weight:800; color:#FFD700;">—</div>
+      <div id="resenasPromedio" style="font-size:48px; font-weight:800; color:#FFAC48;">—</div>
       <div id="resenasStars" style="font-size:24px; margin:4px 0;">☆☆☆☆☆</div>
       <div id="resenasCount" style="font-size:13px; color:rgba(0,0,0,0.5);">Sin reseñas</div>
     </div>
@@ -696,6 +714,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../assets/supabase-client.js"></script>
+<script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/mobile-nav.js"></script>
 <script>
   const toastEl = document.getElementById('toast');
@@ -880,7 +899,7 @@
     updateHeroDrinkChip(null);
     stage.innerHTML = `
       <div class="empty-state fade-in">
-        <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.6"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div>
+        <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#FFAC48" stroke-width="1.6"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div>
         <div class="empty-title">${title}</div>
         <div class="empty-sub">${sub}</div>
       </div>`;
@@ -916,9 +935,15 @@
     setHeaderEstado('libre');
     updateHeroDrinkChip(null);
     const clientName = cita.usuarios?.full_name || cita.usuarios?.username || 'Cliente';
+    const avatarUrl = cita.usuarios?.avatar_url;
+    const initials = clientName.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+    const avatarHtml = avatarUrl
+      ? `<div class="client-avatar-float"><img src="${avatarUrl}" alt="${clientName}"></div>`
+      : `<div class="client-avatar-float">${initials}</div>`;
     stage.innerHTML = `
       <div class="stage" style="justify-content:center;">
         <div class="empty-state fade-in" style="gap:12px;">
+          ${avatarHtml}
           <div class="client-eyebrow">Próximo cliente</div>
           <div class="client-name" style="font-size:23px; white-space:normal;">${clientName}</div>
           <div class="client-service">${cita.servicios?.nombre || 'Servicio'}</div>
@@ -939,7 +964,7 @@
     stage.innerHTML = `
       <div class="stage" style="justify-content:center;">
         <div class="empty-state fade-in">
-          <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#FFAC48" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div>
           <div class="empty-title">${title}</div>
           <div class="waiting-note">${sub}</div>
         </div>
@@ -950,11 +975,17 @@
     clearInterval(timerInterval);
     setHeaderEstado('libre');
     const clientName = cita.usuarios?.full_name || cita.usuarios?.username || 'Cliente';
+    const avatarUrl = cita.usuarios?.avatar_url;
+    const initials = clientName.split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+    const avatarHtml = avatarUrl
+      ? `<div class="client-avatar-float"><img src="${avatarUrl}" alt="${clientName}"></div>`
+      : `<div class="client-avatar-float">${initials}</div>`;
     document.getElementById('arrivalTxt').textContent = 'Tu próximo cliente ya está esperando en recepción.';
     arrivalBanner.classList.add('show');
     stage.innerHTML = `
       <div class="stage" style="justify-content:center;">
         <div class="empty-state fade-in" style="gap:12px;">
+          ${avatarHtml}
           <div class="client-eyebrow">Cliente en sala de espera</div>
           <div class="client-name" style="font-size:23px; white-space:normal;">${clientName}</div>
           <div class="client-service">${cita.servicios?.nombre || 'Servicio'}</div>
@@ -1330,7 +1361,7 @@
         <div class="swipe-shimmer"></div>
         <div class="swipe-fill" id="swipeFill"></div>
         <div class="swipe-label"><div class="t">DESLIZA PARA ENVIAR A CAJA</div><div class="s">Se enviará la orden de cobro a recepción</div></div>
-        <div class="swipe-icon-hint"><svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="2"><path d="M7 6l5 6-5 6M13 6l5 6-5 6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="swipe-icon-hint"><svg viewBox="0 0 24 24" fill="none" stroke="#FFAC48" stroke-width="2"><path d="M7 6l5 6-5 6M13 6l5 6-5 6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="swipe-handle" id="swipeHandle"><svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2.4"><path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>`;
   }
@@ -1485,12 +1516,58 @@
     finalizandoServicio = true;
 
     try {
-      const { data: barberoRow } = await sb.from('barberos').select('comision_pct').eq('id', user.id).maybeSingle();
+      let barberoRow = null;
+      try {
+        const res = await sb.from('barberos').select('comision_pct').eq('id', user.id).maybeSingle();
+        barberoRow = res?.data;
+      } catch (e) { /* ignorar error de comisión */ }
       const total = calcTotal(cita);
       const comision = barberoRow?.comision_pct ? total * (Number(barberoRow.comision_pct)/100) : null;
 
       const ahora = new Date().toISOString();
       console.log('[finalizarServicio] Intentando actualizar cita:', cita.id, 'estado actual:', cita.estado);
+
+      // ===== SOPORTE OFFLINE =====
+      // Si no hay conexión, guardar en cola y mostrar éxito
+      if (!navigator.onLine && window.offlineManager) {
+        console.log('[finalizarServicio] Sin conexión - guardando en cola offline');
+
+        await window.offlineManager.queue({
+          type: 'supabase',
+          payload: {
+            table: 'citas',
+            method: 'update',
+            data: {
+              estado: 'pendiente_pago',
+              fin_servicio_at: ahora,
+              comision_calculada: comision,
+              precio: total
+            },
+            match: { id: cita.id }
+          }
+        });
+
+        // Marcar cita como finalizada localmente
+        citasFinalizadasHoy.add(cita.id);
+        saveSetToStorage(citasFinalizadasKey, citasFinalizadasHoy);
+        fijarCita(null);
+
+        // Mostrar éxito con indicación de offline
+        document.getElementById('sendConfirm').classList.add('show');
+        vibrate([50,40,50,40,80]);
+        toast('Orden guardada. Se enviará cuando vuelva la conexión.');
+
+        setTimeout(() => {
+          document.getElementById('sendConfirm').classList.remove('show');
+          resetSwipe();
+          renderServicioCompletado();
+          setTimeout(() => loadCurrentClient(), 2500);
+        }, 1500);
+
+        finalizandoServicio = false;
+        return;
+      }
+      // ===== FIN SOPORTE OFFLINE =====
 
       // Actualizar con control de concurrencia:
       // Solo actualizar si el estado actual es el esperado (evita race conditions)
@@ -1552,8 +1629,9 @@
         setTimeout(() => loadCurrentClient(), 2500);
       }, 1500);
     } catch (err) {
-      console.error(err);
-      toast('No pudimos enviar la orden. Intenta de nuevo.');
+      console.error('[finalizarServicio] Error completo:', err);
+      const msg = err?.message || err?.code || String(err);
+      toast('Error: ' + msg.substring(0, 80));
       resetSwipe();
     } finally {
       finalizandoServicio = false;
@@ -1574,6 +1652,31 @@
 
     try {
       const ahora = new Date().toISOString();
+
+      // ===== SOPORTE OFFLINE =====
+      if (!navigator.onLine && window.offlineManager) {
+        console.log('[llamarCliente] Sin conexión - guardando en cola offline');
+
+        await window.offlineManager.queue({
+          type: 'supabase',
+          payload: {
+            table: 'citas',
+            method: 'update',
+            data: {
+              estado: 'en_servicio',
+              inicio_servicio_at: ahora
+            },
+            match: { id: citaId }
+          }
+        });
+
+        toast('Servicio iniciado (sin conexión)');
+        loadCurrentClient();
+        iniciandoServicio = false;
+        return;
+      }
+      // ===== FIN SOPORTE OFFLINE =====
+
       const { data, error } = await sb.from('citas').update({
         estado: 'en_servicio',
         inicio_servicio_at: ahora
@@ -1632,13 +1735,17 @@
   let addSheetLevel = 'type'; // 'type' | 'categories' | 'items'
   let addSheetType = null; // 'servicios' | 'productos'
   let addSheetCategory = null;
+  let isEditingServicioBase = false; // Para modo de edición de servicio principal
 
   async function openAddSheet(){
     vibrate(8);
-    // Cargar servicios si no están en cache
+    // Cargar servicios si no están en cache (incluyendo nombre de categoría)
     if (!allServiciosCache) {
-      const { data } = await sb.from('servicios').select('id, nombre, precio, categoria_id').eq('activo', true);
-      allServiciosCache = data || [];
+      const { data } = await sb.from('servicios').select('id, nombre, precio, categoria_id, categorias_servicio(nombre)').eq('activo', true);
+      allServiciosCache = (data || []).map(s => ({
+        ...s,
+        categoria_nombre: s.categorias_servicio?.nombre || ''
+      }));
     }
     // Cargar productos si no están en cache
     if (!allProductosCache) {
@@ -1652,7 +1759,7 @@
     renderAddedList();
     document.getElementById('addSheetBg').classList.add('show');
   }
-  function closeAddSheet(){ document.getElementById('addSheetBg').classList.remove('show'); }
+  function closeAddSheet(){ document.getElementById('addSheetBg').classList.remove('show'); isEditingServicioBase = false; }
 
   function renderAddSheetContent(){
     const content = document.getElementById('addSheetContent');
@@ -1732,27 +1839,53 @@
         row.addEventListener('click', () => {
           const idx = parseInt(row.dataset.idx);
           const item = items[idx];
-          if (item) agregarItem(item.nombre, item.precio, tipoCategoria);
+          if (item) agregarItem(item.nombre, item.precio, tipoCategoria, item.id);
         });
       });
     }
   }
 
   function filterServiciosByCategory(catKey){
-    // Mapeo de categorías a palabras clave en nombres de servicios
-    const mapping = {
-      'cortes': ['corte', 'haircut', 'fade', 'taper'],
-      'barbas': ['barba', 'beard', 'bigote'],
-      'mascarillas': ['mascarilla', 'exfolia', 'puntos negros'],
-      'faciales': ['facial', 'limpieza'],
-      'cejas': ['ceja', 'eyebrow'],
-      'disenos': ['diseño', 'design', 'línea', 'figura'],
+    // Mapeo de categorías del menú a categorías reales de la BD
+    const categoriasDB = {
+      'cortes': ['Cortes'],
+      'barbas': ['Barba'],
+      'mascarillas': ['Mascarillas'],
+      'faciales': ['Faciales'],
+      'cejas': ['Cejas y Diseños'],  // Solo servicios de esta categoría, NO combos
+      'disenos': ['Cejas y Diseños'],
     };
-    const keywords = mapping[catKey] || [];
-    return allServiciosCache.filter(s => {
-      const nombre = s.nombre.toLowerCase();
-      return keywords.some(k => nombre.includes(k.toLowerCase()));
+
+    const categoriasPermitidas = categoriasDB[catKey] || [];
+
+    // Filtrar por categoría real de la BD
+    let filtered = allServiciosCache.filter(s => {
+      const catNombre = (s.categoria_nombre || '').toLowerCase();
+      return categoriasPermitidas.some(c => catNombre.includes(c.toLowerCase()));
     });
+
+    // Si no hay resultados por categoría, usar keywords como fallback
+    if (filtered.length === 0) {
+      const keywordsMapping = {
+        'cortes': ['corte', 'haircut', 'fade', 'taper'],
+        'barbas': ['barba', 'beard', 'bigote'],
+        'mascarillas': ['mascarilla', 'exfolia', 'puntos negros'],
+        'faciales': ['facial', 'limpieza'],
+        'cejas': ['ceja', 'eyebrow'],
+        'disenos': ['diseño', 'design', 'línea', 'figura'],
+      };
+      const keywords = keywordsMapping[catKey] || [];
+      filtered = allServiciosCache.filter(s => {
+        const nombre = s.nombre.toLowerCase();
+        // Excluir combos (servicios con "y" o "+") para categorías específicas
+        if (['cejas', 'disenos'].includes(catKey) && (nombre.includes(' y ') || nombre.includes('+'))) {
+          return false;
+        }
+        return keywords.some(k => nombre.includes(k.toLowerCase()));
+      });
+    }
+
+    return filtered;
   }
 
   function filterProductosByCategory(catKey){
@@ -1806,12 +1939,37 @@
     agregarItem(nombre, precio, categoria);
   }
 
-  async function agregarItem(nombre, precio, categoria){
+  async function agregarItem(nombre, precio, categoria, servicioId = null){
     if (!currentCita) {
       toast('No hay cita activa');
       return;
     }
     try {
+      // Si estamos editando el servicio base, actualizar la cita en lugar de agregar item
+      if (isEditingServicioBase) {
+        const updateData = { precio: Number(precio) || 0 };
+        if (servicioId) updateData.servicio_id = servicioId;
+
+        const { error } = await sb.from('citas').update(updateData).eq('id', currentCita.id);
+        if (error) throw error;
+
+        // Actualizar cita local
+        currentCita.precio = Number(precio) || 0;
+        if (servicioId) {
+          currentCita.servicio_id = servicioId;
+          currentCita.servicios = { id: servicioId, nombre: nombre, precio: precio };
+        }
+
+        isEditingServicioBase = false;
+        closeAddSheet();
+        updateTotalsUI();
+        vibrate(10);
+        toast(`Servicio cambiado a ${nombre}`);
+        // Reabrir el sheet de orden para ver el cambio
+        setTimeout(() => openOrderSheet(), 200);
+        return;
+      }
+
       const insertData = {
         cita_id: currentCita.id,
         nombre: nombre,
@@ -1874,11 +2032,12 @@
   function renderOrderSheetItems(){
     if (!currentCita) return;
     const c = currentCita;
+    const editIcon = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const trashIcon = `<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const rows = [];
     // Servicio base (solo mostrar si precio > 0)
     if (Number(c.precio) > 0) {
-      rows.push(`<div class="added-row"><span>${c.servicios?.nombre || 'Servicio base'}</span><span style="display:flex;align-items:center;"><span class="p">${dnFormatCOP(c.precio)}</span><div class="trash-btn" onclick="quitarServicioBase()">${trashIcon}</div></span></div>`);
+      rows.push(`<div class="added-row"><span>${c.servicios?.nombre || 'Servicio base'}</span><span style="display:flex;align-items:center;"><span class="p">${dnFormatCOP(c.precio)}</span><div class="edit-btn" onclick="editarServicioBase()">${editIcon}</div><div class="trash-btn" onclick="quitarServicioBase()">${trashIcon}</div></span></div>`);
     }
     // Items adicionales
     currentItems.forEach(i => {
@@ -1934,6 +2093,31 @@
     }
   };
 
+  // Editar/cambiar servicio base
+  window.editarServicioBase = async function(){
+    if (!currentCita) return;
+    vibrate(8);
+    closeOrderSheet();
+    isEditingServicioBase = true;
+    // Cargar servicios si no están en cache
+    if (!allServiciosCache) {
+      const { data } = await sb.from('servicios').select('id, nombre, precio, categoria_id, categorias_servicio(nombre)').eq('activo', true);
+      allServiciosCache = (data || []).map(s => ({
+        ...s,
+        categoria_nombre: s.categorias_servicio?.nombre || ''
+      }));
+    }
+    // Abrir el addSheet directamente en modo servicios/categorías
+    addSheetLevel = 'categories';
+    addSheetType = 'servicios';
+    addSheetCategory = null;
+    renderAddSheetContent();
+    // Cambiar título para indicar modo edición
+    document.getElementById('addSheetTitle').textContent = 'Cambiar servicio';
+    document.getElementById('addSheetSub').textContent = 'Selecciona el nuevo servicio';
+    document.getElementById('addSheetBg').classList.add('show');
+  };
+
   // ---- Carga principal ----
   let lastRenderSig = null;
   function citaSig(c, estado){ return c ? `${c.id}|${estado}|${JSON.stringify(c.pasos_servicio||{})}` : `empty|${estado}`; }
@@ -1965,7 +2149,8 @@
       }
 
       // Filtrar citas que ya fueron finalizadas en esta sesión (evita que reaparezcan)
-      const citasActivas = citas.filter(c => !citasFinalizadasHoy.has(c.id));
+      // PERO: nunca filtrar citas en_servicio - siempre deben aparecer
+      const citasActivas = citas.filter(c => c.estado === 'en_servicio' || !citasFinalizadasHoy.has(c.id));
 
       if (citasActivas.length === 0) {
         currentCita = null;
@@ -2289,9 +2474,9 @@
       let starsHTML = '';
       for (let i = 1; i <= 5; i++) {
         if (i <= fullStars) {
-          starsHTML += '<span style="color:#FFD700;">★</span>';
+          starsHTML += '<span style="color:#FFAC48;">★</span>';
         } else if (i === fullStars + 1 && hasHalf) {
-          starsHTML += '<span style="color:#FFD700;">★</span>';
+          starsHTML += '<span style="color:#FFAC48;">★</span>';
         } else {
           starsHTML += '<span style="color:#ddd;">☆</span>';
         }
@@ -2308,7 +2493,7 @@
         let stars = '';
         for (let i = 1; i <= 5; i++) {
           stars += i <= r.calificacion
-            ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="#FFD700" stroke="#FFD700" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+            ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="#FFAC48" stroke="#FFAC48" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
             : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ddd" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
         }
 
@@ -2403,5 +2588,6 @@
   init();
 </script>
 <script src="../assets/citas-estados.js" defer></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

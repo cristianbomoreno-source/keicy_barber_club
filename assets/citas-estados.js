@@ -103,9 +103,9 @@ const ESTADO_CONFIG = {
   [CITA_ESTADOS.EN_SERVICIO]: {
     label: 'En Servicio',
     labelCorto: 'En Servicio',
-    color: '#D9B872',       // Dorado
-    bgColor: 'rgba(217, 184, 114, 0.18)',
-    borderColor: 'rgba(217, 184, 114, 0.45)',
+    color: '#FFAC48',       // Dorado
+    bgColor: 'rgba(255, 172, 72, 0.18)',
+    borderColor: 'rgba(255, 172, 72, 0.45)',
     icon: 'scissors',
   },
   [CITA_ESTADOS.PENDIENTE_PAGO]: {

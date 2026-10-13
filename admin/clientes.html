@@ -3,13 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- Preconnect críticos -->
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://ygrmammcaupnygdxmgth.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
+<!-- Preload CSS críticos -->
+<link rel="preload" href="../assets/design-system.css" as="style">
+<link rel="preload" href="../assets/mobile-admin.css" as="style">
+<!-- Preload JS críticos -->
+<link rel="preload" href="../assets/supabase-client.js" as="script">
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
 <link rel="icon" href="../assets/favicon-32.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
-<meta name="theme-color" content="#0A0A0C">
+<meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Clientes</title>
 <script src="../assets/theme-manager.js"></script>
 <link rel="stylesheet" href="../assets/design-system.css">
@@ -52,7 +63,7 @@
   .nav-section-label{ display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
   .nav-section-label:first-of-type{ padding-top:2px; }
   .sidebar.expanded .nav-section-label{ display:block; }
-  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0; display:none; }
+  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(255,172,72,0.06); min-width:196px; flex-shrink:0; display:none; }
   .sidebar.expanded .plan-card{ display:block; }
   .plan-card .label{ font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--gold); text-transform:uppercase; display:flex; align-items:center; gap:6px; }
   .plan-card .sub{ font-size:12px; color:var(--text-secondary); margin-top:6px; }
@@ -96,8 +107,8 @@
   }
   .client-row:hover{ background:var(--glass-2); }
   .client-row:last-child{ border-bottom:none; }
-  .client-row .avatar{ width:44px; height:44px; font-size:14px; flex-shrink:0; overflow:hidden; }
-  .client-row .avatar img{ width:100%; height:100%; object-fit:cover; border-radius:50%; }
+  .client-row .avatar{ width:44px; height:44px; font-size:14px; flex-shrink:0; overflow:hidden; border-radius:50%; background:var(--gold); color:#141414; display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .client-row .avatar img{ width:100%; height:100%; object-fit:cover; }
   .client-mid{ flex:1; min-width:0; }
   .client-mid .name{ font-size:14px; font-weight:700; }
   .client-mid .meta{ font-size:11.5px; color:var(--text-secondary); margin-top:1px; }
@@ -108,13 +119,13 @@
   .tier-pill{ font-size:10px; font-weight:800; padding:3px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; }
   .tier-pill.bronce{ background:rgba(205,127,50,0.2); color:#CD7F32; }
   .tier-pill.plata{ background:rgba(192,192,192,0.2); color:#C0C0C0; }
-  .tier-pill.oro{ background:rgba(201,163,91,0.2); color:var(--gold); }
+  .tier-pill.oro{ background:rgba(255,172,72,0.2); color:var(--gold); }
   .tier-pill.black{ background:rgba(255,255,255,0.12); color:#FFFFFF; border:1px solid rgba(255,255,255,0.3); }
 
   /* Club de Leales - Progreso */
   .lealtad-card{
-    background:linear-gradient(135deg, rgba(201,163,91,0.1) 0%, rgba(201,163,91,0.02) 100%);
-    border:1px solid rgba(201,163,91,0.2);
+    background:linear-gradient(135deg, rgba(255,172,72,0.1) 0%, rgba(255,172,72,0.02) 100%);
+    border:1px solid rgba(255,172,72,0.2);
     border-radius:18px;
     padding:20px;
     margin-bottom:22px;
@@ -133,7 +144,7 @@
   }
   .lealtad-progress-fill.bronce{ background:linear-gradient(90deg, #CD7F32, #E8A850); }
   .lealtad-progress-fill.plata{ background:linear-gradient(90deg, #A0A0A0, #D0D0D0); }
-  .lealtad-progress-fill.oro{ background:linear-gradient(90deg, #C9A35B, #E8C87A); }
+  .lealtad-progress-fill.oro{ background:linear-gradient(90deg, #FFAC48, #FFC27A); }
   .lealtad-progress-fill.black{ background:linear-gradient(90deg, #333, #666); }
   .lealtad-info{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-secondary); }
   .lealtad-next{ color:var(--gold); font-weight:600; }
@@ -154,8 +165,8 @@
   .drawer-back svg{ width:15px; height:15px; }
 
   .profile-head{ display:flex; align-items:center; gap:16px; margin-bottom:20px; flex-wrap:wrap; }
-  .profile-head .avatar{ width:64px; height:64px; font-size:20px; flex-shrink:0; overflow:hidden; }
-  .profile-head .avatar img{ width:100%; height:100%; object-fit:cover; border-radius:50%; }
+  .profile-head .avatar{ width:64px; height:64px; font-size:20px; flex-shrink:0; overflow:hidden; border-radius:50%; background:var(--gold); color:#141414; display:flex; align-items:center; justify-content:center; font-weight:700; }
+  .profile-head .avatar img{ width:100%; height:100%; object-fit:cover; }
   .profile-name{ font-size:20px; font-weight:800; display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
   .profile-meta{ font-size:12.5px; color:var(--text-secondary); margin-top:2px; }
 
@@ -213,7 +224,7 @@
   }
   .phone-field:focus-within { border-color:var(--gold); }
   .phone-field .phone-prefix {
-    padding:0 12px; font-size:13px; font-weight:600; color:var(--gold); background:rgba(201,163,91,0.1);
+    padding:0 12px; font-size:13px; font-weight:600; color:var(--gold); background:rgba(255,172,72,0.1);
     height:100%; display:flex; align-items:center; border-right:1px solid var(--glass-border);
     white-space:nowrap;
   }
@@ -272,7 +283,7 @@
   [data-theme="light"] .nav-link:hover { background:var(--bg-hover); color:var(--text); }
   [data-theme="light"] .nav-link.active { background:var(--gold); color:#141414; }
   [data-theme="light"] .nav-section-label { color:var(--text-muted); }
-  [data-theme="light"] .plan-card { background:rgba(212,175,85,0.08); border-color:var(--gold); }
+  [data-theme="light"] .plan-card { background:rgba(255,172,72,0.08); border-color:var(--gold); }
   [data-theme="light"] .plan-card .sub { color:var(--text-secondary); }
   [data-theme="light"] .clients-card { background:var(--bg-card); border-color:var(--border); box-shadow:0 2px 12px rgba(0,0,0,0.04); }
   [data-theme="light"] .search-bar { background:var(--bg); border-color:var(--border); }
@@ -552,13 +563,48 @@
   </div>
 </div>
 
-<!-- Modal: editar información básica -->
+<!-- Modal: editar información del cliente -->
 <div class="modal-overlay" id="editBasicModal" onclick="if(event.target===this)this.classList.remove('show')">
-  <div class="modal-box">
+  <div class="modal-box" style="max-width:520px;">
     <span class="modal-close" onclick="document.getElementById('editBasicModal').classList.remove('show')">✕ Cerrar</span>
     <div class="modal-title">Editar cliente</div>
-    <div class="modal-sub">Información básica y origen.</div>
+    <div class="modal-sub">Modifica la información del cliente.</div>
+
     <div class="field"><label>Nombre completo</label><input type="text" id="editFullName"></div>
+
+    <div class="field">
+      <label>Teléfono</label>
+      <div style="display:flex; gap:8px; align-items:stretch;">
+        <select id="editCountryCode" style="width:90px; flex-shrink:0; border-radius:13px; padding:0 10px; background:var(--glass-2); border:1px solid var(--glass-border); color:var(--gold); font-weight:600; font-size:13px; height:48px; outline:none; cursor:pointer;">
+          <option value="57">+57</option>
+          <option value="1">+1</option>
+          <option value="34">+34</option>
+          <option value="52">+52</option>
+          <option value="54">+54</option>
+          <option value="56">+56</option>
+          <option value="51">+51</option>
+          <option value="593">+593</option>
+          <option value="58">+58</option>
+          <option value="507">+507</option>
+        </select>
+        <input type="tel" id="editPhone" placeholder="300 123 4567" inputmode="numeric" style="flex:1; min-width:0;">
+      </div>
+    </div>
+
+    <div class="field"><label>Correo electrónico</label><input type="email" id="editEmail" placeholder="cliente@email.com"></div>
+
+    <div class="field-row">
+      <div class="field"><label>Fecha de nacimiento</label><input type="date" id="editFechaNacimiento"></div>
+      <div class="field"><label>Género</label>
+        <select id="editGenero">
+          <option value="">Sin especificar</option>
+          <option value="masculino">Masculino</option>
+          <option value="femenino">Femenino</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+    </div>
+
     <div class="field-row">
       <div class="field"><label>Nivel de membresía</label>
         <select id="editTier">
@@ -576,11 +622,19 @@
           <option value="google">Google</option>
           <option value="walk_in">Walk-in</option>
           <option value="whatsapp">WhatsApp</option>
+          <option value="tiktok">TikTok</option>
+          <option value="facebook">Facebook</option>
           <option value="otro">Otro</option>
         </select>
       </div>
     </div>
+
+    <div class="field"><label>Dirección</label><input type="text" id="editDireccion" placeholder="Calle, número, ciudad..."></div>
+
+    <div class="field"><label>Referido por</label><input type="text" id="editReferidoPor" placeholder="Nombre o teléfono de quien lo refirió"></div>
+
     <div class="field"><label>Notas internas</label><textarea id="editNotas" placeholder="Preferencias, alergias, observaciones…"></textarea></div>
+
     <div class="modal-actions">
       <button class="btn-cancel" onclick="document.getElementById('editBasicModal').classList.remove('show')">Cancelar</button>
       <button class="btn-save" onclick="saveBasicEdit()">Guardar</button>
@@ -735,6 +789,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../assets/supabase-client.js"></script>
+<script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/admin-sede-nav.js"></script>
 
 <script>
@@ -781,7 +836,7 @@
   dnInitSidebarCard();
 
   const TIER_LABEL = { bronce: 'Bronce', plata: 'Plata', oro: 'Oro', black: 'Black' };
-  const TIER_COLORS = { bronce: '#CD7F32', plata: '#C0C0C0', oro: '#C9A35B', black: '#FFFFFF' };
+  const TIER_COLORS = { bronce: '#CD7F32', plata: '#C0C0C0', oro: '#FFAC48', black: '#FFFFFF' };
 
   // Calcular info de lealtad localmente (fallback)
   function calcularLealtadLocal(cortes) {
@@ -1337,29 +1392,137 @@
     }
   }
 
-  // ---- Editar info básica ----
-  function openEditBasicModal(){
-    const c = clientes.find(x => x.id === currentClientId);
-    if (!c) return;
-    document.getElementById('editFullName').value = c.full_name || '';
-    document.getElementById('editTier').value = c.membership_tier || '';
-    document.getElementById('editOrigen').value = c.origen || '';
-    document.getElementById('editNotas').value = c.notas_admin || '';
-    document.getElementById('editBasicModal').classList.add('show');
+  // ---- Editar info del cliente ----
+  async function openEditBasicModal(){
+    if (!currentClientId) return;
+
+    // Cargar datos frescos directamente de la tabla usuarios
+    try {
+      const { data: c, error } = await sb
+        .from('usuarios')
+        .select('*')
+        .eq('id', currentClientId)
+        .single();
+
+      if (error || !c) {
+        toast('No se pudo cargar la información del cliente.');
+        return;
+      }
+
+      // Nombre
+      document.getElementById('editFullName').value = c.full_name || '';
+
+      // Teléfono - extraer código de país y número
+      const phone = c.phone || '';
+      let countryCode = '57';
+      let phoneNumber = phone;
+
+      if (phone.startsWith('+')) {
+        // Formato internacional: +573001234567
+        const codes = ['593', '507', '57', '58', '56', '54', '52', '51', '34', '1'];
+        for (const code of codes) {
+          if (phone.startsWith('+' + code)) {
+            countryCode = code;
+            phoneNumber = phone.substring(code.length + 1);
+            break;
+          }
+        }
+      } else if (phone.length === 10 && phone.startsWith('3')) {
+        // Número colombiano sin indicativo: 3001234567
+        countryCode = '57';
+        phoneNumber = phone;
+      } else if (phone.length > 10) {
+        // Puede tener código de país sin +
+        const codes = ['593', '507', '57', '58', '56', '54', '52', '51', '34', '1'];
+        for (const code of codes) {
+          if (phone.startsWith(code)) {
+            countryCode = code;
+            phoneNumber = phone.substring(code.length);
+            break;
+          }
+        }
+      }
+
+      document.getElementById('editCountryCode').value = countryCode;
+      document.getElementById('editPhone').value = phoneNumber;
+
+      // Email
+      document.getElementById('editEmail').value = c.email || '';
+
+      // Fecha de nacimiento
+      document.getElementById('editFechaNacimiento').value = c.fecha_nacimiento || '';
+
+      // Género
+      document.getElementById('editGenero').value = c.genero || '';
+
+      // Tier y origen
+      document.getElementById('editTier').value = c.membership_tier || '';
+      document.getElementById('editOrigen').value = c.origen || '';
+
+      // Dirección y referido
+      document.getElementById('editDireccion').value = c.direccion || '';
+      document.getElementById('editReferidoPor').value = c.referido_por || '';
+
+      // Notas
+      document.getElementById('editNotas').value = c.notas_admin || '';
+
+      document.getElementById('editBasicModal').classList.add('show');
+    } catch (err) {
+      console.error('Error cargando cliente para editar:', err);
+      toast('Error al cargar datos del cliente.');
+    }
   }
 
   async function saveBasicEdit(){
     if (!currentClientId) return;
+
     const fullName = document.getElementById('editFullName').value.trim();
-    const tier = document.getElementById('editTier').value || null;
-    const origen = document.getElementById('editOrigen').value || null;
-    const notas = document.getElementById('editNotas').value.trim() || null;
     if (!fullName) { toast('El nombre no puede estar vacío.'); return; }
 
+    // Teléfono - guardar en formato consistente (sin indicativo para Colombia)
+    const countryCode = document.getElementById('editCountryCode').value;
+    const phoneNumber = document.getElementById('editPhone').value.replace(/\D/g, '');
+    // Para Colombia: solo el número. Para otros países: código + número
+    const phone = phoneNumber ? (countryCode === '57' ? phoneNumber : countryCode + phoneNumber) : null;
+
+    // Email
+    const email = document.getElementById('editEmail').value.trim() || null;
+
+    // Fecha de nacimiento
+    const fechaNacimiento = document.getElementById('editFechaNacimiento').value || null;
+
+    // Género
+    const genero = document.getElementById('editGenero').value || null;
+
+    // Tier y origen
+    const tier = document.getElementById('editTier').value || null;
+    const origen = document.getElementById('editOrigen').value || null;
+
+    // Dirección y referido
+    const direccion = document.getElementById('editDireccion').value.trim() || null;
+    const referidoPor = document.getElementById('editReferidoPor').value.trim() || null;
+
+    // Notas
+    const notas = document.getElementById('editNotas').value.trim() || null;
+
+    // Construir objeto de actualización solo con campos que existen en la tabla
+    const updateData = {
+      full_name: fullName,
+      phone,
+      email,
+      membership_tier: tier,
+      origen,
+      notas_admin: notas
+    };
+
+    // Agregar campos opcionales solo si tienen valor (pueden no existir en todas las instalaciones)
+    if (fechaNacimiento) updateData.fecha_nacimiento = fechaNacimiento;
+    if (genero) updateData.genero = genero;
+    if (direccion) updateData.direccion = direccion;
+    if (referidoPor) updateData.referido_por = referidoPor;
+
     try {
-      const { error } = await sb.from('usuarios').update({
-        full_name: fullName, membership_tier: tier, origen, notas_admin: notas
-      }).eq('id', currentClientId);
+      const { error } = await sb.from('usuarios').update(updateData).eq('id', currentClientId);
       if (error) throw error;
       toast('Cliente actualizado.');
       document.getElementById('editBasicModal').classList.remove('show');
@@ -1529,5 +1692,6 @@
 
 <script src="../assets/mobile-nav.js"></script>
 <script src="../assets/admin-sede-sidebar.js"></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
-<meta name="theme-color" content="#0A0A0C">
+<meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Marketing</title>
 <script src="../assets/theme-manager.js"></script>
 <link rel="stylesheet" href="../assets/design-system.css">
@@ -51,7 +51,7 @@
   .nav-section-label{ display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
   .nav-section-label:first-of-type{ padding-top:2px; }
   .sidebar.expanded .nav-section-label{ display:block; }
-  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0; display:none; }
+  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(255,172,72,0.06); min-width:196px; flex-shrink:0; display:none; }
   .sidebar.expanded .plan-card{ display:block; }
   .plan-card .label{ font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--gold); text-transform:uppercase; display:flex; align-items:center; gap:6px; }
   .plan-card .sub{ font-size:12px; color:var(--text-secondary); margin-top:6px; }
@@ -86,7 +86,7 @@
   .hub-card{ padding:18px; cursor:pointer; transition:transform .15s ease, border-color .2s ease; position:relative; }
   .hub-card:hover{ border-color:rgba(255,255,255,0.18); }
   .hub-card:active{ transform:scale(0.98); }
-  .hub-card .ic{ width:40px; height:40px; border-radius:12px; background:rgba(201,163,91,0.12); display:flex; align-items:center; justify-content:center; margin-bottom:12px; }
+  .hub-card .ic{ width:40px; height:40px; border-radius:12px; background:rgba(255,172,72,0.12); display:flex; align-items:center; justify-content:center; margin-bottom:12px; }
   .hub-card .ic svg{ width:20px; height:20px; color:var(--gold); }
   .hub-card .t{ font-size:14.5px; font-weight:800; }
   .hub-card .s{ font-size:12px; color:var(--text-secondary); margin-top:4px; line-height:1.4; }
@@ -426,6 +426,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../assets/supabase-client.js"></script>
+<script src="../assets/turbo-loader.js" defer></script>
 <script>
   const toastEl = document.getElementById('toast');
   const toastText = document.getElementById('toastText');
@@ -654,26 +655,26 @@
         </div>
 
         <!-- Detalles de la cita (simplificado) -->
-        <div style="background:#1C1E24; border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid #E5E5E5;">
+        <div style="background:#1C1C1C; border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid #E5E5E5;">
           <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
             <div>
-              <div style="font-size:9px; color:#D4AF55; text-transform:uppercase; letter-spacing:0.4px;">Fecha</div>
+              <div style="font-size:9px; color:#FFAC48; text-transform:uppercase; letter-spacing:0.4px;">Fecha</div>
               <div style="font-size:12px; color:#111111; margin-top:2px;">sábado 15 de marzo</div>
             </div>
             <div>
-              <div style="font-size:9px; color:#D4AF55; text-transform:uppercase; letter-spacing:0.4px;">Hora</div>
+              <div style="font-size:9px; color:#FFAC48; text-transform:uppercase; letter-spacing:0.4px;">Hora</div>
               <div style="font-size:12px; color:#111111; margin-top:2px;">10:00 AM</div>
             </div>
           </div>
           <div style="padding-top:8px; border-top:1px solid #E5E5E5;">
-            <div style="font-size:9px; color:#D4AF55; text-transform:uppercase; letter-spacing:0.4px;">Servicio</div>
+            <div style="font-size:9px; color:#FFAC48; text-transform:uppercase; letter-spacing:0.4px;">Servicio</div>
             <div style="font-size:12px; color:#111111; margin-top:2px;">Corte + Barba</div>
           </div>
         </div>
 
         <!-- Recordatorio -->
-        <div style="background:rgba(201,163,91,0.1); border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid rgba(201,163,91,0.2);">
-          <div style="font-size:12px; font-weight:600; color:#D4AF55; margin-bottom:4px;">${reemplazar(recordatorioTitulo)}</div>
+        <div style="background:rgba(255,172,72,0.1); border-radius:10px; padding:12px; margin-bottom:12px; border:1px solid rgba(255,172,72,0.2);">
+          <div style="font-size:12px; font-weight:600; color:#FFAC48; margin-bottom:4px;">${reemplazar(recordatorioTitulo)}</div>
           <div style="font-size:11px; color:#888888666;">${reemplazar(recordatorioTexto)}</div>
         </div>
 
@@ -698,5 +699,6 @@
 
 <script src="../assets/mobile-nav.js"></script>
 <script src="../assets/admin-sede-sidebar.js"></script>
+<script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

@@ -90,7 +90,7 @@ if (DN_DEBUG) {
               page: window.location.pathname
             };
             DN_QUERY_LOG.push(logEntry);
-            console.log(`%c[DN_DEBUG] ${table}`, 'color:#C8A05A;font-weight:bold',
+            console.log(`%c[DN_DEBUG] ${table}`, 'color:#FFAC48;font-weight:bold',
               `→ ${rowCount} rows in ${duration}ms`, logEntry);
             if (onFulfilled) return onFulfilled(response);
             return response;
