@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="../manifest.json">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
-<link rel="icon" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
+<link rel="icon" href="../assets/favicon-32-v3.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -5601,14 +5601,14 @@
           </div>
         `;
       } else {
-        const imgSrc = item.foto_url || '../assets/apple-touch-icon-v2.png';
+        const imgSrc = item.foto_url || '../assets/apple-touch-icon-v3.png';
         const duracion = item.duracion_min || item.duracion || 30;
         const precioTexto = (item.precio === 0 || item.precio === null) ? 'Precio variable' : dnFormatCOP(item.precio);
         const precioClass = (item.precio === 0 || item.precio === null) ? 'variable' : '';
         return `
           <div class="item-card ${inCart ? 'in-cart' : ''}" onclick="handleServicioClick('${item.id}')">
             ${badge}
-            <img class="item-img" src="${imgSrc}" alt="${item.nombre}" onerror="this.src='../assets/apple-touch-icon-v2.png'">
+            <img class="item-img" src="${imgSrc}" alt="${item.nombre}" onerror="this.src='../assets/apple-touch-icon-v3.png'">
             <div class="item-info">
               <div class="item-name">${item.nombre}</div>
               <div class="item-type"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ${duracion} min</div>
@@ -6007,7 +6007,7 @@
     } else {
       container.innerHTML = cart.map((item, i) => {
         // Imagen del producto
-        const imgSrc = item.foto_url || '../assets/apple-touch-icon-v2.png';
+        const imgSrc = item.foto_url || '../assets/apple-touch-icon-v3.png';
         const imgHtml = item.foto_url
           ? `<img class="cart-item-img" src="${imgSrc}" alt="${item.nombre}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
              <div class="cart-item-img-placeholder" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg></div>`
@@ -9313,10 +9313,10 @@
     citasPorDia = {};
 
     const preview = document.getElementById('servicioPreview');
-    const imgSrc = servicio.foto_url || '../assets/apple-touch-icon-v2.png';
+    const imgSrc = servicio.foto_url || '../assets/apple-touch-icon-v3.png';
     const duracion = servicio.duracion_min || servicio.duracion || 30;
     preview.innerHTML = `
-      <img src="${imgSrc}" alt="${servicio.nombre}" onerror="this.src='../assets/apple-touch-icon-v2.png'">
+      <img src="${imgSrc}" alt="${servicio.nombre}" onerror="this.src='../assets/apple-touch-icon-v3.png'">
       <div class="info">
         <div class="name">${servicio.nombre}</div>
         <div class="meta">
@@ -9988,10 +9988,10 @@
     // Mostrar preview del servicio
     const servicio = servicios.find(s => s.id === item.id);
     const preview = document.getElementById('agendaServicioPreview');
-    const imgSrc = servicio?.foto_url || '../assets/apple-touch-icon-v2.png';
+    const imgSrc = servicio?.foto_url || '../assets/apple-touch-icon-v3.png';
     const duracion = item.duracion || 30;
     preview.innerHTML = `
-      <img src="${imgSrc}" alt="${item.nombre}" onerror="this.src='../assets/apple-touch-icon-v2.png'">
+      <img src="${imgSrc}" alt="${item.nombre}" onerror="this.src='../assets/apple-touch-icon-v3.png'">
       <div class="info">
         <div class="name">${item.nombre}</div>
         <div class="meta">
@@ -10393,13 +10393,13 @@
           </div>
         `;
       } else {
-        const imgSrc = item.foto_url || '../assets/apple-touch-icon-v2.png';
+        const imgSrc = item.foto_url || '../assets/apple-touch-icon-v3.png';
         const duracion = item.duracion_min || item.duracion || 30;
         const precioTexto = (item.precio === 0 || item.precio === null) ? 'Variable' : dnFormatCOP(item.precio);
         return `
           <div class="mv-item ${inCart ? 'in-cart' : ''}" onclick="handleServicioClick('${item.id}')">
             ${badge}
-            <img src="${imgSrc}" alt="${item.nombre}" onerror="this.src='../assets/apple-touch-icon-v2.png'">
+            <img src="${imgSrc}" alt="${item.nombre}" onerror="this.src='../assets/apple-touch-icon-v3.png'">
             <div class="name">${item.nombre}</div>
             <div class="price">${precioTexto}</div>
             <div class="duration">
