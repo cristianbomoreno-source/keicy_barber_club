@@ -137,46 +137,49 @@ function generateEmailHTML(data: CitaData): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark light">
+  <meta name="supported-color-schemes" content="dark light">
+  <link href="https://fonts.googleapis.com/css2?family=Trirong:wght@400;600;700;800&display=swap" rel="stylesheet">
   <title>Cita Agendada - Keicy Barber Club</title>
 </head>
-<body style="margin:0; padding:0; background-color:#FFFFFF; font-family:'Georgia', 'Times New Roman', serif;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#FFFFFF;">
+<body style="margin:0; padding:0; background-color:#000000; font-family:'Trirong', Georgia, 'Times New Roman', serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#000000;">
     <tr>
       <td align="center" style="padding:40px 20px;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:500px; background-color:#FFFFFF;">
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:500px; background-color:#000000;">
 
           <!-- Logo -->
           <tr>
             <td align="center" style="padding:32px 24px 24px; text-align:center;">
-              <img src="https://www.keicybarberclub.com/assets/logo.png" alt="Keicy Barber Club" width="120" style="width:120px; height:auto; display:block; margin:0 auto;">
+              <img src="https://www.keicybarberclub.com/assets/logo-oro.png" alt="Keicy Barber Club" width="150" style="width:150px; height:auto; display:block; margin:0 auto;">
             </td>
           </tr>
 
           <!-- Header -->
           <tr>
             <td align="center" style="padding:0 24px 32px;">
-              <h1 style="margin:0; color:#111111; font-size:28px; font-weight:400; font-style:italic; font-family:'Georgia', 'Times New Roman', serif;">${titulo}</h1>
-              <p style="margin:12px 0 0; color:#666666; font-size:15px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${subtitulo}</p>
+              <h1 style="margin:0; color:#FFAC48; font-size:28px; font-weight:800; letter-spacing:1px; text-transform:uppercase; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${titulo}</h1>
+              <p style="margin:12px 0 0; color:#B3B3B3; font-size:15px; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${subtitulo}</p>
             </td>
           </tr>
 
           <!-- Detalles de la cita -->
           <tr>
             <td style="padding:0 24px 24px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#FAFAFA; border-radius:16px; border:1px solid #E5E5E5;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:#141414; border-radius:16px; border:1px solid #262626;">
 
                 <!-- Fecha y Hora -->
                 <tr>
-                  <td style="padding:20px; border-bottom:1px solid #E5E5E5;">
+                  <td style="padding:20px; border-bottom:1px solid #262626;">
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                       <tr>
                         <td width="50%">
-                          <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Fecha</p>
-                          <p style="margin:6px 0 0; color:#111111; font-size:15px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${formatDate(data.fecha)}</p>
+                          <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:'Trirong', Georgia, 'Times New Roman', serif;">Fecha</p>
+                          <p style="margin:6px 0 0; color:#FFFFFF; font-size:15px; font-weight:600; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${formatDate(data.fecha)}</p>
                         </td>
                         <td width="50%">
-                          <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Hora</p>
-                          <p style="margin:6px 0 0; color:#111111; font-size:15px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${formatTime(data.hora)}</p>
+                          <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:'Trirong', Georgia, 'Times New Roman', serif;">Hora</p>
+                          <p style="margin:6px 0 0; color:#FFFFFF; font-size:15px; font-weight:600; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${formatTime(data.hora)}</p>
                         </td>
                       </tr>
                     </table>
@@ -185,27 +188,27 @@ function generateEmailHTML(data: CitaData): string {
 
                 <!-- Barbero -->
                 <tr>
-                  <td style="padding:20px; border-bottom:1px solid #E5E5E5;">
-                    <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Barbero</p>
-                    <p style="margin:6px 0 0; color:#111111; font-size:15px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${data.barbero_nombre || "El primer barbero disponible"}</p>
+                  <td style="padding:20px; border-bottom:1px solid #262626;">
+                    <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:'Trirong', Georgia, 'Times New Roman', serif;">Barbero</p>
+                    <p style="margin:6px 0 0; color:#FFFFFF; font-size:15px; font-weight:600; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${data.barbero_nombre || "El primer barbero disponible"}</p>
                   </td>
                 </tr>
 
                 <!-- Servicio -->
                 <tr>
-                  <td style="padding:20px; border-bottom:1px solid #E5E5E5;">
-                    <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Servicio</p>
-                    <p style="margin:6px 0 0; color:#111111; font-size:15px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${data.servicio_nombre}</p>
-                    ${serviciosExtra ? `<ul style="margin:8px 0 0; padding-left:20px; color:#666666; font-size:14px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${serviciosExtra}</ul>` : ""}
+                  <td style="padding:20px; border-bottom:1px solid #262626;">
+                    <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:'Trirong', Georgia, 'Times New Roman', serif;">Servicio</p>
+                    <p style="margin:6px 0 0; color:#FFFFFF; font-size:15px; font-weight:600; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${data.servicio_nombre}</p>
+                    ${serviciosExtra ? `<ul style="margin:8px 0 0; padding-left:20px; color:#B3B3B3; font-size:14px; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${serviciosExtra}</ul>` : ""}
                   </td>
                 </tr>
 
                 <!-- Sede -->
                 <tr>
-                  <td style="padding:20px; border-bottom:1px solid #E5E5E5;">
-                    <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Sede</p>
-                    <p style="margin:6px 0 0; color:#111111; font-size:15px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${data.sede_nombre}</p>
-                    <p style="margin:4px 0 0; color:#666666; font-size:13px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${data.sede_direccion}</p>
+                  <td style="padding:20px; border-bottom:1px solid #262626;">
+                    <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:'Trirong', Georgia, 'Times New Roman', serif;">Sede</p>
+                    <p style="margin:6px 0 0; color:#FFFFFF; font-size:15px; font-weight:600; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${data.sede_nombre}</p>
+                    <p style="margin:4px 0 0; color:#B3B3B3; font-size:13px; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${data.sede_direccion}</p>
                   </td>
                 </tr>
 
@@ -215,10 +218,10 @@ function generateEmailHTML(data: CitaData): string {
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                       <tr>
                         <td>
-                          <p style="margin:0; color:#666666; font-size:12px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">TOTAL</p>
+                          <p style="margin:0; color:#B3B3B3; font-size:12px; font-weight:600; font-family:'Trirong', Georgia, 'Times New Roman', serif;">TOTAL</p>
                         </td>
                         <td align="right">
-                          <p style="margin:0; color:#FFAC48; font-size:24px; font-weight:700; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${formatPrice(data.precio_total)}</p>
+                          <p style="margin:0; color:#FFAC48; font-size:24px; font-weight:700; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${formatPrice(data.precio_total)}</p>
                         </td>
                       </tr>
                     </table>
@@ -232,11 +235,11 @@ function generateEmailHTML(data: CitaData): string {
           <!-- Recordatorio -->
           <tr>
             <td style="padding:0 24px 24px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:rgba(255,172,72,0.08); border-radius:16px; border:1px solid rgba(255,172,72,0.2);">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:rgba(255,172,72,0.10); border-radius:16px; border:1px solid rgba(255,172,72,0.2);">
                 <tr>
                   <td style="padding:18px;">
-                    <p style="margin:0; color:#CC7A14; font-size:14px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${recordatorioTitulo}</p>
-                    <p style="margin:8px 0 0; color:#666666; font-size:13px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${recordatorioTexto}</p>
+                    <p style="margin:0; color:#FFAC48; font-size:14px; font-weight:600; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${recordatorioTitulo}</p>
+                    <p style="margin:8px 0 0; color:#B3B3B3; font-size:13px; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${recordatorioTexto}</p>
                   </td>
                 </tr>
               </table>
@@ -246,7 +249,7 @@ function generateEmailHTML(data: CitaData): string {
           <!-- Agregar al Calendario -->
           <tr>
             <td style="padding:0 24px 24px;">
-              <p style="margin:0 0 14px; color:#111111; font-size:14px; font-weight:600; text-align:center; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${calendarioTexto}</p>
+              <p style="margin:0 0 14px; color:#FFFFFF; font-size:14px; font-weight:600; text-align:center; font-family:'Trirong', Georgia, 'Times New Roman', serif;">${calendarioTexto}</p>
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center">
@@ -254,19 +257,19 @@ function generateEmailHTML(data: CitaData): string {
                       <tr>
                         <!-- Google Calendar -->
                         <td style="padding:0 6px;">
-                          <a href="${calendarLinks.google}" target="_blank" style="display:inline-block; padding:12px 18px; background-color:#111111; color:#ffffff; text-decoration:none; border-radius:12px; font-size:12px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                          <a href="${calendarLinks.google}" target="_blank" style="display:inline-block; padding:12px 18px; background-color:#141414; color:#FFAC48; border:1px solid rgba(255,172,72,0.45); text-decoration:none; border-radius:12px; font-size:12px; font-weight:600; font-family:'Trirong', Georgia, 'Times New Roman', serif;">
                             Google
                           </a>
                         </td>
                         <!-- Outlook -->
                         <td style="padding:0 6px;">
-                          <a href="${calendarLinks.outlook}" target="_blank" style="display:inline-block; padding:12px 18px; background-color:#111111; color:#ffffff; text-decoration:none; border-radius:12px; font-size:12px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                          <a href="${calendarLinks.outlook}" target="_blank" style="display:inline-block; padding:12px 18px; background-color:#141414; color:#FFAC48; border:1px solid rgba(255,172,72,0.45); text-decoration:none; border-radius:12px; font-size:12px; font-weight:600; font-family:'Trirong', Georgia, 'Times New Roman', serif;">
                             Outlook
                           </a>
                         </td>
                         <!-- Apple/iCal -->
                         <td style="padding:0 6px;">
-                          <a href="${calendarLinks.ics}" target="_blank" style="display:inline-block; padding:12px 18px; background-color:#111111; color:#ffffff; text-decoration:none; border-radius:12px; font-size:12px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                          <a href="${calendarLinks.ics}" target="_blank" style="display:inline-block; padding:12px 18px; background-color:#141414; color:#FFAC48; border:1px solid rgba(255,172,72,0.45); text-decoration:none; border-radius:12px; font-size:12px; font-weight:600; font-family:'Trirong', Georgia, 'Times New Roman', serif;">
                             Apple
                           </a>
                         </td>
@@ -281,11 +284,11 @@ function generateEmailHTML(data: CitaData): string {
           <!-- Alerta de Confirmación Obligatoria -->
           <tr>
             <td style="padding:0 24px 24px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:rgba(239,83,80,0.06); border-radius:16px; border:1px solid rgba(239,83,80,0.2);">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:rgba(239,83,80,0.12); border-radius:16px; border:1px solid rgba(239,83,80,0.2);">
                 <tr>
                   <td style="padding:18px;">
-                    <p style="margin:0; color:#DC2626; font-size:14px; font-weight:700; text-align:center; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">⚠️ CONFIRMACIÓN OBLIGATORIA</p>
-                    <p style="margin:10px 0 0; color:#444444; font-size:13px; text-align:center; line-height:1.6; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                    <p style="margin:0; color:#EF5350; font-size:14px; font-weight:700; text-align:center; font-family:'Trirong', Georgia, 'Times New Roman', serif;">⚠️ CONFIRMACIÓN OBLIGATORIA</p>
+                    <p style="margin:10px 0 0; color:#CCCCCC; font-size:13px; text-align:center; line-height:1.6; font-family:'Trirong', Georgia, 'Times New Roman', serif;">
                       Debes confirmar tu asistencia <strong>hasta 1 hora antes</strong> de la cita.<br>
                       Si no confirmas, tu cita será <strong>cancelada automáticamente</strong>.
                     </p>
@@ -301,7 +304,7 @@ function generateEmailHTML(data: CitaData): string {
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center">
-                    <a href="${calendarLinks.confirm}" target="_blank" style="display:inline-block; padding:18px 48px; background:linear-gradient(180deg, #FFC27A, #FFAC48); color:#111111; text-decoration:none; border-radius:16px; font-size:16px; font-weight:700; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; box-shadow:0 4px 16px rgba(255,172,72,0.3);">
+                    <a href="${calendarLinks.confirm}" target="_blank" style="display:inline-block; padding:18px 48px; background:linear-gradient(180deg, #FFC27A, #FFAC48); color:#000000; text-decoration:none; border-radius:16px; font-size:16px; font-weight:700; font-family:'Trirong', Georgia, 'Times New Roman', serif; box-shadow:0 4px 16px rgba(255,172,72,0.3);">
                       ✓ CONFIRMAR MI ASISTENCIA
                     </a>
                   </td>
@@ -316,7 +319,7 @@ function generateEmailHTML(data: CitaData): string {
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center">
-                    <a href="${calendarLinks.cancel}" target="_blank" style="display:inline-block; padding:12px 32px; background-color:transparent; color:#999999; text-decoration:none; border-radius:12px; font-size:13px; font-weight:500; border:1px solid #E5E5E5; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+                    <a href="${calendarLinks.cancel}" target="_blank" style="display:inline-block; padding:12px 32px; background-color:transparent; color:#8A8A8A; text-decoration:none; border-radius:12px; font-size:13px; font-weight:500; border:1px solid #262626; font-family:'Trirong', Georgia, 'Times New Roman', serif;">
                       ${cancelarTexto}
                     </a>
                   </td>
@@ -328,17 +331,25 @@ function generateEmailHTML(data: CitaData): string {
           <!-- Tagline -->
           <tr>
             <td align="center" style="padding:0 24px 16px;">
-              <p style="margin:0; color:#FFAC48; font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+              <p style="margin:0; color:#FFAC48; font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; font-family:'Trirong', Georgia, 'Times New Roman', serif;">
                 TU ESTILO, NUESTRA PASIÓN
               </p>
             </td>
           </tr>
 
-          <!-- Footer -->
+          <!-- Footer Keicy -->
           <tr>
-            <td align="center" style="padding:0 24px 32px;">
-              <p style="margin:0; color:#999999; font-size:11px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-                Keicy Barber Club
+            <td align="center" style="padding:8px 24px 32px; border-top:1px solid #262626;">
+              <img src="https://www.keicybarberclub.com/assets/logo-oro.png" alt="Keicy Barber Club" width="90" style="width:90px; height:auto; display:block; margin:20px auto 14px;">
+              <p style="margin:0 0 6px; color:#B3B3B3; font-size:12px; line-height:1.6; font-family:'Trirong', Georgia, 'Times New Roman', serif;">Av. 4 Nte. #49, Urb. La Flora · Cali, Valle del Cauca</p>
+              <p style="margin:0 0 6px; color:#B3B3B3; font-size:12px; line-height:1.6; font-family:'Trirong', Georgia, 'Times New Roman', serif;">Lun - Sáb · 10am - 8pm</p>
+              <p style="margin:0 0 14px; font-size:12px; line-height:1.6; font-family:'Trirong', Georgia, 'Times New Roman', serif;">
+                <a href="https://wa.me/573171713526" target="_blank" style="color:#FFAC48; text-decoration:none;">WhatsApp +57 317 171 3526</a>
+                <span style="color:#555555;">&nbsp;·&nbsp;</span>
+                <a href="https://instagram.com/keicy_barber_club" target="_blank" style="color:#FFAC48; text-decoration:none;">@keicy_barber_club</a>
+              </p>
+              <p style="margin:0; color:#7A7A7A; font-size:11px; font-family:'Trirong', Georgia, 'Times New Roman', serif;">
+                <a href="https://www.keicybarberclub.com" target="_blank" style="color:#7A7A7A; text-decoration:none;">keicybarberclub.com</a> · Keicy Barber Club®
               </p>
             </td>
           </tr>
