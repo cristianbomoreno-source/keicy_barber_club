@@ -68,8 +68,8 @@ const BARBERIA_CONFIG = {
 
   // ===== COLORES (para personalizar tema) =====
   colores: {
-    primario: '#C9A35B',      // Dorado
-    secundario: '#0A0A0C',    // Negro
+    primario: '#FFAC48',      // Dorado
+    secundario: '#000000',    // Negro
     acento: '#10B981',        // Verde éxito
     error: '#EF4444'          // Rojo error
   },

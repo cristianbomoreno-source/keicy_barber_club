@@ -9,10 +9,10 @@
   if (splashShown) return;
 
   // Detectar tema actual
-  const theme = localStorage.getItem('dn_theme') || 'light';
+  const theme = localStorage.getItem('dn_theme') || 'dark';
   const isDark = theme === 'dark';
-  const bgColor = isDark ? '#0A0A0C' : '#FFFFFF';
-  const logoFilter = isDark ? 'none' : 'none';
+  const bgColor = isDark ? '#000000' : '#FFFFFF';
+  const logoSrc = isDark ? '/assets/logo-oro.png' : '/assets/logo-transparent.png';
 
   // Crear estilos
   const style = document.createElement('style');
@@ -33,9 +33,8 @@
       pointer-events: none;
     }
     .dn-splash-logo {
-      width: 120px;
-      height: 120px;
-      border-radius: 24px;
+      width: 160px;
+      height: auto;
       animation: dn-splash-pulse 1.5s ease-in-out infinite;
     }
     @keyframes dn-splash-pulse {
@@ -48,7 +47,7 @@
   // Crear splash
   const splash = document.createElement('div');
   splash.className = 'dn-splash';
-  splash.innerHTML = `<img src="/assets/logo-transparent.png" class="dn-splash-logo" alt="Keicy Barber">`;
+  splash.innerHTML = `<img src="${logoSrc}" class="dn-splash-logo" alt="Keicy Barber">`;
   document.body.insertBefore(splash, document.body.firstChild);
 
   // Ocultar splash después de la animación

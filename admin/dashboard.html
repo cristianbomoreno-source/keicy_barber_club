@@ -21,7 +21,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
-<meta name="theme-color" content="#0A0A0C">
+<meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Resumen</title>
 <script src="../assets/theme-manager.js"></script>
 <link rel="stylesheet" href="../assets/design-system.css">
@@ -85,7 +85,7 @@
   .plan-card{
     margin-top:16px; padding:16px;
     border:1px solid var(--gold); border-radius:16px;
-    background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0;
+    background:rgba(255,172,72,0.06); min-width:196px; flex-shrink:0;
     display:none;
   }
   .sidebar.expanded .plan-card{ display:block; }
@@ -494,7 +494,7 @@
           <span class="premium-shortcut-label">Reportes</span>
         </a>
         <a href="#resenasHoy" class="premium-shortcut" onclick="document.getElementById('resenasHoySection').scrollIntoView({behavior:'smooth'}); return false;">
-          <div class="premium-shortcut-icon" style="background:linear-gradient(135deg,#C9A35B,#E8D5A3);">
+          <div class="premium-shortcut-icon" style="background:linear-gradient(135deg,#FFAC48,#FFD9A8);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           </div>
           <span class="premium-shortcut-label">Reseñas</span>
@@ -647,7 +647,7 @@
         <h2 class="premium-section-title">⭐ Reseñas</h2>
         <div style="display:flex;align-items:center;gap:8px;">
           <input type="date" id="resenasDatePicker" style="background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:8px;padding:4px 8px;color:var(--text-primary);font-size:12px;font-family:inherit;">
-          <span class="premium-section-link" id="resenasHoyCount" style="background:linear-gradient(135deg,#C9A35B,#E8D5A3);color:#111;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">0 reseñas</span>
+          <span class="premium-section-link" id="resenasHoyCount" style="background:linear-gradient(135deg,#FFAC48,#FFD9A8);color:#111;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">0 reseñas</span>
         </div>
       </div>
       <div class="premium-visits-card" id="resenasHoyList" style="max-height:400px;overflow-y:auto;">
@@ -713,28 +713,28 @@
       <div class="card kpi-card">
         <div class="kpi-top">
           <div><div class="kpi-value" id="kpiIngresos">–</div><div class="kpi-label">Ingresos hoy</div></div>
-          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D4AF55" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 15s1 1.5 3 1.5 3-1 3-2-1-1.7-3-2.2-3-1.2-3-2.3 1-2 3-2 3 1.5 3 1.5" stroke-linecap="round"/></svg></div>
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#FFAC48" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9 15s1 1.5 3 1.5 3-1 3-2-1-1.7-3-2.2-3-1.2-3-2.3 1-2 3-2 3 1.5 3 1.5" stroke-linecap="round"/></svg></div>
         </div>
         <div class="kpi-delta" style="color:var(--text-secondary);" id="kpiIngresosNote">Hoy</div>
       </div>
       <div class="card kpi-card">
         <div class="kpi-top">
           <div><div class="kpi-value" id="kpiCitas">–</div><div class="kpi-label">Citas hoy</div></div>
-          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D4AF55" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg></div>
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#FFAC48" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/><path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round"/></svg></div>
         </div>
         <div class="kpi-delta" style="color:var(--text-secondary);" id="kpiCitasNote">Hoy</div>
       </div>
       <div class="card kpi-card">
         <div class="kpi-top">
           <div><div class="kpi-value" id="kpiClientes">–</div><div class="kpi-label">Clientes nuevos</div></div>
-          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D4AF55" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg></div>
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#FFAC48" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M4.5 20c1.6-3.6 4.4-5.4 7.5-5.4s5.9 1.8 7.5 5.4" stroke-linecap="round"/></svg></div>
         </div>
         <div class="kpi-delta" style="color:var(--text-secondary);">Hoy</div>
       </div>
       <div class="card kpi-card">
         <div class="kpi-top">
           <div><div class="kpi-value" id="kpiCalificacion">–</div><div class="kpi-label">Calificación</div></div>
-          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D4AF55" stroke-width="1.8"><path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6-4.4-4.2 6-.8L12 3z"/></svg></div>
+          <div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#FFAC48" stroke-width="1.8"><path d="M12 3l2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-3-5.3 3 1.1-6-4.4-4.2 6-.8L12 3z"/></svg></div>
         </div>
         <div class="kpi-delta" style="color:var(--text-secondary);" id="kpiCalificacionNote">Promedio de barberos</div>
       </div>
@@ -751,8 +751,8 @@
         <svg viewBox="0 0 560 180" style="width:100%; height:150px;" id="revenueSvg">
           <defs>
             <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#D4AF55" stop-opacity="0.35"/>
-              <stop offset="100%" stop-color="#D4AF55" stop-opacity="0"/>
+              <stop offset="0%" stop-color="#FFAC48" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#FFAC48" stop-opacity="0"/>
             </linearGradient>
           </defs>
           <g id="revenueChartContent"></g>
@@ -785,7 +785,7 @@
         <div class="gauge-wrap">
           <svg viewBox="0 0 140 80" style="width:150px;" id="gaugeSvg">
             <path d="M10 75 A60 60 0 0 1 130 75" fill="none" stroke="#2B2B2B" stroke-width="14"/>
-            <path d="M10 75 A60 60 0 0 1 113 27" fill="none" stroke="#D4AF55" stroke-width="14" stroke-linecap="round" id="gaugeArc"/>
+            <path d="M10 75 A60 60 0 0 1 113 27" fill="none" stroke="#FFAC48" stroke-width="14" stroke-linecap="round" id="gaugeArc"/>
           </svg>
           <div class="gauge-num" id="gaugeNum">– <span style="font-size:13px; color:var(--text-secondary); font-weight:500;"></span></div>
           <div class="gauge-sub" id="gaugeSub"></div>
@@ -803,12 +803,12 @@
         <div class="donut-wrap">
           <svg viewBox="0 0 120 120" style="width:110px; height:110px; flex-shrink:0;">
             <circle cx="60" cy="60" r="46" fill="none" stroke="#2B2B2B" stroke-width="16"/>
-            <circle cx="60" cy="60" r="46" fill="none" stroke="#D4AF55" stroke-width="16" stroke-dasharray="188 101" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="46" fill="none" stroke="#FFAC48" stroke-width="16" stroke-dasharray="188 101" transform="rotate(-90 60 60)"/>
             <circle cx="60" cy="60" r="46" fill="none" stroke="#8A8780" stroke-width="16" stroke-dasharray="72 217" stroke-dashoffset="-188" transform="rotate(-90 60 60)"/>
             <circle cx="60" cy="60" r="46" fill="none" stroke="#4a4a4a" stroke-width="16" stroke-dasharray="29 260" stroke-dashoffset="-260" transform="rotate(-90 60 60)"/>
           </svg>
           <div class="donut-legend">
-            <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:#D4AF55;"></span>App móvil</div><span class="legend-val">$9.522.500</span></div>
+            <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:#FFAC48;"></span>App móvil</div><span class="legend-val">$9.522.500</span></div>
             <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:#8A8780;"></span>WhatsApp</div><span class="legend-val">$3.656.250</span></div>
             <div class="legend-row"><div class="legend-left"><span class="legend-dot" style="background:#4a4a4a;"></span>Sitio web</div><span class="legend-val">$1.471.250</span></div>
           </div>
@@ -1009,9 +1009,9 @@
     });
     const polyPoints = points.map(p => p.join(',')).join(' ');
     const polygonPoints = polyPoints + ` ${points[points.length-1][0]},${chartH-10} ${points[0][0]},${chartH-10}`;
-    const dots = points.map(([x,y]) => `<circle cx="${x}" cy="${y}" r="3.5" fill="#D4AF55"/>`).join('');
+    const dots = points.map(([x,y]) => `<circle cx="${x}" cy="${y}" r="3.5" fill="#FFAC48"/>`).join('');
     document.getElementById('revenueChartContent').innerHTML = `
-      <polyline points="${polyPoints}" fill="none" stroke="#D4AF55" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <polyline points="${polyPoints}" fill="none" stroke="#FFAC48" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
       <polygon points="${polygonPoints}" fill="url(#areaFill)"/>
       ${dots}
     `;
@@ -1026,7 +1026,7 @@
     });
     const catEntries = Object.entries(catCounts).sort((a,b) => b[1]-a[1]).slice(0,5);
     const totalCitasSemana = citas.length;
-    const colors = ['#D4AF55','#8A8780','#6b6b6b','#E8C66A','#4a4a4a'];
+    const colors = ['#FFAC48','#8A8780','#6b6b6b','#FFC27A','#4a4a4a'];
     const circumference = 2 * Math.PI * 46;
     let offsetAcc = 0;
     const arcs = catEntries.map(([name, count], i) => {
@@ -1138,7 +1138,7 @@
       const timeLabel = mins < 60 ? `Hace ${mins} min` : `Hace ${Math.round(mins/60)} h`;
       return `
         <div class="activity-row">
-          <div class="activity-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#D4AF55" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/></svg></div>
+          <div class="activity-icon"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#FFAC48" stroke-width="1.8"><rect x="4" y="5" width="16" height="15" rx="3"/></svg></div>
           <div class="activity-mid"><div class="t">Cita ${c.estado}</div><div class="s">${clientName} · ${c.servicios?.nombre || ''}</div></div>
           <div class="activity-time">${timeLabel}</div>
         </div>`;
@@ -1635,7 +1635,7 @@
         return `
           <div class="premium-visit-item" style="padding:14px;border-bottom:1px solid var(--glass-border);">
             <div style="display:flex;align-items:center;gap:12px;">
-              <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#C9A35B,#E8D5A3);display:flex;align-items:center;justify-content:center;font-size:18px;">⭐</div>
+              <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FFAC48,#FFD9A8);display:flex;align-items:center;justify-content:center;font-size:18px;">⭐</div>
               <div style="flex:1;min-width:0;">
                 <div style="font-weight:700;font-size:13px;margin-bottom:2px;">${cliente}</div>
                 <div style="font-size:11px;color:var(--text-secondary);">para <span style="color:var(--gold);font-weight:600;">${barbero}</span></div>

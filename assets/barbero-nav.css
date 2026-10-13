@@ -30,10 +30,10 @@
   --barbero-toast-z: 200;
 
   /* Colores */
-  --barbero-nav-bg: var(--bg, #0A0A0C);
+  --barbero-nav-bg: var(--bg, #000000);
   --barbero-nav-border: rgba(255, 255, 255, 0.04);
   --barbero-nav-inactive: rgba(255, 255, 255, 0.38);
-  --barbero-nav-active: var(--gold, #D9B872);
+  --barbero-nav-active: var(--gold, #FFAC48);
 }
 
 /* ============================================
@@ -390,7 +390,7 @@ html.pwa-standalone body {
   --barbero-nav-bg: #FFFFFF;
   --barbero-nav-border: rgba(0, 0, 0, 0.08);
   --barbero-nav-inactive: rgba(0, 0, 0, 0.4);
-  --barbero-nav-active: #B8860B;
+  --barbero-nav-active: #CC7A14;
 }
 
 [data-theme="light"] .sheet-bg {

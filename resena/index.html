@@ -15,9 +15,9 @@
 <link rel="stylesheet" href="../assets/dn-modals.css">
 <style>
   :root {
-    --gold: #C9A35B;
-    --gold-light: #D4B06A;
-    --gold-bright: #E5C158;
+    --gold: #FFAC48;
+    --gold-light: #FFC27A;
+    --gold-bright: #FFC27A;
     --bg: #0a0a0a;
     --card: #141414;
     --card-2: #1a1a1a;
@@ -64,7 +64,7 @@
 
   /* Info del servicio */
   .service-info { text-align:center; padding-bottom:24px; margin-bottom:24px; border-bottom:1px solid var(--border); }
-  .service-icon { width:60px; height:60px; border-radius:16px; background:rgba(201,163,91,0.12); border:1px solid rgba(201,163,91,0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
+  .service-icon { width:60px; height:60px; border-radius:16px; background:rgba(255,172,72,0.12); border:1px solid rgba(255,172,72,0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
   .service-icon svg { width:28px; height:28px; color:var(--gold); }
   .service-name { font-size:17px; font-weight:700; color:var(--text); margin-bottom:6px; }
   .service-date { font-size:13px; color:var(--text-secondary); }
@@ -80,9 +80,9 @@
     display:flex; align-items:center; justify-content:center;
   }
   .star-btn svg { width:28px; height:28px; color:rgba(255,255,255,0.25); transition:all 0.25s ease; }
-  .star-btn:hover { border-color:var(--gold); transform:scale(1.08); background:rgba(201,163,91,0.1); }
+  .star-btn:hover { border-color:var(--gold); transform:scale(1.08); background:rgba(255,172,72,0.1); }
   .star-btn:hover svg { color:var(--gold); }
-  .star-btn.active { border-color:var(--gold); background:rgba(201,163,91,0.15); box-shadow:0 4px 15px rgba(201,163,91,0.25); }
+  .star-btn.active { border-color:var(--gold); background:rgba(255,172,72,0.15); box-shadow:0 4px 15px rgba(255,172,72,0.25); }
   .star-btn.active svg { color:var(--gold); fill:var(--gold); }
 
   /* Comment */
@@ -100,12 +100,12 @@
   /* Submit */
   .submit-btn {
     width:100%; padding:18px 24px; border-radius:14px; border:none; cursor:pointer;
-    background:linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 50%, #B8860B 100%);
+    background:linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 50%, #CC7A14 100%);
     color:#141414; font-family:inherit; font-size:16px; font-weight:800;
     transition:all 0.25s ease;
-    box-shadow: 0 4px 20px rgba(201,163,91,0.35);
+    box-shadow: 0 4px 20px rgba(255,172,72,0.35);
   }
-  .submit-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 30px rgba(201,163,91,0.5); }
+  .submit-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 30px rgba(255,172,72,0.5); }
   .submit-btn:disabled { opacity:0.4; cursor:not-allowed; box-shadow:none; }
 
   /* Success state */
@@ -140,7 +140,7 @@
 
   /* Reservar cita button */
   .reservar-prompt {
-    background:rgba(201,163,91,0.08); border:1px solid rgba(201,163,91,0.2);
+    background:rgba(255,172,72,0.08); border:1px solid rgba(255,172,72,0.2);
     border-radius:16px; padding:22px; margin-top:20px;
   }
   .reservar-prompt-title { font-size:15px; font-weight:700; color:var(--text); margin-bottom:10px; display:flex; align-items:center; gap:10px; }
@@ -153,7 +153,7 @@
     font-family:inherit; font-size:14px; font-weight:700;
     cursor:pointer; transition:all 0.2s ease; text-decoration:none;
   }
-  .reservar-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(201,163,91,0.35); }
+  .reservar-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(255,172,72,0.35); }
   .reservar-btn svg { width:18px; height:18px; }
 
   /* WhatsApp prompt for low ratings */

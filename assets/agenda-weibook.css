@@ -18,9 +18,9 @@
     --wb-border-light: #F3F4F6;
 
     /* Colores de marca */
-    --wb-gold: #D4A853;
-    --wb-gold-bg: #FDF8ED;
-    --wb-gold-dark: #B8923A;
+    --wb-gold: #FFAC48;
+    --wb-gold-bg: #FFF4E6;
+    --wb-gold-dark: #CC7A14;
 
     /* Estados de citas - Unificados con versión web */
     --wb-agendada: rgba(120,120,120,0.15);
@@ -99,25 +99,25 @@
      TEMA OSCURO - Agenda completa
      ================================================================ */
   [data-theme="dark"] .agenda-mobile {
-    --wb-bg: #0A0A0C;
-    --wb-bg-secondary: #16181D;
-    --wb-text: #F5F2EA;
+    --wb-bg: #000000;
+    --wb-bg-secondary: #141414;
+    --wb-text: #FFFFFF;
     --wb-text-secondary: #A0A0A0;
     --wb-text-muted: #6B6B6B;
-    --wb-border: #2A2D35;
+    --wb-border: #2A2A2A;
     --wb-border-light: #1E2028;
-    --wb-gold: #D9B872;
-    --wb-gold-bg: rgba(217, 184, 114, 0.12);
-    --wb-gold-dark: #C9A55A;
+    --wb-gold: #FFAC48;
+    --wb-gold-bg: rgba(255, 172, 72, 0.12);
+    --wb-gold-dark: #CC7A14;
     --wb-disponible: #1A1C22;
-    background: #0A0A0C !important;
+    background: #000000 !important;
   }
 
   [data-theme="dark"] .agenda-mobile .am-header,
   [data-theme="dark"] .agenda-mobile .am-barberos-header,
   [data-theme="dark"] .agenda-mobile .am-time-gutter,
   [data-theme="dark"] .agenda-mobile .am-barbero-col {
-    background: #0A0A0C !important;
+    background: #000000 !important;
   }
 
   [data-theme="dark"] .agenda-mobile .am-logo {
@@ -127,7 +127,7 @@
   [data-theme="dark"] .agenda-mobile .am-barbero-name,
   [data-theme="dark"] .agenda-mobile .am-date-current,
   [data-theme="dark"] .agenda-mobile .am-day-num {
-    color: #F5F2EA !important;
+    color: #FFFFFF !important;
   }
 
   [data-theme="dark"] .agenda-mobile .am-day-name,
@@ -136,8 +136,8 @@
   }
 
   [data-theme="dark"] .agenda-mobile .am-sede-tab {
-    background: #16181D !important;
-    border-color: #2A2D35 !important;
+    background: #141414 !important;
+    border-color: #2A2A2A !important;
     color: #A0A0A0 !important;
   }
 
@@ -157,8 +157,8 @@
   }
 
   [data-theme="dark"] .agenda-mobile .am-icon-btn {
-    background: #16181D !important;
-    border-color: #2A2D35 !important;
+    background: #141414 !important;
+    border-color: #2A2A2A !important;
   }
 
   [data-theme="dark"] .agenda-mobile .am-icon-btn svg {
@@ -166,16 +166,16 @@
   }
 
   [data-theme="dark"] .agenda-mobile .am-date-arrow {
-    background: #16181D !important;
+    background: #141414 !important;
   }
 
   [data-theme="dark"] .agenda-mobile .am-date-arrow svg {
-    color: #F5F2EA !important;
+    color: #FFFFFF !important;
   }
 
   [data-theme="dark"] .agenda-mobile .am-hour-slot {
     background: #1A1C22 !important;
-    border-color: #2A2D35 !important;
+    border-color: #2A2A2A !important;
   }
 
   [data-theme="dark"] .agenda-mobile .am-hour-slot::after {
@@ -258,7 +258,7 @@
   }
 
   [data-theme="dark"] .agenda-mobile .am-bloqueo {
-    background: #2A2D35 !important;
+    background: #2A2A2A !important;
   }
 
   [data-theme="dark"] .agenda-mobile .am-bloqueo-text {
@@ -267,8 +267,8 @@
 
   /* Bottom nav en tema oscuro */
   [data-theme="dark"] .dn-bottom-nav {
-    background: #0A0A0C !important;
-    border-top-color: #2A2D35 !important;
+    background: #000000 !important;
+    border-top-color: #2A2A2A !important;
   }
 
   [data-theme="dark"] .dn-bottom-nav .dn-nav-item {
@@ -280,26 +280,26 @@
   }
 
   [data-theme="dark"] .dn-bottom-nav .dn-nav-item.active {
-    background: rgba(217, 184, 114, 0.12) !important;
-    color: #D9B872 !important;
+    background: rgba(255, 172, 72, 0.12) !important;
+    color: #FFAC48 !important;
   }
 
   [data-theme="dark"] .dn-bottom-nav .dn-nav-item.active svg {
-    stroke: #D9B872 !important;
+    stroke: #FFAC48 !important;
   }
 
   /* Modal en tema oscuro */
   [data-theme="dark"] #newApptModal .modal-box,
   [data-theme="dark"] #amDetailModal .modal-box,
   [data-theme="dark"] .modal-box {
-    background: #16181D !important;
-    border-color: #2A2D35 !important;
+    background: #141414 !important;
+    border-color: #2A2A2A !important;
   }
 
   [data-theme="dark"] #newApptModal .modal-title,
   [data-theme="dark"] #amDetailModal .modal-title,
   [data-theme="dark"] .modal-box .modal-title {
-    color: #F5F2EA !important;
+    color: #FFFFFF !important;
   }
 
   /* Popup detalle cita - tema oscuro */
@@ -308,7 +308,7 @@
   [data-theme="dark"] .modal-box .det-row,
   [data-theme="dark"] .modal-box .det-row span,
   [data-theme="dark"] .modal-box .det-row b {
-    color: #F5F2EA !important;
+    color: #FFFFFF !important;
   }
 
   [data-theme="dark"] #amDetailModal .modal-close,
@@ -318,33 +318,33 @@
 
   [data-theme="dark"] #amDetailModal .det-phone-link,
   [data-theme="dark"] .modal-box .det-phone-link {
-    color: #D9B872 !important;
+    color: #FFAC48 !important;
   }
 
   [data-theme="dark"] #amDetailModal .det-row,
   [data-theme="dark"] .modal-box .det-row {
-    background: #0A0A0C !important;
-    border: 1px solid #2A2D35 !important;
+    background: #000000 !important;
+    border: 1px solid #2A2A2A !important;
   }
 
   [data-theme="dark"] #amDetailModal .det-estado-pill,
   [data-theme="dark"] .modal-box .det-estado-pill {
-    background: #0A0A0C !important;
-    border: 1px solid #2A2D35 !important;
+    background: #000000 !important;
+    border: 1px solid #2A2A2A !important;
     color: #A0A0A0 !important;
   }
 
   [data-theme="dark"] #amDetailModal .apple-btn,
   [data-theme="dark"] .modal-box .apple-btn {
-    background: #0A0A0C !important;
-    border: 1px solid #2A2D35 !important;
-    color: #F5F2EA !important;
+    background: #000000 !important;
+    border: 1px solid #2A2A2A !important;
+    color: #FFFFFF !important;
   }
 
   [data-theme="dark"] #amDetailModal .apple-btn.primary,
   [data-theme="dark"] .modal-box .apple-btn.primary {
-    background: #D9B872 !important;
-    border-color: #D9B872 !important;
+    background: #FFAC48 !important;
+    border-color: #FFAC48 !important;
     color: #000 !important;
   }
 
@@ -359,8 +359,8 @@
   }
 
   [data-theme="dark"] #detailModal .modal-box {
-    background: #16181D !important;
-    border: 1px solid #2A2D35 !important;
+    background: #141414 !important;
+    border: 1px solid #2A2A2A !important;
   }
 
   [data-theme="dark"] #detailModal .modal-box *,
@@ -368,7 +368,7 @@
   [data-theme="dark"] #detailModal .modal-sub,
   [data-theme="dark"] #detailModal #detBody,
   [data-theme="dark"] #detailModal #detBody * {
-    color: #F5F2EA !important;
+    color: #FFFFFF !important;
   }
 
   [data-theme="dark"] #detailModal .modal-close {
@@ -376,14 +376,14 @@
   }
 
   [data-theme="dark"] #detailModal .apple-btn {
-    background: #0A0A0C !important;
-    border: 1px solid #2A2D35 !important;
-    color: #F5F2EA !important;
+    background: #000000 !important;
+    border: 1px solid #2A2A2A !important;
+    color: #FFFFFF !important;
   }
 
   [data-theme="dark"] #detailModal .apple-btn.primary {
-    background: #D9B872 !important;
-    border-color: #D9B872 !important;
+    background: #FFAC48 !important;
+    border-color: #FFAC48 !important;
     color: #000 !important;
   }
 
@@ -393,12 +393,12 @@
   }
 
   [data-theme="dark"] #phoneOptionsModal .modal-box {
-    background: #16181D !important;
-    border: 1px solid #2A2D35 !important;
+    background: #141414 !important;
+    border: 1px solid #2A2A2A !important;
   }
 
   [data-theme="dark"] #phoneOptionsModal .modal-box * {
-    color: #F5F2EA !important;
+    color: #FFFFFF !important;
   }
 
   [data-theme="dark"] #newApptModal .modal-sub,
@@ -407,54 +407,54 @@
   }
 
   [data-theme="dark"] #newApptModal .field label {
-    color: #F5F2EA !important;
+    color: #FFFFFF !important;
   }
 
   [data-theme="dark"] #newApptModal .field input,
   [data-theme="dark"] #newApptModal .field select {
-    background: #0A0A0C !important;
-    border-color: #2A2D35 !important;
-    color: #F5F2EA !important;
+    background: #000000 !important;
+    border-color: #2A2A2A !important;
+    color: #FFFFFF !important;
   }
 
   [data-theme="dark"] #newApptModal .phone-field {
-    background: #0A0A0C !important;
-    border-color: #2A2D35 !important;
+    background: #000000 !important;
+    border-color: #2A2A2A !important;
   }
 
   [data-theme="dark"] #newApptModal .phone-field .phone-prefix {
-    background: rgba(217, 184, 114, 0.15) !important;
-    color: #D9B872 !important;
-    border-right-color: #2A2D35 !important;
+    background: rgba(255, 172, 72, 0.15) !important;
+    color: #FFAC48 !important;
+    border-right-color: #2A2A2A !important;
   }
 
   [data-theme="dark"] #newApptModal .na-category-chips .na-cat-chip {
-    background: #0A0A0C !important;
-    border-color: #2A2D35 !important;
+    background: #000000 !important;
+    border-color: #2A2A2A !important;
     color: #A0A0A0 !important;
   }
 
   [data-theme="dark"] #newApptModal .na-category-chips .na-cat-chip.active {
-    background: #D9B872 !important;
-    border-color: #D9B872 !important;
+    background: #FFAC48 !important;
+    border-color: #FFAC48 !important;
     color: #000 !important;
   }
 
   [data-theme="dark"] #newApptModal .na-service-list {
-    background: #0A0A0C !important;
+    background: #000000 !important;
   }
 
   [data-theme="dark"] #newApptModal .na-service-card {
-    background: #16181D !important;
-    border-color: #2A2D35 !important;
+    background: #141414 !important;
+    border-color: #2A2A2A !important;
   }
 
   [data-theme="dark"] #newApptModal .na-service-card .na-service-name {
-    color: #F5F2EA !important;
+    color: #FFFFFF !important;
   }
 
   [data-theme="dark"] #newApptModal .na-service-card .na-service-price {
-    color: #D9B872 !important;
+    color: #FFAC48 !important;
   }
 
   [data-theme="dark"] #newApptModal .na-service-card .na-service-dur {
@@ -462,8 +462,8 @@
   }
 
   [data-theme="dark"] #newApptModal .na-service-card.selected {
-    background: #D9B872 !important;
-    border-color: #D9B872 !important;
+    background: #FFAC48 !important;
+    border-color: #FFAC48 !important;
   }
 
   [data-theme="dark"] #newApptModal .na-service-card.selected .na-service-name,
@@ -473,21 +473,21 @@
   }
 
   [data-theme="dark"] #newApptModal .apple-btn {
-    background: #0A0A0C !important;
-    border-color: #2A2D35 !important;
-    color: #F5F2EA !important;
+    background: #000000 !important;
+    border-color: #2A2A2A !important;
+    color: #FFFFFF !important;
   }
 
   [data-theme="dark"] #newApptModal .apple-btn.primary {
-    background: #D9B872 !important;
-    border-color: #D9B872 !important;
+    background: #FFAC48 !important;
+    border-color: #FFAC48 !important;
     color: #000 !important;
   }
 
   [data-theme="dark"] #newApptModal .na-service-summary {
-    background: rgba(217, 184, 114, 0.15) !important;
-    border-color: #D9B872 !important;
-    color: #F5F2EA !important;
+    background: rgba(255, 172, 72, 0.15) !important;
+    border-color: #FFAC48 !important;
+    color: #FFFFFF !important;
   }
 
   /* ================================================================
@@ -1515,7 +1515,7 @@
 
   #newApptModal .phone-field .phone-prefix {
     color: var(--wb-gold-dark) !important;
-    background: rgba(212,168,83,0.1) !important;
+    background: rgba(255,172,72,0.1) !important;
     border-right: 1px solid var(--wb-border) !important;
   }
 

@@ -22,7 +22,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
-<meta name="theme-color" content="#0A0A0C">
+<meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Barbero</title>
 <script src="../assets/theme-manager.js"></script>
 <link rel="stylesheet" href="../assets/design-system.css">
@@ -38,7 +38,7 @@
   }
   [data-theme="dark"] body{
     background:
-      radial-gradient(ellipse 120% 60% at 50% -10%, rgba(217,184,114,0.08), transparent 60%),
+      radial-gradient(ellipse 120% 60% at 50% -10%, rgba(255,172,72,0.08), transparent 60%),
       radial-gradient(ellipse 100% 50% at 90% 110%, rgba(255,255,255,0.035), transparent 55%),
       #000000;
   }
@@ -67,8 +67,8 @@
   .hero-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
   .hero-fallback{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    font-size:52px; font-weight:800; color:rgba(217,184,114,0.35);
-    background:radial-gradient(ellipse 90% 60% at 50% 20%, rgba(217,184,114,0.1), transparent 60%), linear-gradient(165deg, #1c1c1c, #0a0a0a);
+    font-size:52px; font-weight:800; color:rgba(255,172,72,0.35);
+    background:radial-gradient(ellipse 90% 60% at 50% 20%, rgba(255,172,72,0.1), transparent 60%), linear-gradient(165deg, #1c1c1c, #0a0a0a);
   }
   .hero-overlay{
     position:absolute; inset:0; pointer-events:none;
@@ -104,7 +104,7 @@
     background:rgba(52,211,153,0.2); border:1px solid rgba(52,211,153,0.4); color:#5EEAB2;
     transition:background .3s ease, border-color .3s ease, color .3s ease;
   }
-  .hdr-estado.busy{ background:rgba(217,184,114,0.18); border-color:rgba(217,184,114,0.35); color:var(--ring-gold); }
+  .hdr-estado.busy{ background:rgba(255,172,72,0.18); border-color:rgba(255,172,72,0.35); color:var(--ring-gold); }
   .hdr-estado .dot{ width:5px; height:5px; border-radius:50%; background:currentColor; flex-shrink:0; }
   .hero-chips{ display:flex; gap:6px; margin-top:8px; }
   .hero-chip{
@@ -115,7 +115,7 @@
   .hero-chip:active{ transform:scale(0.96); background:rgba(255,255,255,0.15); }
   .hero-chip.off .hero-chip-icon{ background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.4); }
   .hero-chip.off .v{ color:rgba(255,255,255,0.45); }
-  .hero-chip-icon{ width:24px; height:24px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(217,184,114,0.25); color:var(--ring-gold); }
+  .hero-chip-icon{ width:24px; height:24px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(255,172,72,0.25); color:var(--ring-gold); }
   .hero-chip-icon svg{ width:12px; height:12px; }
   .hero-chip-txt{ min-width:0; }
   .hero-chip-txt .l{ display:block; font-size:7px; font-weight:800; letter-spacing:.5px; color:rgba(255,255,255,0.55); text-transform:uppercase; }
@@ -175,11 +175,11 @@
   .client-eyebrow-row svg{ width:10px; height:10px; opacity:.85; color:var(--ring-gold); }
   .client-eyebrow{ font-size:9px; font-weight:700; letter-spacing:0.8px; color:var(--ring-gold); text-transform:uppercase; }
   .client-name{ font-size:17px; font-weight:800; margin-top:3px; letter-spacing:-0.3px; line-height:1.15; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .client-avatar-float{ width:72px; height:72px; border-radius:50%; background:var(--ring-gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:800; margin-bottom:8px; overflow:hidden; border:3px solid rgba(217,184,114,0.3); box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+  .client-avatar-float{ width:72px; height:72px; border-radius:50%; background:var(--ring-gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:800; margin-bottom:8px; overflow:hidden; border:3px solid rgba(255,172,72,0.3); box-shadow:0 8px 24px rgba(0,0,0,0.4); }
   .client-avatar-float img{ width:100%; height:100%; object-fit:cover; }
   .client-service{
     display:inline-flex; margin-top:4px; font-size:10px; color:var(--ring-gold); font-weight:700;
-    background:rgba(217,184,114,0.1); border:1px solid rgba(217,184,114,0.25); padding:2px 8px; border-radius:999px;
+    background:rgba(255,172,72,0.1); border:1px solid rgba(255,172,72,0.25); padding:2px 8px; border-radius:999px;
   }
   .client-time{ font-size:10px; color:rgba(255,255,255,0.4); margin-top:1px; display:flex; align-items:center; gap:4px; font-weight:500; }
   .client-time svg{ width:10px; height:10px; opacity:0.75; }
@@ -195,7 +195,7 @@
   .time-segbar{ display:flex; gap:3.5px; margin-top:11px; }
   .time-seg{ flex:1; height:6px; border-radius:3px; background:rgba(255,255,255,0.08); transition:background .4s ease; }
   .time-seg.filled{ background:linear-gradient(90deg,#34D399,#5EEAB2); }
-  .time-seg.filled.gold{ background:linear-gradient(90deg,var(--ring-gold),#E6CB90); }
+  .time-seg.filled.gold{ background:linear-gradient(90deg,var(--ring-gold),#FFC27A); }
   .time-seg.filled.red{ background:linear-gradient(90deg,#FF6B5E,#FF8A7E); }
   .time-ring-wrap{ position:relative; width:60px; height:60px; flex-shrink:0; }
   .time-ring{ transform:rotate(-90deg); transform-origin:50% 50%; }
@@ -221,7 +221,7 @@
     transition:transform .14s var(--ease-ios), background .2s ease, border-color .2s ease, opacity .3s ease;
   }
   .step-tile.pending{ opacity:0.5; }
-  .step-tile.active{ cursor:pointer; border-color:rgba(217,184,114,0.5); }
+  .step-tile.active{ cursor:pointer; border-color:rgba(255,172,72,0.5); }
   .step-tile.active:active{ transform:scale(0.93); }
   .step-tile.done{ background:rgba(52,211,153,0.09); border-color:rgba(52,211,153,0.4); }
   .step-tile-icon{
@@ -232,8 +232,8 @@
   .step-tile.done .step-tile-icon{ background:rgba(52,211,153,0.18); border-color:rgba(52,211,153,0.55); color:#5EEAB2; animation:stepDone .4s var(--ease-ios); }
   @keyframes stepDone{ 0%{ transform:scale(0.7); } 60%{ transform:scale(1.12); } 100%{ transform:scale(1); } }
   .step-tile.active .step-tile-icon{
-    background:rgba(217,184,114,0.16); border-color:rgba(217,184,114,0.65); color:var(--ring-gold);
-    box-shadow:0 0 0 1px rgba(217,184,114,0.35), 0 0 16px 3px rgba(217,184,114,0.22);
+    background:rgba(255,172,72,0.16); border-color:rgba(255,172,72,0.65); color:var(--ring-gold);
+    box-shadow:0 0 0 1px rgba(255,172,72,0.35), 0 0 16px 3px rgba(255,172,72,0.22);
     animation:haloPulse 2.2s ease-in-out infinite;
   }
   @keyframes haloPulse{ 0%,100%{ opacity:0.65; } 50%{ opacity:1; } }
@@ -266,10 +266,10 @@
     flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:8px 6px;
     border-radius:18px; cursor:pointer; text-align:center;
     background:linear-gradient(165deg, var(--gold-bright), var(--gold));
-    box-shadow:0 6px 16px rgba(217,184,114,0.22);
+    box-shadow:0 6px 16px rgba(255,172,72,0.22);
     transition:transform .15s var(--ease-ios), box-shadow .2s ease;
   }
-  .add-service-btn:active{ transform:scale(0.95); box-shadow:0 4px 12px rgba(217,184,114,0.18); }
+  .add-service-btn:active{ transform:scale(0.95); box-shadow:0 4px 12px rgba(255,172,72,0.18); }
   .add-service-btn .plus-circle{
     width:24px; height:24px; border-radius:50%; background:rgba(255,255,255,0.14);
     display:flex; align-items:center; justify-content:center;
@@ -289,11 +289,11 @@
   }
   .swipe-track::before{
     content:''; position:absolute; inset:0; border-radius:22px; padding:1px;
-    background:linear-gradient(120deg, rgba(217,184,114,0.5), rgba(217,184,114,0) 40%, rgba(217,184,114,0) 60%, rgba(217,184,114,0.35));
+    background:linear-gradient(120deg, rgba(255,172,72,0.5), rgba(255,172,72,0) 40%, rgba(255,172,72,0) 60%, rgba(255,172,72,0.35));
     -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none;
   }
-  .swipe-fill{ position:absolute; left:0; top:0; bottom:0; width:50px; background:linear-gradient(90deg, rgba(217,184,114,0.22), rgba(217,184,114,0.02)); pointer-events:none; transition:width .1s linear; }
+  .swipe-fill{ position:absolute; left:0; top:0; bottom:0; width:50px; background:linear-gradient(90deg, rgba(255,172,72,0.22), rgba(255,172,72,0.02)); pointer-events:none; transition:width .1s linear; }
   .swipe-shimmer{
     position:absolute; inset:0; pointer-events:none; opacity:0.5;
     background:linear-gradient(100deg, transparent 40%, rgba(255,255,255,0.09) 50%, transparent 60%);
@@ -309,7 +309,7 @@
     position:absolute; left:3px; top:3px; width:40px; height:40px; border-radius:50%;
     background:linear-gradient(165deg, var(--gold-bright), var(--gold));
     display:flex; align-items:center; justify-content:center;
-    cursor:grab; touch-action:none; box-shadow:0 4px 14px rgba(217,184,114,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset;
+    cursor:grab; touch-action:none; box-shadow:0 4px 14px rgba(255,172,72,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset;
     transition:left 0.28s cubic-bezier(.2,.9,.3,1.3), transform .15s var(--ease-ios); z-index:2;
   }
   .swipe-handle.dragging{ transition:transform .1s ease; cursor:grabbing; transform:scale(1.06); }
@@ -378,7 +378,7 @@
   .type-card:active{ transform:scale(0.96); }
   .type-card .type-icon{ font-size:32px; }
   .type-card .type-label{ font-size:14px; font-weight:800; }
-  .type-card.selected{ border-color:var(--gold); background:rgba(217,184,114,0.12); }
+  .type-card.selected{ border-color:var(--gold); background:rgba(255,172,72,0.12); }
 
   .add-back-btn{
     display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:12px; margin-bottom:14px;
@@ -395,7 +395,7 @@
     transition:transform .14s var(--ease-ios), border-color .15s ease, background .15s ease;
   }
   .cat-chip:active{ transform:scale(0.94); }
-  .cat-chip.selected{ border-color:var(--gold); background:rgba(217,184,114,0.12); }
+  .cat-chip.selected{ border-color:var(--gold); background:rgba(255,172,72,0.12); }
   .cat-chip .ic{ font-size:20px; }
   .cat-chip .t{ font-size:11px; font-weight:700; }
 
@@ -429,11 +429,11 @@
   .added-row .trash-btn svg{ width:14px; height:14px; stroke:#FF6B5E; }
   .added-row .edit-btn{
     width:28px; height:28px; border-radius:8px; cursor:pointer;
-    background:rgba(212,175,55,0.15); border:1px solid rgba(212,175,55,0.35);
+    background:rgba(255,172,72,0.15); border:1px solid rgba(255,172,72,0.35);
     display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-left:8px;
     transition:background .15s ease, transform .12s ease;
   }
-  .added-row .edit-btn:active{ background:rgba(212,175,55,0.35); transform:scale(0.9); }
+  .added-row .edit-btn:active{ background:rgba(255,172,72,0.35); transform:scale(0.9); }
   .added-row .edit-btn svg{ width:14px; height:14px; stroke:var(--gold); }
 
   .order-total-row{ display:flex; justify-content:space-between; align-items:center; padding-top:14px; margin-top:6px; border-top:1px solid rgba(255,255,255,0.08); }
@@ -470,7 +470,7 @@
     width:64px; height:64px; border-radius:50%; margin:0 auto 16px;
     display:flex; align-items:center; justify-content:center;
     font-size:22px; font-weight:800; color:var(--ring-gold);
-    background:rgba(217,184,114,0.15); border:2px solid rgba(217,184,114,0.3);
+    background:rgba(255,172,72,0.15); border:2px solid rgba(255,172,72,0.3);
   }
   .ganancias-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
   .ganancias-name { text-align:center; font-size:16px; font-weight:700; margin-bottom:20px; }
@@ -550,7 +550,7 @@
           <div class="hero-chip-txt"><span class="l">Tu bebida</span><span class="v" id="heroDrinkVal">Registrar</span></div>
         </div>
         <div class="hero-chip" onclick="openResenasModal()">
-          <span class="hero-chip-icon" style="background:rgba(255,215,0,0.2); color:#FFD700;"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
+          <span class="hero-chip-icon" style="background:rgba(255,172,72,0.2); color:#FFAC48;"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
           <div class="hero-chip-txt"><span class="l">Calificacion</span><span class="v" id="heroResenasVal">—</span></div>
         </div>
       </div>
@@ -625,7 +625,7 @@
       <div class="ganancias-modal-close" onclick="closeResenasModal()">✕</div>
     </div>
     <div style="text-align:center; margin-bottom:16px;">
-      <div id="resenasPromedio" style="font-size:48px; font-weight:800; color:#FFD700;">—</div>
+      <div id="resenasPromedio" style="font-size:48px; font-weight:800; color:#FFAC48;">—</div>
       <div id="resenasStars" style="font-size:24px; margin:4px 0;">☆☆☆☆☆</div>
       <div id="resenasCount" style="font-size:13px; color:rgba(0,0,0,0.5);">Sin reseñas</div>
     </div>
@@ -899,7 +899,7 @@
     updateHeroDrinkChip(null);
     stage.innerHTML = `
       <div class="empty-state fade-in">
-        <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.6"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div>
+        <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#FFAC48" stroke-width="1.6"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div>
         <div class="empty-title">${title}</div>
         <div class="empty-sub">${sub}</div>
       </div>`;
@@ -964,7 +964,7 @@
     stage.innerHTML = `
       <div class="stage" style="justify-content:center;">
         <div class="empty-state fade-in">
-          <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div class="empty-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#FFAC48" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg></div>
           <div class="empty-title">${title}</div>
           <div class="waiting-note">${sub}</div>
         </div>
@@ -1361,7 +1361,7 @@
         <div class="swipe-shimmer"></div>
         <div class="swipe-fill" id="swipeFill"></div>
         <div class="swipe-label"><div class="t">DESLIZA PARA ENVIAR A CAJA</div><div class="s">Se enviará la orden de cobro a recepción</div></div>
-        <div class="swipe-icon-hint"><svg viewBox="0 0 24 24" fill="none" stroke="#D9B872" stroke-width="2"><path d="M7 6l5 6-5 6M13 6l5 6-5 6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="swipe-icon-hint"><svg viewBox="0 0 24 24" fill="none" stroke="#FFAC48" stroke-width="2"><path d="M7 6l5 6-5 6M13 6l5 6-5 6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="swipe-handle" id="swipeHandle"><svg viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="2.4"><path d="M9 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </div>`;
   }
@@ -2474,9 +2474,9 @@
       let starsHTML = '';
       for (let i = 1; i <= 5; i++) {
         if (i <= fullStars) {
-          starsHTML += '<span style="color:#FFD700;">★</span>';
+          starsHTML += '<span style="color:#FFAC48;">★</span>';
         } else if (i === fullStars + 1 && hasHalf) {
-          starsHTML += '<span style="color:#FFD700;">★</span>';
+          starsHTML += '<span style="color:#FFAC48;">★</span>';
         } else {
           starsHTML += '<span style="color:#ddd;">☆</span>';
         }
@@ -2493,7 +2493,7 @@
         let stars = '';
         for (let i = 1; i <= 5; i++) {
           stars += i <= r.calificacion
-            ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="#FFD700" stroke="#FFD700" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
+            ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="#FFAC48" stroke="#FFAC48" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
             : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ddd" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
         }
 

@@ -20,7 +20,7 @@
   <meta name="ICBM" content="3.4516, -76.5320">
 
   <!-- PWA -->
-  <meta name="theme-color" content="#FFFFFF">
+  <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="application-name" content="Keicy Barber Club">
@@ -244,34 +244,34 @@
 
   <!-- Preload imagen crítica LCP -->
   <link rel="preload" as="image" href="assets/pingpong-club.jpg" fetchpriority="high">
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Trirong:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      /* Paleta minimalista clara */
-      --bg-primary: #FFFFFF;
-      --bg-secondary: #FAFAFA;
-      --bg-tertiary: #F5F5F5;
-      --text-primary: #1A1A1A;
-      --text-secondary: #666666;
-      --text-muted: #999999;
-      --divider: #E5E5E5;
-      --divider-light: #F0F0F0;
-      --gold: #E5C066;
-      --gold-bright: #F0D080;
-      --gold-dark: #D4A855;
-      --gold-glow: rgba(201, 164, 92, 0.1);
+      /* Paleta Manual de Marca Keicy: negro, oro, blanco */
+      --bg-primary: #000000;
+      --bg-secondary: #0E0E0E;
+      --bg-tertiary: #141414;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B3B3B3;
+      --text-muted: #7A7A7A;
+      --divider: #262626;
+      --divider-light: #1C1C1C;
+      --gold: #FFAC48;
+      --gold-bright: #FFC27A;
+      --gold-dark: #CC7A14;
+      --gold-glow: rgba(255, 172, 72, 0.1);
 
       /* Variables legacy para compatibilidad */
-      --black-deep: #FFFFFF;
-      --black-secondary: #FAFAFA;
-      --gray-dark: #F5F5F5;
-      --gray-card: #FFFFFF;
-      --white: #1A1A1A;
-      --gray-text: #666666;
+      --black-deep: #000000;
+      --black-secondary: #0E0E0E;
+      --gray-dark: #141414;
+      --gray-card: #0E0E0E;
+      --white: #FFFFFF;
+      --gray-text: #B3B3B3;
 
-      --font-heading: 'Bebas Neue', sans-serif;
-      --font-body: 'Inter', sans-serif;
+      --font-heading: 'Roca', 'Trirong', serif;
+      --font-body: 'Trirong', Georgia, serif;
       --nav-height: 70px;
       --safe-top: env(safe-area-inset-top);
       --safe-bottom: env(safe-area-inset-bottom);
@@ -397,7 +397,7 @@
     .btn-reservar:hover {
       background: var(--gold-dark);
       transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(201, 164, 92, 0.3);
+      box-shadow: 0 8px 25px rgba(255, 172, 72, 0.3);
     }
 
     .btn-ingresar {
@@ -636,13 +636,13 @@
       border: none;
       cursor: pointer;
       transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(201, 164, 92, 0.25);
+      box-shadow: 0 4px 20px rgba(255, 172, 72, 0.25);
     }
 
     .btn-primary:hover {
       background: var(--gold-dark);
       transform: translateY(-3px);
-      box-shadow: 0 8px 30px rgba(201, 164, 92, 0.35);
+      box-shadow: 0 8px 30px rgba(255, 172, 72, 0.35);
     }
 
     .btn-secondary {
@@ -699,7 +699,7 @@
       height: 48px;
       min-width: 48px;
       background: var(--gold-glow);
-      border: 1px solid rgba(201, 164, 92, 0.2);
+      border: 1px solid rgba(255, 172, 72, 0.2);
       border-radius: 12px;
       display: flex;
       align-items: center;
@@ -1149,7 +1149,7 @@
       height: 40px;
       border-radius: 10px;
       background: var(--gold-glow);
-      border: 1px solid rgba(201, 164, 92, 0.2);
+      border: 1px solid rgba(255, 172, 72, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1651,7 +1651,7 @@
         height: 44px;
         min-width: 44px;
         background: var(--gold-glow);
-        border: 1px solid rgba(214, 174, 85, 0.3);
+        border: 1px solid rgba(255, 172, 72, 0.3);
         border-radius: 12px;
         display: flex;
         align-items: center;
@@ -2058,7 +2058,7 @@
 
     .modal-box {
       background: var(--gray-dark);
-      border: 1px solid rgba(214, 174, 85, 0.2);
+      border: 1px solid rgba(255, 172, 72, 0.2);
       border-radius: 24px;
       padding: 40px;
       max-width: 400px;
@@ -2136,7 +2136,7 @@
       height: 48px;
       border-radius: 12px;
       background: var(--gold-glow);
-      border: 1px solid rgba(214, 174, 85, 0.2);
+      border: 1px solid rgba(255, 172, 72, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -2250,7 +2250,7 @@
     }
 
     .testimonial-avatar-fallback {
-      background: rgba(201,163,91,0.15);
+      background: rgba(255,172,72,0.15);
       color: var(--gold);
       display: flex;
       align-items: center;
@@ -2892,7 +2892,7 @@
   <header class="header" id="header">
     <div class="header-inner">
       <a href="#" class="logo">
-        <img src="assets/logo-transparent.png" alt="Keicy Barber" width="300" height="300">
+        <img src="assets/logo-oro.png" alt="Keicy Barber" width="300" height="300">
       </a>
 
       <nav class="nav-desktop">
@@ -2952,7 +2952,7 @@
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <!-- Logo grande centrado -->
-      <img src="assets/logo-transparent.png" alt="Keicy Barber Club" class="hero-logo-large" width="300" height="300">
+      <img src="assets/logo-oro.png" alt="Keicy Barber Club" class="hero-logo-large" width="300" height="300">
 
       <span class="hero-badge">LA MEJOR BARBERÍA EN CALI</span>
 
@@ -3365,7 +3365,7 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <div class="logo">
-          <img src="assets/logo-transparent.png" alt="Keicy Barber" width="300" height="300">
+          <img src="assets/logo-oro.png" alt="Keicy Barber" width="300" height="300">
         </div>
         <p class="footer-tagline">KEICY BARBER CLUB®</p>
         <p class="footer-location">Cali, Colombia</p>
@@ -3435,7 +3435,7 @@
   <div class="modal-overlay" id="loginModal">
     <div class="modal-box">
       <button class="modal-close" onclick="closeLoginModal()">×</button>
-      <img src="assets/logo-transparent.png" alt="Keicy Barber" class="modal-logo">
+      <img src="assets/logo-oro.png" alt="Keicy Barber" class="modal-logo">
       <h3 class="modal-title">INGRESAR</h3>
       <p class="modal-subtitle">Selecciona tu tipo de acceso</p>
 

@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
-<meta name="theme-color" content="#0A0A0C">
+<meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Fidelización</title>
 <script src="../assets/theme-manager.js"></script>
 <link rel="stylesheet" href="../assets/design-system.css">
@@ -51,7 +51,7 @@
   .nav-section-label{ display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
   .nav-section-label:first-of-type{ padding-top:2px; }
   .sidebar.expanded .nav-section-label{ display:block; }
-  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0; display:none; }
+  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(255,172,72,0.06); min-width:196px; flex-shrink:0; display:none; }
   .sidebar.expanded .plan-card{ display:block; }
   .plan-card .label{ font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--gold); text-transform:uppercase; display:flex; align-items:center; gap:6px; }
   .plan-card .sub{ font-size:12px; color:var(--text-secondary); margin-top:6px; }
@@ -278,7 +278,7 @@
     <!-- ============ DASHBOARD CLUB DE LEALES ============ -->
     <div class="dash-grid fade-in">
       <div class="card dash-card" style="background:#1A1A1A;"><div class="lbl" style="color:#888;">Miembros Black</div><div class="val" id="dBlack" style="color:#fff;">—</div></div>
-      <div class="card dash-card"><div class="lbl">Miembros Oro</div><div class="val" id="dOro" style="color:#D4AF37;">—</div></div>
+      <div class="card dash-card"><div class="lbl">Miembros Oro</div><div class="val" id="dOro" style="color:#FFAC48;">—</div></div>
       <div class="card dash-card"><div class="lbl">Miembros Plata</div><div class="val" id="dPlata" style="color:#707070;">—</div></div>
       <div class="card dash-card"><div class="lbl">Miembros Bronce</div><div class="val" id="dBronce" style="color:#CD7F32;">—</div></div>
     </div>
@@ -327,7 +327,7 @@
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
           <div class="categoria-filter active" data-cat="todos" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:var(--gold); color:#141414;">Todos</div>
           <div class="categoria-filter" data-cat="black" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:#1A1A1A; color:#fff; border:1px solid #333;">Black (70+)</div>
-          <div class="categoria-filter" data-cat="oro" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:#D4AF37; color:#141414;">Oro (50+)</div>
+          <div class="categoria-filter" data-cat="oro" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:#FFAC48; color:#141414;">Oro (50+)</div>
           <div class="categoria-filter" data-cat="plata" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:#A0A0A0; color:#141414;">Plata (30+)</div>
           <div class="categoria-filter" data-cat="bronce" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:#CD7F32; color:#141414;">Bronce (10+)</div>
           <div class="categoria-filter" data-cat="sin" style="padding:8px 16px; border-radius:10px; cursor:pointer; font-size:13px; font-weight:600; background:var(--glass-2); color:var(--text-secondary); border:1px solid var(--glass-border);">Sin categoría</div>
@@ -660,7 +660,7 @@
         let nivel = 'Sin nivel';
         let color = 'var(--text-secondary)';
         if (cortes >= 70) { nivel = 'Black'; color = '#fff'; }
-        else if (cortes >= 50) { nivel = 'Oro'; color = '#D4AF37'; }
+        else if (cortes >= 50) { nivel = 'Oro'; color = '#FFAC48'; }
         else if (cortes >= 30) { nivel = 'Plata'; color = '#A0A0A0'; }
         else if (cortes >= 10) { nivel = 'Bronce'; color = '#CD7F32'; }
         return `
@@ -677,7 +677,7 @@
     const niveles = [
       { nombre: 'Bronce', min: 10, color: '#CD7F32' },
       { nombre: 'Plata', min: 30, color: '#A0A0A0' },
-      { nombre: 'Oro', min: 50, color: '#D4AF37' },
+      { nombre: 'Oro', min: 50, color: '#FFAC48' },
       { nombre: 'Black', min: 70, color: '#fff' }
     ];
     const cercaNivel = [];
@@ -971,7 +971,7 @@
     const CATEGORIA_COLORS = {
       bronce: '#CD7F32',
       plata: '#A0A0A0',
-      oro: '#D4AF37',
+      oro: '#FFAC48',
       black: '#1A1A1A'
     };
 
@@ -1140,7 +1140,7 @@
         <div style="font-size:20px; font-weight:800;">${stats.black}</div>
         <div style="font-size:10px; opacity:0.7;">BLACK</div>
       </div>
-      <div style="background:#D4AF37; color:#141414; padding:12px; border-radius:12px; text-align:center;">
+      <div style="background:#FFAC48; color:#141414; padding:12px; border-radius:12px; text-align:center;">
         <div style="font-size:20px; font-weight:800;">${stats.oro}</div>
         <div style="font-size:10px; opacity:0.7;">ORO</div>
       </div>
@@ -1186,7 +1186,7 @@
       return;
     }
 
-    const CATEGORIA_COLORS = { black: '#1A1A1A', oro: '#D4AF37', plata: '#A0A0A0', bronce: '#CD7F32' };
+    const CATEGORIA_COLORS = { black: '#1A1A1A', oro: '#FFAC48', plata: '#A0A0A0', bronce: '#CD7F32' };
 
     el.innerHTML = filtered.slice(0, 100).map(m => {
       const cat = m.lealtad_info?.categoria;

@@ -80,7 +80,7 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--gold, #D4AF55);
+  background: var(--gold, #FFAC48);
   color: #141414;
   display: flex;
   align-items: center;
@@ -118,8 +118,8 @@
 }
 .am-sede-tab:active { transform: scale(0.95); }
 .am-sede-tab.active {
-  background: linear-gradient(135deg, var(--gold, #D4AF55), var(--gold-bright, #E8C66A));
-  color: #0A0A0C;
+  background: linear-gradient(135deg, var(--gold, #FFAC48), var(--gold-bright, #FFC27A));
+  color: #000000;
   font-weight: 700;
   border-color: transparent;
 }
@@ -1191,7 +1191,7 @@
 }
 
 #amDetailModal .apple-btn.primary {
-  background: var(--gold, #D4AF55) !important;
+  background: var(--gold, #FFAC48) !important;
   color: #141414 !important;
   border: none !important;
   font-weight: 600 !important;
@@ -1222,8 +1222,8 @@
 
 .am-hour-slot:hover,
 .am-hour-slot:active {
-  background: rgba(201,163,91,0.1);
-  border-color: rgba(201,163,91,0.4);
+  background: rgba(255,172,72,0.1);
+  border-color: rgba(255,172,72,0.4);
 }
 
 .am-hour-slot-time {

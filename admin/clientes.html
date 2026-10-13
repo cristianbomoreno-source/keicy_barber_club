@@ -20,7 +20,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
-<meta name="theme-color" content="#0A0A0C">
+<meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Clientes</title>
 <script src="../assets/theme-manager.js"></script>
 <link rel="stylesheet" href="../assets/design-system.css">
@@ -63,7 +63,7 @@
   .nav-section-label{ display:none; font-size:10px; font-weight:700; letter-spacing:.6px; text-transform:uppercase; color:var(--text-secondary); padding:14px 12px 6px; }
   .nav-section-label:first-of-type{ padding-top:2px; }
   .sidebar.expanded .nav-section-label{ display:block; }
-  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(201,163,91,0.06); min-width:196px; flex-shrink:0; display:none; }
+  .plan-card{ margin-top:16px; padding:16px; border:1px solid var(--gold); border-radius:16px; background:rgba(255,172,72,0.06); min-width:196px; flex-shrink:0; display:none; }
   .sidebar.expanded .plan-card{ display:block; }
   .plan-card .label{ font-size:11px; font-weight:700; letter-spacing:.5px; color:var(--gold); text-transform:uppercase; display:flex; align-items:center; gap:6px; }
   .plan-card .sub{ font-size:12px; color:var(--text-secondary); margin-top:6px; }
@@ -119,13 +119,13 @@
   .tier-pill{ font-size:10px; font-weight:800; padding:3px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:.4px; white-space:nowrap; }
   .tier-pill.bronce{ background:rgba(205,127,50,0.2); color:#CD7F32; }
   .tier-pill.plata{ background:rgba(192,192,192,0.2); color:#C0C0C0; }
-  .tier-pill.oro{ background:rgba(201,163,91,0.2); color:var(--gold); }
+  .tier-pill.oro{ background:rgba(255,172,72,0.2); color:var(--gold); }
   .tier-pill.black{ background:rgba(255,255,255,0.12); color:#FFFFFF; border:1px solid rgba(255,255,255,0.3); }
 
   /* Club de Leales - Progreso */
   .lealtad-card{
-    background:linear-gradient(135deg, rgba(201,163,91,0.1) 0%, rgba(201,163,91,0.02) 100%);
-    border:1px solid rgba(201,163,91,0.2);
+    background:linear-gradient(135deg, rgba(255,172,72,0.1) 0%, rgba(255,172,72,0.02) 100%);
+    border:1px solid rgba(255,172,72,0.2);
     border-radius:18px;
     padding:20px;
     margin-bottom:22px;
@@ -144,7 +144,7 @@
   }
   .lealtad-progress-fill.bronce{ background:linear-gradient(90deg, #CD7F32, #E8A850); }
   .lealtad-progress-fill.plata{ background:linear-gradient(90deg, #A0A0A0, #D0D0D0); }
-  .lealtad-progress-fill.oro{ background:linear-gradient(90deg, #C9A35B, #E8C87A); }
+  .lealtad-progress-fill.oro{ background:linear-gradient(90deg, #FFAC48, #FFC27A); }
   .lealtad-progress-fill.black{ background:linear-gradient(90deg, #333, #666); }
   .lealtad-info{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-secondary); }
   .lealtad-next{ color:var(--gold); font-weight:600; }
@@ -224,7 +224,7 @@
   }
   .phone-field:focus-within { border-color:var(--gold); }
   .phone-field .phone-prefix {
-    padding:0 12px; font-size:13px; font-weight:600; color:var(--gold); background:rgba(201,163,91,0.1);
+    padding:0 12px; font-size:13px; font-weight:600; color:var(--gold); background:rgba(255,172,72,0.1);
     height:100%; display:flex; align-items:center; border-right:1px solid var(--glass-border);
     white-space:nowrap;
   }
@@ -283,7 +283,7 @@
   [data-theme="light"] .nav-link:hover { background:var(--bg-hover); color:var(--text); }
   [data-theme="light"] .nav-link.active { background:var(--gold); color:#141414; }
   [data-theme="light"] .nav-section-label { color:var(--text-muted); }
-  [data-theme="light"] .plan-card { background:rgba(212,175,85,0.08); border-color:var(--gold); }
+  [data-theme="light"] .plan-card { background:rgba(255,172,72,0.08); border-color:var(--gold); }
   [data-theme="light"] .plan-card .sub { color:var(--text-secondary); }
   [data-theme="light"] .clients-card { background:var(--bg-card); border-color:var(--border); box-shadow:0 2px 12px rgba(0,0,0,0.04); }
   [data-theme="light"] .search-bar { background:var(--bg); border-color:var(--border); }
@@ -836,7 +836,7 @@
   dnInitSidebarCard();
 
   const TIER_LABEL = { bronce: 'Bronce', plata: 'Plata', oro: 'Oro', black: 'Black' };
-  const TIER_COLORS = { bronce: '#CD7F32', plata: '#C0C0C0', oro: '#C9A35B', black: '#FFFFFF' };
+  const TIER_COLORS = { bronce: '#CD7F32', plata: '#C0C0C0', oro: '#FFAC48', black: '#FFFFFF' };
 
   // Calcular info de lealtad localmente (fallback)
   function calcularLealtadLocal(cortes) {

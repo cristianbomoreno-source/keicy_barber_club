@@ -6,9 +6,9 @@
 (function() {
   const THEME_KEY = 'dn_theme';
 
-  // Obtener tema guardado o usar 'light' por defecto
+  // Obtener tema guardado o usar 'dark' por defecto (Manual de Marca: negro dominante)
   function getTheme() {
-    return localStorage.getItem(THEME_KEY) || 'light';
+    return localStorage.getItem(THEME_KEY) || 'dark';
   }
 
   // Guardar tema
@@ -24,7 +24,7 @@
     // Actualizar meta theme-color
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     if (metaTheme) {
-      metaTheme.content = theme === 'dark' ? '#0A0A0C' : '#FFFFFF';
+      metaTheme.content = theme === 'dark' ? '#000000' : '#FFFFFF';
     }
   }
 

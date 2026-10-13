@@ -11,7 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
-<meta name="theme-color" content="#0A0A0C">
+<meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Cuadre de caja</title>
 <script src="../assets/theme-manager.js"></script>
 <link rel="stylesheet" href="../assets/design-system.css">
@@ -90,10 +90,10 @@
   }
   [data-theme="dark"] .nav-link { color: var(--text-secondary, #B8B5AE) !important; }
   [data-theme="dark"] .nav-link svg { stroke: currentColor !important; }
-  [data-theme="dark"] .nav-link:hover { background: var(--glass-2, rgba(255,255,255,0.06)) !important; color: var(--text, #F5F2EA) !important; }
-  [data-theme="dark"] .nav-link.active { background: var(--gold, #D4AF55) !important; color: #141414 !important; }
+  [data-theme="dark"] .nav-link:hover { background: var(--glass-2, rgba(255,255,255,0.06)) !important; color: var(--text, #FFFFFF) !important; }
+  [data-theme="dark"] .nav-link.active { background: var(--gold, #FFAC48) !important; color: #141414 !important; }
   [data-theme="dark"] .nav-link.active svg { stroke: #141414 !important; }
-  [data-theme="dark"] .sidebar-card-name { color: #F5F2EA !important; }
+  [data-theme="dark"] .sidebar-card-name { color: #FFFFFF !important; }
 
   /* ========== MAIN LAYOUT ========== */
   .main{ flex:1; min-width:0; padding:20px 28px; display:flex; flex-direction:column; gap:16px; min-height:100vh; overflow-y:auto; }
@@ -135,7 +135,7 @@
     font-weight:800; font-size:13px; display:flex; align-items:center; gap:8px;
     transition:transform 0.18s ease, box-shadow 0.18s ease;
   }
-  .btn-cerrar-caja:hover{ transform:translateY(-1px); box-shadow:0 4px 12px rgba(212,175,85,0.3); }
+  .btn-cerrar-caja:hover{ transform:translateY(-1px); box-shadow:0 4px 12px rgba(255,172,72,0.3); }
   .btn-cerrar-caja:active{ transform:scale(0.98); }
   .btn-cerrar-caja.abrir{ background:linear-gradient(180deg,#5ED27E,#3FB765); }
   .btn-cerrar-caja svg{ width:16px; height:16px; }
@@ -169,7 +169,7 @@
     font-size:12px; font-weight:600; color:var(--text);
     transition:all 0.18s ease;
   }
-  .caja-action-btn:hover{ border-color:var(--gold); background:rgba(200,160,90,0.08); }
+  .caja-action-btn:hover{ border-color:var(--gold); background:rgba(255,172,72,0.08); }
   .caja-action-btn svg{ width:14px; height:14px; stroke:var(--text-secondary); }
   .caja-action-btn.gasto{ color:var(--error); }
   .caja-action-btn.gasto svg{ stroke:var(--error); }
@@ -207,7 +207,7 @@
     display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:10px;
     background:var(--card-2); cursor:pointer; transition:all 0.15s ease;
   }
-  .caja-composicion-item:hover{ background:rgba(200,160,90,0.08); }
+  .caja-composicion-item:hover{ background:rgba(255,172,72,0.08); }
   .caja-composicion-item .dot{ width:10px; height:10px; border-radius:50%; flex-shrink:0; }
   .caja-composicion-item .info{ flex:1; min-width:0; }
   .caja-composicion-item .name{ font-size:12px; font-weight:600; }
@@ -241,8 +241,8 @@
   .calc-row .v.neg{ color:var(--error); }
   .calc-result{
     margin-top:8px; padding:12px 14px; border-radius:12px;
-    background:linear-gradient(135deg, rgba(200,160,90,0.16), rgba(200,160,90,0.05));
-    border:1px solid rgba(200,160,90,0.4); text-align:center;
+    background:linear-gradient(135deg, rgba(255,172,72,0.16), rgba(255,172,72,0.05));
+    border:1px solid rgba(255,172,72,0.4); text-align:center;
   }
   .calc-result .lbl{ font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--gold); }
   .calc-result .v{ font-size:22px; font-weight:800; margin-top:2px; }
@@ -284,7 +284,7 @@
     transition:all 0.15s ease; border:1px solid transparent;
   }
   .caja-tab:hover{ background:var(--card-2); }
-  .caja-tab.active{ background:rgba(200,160,90,0.12); color:var(--gold); border-color:rgba(200,160,90,0.3); }
+  .caja-tab.active{ background:rgba(255,172,72,0.12); color:var(--gold); border-color:rgba(255,172,72,0.3); }
   .caja-tab .count{ margin-left:4px; font-size:10px; opacity:0.7; }
 
   /* Lista de movimientos */
@@ -301,7 +301,7 @@
   }
   .caja-mov-icon.ingreso{ background:rgba(78,203,113,0.12); }
   .caja-mov-icon.egreso{ background:rgba(239,83,80,0.12); }
-  .caja-mov-icon.venta{ background:rgba(200,160,90,0.12); }
+  .caja-mov-icon.venta{ background:rgba(255,172,72,0.12); }
   .caja-mov-info{ flex:1; min-width:0; }
   .caja-mov-concepto{ font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .caja-mov-meta{ font-size:10px; color:var(--text-secondary); display:flex; align-items:center; gap:8px; margin-top:2px; }
@@ -371,7 +371,7 @@
     padding:8px 14px; border-radius:8px; background:var(--card-2); border:1px solid var(--divider);
     font-size:12px; font-weight:600; cursor:pointer; transition:all 0.15s ease;
   }
-  .quick-amount-btn:hover{ border-color:var(--gold); background:rgba(200,160,90,0.08); }
+  .quick-amount-btn:hover{ border-color:var(--gold); background:rgba(255,172,72,0.08); }
 
   /* ========== ESTILOS LEGACY COMPATIBLES ========== */
   .card{ background:var(--card); border:1px solid var(--divider); border-radius:20px; }
@@ -396,7 +396,7 @@
   .metodo-card .m-count{ font-size:9px; color:#7A7A7A; }
   .metodo-card.efectivo .m-icon{ background:rgba(78,203,113,0.15); }
   .metodo-card.efectivo .m-value{ color:var(--success); }
-  .metodo-card.tarjeta .m-icon{ background:rgba(200,160,90,0.15); }
+  .metodo-card.tarjeta .m-icon{ background:rgba(255,172,72,0.15); }
   .metodo-card.tarjeta .m-value{ color:var(--gold); }
   .metodo-card.nequi .m-icon{ background:rgba(138,43,226,0.15); }
   .metodo-card.nequi .m-value{ color:#9B59B6; }
@@ -470,7 +470,7 @@
   .mov-ticket-tipo{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; padding:3px 8px; border-radius:6px; }
   .mov-ticket-tipo.pos{ background:rgba(78,203,113,0.15); color:#4ECB71; }
   .mov-ticket-tipo.neg{ background:rgba(239,83,80,0.15); color:#EF5350; }
-  .mov-ticket-tipo.neutral{ background:rgba(201,163,91,0.15); color:var(--gold); }
+  .mov-ticket-tipo.neutral{ background:rgba(255,172,72,0.15); color:var(--gold); }
   .mov-ticket-hora{ font-size:11px; color:#7A7A7A; }
   .mov-ticket-monto{ font-size:18px; font-weight:800; margin-bottom:6px; }
   .mov-ticket-monto.pos{ color:#4ECB71; }
@@ -488,14 +488,14 @@
   .pc-row{ display:flex; justify-content:space-between; align-items:center; font-size:12.5px; padding:7px 0; color:#C9C9C9; border-bottom:1px solid rgba(255,255,255,0.04); }
   .pc-row:last-child{ border-bottom:none; }
   .pc-row b{ color:#111111; font-weight:700; }
-  .pc-total{ margin-top:10px; padding:13px 16px; border-radius:16px; background:linear-gradient(135deg, rgba(200,160,90,0.16), rgba(200,160,90,0.05)); border:1px solid rgba(200,160,90,0.4); display:flex; justify-content:space-between; align-items:center; }
+  .pc-total{ margin-top:10px; padding:13px 16px; border-radius:16px; background:linear-gradient(135deg, rgba(255,172,72,0.16), rgba(255,172,72,0.05)); border:1px solid rgba(255,172,72,0.4); display:flex; justify-content:space-between; align-items:center; }
   .pc-total span{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--gold); }
   .pc-total b{ font-size:19px; font-weight:800; }
   .pc-metodo{ margin-top:16px; padding-top:14px; border-top:1px solid var(--divider); }
   .pc-metodo-btns{ display:flex; gap:10px; }
   .pc-metodo-btn{ flex:1; padding:12px 10px; border-radius:12px; border:1px solid var(--divider); background:rgba(255,255,255,0.04); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; transition:all 0.2s ease; }
   .pc-metodo-btn:hover{ background:rgba(255,255,255,0.08); }
-  .pc-metodo-btn.active{ border-color:var(--gold); background:rgba(200,160,90,0.12); }
+  .pc-metodo-btn.active{ border-color:var(--gold); background:rgba(255,172,72,0.12); }
   .pc-metodo-btn .icon{ font-size:20px; }
   .pc-metodo-btn .txt{ font-size:12px; font-weight:600; color:rgba(255,255,255,0.8); }
   .pc-metodo-btn.active .txt{ color:var(--gold); }
@@ -582,7 +582,7 @@
     border-radius:14px; cursor:pointer; transition:all 0.15s ease;
   }
   .comisiones-card:hover{ border-color:var(--gold); transform:translateY(-2px); }
-  .comisiones-card.selected{ border-color:var(--gold); background:rgba(200,160,90,0.1); }
+  .comisiones-card.selected{ border-color:var(--gold); background:rgba(255,172,72,0.1); }
   .comisiones-card.pagado{ opacity:0.5; }
   .comisiones-card.pagado:hover{ opacity:0.7; }
 
@@ -1015,7 +1015,7 @@
     width:72px; height:72px; border-radius:50%; margin:0 auto 12px;
     display:flex; align-items:center; justify-content:center;
     font-size:24px; font-weight:800; color:var(--gold);
-    background:rgba(200,160,90,0.15); border:3px solid rgba(200,160,90,0.3);
+    background:rgba(255,172,72,0.15); border:3px solid rgba(255,172,72,0.3);
     overflow:hidden;
   }
   .colab-avatar img{ width:100%; height:100%; object-fit:cover; }
@@ -1041,7 +1041,7 @@
   .reporte-row b{ color:#111111; font-weight:700; }
   .reporte-row b.green{ color:#5EEAB2; }
   .reporte-row b.red{ color:#FF6B5E; }
-  .reporte-total{ background:linear-gradient(135deg, rgba(200,160,90,0.18), rgba(200,160,90,0.06)); border:1px solid rgba(200,160,90,0.4); border-radius:18px; padding:18px 20px; }
+  .reporte-total{ background:linear-gradient(135deg, rgba(255,172,72,0.18), rgba(255,172,72,0.06)); border:1px solid rgba(255,172,72,0.4); border-radius:18px; padding:18px 20px; }
   .reporte-total-row{ display:flex; justify-content:space-between; align-items:center; }
   .reporte-total-row span{ font-size:14px; font-weight:700; color:var(--gold); }
   .reporte-total-row b{ font-size:24px; font-weight:800; }
@@ -1363,7 +1363,7 @@
   }
   .modal-detail-icon {
     width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center;
-    font-size:24px; background:rgba(200,160,90,0.15);
+    font-size:24px; background:rgba(255,172,72,0.15);
   }
   .modal-detail-title { font-size:18px; font-weight:800; }
   .modal-detail-subtitle { font-size:12px; color:var(--text-secondary); margin-top:2px; }
@@ -1381,8 +1381,8 @@
   .efectivo-row .value.neg { color:var(--error); }
   .efectivo-row.divider { border-top:1px dashed var(--divider); padding-top:12px; margin-top:4px; }
   .efectivo-row.total {
-    background:linear-gradient(135deg, rgba(200,160,90,0.16), rgba(200,160,90,0.05));
-    border:1px solid rgba(200,160,90,0.4); border-radius:12px;
+    background:linear-gradient(135deg, rgba(255,172,72,0.16), rgba(255,172,72,0.05));
+    border:1px solid rgba(255,172,72,0.4); border-radius:12px;
     padding:14px 16px; margin-top:8px;
   }
   .efectivo-row.total .label { color:var(--gold); font-weight:700; font-size:12px; text-transform:uppercase; }
@@ -1401,8 +1401,8 @@
   .transacciones-empty { text-align:center; padding:30px; color:var(--text-secondary); font-size:12px; }
   .transacciones-total {
     display:flex; justify-content:space-between; align-items:center;
-    padding:12px 16px; background:rgba(200,160,90,0.1); border-radius:12px;
-    margin-top:12px; border:1px solid rgba(200,160,90,0.3);
+    padding:12px 16px; background:rgba(255,172,72,0.1); border-radius:12px;
+    margin-top:12px; border:1px solid rgba(255,172,72,0.3);
   }
   .transacciones-total .label { font-size:12px; font-weight:700; color:var(--gold); }
   .transacciones-total .value { font-size:18px; font-weight:800; }
@@ -1431,7 +1431,7 @@
     border:1px solid var(--divider); background:var(--card); color:var(--text);
     transition:all 0.15s; white-space:nowrap;
   }
-  .ticket-action-btn:hover { border-color:var(--gold); background:rgba(200,160,90,0.1); }
+  .ticket-action-btn:hover { border-color:var(--gold); background:rgba(255,172,72,0.1); }
   .ticket-action-btn.anular { background:rgba(220,53,69,0.15); border-color:rgba(220,53,69,0.3); color:#dc3545; }
   .ticket-action-btn.anular:hover { background:rgba(220,53,69,0.25); }
 
@@ -1459,7 +1459,7 @@
   }
   .ticket-logo-img { height:20px; margin:0 auto 4px; display:block; filter:brightness(0) invert(1); }
   .ticket-title-text { font-size:7px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:1px; margin-bottom:1px; }
-  .ticket-number-text { font-size:10px; font-weight:800; color:#D4AF55; }
+  .ticket-number-text { font-size:10px; font-weight:800; color:#FFAC48; }
   .ticket-date-text { font-size:8px; color:#888888666; margin-top:1px; }
   .ticket-client-section { background:#f8f8f8; padding:5px 10px; border-bottom:1px solid #eee; }
   .ticket-client-label { font-size:7px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:0.5px; }
@@ -1479,7 +1479,7 @@
   .ticket-payment-label { font-size:7px; font-weight:700; color:#999; text-transform:uppercase; letter-spacing:0.5px; }
   .ticket-payment-row { display:flex; justify-content:space-between; padding:1px 0; font-size:9px; color:#888888; }
   .ticket-footer-section { background:#FFFFFF; padding:5px; text-align:center; }
-  .ticket-thanks-text { font-size:8px; font-weight:600; color:#D4AF55; }
+  .ticket-thanks-text { font-size:8px; font-weight:600; color:#FFAC48; }
   .ticket-slogan-text { font-size:7px; color:#888888; }
   .ticket-actions-section { display:flex; gap:4px; padding:6px 8px; background:#fff; border-top:1px solid #eee; flex-shrink:0; flex-wrap:wrap; }
   .ticket-btn {
@@ -1488,7 +1488,7 @@
     transition:all 0.2s; min-width:60px;
   }
   .ticket-btn svg { width:12px; height:12px; }
-  .ticket-btn.primary { background:linear-gradient(180deg, #D4AF37 0%, #B8860B 100%); border:none; color:#141414; }
+  .ticket-btn.primary { background:linear-gradient(180deg, #FFAC48 0%, #CC7A14 100%); border:none; color:#141414; }
   .ticket-btn.primary:hover { transform:translateY(-1px); }
   .ticket-btn.secondary { background:#f0f0f0; border:1px solid #ddd; color:#888888; }
   .ticket-btn.secondary:hover { background:#e8e8e8; }
@@ -1512,7 +1512,7 @@
   .mov-edit-modal{ width:360px; max-width:95vw; }
   .mov-edit-header{ display:flex; align-items:center; gap:14px; padding-bottom:16px; border-bottom:1px solid var(--divider); margin-bottom:16px; }
   .mov-edit-icon{ width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
-  .mov-edit-icon.venta{ background:rgba(200,160,90,0.15); }
+  .mov-edit-icon.venta{ background:rgba(255,172,72,0.15); }
   .mov-edit-icon.ingreso{ background:rgba(78,203,113,0.15); }
   .mov-edit-icon.egreso{ background:rgba(239,83,80,0.15); }
   .mov-edit-title{ font-size:15px; font-weight:700; color:var(--text); }
@@ -1525,7 +1525,7 @@
   .mov-edit-metodos{ display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; }
   .mov-edit-metodo-btn{ padding:12px 8px; border-radius:12px; border:1px solid var(--divider); background:var(--card-2); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; transition:all 0.15s ease; }
   .mov-edit-metodo-btn:hover{ background:rgba(255,255,255,0.08); }
-  .mov-edit-metodo-btn.active{ border-color:var(--gold); background:rgba(200,160,90,0.15); }
+  .mov-edit-metodo-btn.active{ border-color:var(--gold); background:rgba(255,172,72,0.15); }
   .mov-edit-metodo-btn .icon{ font-size:18px; }
   .mov-edit-metodo-btn .txt{ font-size:10px; font-weight:600; color:#8A8780; }
   .mov-edit-metodo-btn.active .txt{ color:var(--gold); }
@@ -1599,7 +1599,7 @@
     padding:10px 16px; border-radius:20px; background:var(--card-2); border:1px solid var(--divider);
     font-size:13px; font-weight:600; cursor:pointer; transition:all 0.15s ease; color:var(--text);
   }
-  .gasto-quick-btn:hover{ border-color:var(--gold); background:rgba(200,160,90,0.1); }
+  .gasto-quick-btn:hover{ border-color:var(--gold); background:rgba(255,172,72,0.1); }
   .gasto-quick-btn:active{ transform:scale(0.96); }
 
   /* Selector de método de pago */
@@ -1630,8 +1630,8 @@
     padding:12px 16px; cursor:pointer; display:flex; align-items:center; gap:10px;
     font-size:13px; font-weight:600; transition:background 0.15s ease;
   }
-  .gasto-metodo-option:hover{ background:rgba(200,160,90,0.1); }
-  .gasto-metodo-option.active{ background:rgba(200,160,90,0.15); color:var(--gold); }
+  .gasto-metodo-option:hover{ background:rgba(255,172,72,0.1); }
+  .gasto-metodo-option.active{ background:rgba(255,172,72,0.15); color:var(--gold); }
 
   /* Tipo de gasto con chips */
   .gasto-tipo-section{}
@@ -3972,7 +3972,7 @@
   // Colores para la barra de composición
   const METODO_COLORS = {
     efectivo: '#4ECB71',
-    tarjeta: '#D4AF55',
+    tarjeta: '#FFAC48',
     nequi: '#9B59B6',
     qr: '#3498DB',
     transferencia: '#3498DB'

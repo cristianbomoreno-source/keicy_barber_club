@@ -171,11 +171,11 @@ function generateEmailHTML(data: CitaData): string {
                     <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                       <tr>
                         <td width="50%">
-                          <p style="margin:0; color:#D4AF55; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Fecha</p>
+                          <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Fecha</p>
                           <p style="margin:6px 0 0; color:#111111; font-size:15px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${formatDate(data.fecha)}</p>
                         </td>
                         <td width="50%">
-                          <p style="margin:0; color:#D4AF55; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Hora</p>
+                          <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Hora</p>
                           <p style="margin:6px 0 0; color:#111111; font-size:15px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${formatTime(data.hora)}</p>
                         </td>
                       </tr>
@@ -186,7 +186,7 @@ function generateEmailHTML(data: CitaData): string {
                 <!-- Barbero -->
                 <tr>
                   <td style="padding:20px; border-bottom:1px solid #E5E5E5;">
-                    <p style="margin:0; color:#D4AF55; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Barbero</p>
+                    <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Barbero</p>
                     <p style="margin:6px 0 0; color:#111111; font-size:15px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${data.barbero_nombre || "El primer barbero disponible"}</p>
                   </td>
                 </tr>
@@ -194,7 +194,7 @@ function generateEmailHTML(data: CitaData): string {
                 <!-- Servicio -->
                 <tr>
                   <td style="padding:20px; border-bottom:1px solid #E5E5E5;">
-                    <p style="margin:0; color:#D4AF55; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Servicio</p>
+                    <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Servicio</p>
                     <p style="margin:6px 0 0; color:#111111; font-size:15px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${data.servicio_nombre}</p>
                     ${serviciosExtra ? `<ul style="margin:8px 0 0; padding-left:20px; color:#666666; font-size:14px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${serviciosExtra}</ul>` : ""}
                   </td>
@@ -203,7 +203,7 @@ function generateEmailHTML(data: CitaData): string {
                 <!-- Sede -->
                 <tr>
                   <td style="padding:20px; border-bottom:1px solid #E5E5E5;">
-                    <p style="margin:0; color:#D4AF55; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Sede</p>
+                    <p style="margin:0; color:#FFAC48; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">Sede</p>
                     <p style="margin:6px 0 0; color:#111111; font-size:15px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${data.sede_nombre}</p>
                     <p style="margin:4px 0 0; color:#666666; font-size:13px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${data.sede_direccion}</p>
                   </td>
@@ -218,7 +218,7 @@ function generateEmailHTML(data: CitaData): string {
                           <p style="margin:0; color:#666666; font-size:12px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">TOTAL</p>
                         </td>
                         <td align="right">
-                          <p style="margin:0; color:#D4AF55; font-size:24px; font-weight:700; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${formatPrice(data.precio_total)}</p>
+                          <p style="margin:0; color:#FFAC48; font-size:24px; font-weight:700; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${formatPrice(data.precio_total)}</p>
                         </td>
                       </tr>
                     </table>
@@ -232,10 +232,10 @@ function generateEmailHTML(data: CitaData): string {
           <!-- Recordatorio -->
           <tr>
             <td style="padding:0 24px 24px;">
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:rgba(212,175,85,0.08); border-radius:16px; border:1px solid rgba(212,175,85,0.2);">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color:rgba(255,172,72,0.08); border-radius:16px; border:1px solid rgba(255,172,72,0.2);">
                 <tr>
                   <td style="padding:18px;">
-                    <p style="margin:0; color:#B8963F; font-size:14px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${recordatorioTitulo}</p>
+                    <p style="margin:0; color:#CC7A14; font-size:14px; font-weight:600; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${recordatorioTitulo}</p>
                     <p style="margin:8px 0 0; color:#666666; font-size:13px; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">${recordatorioTexto}</p>
                   </td>
                 </tr>
@@ -301,7 +301,7 @@ function generateEmailHTML(data: CitaData): string {
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                 <tr>
                   <td align="center">
-                    <a href="${calendarLinks.confirm}" target="_blank" style="display:inline-block; padding:18px 48px; background:linear-gradient(180deg, #E8C66A, #D4AF55); color:#111111; text-decoration:none; border-radius:16px; font-size:16px; font-weight:700; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; box-shadow:0 4px 16px rgba(212,175,85,0.3);">
+                    <a href="${calendarLinks.confirm}" target="_blank" style="display:inline-block; padding:18px 48px; background:linear-gradient(180deg, #FFC27A, #FFAC48); color:#111111; text-decoration:none; border-radius:16px; font-size:16px; font-weight:700; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; box-shadow:0 4px 16px rgba(255,172,72,0.3);">
                       ✓ CONFIRMAR MI ASISTENCIA
                     </a>
                   </td>
@@ -328,7 +328,7 @@ function generateEmailHTML(data: CitaData): string {
           <!-- Tagline -->
           <tr>
             <td align="center" style="padding:0 24px 16px;">
-              <p style="margin:0; color:#D4AF55; font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+              <p style="margin:0; color:#FFAC48; font-size:10px; font-weight:600; letter-spacing:2px; text-transform:uppercase; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
                 TU ESTILO, NUESTRA PASIÓN
               </p>
             </td>

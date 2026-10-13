@@ -124,7 +124,7 @@
       .sede-selector-title { padding:10px 12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary, rgba(255,255,255,0.5)); border-bottom:1px solid var(--divider, rgba(255,255,255,0.08)); }
       .sede-option { display:flex; align-items:center; gap:10px; padding:10px 12px; cursor:pointer; transition:background 0.15s; }
       .sede-option:hover { background:var(--glass-2, rgba(255,255,255,0.04)); }
-      .sede-option.active { background:var(--gold, #D4AF55); color:#141414; }
+      .sede-option.active { background:var(--gold, #FFAC48); color:#141414; }
       .sede-option-icon { width:28px; height:28px; border-radius:8px; background:var(--glass-2, rgba(255,255,255,0.06)); display:flex; align-items:center; justify-content:center; }
       .sede-option.active .sede-option-icon { background:rgba(0,0,0,0.15); }
       .sede-option-name { font-size:12px; font-weight:600; }
@@ -329,7 +329,7 @@
       }
       .turno-cerrado-title em {
         font-style: italic;
-        color: var(--gold, #D4AF55);
+        color: var(--gold, #FFAC48);
       }
       .turno-cerrado-subtitle {
         font-size: 14px;
@@ -370,7 +370,7 @@
         font-size: 14px;
         font-weight: 600;
         cursor: pointer;
-        background: linear-gradient(180deg, var(--gold-bright, #E8C547), var(--gold, #D4AF55));
+        background: linear-gradient(180deg, var(--gold-bright, #FFAC48), var(--gold, #FFAC48));
         color: #141414;
         text-decoration: none;
       }

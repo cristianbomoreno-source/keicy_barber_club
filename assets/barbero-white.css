@@ -18,9 +18,9 @@
   --bw-border-light: #F0F0F0;
 
   /* Acentos */
-  --bw-gold: #D4A853;
-  --bw-gold-light: #F5EDD8;
-  --bw-gold-dark: #B8923A;
+  --bw-gold: #FFAC48;
+  --bw-gold-light: #FFF4E6;
+  --bw-gold-dark: #CC7A14;
   --bw-green: #22C55E;
   --bw-green-light: #DCFCE7;
   --bw-green-dark: #16A34A;
@@ -38,16 +38,16 @@
    TEMA OSCURO - Variables
    ================================================================ */
 [data-theme="dark"] {
-  --bw-bg: #0A0A0C;
-  --bw-bg-card: #16181D;
-  --bw-bg-secondary: #1C1E24;
-  --bw-text: #F5F2EA;
+  --bw-bg: #000000;
+  --bw-bg-card: #141414;
+  --bw-bg-secondary: #1C1C1C;
+  --bw-text: #FFFFFF;
   --bw-text-secondary: #9CA3AF;
   --bw-text-muted: #6B7280;
-  --bw-border: #2A2D35;
+  --bw-border: #2A2A2A;
   --bw-border-light: #1F2128;
 
-  --bw-gold-light: rgba(212,168,83,0.15);
+  --bw-gold-light: rgba(255,172,72,0.15);
   --bw-green-light: rgba(34,197,94,0.15);
   --bw-red-light: rgba(239,68,68,0.15);
 
@@ -348,7 +348,7 @@ body {
 }
 
 .time-seg.filled.gold {
-  background: linear-gradient(90deg, var(--bw-gold), #E6CB90) !important;
+  background: linear-gradient(90deg, var(--bw-gold), #FFC27A) !important;
 }
 
 .time-seg.filled.red {
@@ -487,7 +487,7 @@ body {
   background: var(--bw-gold) !important;
   border-color: var(--bw-gold) !important;
   color: #000 !important;
-  box-shadow: 0 4px 12px rgba(212,168,83,0.3) !important;
+  box-shadow: 0 4px 12px rgba(255,172,72,0.3) !important;
 }
 
 .step-tile.done .step-tile-icon svg {
@@ -521,13 +521,13 @@ body {
   border-color: var(--bw-gold) !important;
   border-width: 2px !important;
   color: var(--bw-gold-dark) !important;
-  box-shadow: 0 0 0 4px rgba(212,168,83,0.15), var(--bw-shadow-md) !important;
+  box-shadow: 0 0 0 4px rgba(255,172,72,0.15), var(--bw-shadow-md) !important;
   animation: stepPulse 2s ease-in-out infinite !important;
 }
 
 @keyframes stepPulse {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(212,168,83,0.15), var(--bw-shadow-md); }
-  50% { box-shadow: 0 0 0 8px rgba(212,168,83,0.1), var(--bw-shadow-md); }
+  0%, 100% { box-shadow: 0 0 0 4px rgba(255,172,72,0.15), var(--bw-shadow-md); }
+  50% { box-shadow: 0 0 0 8px rgba(255,172,72,0.1), var(--bw-shadow-md); }
 }
 
 .step-tile.active .step-tile-icon svg {
@@ -602,7 +602,7 @@ body {
   background: var(--bw-gold) !important;
   border-radius: 20px !important;
   padding: 16px !important;
-  box-shadow: 0 6px 20px rgba(212,168,83,0.25) !important;
+  box-shadow: 0 6px 20px rgba(255,172,72,0.25) !important;
 }
 
 .add-service-btn .plus-circle {
@@ -690,7 +690,7 @@ body {
   width: 46px !important;
   height: 46px !important;
   background: var(--bw-gold) !important;
-  box-shadow: 0 4px 12px rgba(212,168,83,0.35) !important;
+  box-shadow: 0 4px 12px rgba(255,172,72,0.35) !important;
 }
 
 .swipe-handle svg {
@@ -975,7 +975,7 @@ body {
   background: var(--bw-gold) !important;
   color: #000 !important;
   border: none !important;
-  box-shadow: 0 4px 12px rgba(212,168,83,0.25) !important;
+  box-shadow: 0 4px 12px rgba(255,172,72,0.25) !important;
 }
 
 .action-btn.secondary {
@@ -1009,7 +1009,7 @@ body {
    TEMA OSCURO - Ajustes específicos
    ================================================================ */
 [data-theme="dark"] .hero-chip {
-  background: rgba(22,24,29,0.95) !important;
+  background: rgba(20,20,20,0.95) !important;
   border: 1px solid var(--bw-border) !important;
 }
 

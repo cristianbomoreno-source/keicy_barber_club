@@ -3,9 +3,9 @@
 // VERSIÓN OPTIMIZADA - Carga ultra rápida
 // ============================================
 
-const CACHE_NAME = 'keicy-barber-club-v31';
-const STATIC_CACHE = 'keicy-barber-club-static-v31';
-const API_CACHE = 'keicy-barber-club-api-v31';
+const CACHE_NAME = 'keicy-barber-club-v32';
+const STATIC_CACHE = 'keicy-barber-club-static-v32';
+const API_CACHE = 'keicy-barber-club-api-v32';
 const OFFLINE_PAGE = '/offline.html';
 
 // Assets críticos para pre-cachear (carga instantánea)
@@ -32,6 +32,7 @@ const PRECACHE_ASSETS = [
   '/assets/icon-512-v2.png',
   '/assets/favicon-32.png',
   '/assets/logo-transparent.png',
+  '/assets/logo-oro.png',
   // Páginas principales (shell)
   '/admin/dashboard.html',
   '/admin/calendario.html',

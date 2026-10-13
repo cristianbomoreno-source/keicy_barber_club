@@ -13,10 +13,10 @@
   --bg-hover:#F0F0F0;
 
   /* Dorados Premium */
-  --gold:#D4AF55;
-  --gold-primary:#D4AF55;
-  --gold-bright:#E8C66A;
-  --gold-glow:rgba(212,175,85,0.15);
+  --gold:#FFAC48;
+  --gold-primary:#FFAC48;
+  --gold-bright:#FFC27A;
+  --gold-glow:rgba(255,172,72,0.15);
   --accent:var(--gold);
   --accent-bright:var(--gold-bright);
 
@@ -31,7 +31,7 @@
   --border:rgba(0,0,0,0.1);
   --border-subtle:rgba(0,0,0,0.06);
   --border-light:rgba(0,0,0,0.05);
-  --border-gold:rgba(212,175,85,0.4);
+  --border-gold:rgba(255,172,72,0.4);
 
   /* Estados */
   --success:#22C55E;
@@ -52,18 +52,18 @@
    TEMA OSCURO
    ================================================================ */
 [data-theme="dark"]{
-  --bg:#0A0A0C;
-  --bg-deep:#0A0A0C;
-  --surface:#101112;
-  --bg-card:#101112;
-  --card:#16181D;
-  --bg-elevated:#16181D;
-  --card-2:#1C1E24;
-  --bg-hover:#1C1E24;
+  --bg:#000000;
+  --bg-deep:#000000;
+  --surface:#0E0E0E;
+  --bg-card:#0E0E0E;
+  --card:#141414;
+  --bg-elevated:#141414;
+  --card-2:#1C1C1C;
+  --bg-hover:#1C1C1C;
 
   /* Texto Premium (claro para fondo oscuro) */
-  --text:#F5F2EA;
-  --text-primary:#F5F2EA;
+  --text:#FFFFFF;
+  --text-primary:#FFFFFF;
   --text-secondary:#8A8780;
   --text-muted:#5A5852;
 
@@ -72,7 +72,7 @@
   --border:rgba(255,255,255,0.06);
   --border-subtle:rgba(255,255,255,0.06);
   --border-light:rgba(255,255,255,0.1);
-  --border-gold:rgba(212,175,85,0.35);
+  --border-gold:rgba(255,172,72,0.35);
 
   /* Estados */
   --success:#4ADE80;
@@ -80,7 +80,7 @@
   --warning:#FBBF24;
 
   /* Glass effects */
-  --glass:rgba(16,17,18,0.85);
+  --glass:rgba(14,14,14,0.85);
   --glass-2:rgba(255,255,255,0.03);
   --glass-card:rgba(255,255,255,0.04);
   --glass-card-2:rgba(255,255,255,0.06);
@@ -98,7 +98,7 @@
   --status-servicio:#A78BFA;
   --status-pago:#FB923C;
   --status-fin:#34D399;
-  --status-gold:#D4AF55;
+  --status-gold:#FFAC48;
   --status-inactive:#FF6B5E;
 
   /* Aliases para compatibilidad con barbero/ */
@@ -179,7 +179,7 @@
   --nav-bg:rgba(255,255,255,0.95);
   --nav-border:rgba(0,0,0,0.08);
   --nav-color:rgba(100,100,100,0.9);
-  --nav-color-active:#D4AF55;
+  --nav-color-active:#FFAC48;
   --nav-total:calc(var(--nav-height) + var(--safe-bottom));
 
   /* ================================================================
@@ -265,7 +265,7 @@
 [data-theme="light"] .icon-pill svg { stroke:var(--text-secondary) !important; }
 [data-theme="light"] .rail-btn svg { stroke:var(--text-secondary) !important; }
 [data-theme="light"] .nav-section-label { color:var(--text-muted) !important; }
-[data-theme="light"] .plan-card { background:rgba(212,175,85,0.08) !important; }
+[data-theme="light"] .plan-card { background:rgba(255,172,72,0.08) !important; }
 [data-theme="light"] .plan-card .sub { color:var(--text-secondary) !important; }
 [data-theme="light"] .main { background:var(--bg) !important; }
 [data-theme="light"] .header-row { background:linear-gradient(to bottom, var(--bg) 0%, var(--bg) 85%, transparent 100%) !important; }
@@ -377,7 +377,7 @@ body{
   color:var(--accent);
   border:1px solid var(--border);
 }
-.btn-ghost:hover{ border-color:var(--accent); background:rgba(212,175,85,0.06); }
+.btn-ghost:hover{ border-color:var(--accent); background:rgba(255,172,72,0.06); }
 
 /* ================================================================
    COMPONENTES — Inputs unificados
@@ -397,7 +397,7 @@ body{
 }
 .input:focus{
   border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(212,175,85,0.14);
+  box-shadow:0 0 0 3px rgba(255,172,72,0.14);
 }
 .input::placeholder{ color:var(--text-muted); }
 .input-lg{ height:var(--input-height-lg); }
@@ -418,7 +418,7 @@ body{
 }
 .textarea:focus{
   border-color:var(--accent);
-  box-shadow:0 0 0 3px rgba(212,175,85,0.14);
+  box-shadow:0 0 0 3px rgba(255,172,72,0.14);
 }
 
 .label{
@@ -507,7 +507,7 @@ body{
 .badge-warning{ background:rgba(251,191,36,0.14); color:var(--warning); }
 .badge-error{ background:rgba(239,83,80,0.14); color:var(--error); }
 .badge-neutral{ background:rgba(159,159,159,0.12); color:var(--text-secondary); }
-.badge-accent{ background:rgba(212,175,85,0.14); color:var(--accent); }
+.badge-accent{ background:rgba(255,172,72,0.14); color:var(--accent); }
 
 /* ================================================================
    COMPONENTES — Tabs
@@ -722,7 +722,7 @@ img{ display:block; max-width:100%; }
   cursor:pointer;
   transition:border-color 0.2s ease, background 0.2s ease;
 }
-.btn-ghost:hover{ border-color:var(--gold); background:rgba(212,175,85,0.06); }
+.btn-ghost:hover{ border-color:var(--gold); background:rgba(255,172,72,0.06); }
 
 .pill{
   display:inline-flex;
