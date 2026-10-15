@@ -2,10 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="../manifest.json">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
-<link rel="icon" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
+<link rel="icon" href="../assets/favicon-32-v3.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Club de Leales">
@@ -1487,7 +1488,7 @@
 
     <!-- Tarjeta de Categoria -->
     <div class="category-card ninguna" id="categoryCard">
-      <img src="../assets/apple-touch-icon-v2.png" alt="DN" class="card-logo">
+      <img src="../assets/apple-touch-icon-v3.png" alt="DN" class="card-logo">
       <div class="card-content">
         <div class="card-label">Tu categoria</div>
         <div class="card-category" id="cardCategory">Cargando...</div>
@@ -1831,7 +1832,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script>
   // Booking state
   let bookingPrefs = null;
@@ -1851,7 +1852,10 @@
 
   // Verificar sesion (usa dnGetLealtadSession de supabase-client.js)
   let session = dnGetLealtadSession();
-  if (!session) {
+  if (!session || !session.cliente_token) {
+    // Sesión de antes de los tokens: hay que volver a entrar
+    if (session) dnClearLealtadSession();
+    session = null;
     window.location.href = 'login.html';
   }
 
@@ -1860,11 +1864,7 @@
     if (!session?.id) return;
 
     try {
-      const { data, error } = await sb
-        .from('usuarios')
-        .select('id, full_name, phone, email, avatar_url, total_visitas, total_visitas_weibook, total_gastado, total_gastado_weibook, ultima_visita, lealtad_info, membership_tier, created_at')
-        .eq('id', session.id)
-        .single();
+      const { data, error } = await dnClienteRpc('dn_cliente_perfil');
 
       if (error) throw error;
       if (!data) return;
@@ -1873,11 +1873,11 @@
       session = {
         ...session,
         full_name: data.full_name,
-        total_visitas: data.total_visitas,
+        total_visitas: data.total_visitas_weibook,
         total_visitas_weibook: data.total_visitas_weibook,
-        total_gastado: data.total_gastado,
+        total_gastado: data.total_gastado_weibook,
         total_gastado_weibook: data.total_gastado_weibook,
-        ultima_visita: data.ultima_visita,
+        ultima_visita: data.ultima_visita_weibook,
         lealtad_info: data.lealtad_info,
         membership_tier: data.membership_tier,
         cliente_desde: data.created_at
@@ -2044,49 +2044,18 @@
     if (!session?.id) return;
 
     try {
-      const today = new Date().toISOString().split('T')[0];
-
-      const { data: citas, error } = await sb
-        .from('citas')
-        .select(`
-          id,
-          fecha,
-          hora_inicio,
-          estado,
-          servicio:servicio_id(nombre, precio),
-          barbero:barbero_id(id),
-          sucursal:sucursal_id(nombre, direccion)
-        `)
-        .eq('cliente_id', session.id)
-        .gte('fecha', today)
-        .in('estado', ['agendada', 'confirmada', 'pendiente'])
-        .order('fecha', { ascending: true })
-        .order('hora_inicio', { ascending: true })
-        .limit(3);
-
+      const { data: todasCitas, error } = await dnClienteRpc('dn_cliente_citas_proximas');
       if (error) throw error;
+      const citas = (todasCitas || []).slice(0, 3);
 
       if (!citas || citas.length === 0) {
         section.style.display = 'none';
         return;
       }
 
-      // Get barber names
-      const barberoIds = [...new Set(citas.map(c => c.barbero?.id).filter(Boolean))];
-      let barberosMap = {};
-
-      if (barberoIds.length > 0) {
-        const { data: barberos } = await sb
-          .from('barberos')
-          .select('id, usuarios!barberos_id_fkey(full_name)')
-          .in('id', barberoIds);
-
-        if (barberos) {
-          barberos.forEach(b => {
-            barberosMap[b.id] = b.usuarios?.full_name || 'Barbero';
-          });
-        }
-      }
+      // Nombres de barberos (ya vienen en las citas)
+      const barberosMap = {};
+      citas.forEach(c => { if (c.barbero?.id) barberosMap[c.barbero.id] = c.barbero.nombre || 'Barbero'; });
 
       section.style.display = 'block';
 
@@ -2217,19 +2186,11 @@
     btn.textContent = 'Cancelando...';
 
     try {
-      const { error } = await sb
-        .from('citas')
-        .update({
-          estado: 'cancelada',
-          cancelado_por: session.id,
-          cancelado_via: 'app_cliente',
-          cancelado_rol: 'cliente',
-          cancelado_at: new Date().toISOString()
-        })
-        .eq('id', citaACancelar)
-        .eq('cliente_id', session.id); // Seguridad: solo puede cancelar sus propias citas
+      // El servidor solo cancela citas del dueño de la sesión
+      const { data: cancelRes, error } = await dnClienteRpc('dn_cliente_cancelar_cita', { p_cita_id: citaACancelar });
 
       if (error) throw error;
+      if (!cancelRes?.success) throw new Error('No se pudo cancelar');
 
       // Cerrar modal
       closeCancelModal();
@@ -2287,7 +2248,7 @@
     btn.textContent = 'Guardando...';
 
     try {
-      const { error } = await sb.from('usuarios').update({ email }).eq('id', session.id);
+      const { error } = await dnClienteRpc('dn_cliente_actualizar', { p_datos: { email } });
       if (error) throw error;
 
       // Update session
@@ -2324,9 +2285,7 @@
   // Load booking preferences (preset barber/service)
   async function loadBookingPreferences() {
     try {
-      const { data, error } = await sb.rpc('obtener_preferencias_cliente', {
-        p_cliente_id: session.id
-      });
+      const { data, error } = await dnClienteRpc('dn_cliente_preferencias');
 
       if (error) throw error;
 
@@ -2576,8 +2535,7 @@
     const servicioActual = tempServiceForBooking || bookingPrefs.servicio;
 
     try {
-      const { data, error } = await sb.rpc('crear_cita_cliente', {
-        p_cliente_id: session.id,
+      const { data, error } = await dnClienteRpc('dn_cliente_crear_cita', {
         p_barbero_id: bookingPrefs.barbero.id,
         p_servicio_id: servicioActual.id,
         p_fecha: selectedDate,
@@ -2916,7 +2874,7 @@
   async function savePreferredSede(sedeId) {
     if (!session || !session.id) return;
     try {
-      await sb.from('usuarios').update({ sucursal_id: sedeId }).eq('id', session.id);
+      await dnClienteRpc('dn_cliente_actualizar', { p_datos: { sucursal_id: sedeId } });
       session.sucursal_id = sedeId;
     } catch (err) {
       console.error('Error saving preferred sede:', err);
@@ -2928,9 +2886,7 @@
     if (!session || !session.id) return;
 
     try {
-      const { data, error } = await sb.rpc('obtener_preferencias_cliente', {
-        p_cliente_id: session.id
-      });
+      const { data, error } = await dnClienteRpc('dn_cliente_preferencias');
 
       if (error) throw error;
 
@@ -3171,7 +3127,7 @@
   async function savePreferredBarber(barberoId) {
     if (!session || !session.id) return;
     try {
-      await sb.from('usuarios').update({ barbero_favorito_id: barberoId }).eq('id', session.id);
+      await dnClienteRpc('dn_cliente_actualizar', { p_datos: { barbero_favorito_id: barberoId } });
     } catch (err) {
       console.error('Error saving preferred barber:', err);
     }
@@ -3372,11 +3328,9 @@
       }
 
       // Get existing appointments for this barber on this date
-      const { data: citas, error: citasErr } = await sb.from('citas')
-        .select('hora_inicio')
-        .eq('barbero_id', selectedBarberFull.id)
-        .eq('fecha', dateStr)
-        .not('estado', 'in', '(cancelada,no_show)');
+      const { data: citas, error: citasErr } = await sb.rpc('dn_citas_ocupadas', {
+        p_fecha: dateStr, p_barbero_id: selectedBarberFull.id, p_excluir: ['cancelada', 'no_show']
+      });
 
       if (citasErr) throw citasErr;
 
@@ -3486,8 +3440,7 @@
     btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;"></div> Confirmando...';
 
     try {
-      const { data, error } = await sb.rpc('crear_cita_cliente', {
-        p_cliente_id: session.id,
+      const { data, error } = await dnClienteRpc('dn_cliente_crear_cita', {
         p_barbero_id: selectedBarberFull.id,
         p_servicio_id: selectedServiceFull.id,
         p_fecha: selectedDateFull,
@@ -3684,13 +3637,9 @@
 
     try {
       // Update user's favorite barber and service
-      const { error } = await sb
-        .from('usuarios')
-        .update({
-          barbero_favorito_id: presetBarberId,
-          servicio_favorito_id: presetServiceId
-        })
-        .eq('id', session.id);
+      const { error } = await dnClienteRpc('dn_cliente_actualizar', {
+        p_datos: { barbero_favorito_id: presetBarberId, servicio_favorito_id: presetServiceId }
+      });
 
       if (error) throw error;
 

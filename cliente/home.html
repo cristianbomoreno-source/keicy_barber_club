@@ -2,10 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="../manifest.json">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
-<link rel="icon" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
+<link rel="icon" href="../assets/favicon-32-v3.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
@@ -578,7 +579,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="/assets/utils.js"></script>
 <script>
   let currentUser = null;
@@ -611,23 +612,24 @@
   // Load profile
   async function loadProfile() {
     // Try lealtad session first
-    let session = dnGetLealtadSession();
+    let session = dnGetLealtadSession() || dnGetSession();
+    if (!session || !session.cliente_token) {
+      dnClearLealtadSession();
+      window.location.href = 'login.html';
+      return;
+    }
 
-    if (session) {
+    {
       currentUser = session;
 
-      // Load full data from DB (datos frescos)
-      const { data, error } = await sb
-        .from('usuarios')
-        .select('*')
-        .eq('id', session.id)
-        .single();
+      // Datos frescos del servidor (solo los del dueño del token)
+      const { data } = await dnClienteRpc('dn_cliente_perfil');
 
       if (data) {
         currentUser = { ...session, ...data };
 
         // Actualizar sesión local con datos frescos
-        dnSaveLealtadSession({
+        if (session.is_lealtad) dnSaveLealtadSession({
           ...session,
           full_name: data.full_name,
           total_visitas: data.total_visitas,
@@ -639,14 +641,6 @@
           membership_tier: data.membership_tier
         });
       }
-    } else {
-      // Try regular session
-      session = dnGetSession();
-      if (!session) {
-        window.location.href = 'login.html';
-        return;
-      }
-      currentUser = session;
     }
 
     // Display data
@@ -771,8 +765,7 @@
       const birthdate = document.getElementById('inputBirthdate').value;
 
       // Call RPC function to update profile
-      const { data, error } = await sb.rpc('actualizar_perfil_cliente', {
-        p_cliente_id: currentUser.id,
+      const { data, error } = await dnClienteRpc('dn_cliente_actualizar_perfil', {
         p_full_name: fullName || null,
         p_email: email || null,
         p_instagram: instagram || null,

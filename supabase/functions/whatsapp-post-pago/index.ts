@@ -7,8 +7,9 @@
 // =====================================================
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { sendWhatsAppText } from '../_shared/whatsapp/client.ts';
+import { sendWhatsAppText, sendWhatsAppTemplate } from '../_shared/whatsapp/client.ts';
 import { createSupabaseClient } from '../_shared/whatsapp/config.ts';
+import { esLlamadaDeLaApp, respuestaNoAutorizada } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,6 +24,11 @@ interface PostPagoRequest {
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
+  }
+
+  // Solo la app (equipo con sesión), las tareas programadas o el servidor
+  if (!(await esLlamadaDeLaApp(req))) {
+    return respuestaNoAutorizada(corsHeaders);
   }
 
   if (req.method !== 'POST') {
@@ -166,13 +172,40 @@ ${resenaUrl}
 
     console.log(`[PostPago] Enviando mensaje a ${clienteTelefono}`);
 
-    // Enviar mensaje
-    const result = await sendWhatsAppText(
-      cita.sucursal_id,
-      clienteTelefono,
-      mensaje,
-      cita_id
-    );
+    // Plantilla aprobada por Meta: llega aunque el cliente no haya escrito en las
+    // últimas 24 horas (con texto libre fallaba con el error 131047). Los botones
+    // abren el recibo y la reseña; la URL de la plantilla es la del sitio + este sufijo.
+    const sufijo = (u: string) => u.replace(`${baseUrl}/`, '');
+    let result = await sendWhatsAppTemplate({
+      sucursalId: cita.sucursal_id,
+      to: clienteTelefono,
+      templateName: 'gracias_visita',
+      languageCode: 'es',
+      citaId: cita_id,
+      components: [
+        {
+          type: 'body',
+          parameters: [
+            { type: 'text', text: primerNombre },
+            { type: 'text', text: totalFormatted },
+            { type: 'text', text: barberoNombre }
+          ]
+        },
+        { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: sufijo(reciboUrl) }] },
+        { type: 'button', sub_type: 'url', index: '1', parameters: [{ type: 'text', text: sufijo(resenaUrl) }] }
+      ]
+    });
+
+    // Si la plantilla todavía no está aprobada (o falla al enviarla), se usa el texto
+    if (!result.success) {
+      console.warn('[PostPago] Plantilla no disponible, se envía texto:', result.error);
+      result = await sendWhatsAppText(
+        cita.sucursal_id,
+        clienteTelefono,
+        mensaje,
+        cita_id
+      );
+    }
 
     if (result.success) {
       console.log('[PostPago] Mensaje enviado:', result.messageId);

@@ -3,9 +3,9 @@
 // VERSIÓN OPTIMIZADA - Carga ultra rápida
 // ============================================
 
-const CACHE_NAME = 'keicy-barber-club-v32';
-const STATIC_CACHE = 'keicy-barber-club-static-v32';
-const API_CACHE = 'keicy-barber-club-api-v32';
+const CACHE_NAME = 'keicy-barber-club-v36';
+const STATIC_CACHE = 'keicy-barber-club-static-v36';
+const API_CACHE = 'keicy-barber-club-api-v36';
 const OFFLINE_PAGE = '/offline.html';
 
 // Assets críticos para pre-cachear (carga instantánea)
@@ -18,7 +18,7 @@ const PRECACHE_ASSETS = [
   '/assets/barbero-white.css',
   '/assets/dn-modals.css',
   // JS críticos
-  '/assets/supabase-client.js',
+  '/assets/supabase-client.js?v=20261014e',
   '/assets/theme-manager.js',
   '/assets/mobile-nav.js',
   '/assets/sidebar-toggle.js',
@@ -27,10 +27,10 @@ const PRECACHE_ASSETS = [
   '/assets/turbo-loader.js',
   '/assets/offline-manager.js',
   // Imágenes críticas
-  '/assets/apple-touch-icon-v2.png',
-  '/assets/icon-192-v2.png',
-  '/assets/icon-512-v2.png',
-  '/assets/favicon-32.png',
+  '/assets/apple-touch-icon-v3.png',
+  '/assets/icon-192-v3.png',
+  '/assets/icon-512-v3.png',
+  '/assets/favicon-32-v3.png',
   '/assets/logo-transparent.png',
   '/assets/logo-oro.png',
   // Páginas principales (shell)
@@ -220,8 +220,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title || 'Keicy Barber', {
       body: data.body || 'Nueva notificación',
-      icon: '/assets/apple-touch-icon-v2.png',
-      badge: '/assets/favicon-32.png',
+      icon: '/assets/apple-touch-icon-v3.png',
+      badge: '/assets/favicon-32-v3.png',
       vibrate: [200, 100, 200],
       requireInteraction: true,
       data: data

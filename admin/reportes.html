@@ -2,10 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="../manifest.json">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
-<link rel="icon" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
+<link rel="icon" href="../assets/favicon-32-v3.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
@@ -98,6 +99,11 @@
   .kpi-card .sub{ font-size:11px; color:var(--text-secondary); margin-top:3px; }
 
   .chart-wrap{ position:relative; margin-top:6px; }
+  .chart-hit{ fill:transparent; cursor:pointer; }
+  .chart-dot{ pointer-events:none; }
+  .chart-tip{ position:absolute; display:none; transform:translate(-50%, calc(-100% - 12px)); background:#1c1c1e; color:#fff; border:1px solid #FFAC48; border-radius:8px; padding:6px 10px; font-size:12px; line-height:1.35; white-space:nowrap; pointer-events:none; z-index:5; box-shadow:0 4px 14px rgba(0,0,0,.25); }
+  .chart-tip .tip-date{ font-size:10.5px; color:#bdbdbd; }
+  .chart-tip .tip-val{ font-weight:800; color:#FFAC48; font-size:14px; }
   .chart-day-labels{ display:flex; justify-content:space-between; margin-top:6px; font-size:10.5px; color:var(--text-secondary); padding:0 4px; }
 
   .split-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; align-items:start; }
@@ -129,7 +135,7 @@
     }
   </script>
   <div class="sidebar" id="sidebar">
-    <img src="../assets/apple-touch-icon-v2.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
+    <img src="../assets/apple-touch-icon-v3.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
     <img src="../assets/logo-transparent.png" class="sidebar-logo sidebar-logo-full" alt="Keicy Barbería" id="sidebarLogoFull">
     <div class="sidebar-card" id="sidebarCard" title="Cambiar de sede">
       <div class="sidebar-card-avatar">DN</div>
@@ -251,6 +257,7 @@
           </defs>
           <g id="chartContent"></g>
         </svg>
+        <div class="chart-tip" id="chartTip"></div>
         <div class="chart-day-labels" id="chartLabels"></div>
       </div>
     </div>
@@ -271,7 +278,7 @@
     <div class="split-grid">
       <div class="panel fade-in">
         <div class="panel-title">Ingresos por método de pago</div>
-        <div class="panel-sub">Distribución del período.</div>
+        <div class="panel-sub">Dinero recibido en el período (servicios y productos).</div>
         <div id="porMetodo" style="margin-top:14px;"><div class="empty-row">Cargando…</div></div>
       </div>
       <div class="panel fade-in" id="porSedePanel" style="display:none;">
@@ -326,7 +333,7 @@
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -362,8 +369,7 @@
   // Cerrar sesión
   document.getElementById('logoutBtn')?.addEventListener('click', () => {
     if (confirm('¿Seguro que deseas cerrar sesión?')) {
-      dnClearSession();
-      window.location.href = '../auth.html';
+      dnLogout();
     }
   });
 
@@ -444,6 +450,18 @@
     }
   }
 
+  // Supabase devuelve máximo 1000 filas por consulta; se pide por páginas hasta traerlas todas.
+  async function fetchAllRows(buildQuery){
+    const PAGE = 1000;
+    const rows = [];
+    for (let fromRow = 0; ; fromRow += PAGE) {
+      const { data, error } = await buildQuery().range(fromRow, fromRow + PAGE - 1);
+      if (error) throw error;
+      rows.push(...(data || []));
+      if (!data || data.length < PAGE) return rows;
+    }
+  }
+
   async function loadReportes(){
     const { from, to } = getRangeDates();
     document.getElementById('chartSub').textContent = `${dnFormatDateRange(from,to)}`;
@@ -453,20 +471,21 @@
       // AISLAMIENTO TEST: Obtener IDs de sedes TEST para excluirlas de reportes
       const sedesTestIds = await dnGetSedesTestIds();
 
-      let query = sb.from('citas')
-        .select('fecha, precio, metodo_pago, comision_calculada, servicio_id, servicios(nombre), barbero_id, barberos(comision_pct, usuarios!barberos_id_fkey(full_name, username)), sucursal_id')
-        .eq('estado', 'finalizada')
-        .gte('fecha', from)
-        .lte('fecha', to);
-      if (sedeFiltro) {
-        query = query.eq('sucursal_id', sedeFiltro);
-      } else if (sedesTestIds.length > 0) {
-        // Excluir sedes TEST de reportes globales
-        query = query.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
-      }
-      const { data, error } = await query;
-      if (error) throw error;
-      const citas = data || [];
+      const citas = await fetchAllRows(() => {
+        let query = sb.from('citas')
+          .select('id, fecha, precio, metodo_pago, comision_calculada, servicio_id, servicios(nombre), barbero_id, barberos(comision_pct, usuarios!barberos_id_fkey(full_name, username)), sucursal_id')
+          .eq('estado', 'finalizada')
+          .gte('fecha', from)
+          .lte('fecha', to)
+          .order('id');
+        if (sedeFiltro) {
+          query = query.eq('sucursal_id', sedeFiltro);
+        } else if (sedesTestIds.length > 0) {
+          // Excluir sedes TEST de reportes globales
+          query = query.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+        }
+        return query;
+      });
 
       // Gastos del período: caja_movimientos (tipo='gasto') de las sesiones de caja en el rango de fechas.
       let sesQuery = sb.from('caja_sesiones').select('id').gte('fecha', from).lte('fecha', to);
@@ -480,22 +499,44 @@
       const sesionIds = (sesionesPeriodo || []).map(s => s.id);
       let gastos = [];
       if (sesionIds.length) {
-        const { data: movs, error: movError } = await sb.from('caja_movimientos')
-          .select('monto, descripcion')
+        const movs = await fetchAllRows(() => sb.from('caja_movimientos')
+          .select('id, monto, descripcion')
           .eq('tipo', 'gasto')
-          .in('sesion_id', sesionIds);
-        if (movError) throw movError;
-        gastos = movs || [];
+          .in('sesion_id', sesionIds)
+          .order('id'));
+        // Los pagos de comisión hechos en caja ya están en "Comisiones a barberos";
+        // contarlos también como gasto los restaría dos veces de la utilidad.
+        gastos = movs.filter(m => !/^Pago comisión a /i.test(m.descripcion || ''));
       }
       const totalGastos = gastos.reduce((s,m) => s + (Number(m.monto)||0), 0);
 
+      // Métodos de pago: pagos reales de los tickets del período. Incluye ventas de
+      // productos (no tienen cita) y respeta pagos divididos entre varios métodos.
+      const pagos = await fetchAllRows(() => {
+        let q = sb.from('pagos')
+          .select('id, monto, metodo, ticket_id, tickets!inner(tipo, sucursal_id, anulado, created_at)')
+          .eq('estado', 'pagado')
+          .not('tickets.anulado', 'is', true)
+          .gte('tickets.created_at', `${from}T00:00:00-05:00`)
+          .lte('tickets.created_at', `${to}T23:59:59.999-05:00`)
+          .order('id');
+        if (sedeFiltro) {
+          q = q.eq('tickets.sucursal_id', sedeFiltro);
+        } else if (sedesTestIds.length > 0) {
+          q = q.not('tickets.sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+        }
+        return q;
+      });
+
       // KPIs
-      const totalIngresos = citas.reduce((s,c) => s + (Number(c.precio)||0), 0);
+      // Ingresos = dinero realmente recibido (pagos de servicios y productos, sin cortesías)
+      const totalIngresos = pagos.reduce((s,p) => s + (Number(p.monto)||0), 0);
+      const numTickets = new Set(pagos.map(p => p.ticket_id)).size;
       const totalComisiones = citas.reduce((s,c) => s + (Number(c.comision_calculada)||0), 0);
       const utilidadNeta = totalIngresos - totalComisiones - totalGastos;
       document.getElementById('kIngresos').textContent = dnFormatCOP(totalIngresos);
       document.getElementById('kCitas').textContent = citas.length;
-      document.getElementById('kTicket').textContent = dnFormatCOP(citas.length ? totalIngresos/citas.length : 0);
+      document.getElementById('kTicket').textContent = dnFormatCOP(numTickets ? totalIngresos/numTickets : 0);
       document.getElementById('kComisiones').textContent = dnFormatCOP(totalComisiones);
       const kUtilidadEl = document.getElementById('kUtilidad');
       kUtilidadEl.textContent = dnFormatCOP(utilidadNeta);
@@ -517,18 +558,23 @@
       document.getElementById('metaRealTxt').textContent = `Real: ${dnFormatCOP(totalIngresos)}`;
       document.getElementById('metaMetaTxt').textContent = metaPeriodo > 0 ? `Meta: ${dnFormatCOP(metaPeriodo)}` : 'Meta: sin configurar';
 
-      lastReportData = { from, to, citas, gastos, totalIngresos, totalComisiones, totalGastos, utilidadNeta, metaPeriodo, cumplimientoPct };
+      lastReportData = { from, to, citas, gastos, pagos, numTickets, totalIngresos, totalComisiones, totalGastos, utilidadNeta, metaPeriodo, cumplimientoPct };
 
-      renderChart(citas, from, to);
+      renderChart(citas, pagos, from, to);
       renderPorServicio(citas, totalIngresos);
       renderPorBarbero(citas, totalIngresos);
-      renderPorMetodo(citas, totalIngresos);
+      renderPorMetodo(pagos, citas);
       renderPorGasto(gastos);
-      if (sedes.length > 1) renderPorSede(citas, totalIngresos);
+      if (sedes.length > 1) renderPorSede(pagos);
     } catch (err) {
       console.error(err);
       toast('No pudimos cargar los reportes.');
     }
+  }
+
+  // Fecha (YYYY-MM-DD) en hora de Colombia de un timestamp
+  function fechaBogota(ts){
+    return ts ? new Date(ts).toLocaleDateString('en-CA', { timeZone: 'America/Bogota' }) : '';
   }
 
   function dnFormatDateRange(from, to){
@@ -537,7 +583,7 @@
     return `${f} — ${t}`;
   }
 
-  function renderChart(citas, from, to){
+  function renderChart(citas, pagos, from, to){
     const dias = [];
     let d = new Date(from + 'T00:00:00');
     const end = new Date(to + 'T00:00:00');
@@ -545,7 +591,9 @@
       dias.push(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'));
       d.setDate(d.getDate() + 1);
     }
-    const totalsByDay = dias.map(dia => citas.filter(c => c.fecha === dia).reduce((s,c) => s + (Number(c.precio)||0), 0));
+    const porDia = {};
+    pagos.forEach(p => { const dia = fechaBogota(p.tickets?.created_at); porDia[dia] = (porDia[dia] || 0) + (Number(p.monto)||0); });
+    const totalsByDay = dias.map(dia => porDia[dia] || 0);
     const maxVal = Math.max(...totalsByDay, metaDiariaGlobal, 1);
 
     const chartW = 560, chartH = 180, padX = 10, padTop = 20, padBottom = 20;
@@ -558,7 +606,12 @@
     });
     const polyPoints = points.map(p => p.join(',')).join(' ');
     const polygonPoints = points.length > 1 ? polyPoints + ` ${points[points.length-1][0]},${chartH-padBottom} ${points[0][0]},${chartH-padBottom}` : '';
-    const dots = points.map(([x,y]) => `<circle cx="${x}" cy="${y}" r="3.5" fill="#FFAC48"/>`).join('');
+    const dots = points.map(([x,y], i) => `<circle class="chart-dot" data-i="${i}" cx="${x}" cy="${y}" r="3.5" fill="#FFAC48"/>`).join('');
+    // Zonas táctiles más grandes que el punto para que sea fácil tocarlo en el celular
+    const hitR = Math.max(6, Math.min(16, dias.length > 1 ? usableW / (dias.length - 1) / 2 : 16));
+    const hits = points.map(([x,y], i) => `<circle class="chart-hit" data-i="${i}" cx="${x}" cy="${y}" r="${hitR}"/>`).join('');
+    chartPoints = dias.map((dia, i) => ({ dia, total: totalsByDay[i], citas: citas.filter(c => c.fecha === dia).length }));
+    hideChartTip();
     const metaY = metaDiariaGlobal > 0 ? padTop + usableH - (metaDiariaGlobal/maxVal)*usableH : null;
     const metaLine = metaY !== null ? `
       <line x1="${padX}" y1="${metaY}" x2="${chartW-padX}" y2="${metaY}" class="chart-meta-line"/>
@@ -568,6 +621,7 @@
       <polyline points="${polyPoints}" fill="none" stroke="#FFAC48" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
       ${polygonPoints ? `<polygon points="${polygonPoints}" fill="url(#repAreaFill)"/>` : ''}
       ${dots}
+      ${hits}
     `;
 
     // Etiquetas: si son muchos días, mostrar solo algunos para no saturar
@@ -580,6 +634,39 @@
     }).filter(Boolean).join('');
     document.getElementById('chartLabels').innerHTML = labelsHtml;
   }
+
+  let chartPoints = [];
+  function showChartTip(i){
+    const p = chartPoints[i];
+    const dot = document.querySelector(`#chartContent .chart-dot[data-i="${i}"]`);
+    if (!p || !dot) return;
+    document.querySelectorAll('#chartContent .chart-dot.active').forEach(d => { d.classList.remove('active'); d.setAttribute('r', '3.5'); });
+    dot.classList.add('active');
+    dot.setAttribute('r', '6');
+    const tip = document.getElementById('chartTip');
+    const fecha = new Date(p.dia + 'T00:00:00').toLocaleDateString('es-CO', { weekday:'short', day:'numeric', month:'short' });
+    tip.innerHTML = `<div class="tip-date">${fecha} · ${p.citas} cita${p.citas === 1 ? '' : 's'}</div><div class="tip-val">${dnFormatCOP(p.total)}</div>`;
+    tip.style.display = 'block';
+    const wrap = tip.parentElement.getBoundingClientRect();
+    const r = dot.getBoundingClientRect();
+    const half = tip.offsetWidth / 2;
+    const x = Math.min(Math.max(r.left + r.width/2 - wrap.left, half), wrap.width - half);
+    tip.style.left = `${x}px`;
+    tip.style.top = `${r.top - wrap.top + r.height/2}px`;
+  }
+  function hideChartTip(){
+    const tip = document.getElementById('chartTip');
+    if (tip) tip.style.display = 'none';
+    document.querySelectorAll('#chartContent .chart-dot.active').forEach(d => { d.classList.remove('active'); d.setAttribute('r', '3.5'); });
+  }
+  (function initChartTip(){
+    const g = document.getElementById('chartContent');
+    const pick = e => { const hit = e.target.closest('.chart-hit'); if (hit) showChartTip(Number(hit.dataset.i)); };
+    g.addEventListener('mouseover', pick);
+    g.addEventListener('click', pick);
+    g.closest('svg').addEventListener('mouseleave', hideChartTip);
+    document.addEventListener('click', e => { if (!e.target.closest('#chartContent .chart-hit')) hideChartTip(); });
+  })();
 
   function barRowsHtml(items, maxVal){
     return items.map(it => `
@@ -622,18 +709,29 @@
       </div>`).join('');
   }
 
-  const METODO_LABEL = { tarjeta: 'Tarjeta', nequi: 'Nequi', daviplata: 'Daviplata', apple_pay: 'Apple Pay', google_pay: 'Google Pay', efectivo: 'Efectivo' };
-  function renderPorMetodo(citas, total){
-    const el = document.getElementById('porMetodo');
+  const METODO_LABEL = { tarjeta: 'Tarjeta', nequi: 'Nequi', daviplata: 'Daviplata', apple_pay: 'Apple Pay', google_pay: 'Google Pay', efectivo: 'Efectivo', qr: 'QR', transferencia: 'Transferencia', cortesia: 'Cortesía', cortesia_embajador: 'Cortesía embajador' };
+  // Dinero recibido por método (pagos de tickets) + cortesías, que no generan pago
+  function metodosDelPeriodo(pagos, citas){
     const map = {};
-    citas.forEach(c => {
-      const metodo = METODO_LABEL[c.metodo_pago] || 'Sin registrar';
-      map[metodo] = (map[metodo] || 0) + (Number(c.precio)||0);
+    pagos.forEach(p => {
+      const n = METODO_LABEL[p.metodo] || p.metodo || 'Sin registrar';
+      map[n] = (map[n] || 0) + (Number(p.monto)||0);
     });
+    citas.filter(c => (c.metodo_pago || '').startsWith('cortesia')).forEach(c => {
+      const n = METODO_LABEL[c.metodo_pago];
+      map[n] = (map[n] || 0) + (Number(c.precio)||0);
+    });
+    return map;
+  }
+  function renderPorMetodo(pagos, citas){
+    const el = document.getElementById('porMetodo');
+    const map = metodosDelPeriodo(pagos, citas);
     const items = Object.entries(map).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
     if (!items.length) { el.innerHTML = '<div class="empty-row">Sin datos en este período.</div>'; return; }
     const maxVal = Math.max(...items.map(i => i.value));
-    el.innerHTML = barRowsHtml(items, maxVal);
+    const productos = pagos.filter(p => p.tickets?.tipo === 'producto').reduce((s,p) => s + (Number(p.monto)||0), 0);
+    el.innerHTML = barRowsHtml(items, maxVal) +
+      (productos > 0 ? `<div style="font-size:11px; color:var(--text-secondary); margin-top:8px;">Incluye ${dnFormatCOP(productos)} en ventas de productos.</div>` : '');
   }
 
   function renderPorGasto(gastos){
@@ -649,13 +747,13 @@
     el.innerHTML = barRowsHtml(items, maxVal);
   }
 
-  function renderPorSede(citas, total){
+  function renderPorSede(pagos){
     const el = document.getElementById('porSede');
     const map = {};
-    citas.forEach(c => {
-      const sede = sedes.find(s => s.id === c.sucursal_id);
+    pagos.forEach(p => {
+      const sede = sedes.find(s => s.id === p.tickets?.sucursal_id);
       const nombre = sede?.nombre || 'Sin sede';
-      map[nombre] = (map[nombre] || 0) + (Number(c.precio)||0);
+      map[nombre] = (map[nombre] || 0) + (Number(p.monto)||0);
     });
     const items = Object.entries(map).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
     if (!items.length) { el.innerHTML = '<div class="empty-row">Sin datos en este período.</div>'; return; }
@@ -664,7 +762,7 @@
   }
 
   // ---- Exportar reporte del período seleccionado ----
-  function buildBreakdowns(citas, gastos){
+  function buildBreakdowns(citas, gastos, pagos){
     const porServicio = {};
     citas.forEach(c => { const n = c.servicios?.nombre || 'Otro'; porServicio[n] = (porServicio[n]||0) + (Number(c.precio)||0); });
 
@@ -676,8 +774,7 @@
       porBarbero[n].comision += Number(c.comision_calculada)||0;
     });
 
-    const porMetodo = {};
-    citas.forEach(c => { const n = METODO_LABEL[c.metodo_pago] || 'Sin registrar'; porMetodo[n] = (porMetodo[n]||0) + (Number(c.precio)||0); });
+    const porMetodo = metodosDelPeriodo(pagos, citas);
 
     const porGasto = {};
     gastos.forEach(g => { const n = g.descripcion?.trim() || 'Sin descripción'; porGasto[n] = (porGasto[n]||0) + (Number(g.monto)||0); });
@@ -687,8 +784,8 @@
 
   function exportReportePDF(){
     if (!lastReportData) { toast('Espera a que carguen los datos del período.'); return; }
-    const { from, to, citas, gastos, totalIngresos, totalComisiones, totalGastos, utilidadNeta } = lastReportData;
-    const { porServicio, porBarbero, porMetodo, porGasto } = buildBreakdowns(citas, gastos);
+    const { from, to, citas, gastos, pagos, numTickets, totalIngresos, totalComisiones, totalGastos, utilidadNeta } = lastReportData;
+    const { porServicio, porBarbero, porMetodo, porGasto } = buildBreakdowns(citas, gastos, pagos);
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
@@ -706,7 +803,7 @@
         ['Comisiones a barberos', dnFormatCOP(totalComisiones)],
         ['Gastos del período', dnFormatCOP(totalGastos)],
         ['Citas finalizadas', String(citas.length)],
-        ['Ticket promedio', dnFormatCOP(citas.length ? totalIngresos/citas.length : 0)],
+        ['Ticket promedio', dnFormatCOP(numTickets ? totalIngresos/numTickets : 0)],
       ],
       theme: 'grid', headStyles: { fillColor: [201,163,91] }, styles: { fontSize: 9 }
     });
@@ -730,8 +827,8 @@
 
   function exportReporteExcel(){
     if (!lastReportData) { toast('Espera a que carguen los datos del período.'); return; }
-    const { from, to, citas, gastos, totalIngresos, totalComisiones, totalGastos, utilidadNeta } = lastReportData;
-    const { porServicio, porBarbero, porMetodo, porGasto } = buildBreakdowns(citas, gastos);
+    const { from, to, citas, gastos, pagos, numTickets, totalIngresos, totalComisiones, totalGastos, utilidadNeta } = lastReportData;
+    const { porServicio, porBarbero, porMetodo, porGasto } = buildBreakdowns(citas, gastos, pagos);
     const wb = XLSX.utils.book_new();
 
     const resumenRows = [
@@ -744,7 +841,7 @@
       ['Comisiones a barberos', totalComisiones],
       ['Gastos del período', totalGastos],
       ['Citas finalizadas', citas.length],
-      ['Ticket promedio', citas.length ? Math.round(totalIngresos/citas.length) : 0],
+      ['Ticket promedio', numTickets ? Math.round(totalIngresos/numTickets) : 0],
     ];
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumenRows), 'Resumen');
 
@@ -781,7 +878,7 @@
 </script>
 
 <script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

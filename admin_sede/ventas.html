@@ -2,10 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="../manifest.json">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
-<link rel="icon" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
+<link rel="icon" href="../assets/favicon-32-v3.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -3525,6 +3526,10 @@
       <label>Valor</label>
       <input type="number" id="descuentoValor" placeholder="0" min="0">
     </div>
+    <div class="field" id="descuentoItemsField" style="display:none;">
+      <label>¿A qué aplica el descuento?</label>
+      <div id="descuentoItemsList" style="display:flex; flex-direction:column; gap:8px;"></div>
+    </div>
     <div class="field" id="descuentoMotivoField">
       <label>Motivo (opcional)</label>
       <input type="text" id="descuentoMotivo" placeholder="Ej: Cupon BIENVENIDA">
@@ -3666,7 +3671,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="../assets/dn-modals.js"></script>
 <script>
 (async function() {
@@ -5148,12 +5153,7 @@
   // Calcular total pendiente de asignar a métodos de pago
   function calcularTotalPendiente() {
     const subtotal = cart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
-    let descuentoMonto = 0;
-    if (descuento) {
-      descuentoMonto = descuento.tipo === 'porcentaje'
-        ? Math.round(subtotal * (descuento.valor / 100))
-        : Math.min(descuento.valor, subtotal);
-    }
+    const descuentoMonto = calcDescuentoMonto();
     const total = subtotal - descuentoMonto + propinaMonto;
     const asignado = Object.values(selectedMethods).reduce((sum, v) => sum + v, 0);
     return Math.max(0, total - asignado);
@@ -5168,12 +5168,7 @@
   // Calcular y mostrar vueltas (solo para efectivo)
   function calcularVueltas() {
     const subtotal = cart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
-    let descuentoMonto = 0;
-    if (descuento) {
-      descuentoMonto = descuento.tipo === 'porcentaje'
-        ? Math.round(subtotal * (descuento.valor / 100))
-        : Math.min(descuento.valor, subtotal);
-    }
+    const descuentoMonto = calcDescuentoMonto();
     // Total a cobrar INCLUYE la propina
     const totalACobrar = subtotal - descuentoMonto + propinaMonto;
 
@@ -5601,14 +5596,14 @@
           </div>
         `;
       } else {
-        const imgSrc = item.foto_url || '../assets/apple-touch-icon-v2.png';
+        const imgSrc = item.foto_url || '../assets/apple-touch-icon-v3.png';
         const duracion = item.duracion_min || item.duracion || 30;
         const precioTexto = (item.precio === 0 || item.precio === null) ? 'Precio variable' : dnFormatCOP(item.precio);
         const precioClass = (item.precio === 0 || item.precio === null) ? 'variable' : '';
         return `
           <div class="item-card ${inCart ? 'in-cart' : ''}" onclick="handleServicioClick('${item.id}')">
             ${badge}
-            <img class="item-img" src="${imgSrc}" alt="${item.nombre}" onerror="this.src='../assets/apple-touch-icon-v2.png'">
+            <img class="item-img" src="${imgSrc}" alt="${item.nombre}" onerror="this.src='../assets/apple-touch-icon-v3.png'">
             <div class="item-info">
               <div class="item-name">${item.nombre}</div>
               <div class="item-type"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ${duracion} min</div>
@@ -6007,7 +6002,7 @@
     } else {
       container.innerHTML = cart.map((item, i) => {
         // Imagen del producto
-        const imgSrc = item.foto_url || '../assets/apple-touch-icon-v2.png';
+        const imgSrc = item.foto_url || '../assets/apple-touch-icon-v3.png';
         const imgHtml = item.foto_url
           ? `<img class="cart-item-img" src="${imgSrc}" alt="${item.nombre}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
              <div class="cart-item-img-placeholder" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg></div>`
@@ -6101,18 +6096,93 @@
     updateTotals();
   }
 
+  // Descuento sobre los ítems elegidos en el modal (servicio completo, solo el corte o producto).
+  // Retorna cuánto del descuento corresponde a servicios y cuánto a productos.
+  function calcDescuentoPartes() {
+    if (!descuento) return { servicios: 0, productos: 0, total: 0 };
+    // Ítems sobre los que aplica: los elegidos en el modal, o toda la orden
+    const seleccion = descuento.seleccion
+      ? descuento.seleccion.filter(sel => cart.includes(sel.item))
+      : cart.map(item => ({ item, modo: 'completo' }));
+    let baseServicios = 0, baseProductos = 0;
+    for (const { item, modo } of seleccion) {
+      const precio = modo === 'corte' ? Math.min(item.precio, precioCorteBase(item)) : item.precio;
+      if (item.tipo === 'productos') baseProductos += precio * item.cantidad;
+      else baseServicios += precio * item.cantidad;
+    }
+    const base = baseServicios + baseProductos;
+    const monto = descuento.tipo === 'porcentaje' ? Math.round(base * (descuento.valor / 100)) : Math.min(descuento.valor, base);
+    // Se reparte entre servicios y productos según lo seleccionado
+    const productos = base === 0 ? 0 : Math.round(monto * (baseProductos / base));
+    return { servicios: monto - productos, productos, total: monto };
+  }
+
+  function calcDescuentoMonto() {
+    return calcDescuentoPartes().total;
+  }
+
+  // Valor del corte dentro de los servicios que lo incluyen (ej. Corte y Barba):
+  // el precio del servicio "Corte" ($35.000), o el del corte de cabello largo ($50.000)
+  // en los servicios Cambio Total. Nunca supera el precio del servicio.
+  function precioCorteBase(item) {
+    const esCabelloLargo = /cambio total|cabello largo/i.test(item.nombre || '');
+    const corte = esCabelloLargo
+      ? servicios.find(s => /cabello largo/i.test(s.nombre || ''))
+      : servicios.find(s => (s.nombre || '').trim().toLowerCase() === 'corte');
+    return Number(corte?.precio) || (esCabelloLargo ? 50000 : 35000);
+  }
+
+  // Servicio que incluye corte y algo más (ej. Corte y Barba): permite descontar solo el corte
+  function esComboConCorte(item) {
+    return item.tipo === 'servicios' && /corte/i.test(item.nombre || '') && item.precio > precioCorteBase(item);
+  }
+
+  function hayQueElegirItemsDescuento() {
+    return cart.length > 1 || cart.some(esComboConCorte);
+  }
+
+  function renderDescuentoItems() {
+    const hayServicios = cart.some(c => c.tipo === 'servicios');
+    document.getElementById('descuentoItemsList').innerHTML = cart.map((item, i) => {
+      // Por defecto: los servicios marcados y los productos sin marcar (si no hay servicios, todo marcado)
+      const marcado = !hayServicios || item.tipo === 'servicios';
+      const precio = item.precio * item.cantidad;
+      const selectorCorte = esComboConCorte(item) ? `
+          <select data-desc-modo="${i}" style="margin-top:6px; width:100%;">
+            <option value="completo">Servicio completo (${dnFormatCOP(precio)})</option>
+            <option value="corte">Solo el corte (${dnFormatCOP(precioCorteBase(item) * item.cantidad)})</option>
+          </select>` : '';
+      return `
+        <div style="border:1px solid var(--border-subtle); border-radius:10px; padding:10px 12px;">
+          <label style="display:flex; align-items:center; gap:10px; cursor:pointer; margin:0; text-transform:none; letter-spacing:normal; font-weight:500; font-size:13px; color:var(--text-primary, inherit);">
+            <input type="checkbox" data-desc-item="${i}" ${marcado ? 'checked' : ''} style="width:18px; height:18px; flex:none;">
+            <span style="flex:1; font-size:13px;">${item.tipo === 'productos' ? '🧴' : '✂️'} ${item.nombre}${item.cantidad > 1 ? ` x${item.cantidad}` : ''}</span>
+            <span style="font-size:13px; color:var(--text-secondary);">${dnFormatCOP(precio)}</span>
+          </label>${selectorCorte}
+        </div>`;
+    }).join('');
+  }
+
+  function leerSeleccionDescuento() {
+    return [...document.querySelectorAll('[data-desc-item]:checked')].map(chk => {
+      const i = Number(chk.dataset.descItem);
+      const modo = document.querySelector(`[data-desc-modo="${i}"]`)?.value || 'completo';
+      return { item: cart[i], modo };
+    }).filter(sel => sel.item);
+  }
+
+  function etiquetaSeleccionDescuento() {
+    if (!descuento?.seleccion) return '';
+    const sel = descuento.seleccion.filter(s => cart.includes(s.item));
+    const todoCompleto = sel.length === cart.length && sel.every(s => s.modo === 'completo');
+    if (todoCompleto) return '';
+    return ' · ' + sel.map(s => s.modo === 'corte' ? 'Corte' : s.item.nombre).join(', ');
+  }
+
   // Actualizar totales
   function updateTotals() {
     const subtotal = cart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
-    let descuentoMonto = 0;
-
-    if (descuento) {
-      if (descuento.tipo === 'porcentaje') {
-        descuentoMonto = Math.round(subtotal * (descuento.valor / 100));
-      } else {
-        descuentoMonto = Math.min(descuento.valor, subtotal);
-      }
-    }
+    const descuentoMonto = calcDescuentoMonto();
 
     const totalSinPropina = subtotal - descuentoMonto;
     const total = totalSinPropina + propinaMonto;
@@ -6181,7 +6251,7 @@
         } else if (esDescuentoCortesia) {
           discountInfoEl.textContent = '🎁 Cortesía';
         } else {
-          discountInfoEl.textContent = descuento.tipo === 'porcentaje' ? `-${descuento.valor}%` : `-${dnFormatCOP(descuento.valor)}`;
+          discountInfoEl.textContent = (descuento.tipo === 'porcentaje' ? `-${descuento.valor}%` : `-${dnFormatCOP(descuento.valor)}`) + etiquetaSeleccionDescuento();
         }
       }
     } else {
@@ -6300,6 +6370,7 @@
     document.getElementById('descuentoTipo').value = 'porcentaje';
     document.getElementById('descuentoValor').value = '';
     document.getElementById('descuentoMotivo').value = '';
+    renderDescuentoItems();
     onDescuentoTipoChange(); // Reset visibility
     document.getElementById('descuentoModal').classList.add('open');
   };
@@ -6332,6 +6403,9 @@
       embajadorInfo.style.display = 'none';
       cortesiaInfo.style.display = 'none';
     }
+    // Elegir a qué ítems aplica (solo si hay más de un ítem o un servicio con corte + algo más)
+    const itemsField = document.getElementById('descuentoItemsField');
+    itemsField.style.display = (tipo === 'porcentaje' || tipo === 'monto_fijo') && hayQueElegirItemsDescuento() ? 'block' : 'none';
   };
 
   window.aplicarDescuento = function() {
@@ -6368,7 +6442,12 @@
       return;
     }
 
-    descuento = { tipo, valor, motivo };
+    const seleccion = hayQueElegirItemsDescuento() ? leerSeleccionDescuento() : null;
+    if (seleccion && seleccion.length === 0) {
+      toast('Selecciona a qué aplicar el descuento');
+      return;
+    }
+    descuento = { tipo, valor, motivo, seleccion };
     closeDescuentoModal();
     updateTotals();
     toast('Descuento aplicado');
@@ -7437,10 +7516,7 @@
 
     // === CALCULAR TOTALES PARA VUELTAS ===
     const subtotal = cart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
-    let descuentoMonto = 0;
-    if (descuento) {
-      descuentoMonto = descuento.tipo === 'porcentaje' ? Math.round(subtotal * (descuento.valor / 100)) : Math.min(descuento.valor, subtotal);
-    }
+    const descuentoMonto = calcDescuentoMonto();
     const totalVenta = subtotal - descuentoMonto + propinaMonto;
     const totalIngresado = Object.values(selectedMethods).reduce((s, v) => s + v, 0);
     const vueltas = totalIngresado - totalVenta;
@@ -7506,10 +7582,7 @@
   // Toggle método de pago en drawer
   window.toggleCobroMethod = function(method) {
     const subtotal = cart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
-    let descuentoMonto = 0;
-    if (descuento) {
-      descuentoMonto = descuento.tipo === 'porcentaje' ? Math.round(subtotal * (descuento.valor / 100)) : Math.min(descuento.valor, subtotal);
-    }
+    const descuentoMonto = calcDescuentoMonto();
     const total = subtotal - descuentoMonto + propinaMonto;
     const totalPendiente = total - Object.entries(selectedMethods).filter(([k]) => k !== method).reduce((s, [, v]) => s + v, 0);
 
@@ -7628,10 +7701,7 @@
   // Actualizar totales del drawer
   function updateCobroTotals() {
     const subtotal = cart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
-    let descuentoMonto = 0;
-    if (descuento) {
-      descuentoMonto = descuento.tipo === 'porcentaje' ? Math.round(subtotal * (descuento.valor / 100)) : Math.min(descuento.valor, subtotal);
-    }
+    const descuentoMonto = calcDescuentoMonto();
     const totalSinPropina = subtotal - descuentoMonto;
     const total = totalSinPropina + propinaMonto;
     const ingresado = Object.values(selectedMethods).reduce((s, v) => s + v, 0);
@@ -7676,10 +7746,7 @@
   window.confirmarPagoDrawer = async function() {
     const btn = document.getElementById('btnConfirmarPago');
     const subtotal = cart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
-    let descuentoMonto = 0;
-    if (descuento) {
-      descuentoMonto = descuento.tipo === 'porcentaje' ? Math.round(subtotal * (descuento.valor / 100)) : Math.min(descuento.valor, subtotal);
-    }
+    const descuentoMonto = calcDescuentoMonto();
     const total = subtotal - descuentoMonto + propinaMonto;
 
     // Preparar datos del cliente
@@ -8062,10 +8129,7 @@
 
       const response = await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/send-service-completed-email', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sb.supabaseKey}`
-        },
+        headers: await dnFuncionHeaders(),
         body: JSON.stringify(payload)
       });
 
@@ -8084,10 +8148,7 @@
     try {
       const response = await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/whatsapp-post-pago', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sb.supabaseKey}`
-        },
+        headers: await dnFuncionHeaders(),
         body: JSON.stringify({ cita_id: citaId })
       });
 
@@ -8149,12 +8210,7 @@
 
     // Calcular si el descuento cubre el 100%
     const subtotalCalc = cart.reduce((s, i) => s + (Number(i.precio) || 0) * (i.cantidad || 1), 0);
-    let descuentoMontoCalc = 0;
-    if (descuento) {
-      descuentoMontoCalc = descuento.tipo === 'porcentaje'
-        ? Math.round(subtotalCalc * (descuento.valor / 100))
-        : Math.min(descuento.valor, subtotalCalc);
-    }
+    const descuentoMontoCalc = calcDescuentoMonto();
     const esDescuentoCompleto = descuento && descuentoMontoCalc >= subtotalCalc && subtotalCalc > 0;
 
     if (esDescuentoEmbajador) {
@@ -8167,13 +8223,14 @@
 
     // Para cortesía o descuento completo no necesitamos métodos de pago
     const metodos = esCortesiaGeneral ? (esCortesiaEmbajador ? ['cortesia_embajador'] : ['cortesia']) : Object.keys(selectedMethods);
-    if ((!metodos.length && !esCortesiaGeneral) || !cart.length) return;
+    if ((!metodos.length && !esCortesiaGeneral) || !cart.length) { _procesandoCobro = false; return; }
 
     // Validar que el total sea mayor a 0 (excepto para cortesías/descuento completo)
     const totalCarrito = cart.reduce((s, i) => s + (Number(i.precio) || 0) * (i.cantidad || 1), 0);
     if (totalCarrito <= 0 && !esCortesiaGeneral) {
       toast('El total debe ser mayor a $0. Verifica los precios de los servicios.');
       console.error('[procesarCobro] Total inválido:', totalCarrito, 'Cart:', cart);
+      _procesandoCobro = false;
       return;
     }
 
@@ -8260,14 +8317,33 @@
           // Cortesía: 100% de descuento (servicio gratis, comisión sí se paga)
           descuentoMonto = subtotal;
         } else {
-          descuentoMonto = descuento.tipo === 'porcentaje' ? Math.round(subtotal * (descuento.valor / 100)) : Math.min(descuento.valor, subtotal);
+          descuentoMonto = calcDescuentoMonto();
         }
       }
       const totalSinPropina = subtotal - descuentoMonto;
       const total = totalSinPropina + propinaMonto;
+      const descuentoPartes = esCortesiaGeneralLocal ? { servicios: descuentoMonto, productos: 0 } : calcDescuentoPartes();
+      const descuentoServicios = descuentoPartes.servicios;
+      const descuentoProductos = descuentoPartes.productos;
+
+      // Si el efectivo recibido supera el total (hay vueltas), se registra solo lo cobrado
+      if (!esCortesiaGeneral) {
+        const excedente = Object.values(selectedMethods).reduce((sum, v) => sum + v, 0) - total;
+        if (excedente > 0) {
+          if ((selectedMethods.efectivo || 0) < excedente) {
+            toast(`Los pagos superan el total por ${dnFormatCOP(excedente)}. Ajusta los montos.`);
+            return;
+          }
+          selectedMethods = { ...selectedMethods, efectivo: selectedMethods.efectivo - excedente };
+          if (selectedMethods.efectivo <= 0) delete selectedMethods.efectivo;
+          console.log('[Ventas] Vueltas:', excedente, '→ métodos ajustados:', selectedMethods);
+        }
+      }
 
       // Obtener métodos de pago ordenados (el de mayor monto primero)
-      const metodosOrdenados = metodos.sort((a, b) => selectedMethods[b] - selectedMethods[a]);
+      const metodosOrdenados = metodos
+        .filter(m => esCortesiaGeneral || selectedMethods[m] > 0)
+        .sort((a, b) => selectedMethods[b] - selectedMethods[a]);
       const metodoPrincipal = metodosOrdenados[0];
 
       // Validar que los métodos de pago sean válidos (excepto para cortesías)
@@ -8286,8 +8362,8 @@
         // REGLA: Nequi solo se puede usar para productos, no para servicios
         const serviciosCart = cart.filter(c => c.tipo === 'servicios');
         const productosCart = cart.filter(c => c.tipo === 'productos');
-        const subtotalServicios = serviciosCart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
-        const subtotalProductos = productosCart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
+        const subtotalServicios = serviciosCart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0) - descuentoServicios;
+        const subtotalProductos = productosCart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0) - descuentoProductos;
         const montoNequi = selectedMethods['nequi'] || 0;
 
         if (montoNequi > 0 && serviciosCart.length > 0) {
@@ -8329,8 +8405,9 @@
       let metodosUsadosEnProductos = {}; // Para restar de selectedMethods cuando hay servicios
 
       if (productosCart.length > 0) {
-        // Calcular totales de productos
-        const subtotalProductos = productosCart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
+        // Calcular totales de productos (neto = con su parte del descuento)
+        const subtotalProductosBruto = productosCart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
+        const subtotalProductos = subtotalProductosBruto - descuentoProductos;
 
         // Obtener barberoId: primero barberoVenta, luego de servicios, luego de producto
         const barberoIdProductos = barberoVenta?.id
@@ -8359,7 +8436,7 @@
         // REGLA CLARA: Nequi SOLO para productos, otros métodos para servicios
         // Esta regla es estricta para evitar confusiones en el cierre de caja
         const serviciosCartLocal = cart.filter(c => c.tipo === 'servicios');
-        const subtotalServiciosLocal = serviciosCartLocal.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
+        const subtotalServiciosLocal = serviciosCartLocal.reduce((sum, c) => sum + (c.precio * c.cantidad), 0) - descuentoServicios;
 
         let metodosProductos = [];
         const montoNequi = selectedMethods['nequi'] || 0;
@@ -8428,8 +8505,8 @@
           sucursalId: sedeId,
           items: itemsProductos,
           metodosPago: metodosProductos,
-          subtotal: subtotalProductos,
-          descuento: 0, // Descuento se aplica al total general, no por separado
+          subtotal: subtotalProductosBruto,
+          descuento: descuentoProductos,
           propina: 0, // Propina va a servicios
           total: subtotalProductos,
           clienteId: clienteId,
@@ -8778,9 +8855,9 @@
           items: itemsParaTicket,
           metodosPago: metodosParaCobro,
           subtotal: precioTotalWalkIn,
-          descuento: descuentoMonto,
+          descuento: descuentoServicios,
           propina: propinaMonto,
-          total: precioTotalWalkIn - descuentoMonto + propinaMonto,
+          total: precioTotalWalkIn - descuentoServicios + propinaMonto,
           clienteId: clienteId,
           clienteNombre: clienteEncontrado?.full_name || document.getElementById('clienteNombre')?.value?.trim() || 'Cliente',
           clienteTelefono: clienteEncontrado?.phone || document.getElementById('clienteSearch')?.value?.trim() || null,
@@ -8878,9 +8955,9 @@
             items: itemsParaTicketCita,
             metodosPago: metodosParaCobroCita,
             subtotal: precioTotal,
-            descuento: descuentoMonto,
+            descuento: descuentoServicios,
             propina: propinaMonto,
-            total: precioTotal - descuentoMonto + propinaMonto,
+            total: precioTotal - descuentoServicios + propinaMonto,
             clienteId: clienteId,
             clienteNombre: clienteEncontrado?.full_name || document.getElementById('clienteNombre')?.value?.trim() || 'Cliente',
             clienteTelefono: clienteEncontrado?.phone || document.getElementById('clienteSearch')?.value?.trim() || null,
@@ -8974,9 +9051,9 @@
             items: itemsParaTicketNueva,
             metodosPago: metodosParaCobroNueva,
             subtotal: precioTotal,
-            descuento: descuentoMonto,
+            descuento: descuentoServicios,
             propina: propinaMonto,
-            total: precioTotal - descuentoMonto + propinaMonto,
+            total: precioTotal - descuentoServicios + propinaMonto,
             clienteId: clienteId,
             clienteNombre: clienteEncontrado?.full_name || document.getElementById('clienteNombre')?.value?.trim() || 'Cliente',
             clienteTelefono: clienteEncontrado?.phone || document.getElementById('clienteSearch')?.value?.trim() || null,
@@ -9107,12 +9184,7 @@
 
     // Detectar si el descuento cubre el 100% (descuento completo)
     const subtotalActual = cart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
-    let descuentoMontoActual = 0;
-    if (descuento) {
-      descuentoMontoActual = descuento.tipo === 'porcentaje'
-        ? Math.round(subtotalActual * (descuento.valor / 100))
-        : Math.min(descuento.valor, subtotalActual);
-    }
+    const descuentoMontoActual = calcDescuentoMonto();
     const esDescuentoCompleto = descuento && descuentoMontoActual >= subtotalActual;
 
     const esCortesiaGeneral = esDescuentoEmbajador || esDescuentoCortesia || esDescuentoCompleto;
@@ -9201,9 +9273,7 @@
         confirmText: 'Cerrar sesión'
       });
       if (confirmed) {
-        dnClearSession();
-        dnClearTurnoSede();
-        window.location.href = '../auth.html';
+        dnLogout();
       }
     });
   }
@@ -9313,10 +9383,10 @@
     citasPorDia = {};
 
     const preview = document.getElementById('servicioPreview');
-    const imgSrc = servicio.foto_url || '../assets/apple-touch-icon-v2.png';
+    const imgSrc = servicio.foto_url || '../assets/apple-touch-icon-v3.png';
     const duracion = servicio.duracion_min || servicio.duracion || 30;
     preview.innerHTML = `
-      <img src="${imgSrc}" alt="${servicio.nombre}" onerror="this.src='../assets/apple-touch-icon-v2.png'">
+      <img src="${imgSrc}" alt="${servicio.nombre}" onerror="this.src='../assets/apple-touch-icon-v3.png'">
       <div class="info">
         <div class="name">${servicio.nombre}</div>
         <div class="meta">
@@ -9988,10 +10058,10 @@
     // Mostrar preview del servicio
     const servicio = servicios.find(s => s.id === item.id);
     const preview = document.getElementById('agendaServicioPreview');
-    const imgSrc = servicio?.foto_url || '../assets/apple-touch-icon-v2.png';
+    const imgSrc = servicio?.foto_url || '../assets/apple-touch-icon-v3.png';
     const duracion = item.duracion || 30;
     preview.innerHTML = `
-      <img src="${imgSrc}" alt="${item.nombre}" onerror="this.src='../assets/apple-touch-icon-v2.png'">
+      <img src="${imgSrc}" alt="${item.nombre}" onerror="this.src='../assets/apple-touch-icon-v3.png'">
       <div class="info">
         <div class="name">${item.nombre}</div>
         <div class="meta">
@@ -10393,13 +10463,13 @@
           </div>
         `;
       } else {
-        const imgSrc = item.foto_url || '../assets/apple-touch-icon-v2.png';
+        const imgSrc = item.foto_url || '../assets/apple-touch-icon-v3.png';
         const duracion = item.duracion_min || item.duracion || 30;
         const precioTexto = (item.precio === 0 || item.precio === null) ? 'Variable' : dnFormatCOP(item.precio);
         return `
           <div class="mv-item ${inCart ? 'in-cart' : ''}" onclick="handleServicioClick('${item.id}')">
             ${badge}
-            <img src="${imgSrc}" alt="${item.nombre}" onerror="this.src='../assets/apple-touch-icon-v2.png'">
+            <img src="${imgSrc}" alt="${item.nombre}" onerror="this.src='../assets/apple-touch-icon-v3.png'">
             <div class="name">${item.nombre}</div>
             <div class="price">${precioTexto}</div>
             <div class="duration">
@@ -10525,10 +10595,7 @@
 
   function updateMobileTotals() {
     const subtotal = cart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
-    let descuentoMonto = 0;
-    if (descuento) {
-      descuentoMonto = descuento.tipo === 'porcentaje' ? Math.round(subtotal * (descuento.valor / 100)) : Math.min(descuento.valor, subtotal);
-    }
+    const descuentoMonto = calcDescuentoMonto();
     const totalSinPropina = subtotal - descuentoMonto;
     const total = totalSinPropina + propinaMonto;
 
@@ -11053,7 +11120,7 @@
   }
 })();
 </script>
-<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
 <script src="../assets/citas-estados.js"></script>
 <script src="../assets/mobile-nav.js"></script>
 <script src="/assets/turbo-loader.js" defer></script>

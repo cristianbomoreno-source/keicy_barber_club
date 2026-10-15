@@ -395,10 +395,29 @@ serve(async (req) => {
 
     const data: CitaData = await req.json();
 
-    // Validar datos requeridos
-    if (!data.cliente_email || !data.cliente_nombre) {
-      throw new Error("Faltan datos del cliente");
+    // El destinatario sale de la cita en la base de datos, no del mensaje: así
+    // nadie puede usar esta función para enviar correos a cualquier dirección.
+    if (!data.cita_id) {
+      throw new Error("Falta cita_id");
     }
+    const { data: cita } = await supabase
+      .from('citas')
+      .select('id, created_at, usuarios!citas_cliente_id_fkey(email, full_name)')
+      .eq('id', data.cita_id)
+      .maybeSingle();
+    const cliente = (cita as any)?.usuarios;
+    if (!cita || !cliente?.email) {
+      return new Response(JSON.stringify({ success: false, message: 'La cita no tiene un correo registrado' }), {
+        status: 200,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+    // Solo citas recién creadas (evita reenvíos masivos)
+    if (Date.now() - new Date((cita as any).created_at).getTime() > 24 * 60 * 60 * 1000) {
+      throw new Error("La cita no es reciente");
+    }
+    data.cliente_email = cliente.email;
+    data.cliente_nombre = data.cliente_nombre || cliente.full_name || 'Cliente';
 
     const emailHTML = generateEmailHTML(data);
 

@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
 <!-- Preconnect críticos -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -12,11 +13,11 @@
 <link rel="preload" href="../assets/design-system.css" as="style">
 <link rel="preload" href="../assets/barbero-nav.css" as="style">
 <!-- Preload JS críticos -->
-<link rel="preload" href="../assets/supabase-client.js" as="script">
+<link rel="preload" href="../assets/supabase-client.js?v=20261014e" as="script">
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
-<link rel="icon" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
+<link rel="icon" href="../assets/favicon-32-v3.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -573,7 +574,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/mobile-nav.js"></script>
 <script>
@@ -656,8 +657,7 @@
   function closeAccountSheet(){ document.getElementById('accountSheetBg').classList.remove('show'); }
   function logoutBarbero(){
     if (!confirm('¿Cerrar sesión?')) return;
-    dnClearSession();
-    window.location.href = '../auth.html';
+    dnLogout();
   }
 
   // ---- Fechas ----

@@ -1,11 +1,8 @@
-# Keicy Barber Club - Robots.txt
+# Keicy Barber Club - robots.txt
+# Las páginas privadas (admin, barbero, recepción, login, cliente...) llevan
+# <meta name="robots" content="noindex, nofollow">. No se bloquean aquí para que
+# Google pueda leer ese noindex y sacarlas del índice.
 User-agent: *
 Allow: /
 
-# Sitemap
 Sitemap: https://keicybarberclub.com/sitemap.xml
-
-# Bloquear páginas de admin
-Disallow: /admin/
-Disallow: /barbero/
-Disallow: /admin_sede/

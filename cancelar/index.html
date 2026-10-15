@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -195,13 +196,14 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script>
 (async function(){
   const phoneInput = document.getElementById('phoneInput');
   const searchBtn = document.getElementById('searchBtn');
   const citasList = document.getElementById('citasList');
   const successMsg = document.getElementById('successMsg');
+  let telefonosBuscados = []; // celulares de la última búsqueda (para cancelar)
 
   // Obtener teléfono de URL si viene
   const urlParams = new URLSearchParams(window.location.search);
@@ -245,65 +247,28 @@
         phoneWith57 = phone;
       }
 
-      // Buscar cliente por teléfono (todas las variantes posibles)
-      const { data: cliente } = await sb.from('usuarios')
-        .select('id')
-        .or(`phone.eq.${phone},phone.eq.${phoneWith57},phone.eq.${phoneWithout57}`)
-        .maybeSingle();
-
-      if (!cliente) {
-        citasList.innerHTML = '<div class="no-citas">No encontramos citas con ese número</div>';
-        return;
-      }
-
-      // Buscar citas pendientes del cliente
-      const today = new Date().toISOString().split('T')[0];
-      const { data: citas } = await sb.from('citas')
-        .select(`
-          id,
-          fecha,
-          hora_inicio,
-          precio,
-          estado,
-          barbero_id,
-          servicios:servicio_id(nombre),
-          sucursal:sucursal_id(nombre)
-        `)
-        .eq('cliente_id', cliente.id)
-        .gte('fecha', today)
-        .in('estado', ['agendada', 'confirmada'])
-        .order('fecha', { ascending: true })
-        .order('hora_inicio', { ascending: true });
+      // Citas próximas de ese celular (el servidor solo devuelve lo necesario)
+      telefonosBuscados = [...new Set([phone, phoneWith57, phoneWithout57])];
+      const { data: citas, error: citasErr } = await sb.rpc('dn_citas_por_telefono', { p_telefonos: telefonosBuscados });
+      if (citasErr) throw citasErr;
 
       if (!citas || citas.length === 0) {
         citasList.innerHTML = '<div class="no-citas">No tienes citas pendientes</div>';
         return;
       }
 
-      // Obtener nombres de barberos
-      const barberoIds = [...new Set(citas.map(c => c.barbero_id).filter(Boolean))];
-      let barberosMap = {};
-      if (barberoIds.length > 0) {
-        const { data: barberos } = await sb.from('usuarios')
-          .select('id, full_name')
-          .in('id', barberoIds);
-        if (barberos) {
-          barberos.forEach(b => barberosMap[b.id] = b.full_name);
-        }
-      }
-
       citasList.innerHTML = citas.map(cita => {
         const fecha = new Date(cita.fecha + 'T12:00:00');
         const fechaStr = fecha.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
         const hora = formatHora(cita.hora_inicio);
-        const barberoNombre = barberosMap[cita.barbero_id] || 'Primer barbero disponible';
+        const barberoNombre = cita.barbero_nombre || 'Primer barbero disponible';
 
         return `
           <div class="cita-card" data-id="${cita.id}">
             <div class="cita-fecha">${capitalize(fechaStr)}</div>
             <div class="cita-hora">${hora}</div>
-            <div class="cita-servicio">📍 ${cita.sucursal?.nombre || 'Keicy Barbería'}</div>
-            <div class="cita-servicio">✂️ ${cita.servicios?.nombre || 'Servicio'}</div>
+            <div class="cita-servicio">📍 ${cita.sucursal_nombre || 'Keicy Barber Club'}</div>
+            <div class="cita-servicio">✂️ ${cita.servicio_nombre || 'Servicio'}</div>
             <div class="cita-barbero">💈 ${barberoNombre}</div>
             <button class="cancel-cita-btn" onclick="cancelarCita('${cita.id}')">Cancelar esta cita</button>
           </div>
@@ -323,11 +288,11 @@
     if (!confirm('¿Estás seguro de que deseas cancelar esta cita?')) return;
 
     try {
-      const { error } = await sb.from('citas')
-        .update({ estado: 'cancelada' })
-        .eq('id', citaId);
+      // El servidor verifica que la cita sea de este celular
+      const { data: res, error } = await sb.rpc('dn_cancelar_cita_publica', { p_cita_id: citaId, p_telefonos: telefonosBuscados });
 
       if (error) throw error;
+      if (!res?.success) throw new Error('No se pudo cancelar');
 
       // Remover la tarjeta de la cita
       const card = document.querySelector(`[data-id="${citaId}"]`);

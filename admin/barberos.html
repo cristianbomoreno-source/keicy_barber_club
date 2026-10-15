@@ -2,10 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="../manifest.json">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
-<link rel="icon" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
+<link rel="icon" href="../assets/favicon-32-v3.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
@@ -469,7 +470,7 @@
     }
   </script>
   <div class="sidebar" id="sidebar">
-    <img src="../assets/apple-touch-icon-v2.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
+    <img src="../assets/apple-touch-icon-v3.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
     <img src="../assets/logo-transparent.png" class="sidebar-logo sidebar-logo-full" alt="Keicy Barbería" id="sidebarLogoFull">
     <div class="sidebar-card" id="sidebarCard" title="Cambiar de sede">
       <div class="sidebar-card-avatar">DN</div>
@@ -555,6 +556,12 @@
     </a>
   </div>
 
+  <a href="sesiones.html" style="display:flex; align-items:center; gap:10px; padding:12px 14px; margin-bottom:14px; border-radius:14px; background:var(--card); border:1px solid var(--divider); color:var(--text); text-decoration:none; font-size:13px;">
+    <span style="font-size:18px;">🔐</span>
+    <span style="flex:1;"><b>Sesiones activas</b> · ver en qué dispositivos está abierta la sesión de cada uno y cerrarlas</span>
+    <span style="color:var(--text-secondary);">›</span>
+  </a>
+
   <div class="sec-tabs">
     <div class="sec-tab active" data-sec="colaboradores" onclick="switchSeccion('colaboradores')">Colaboradores</div>
     <div class="sec-tab" data-sec="administrativos" onclick="switchSeccion('administrativos')">Administrativos</div>
@@ -605,7 +612,7 @@
     <div class="modal-box">
       <span class="modal-close" onclick="document.getElementById('createModal').classList.remove('show')">✕ Cerrar</span>
       <div class="modal-title">Crear cuenta de barbero</div>
-      <div class="modal-sub">Define su usuario y clave — él la usará para entrar a su app.</div>
+      <div class="modal-sub">Define su usuario. La primera vez que entre a su app creará su propio PIN de 6 dígitos.</div>
 
       <div class="error-box" id="errorBox"></div>
 
@@ -629,7 +636,7 @@
         </div>
         <div class="field-row">
           <div class="field"><label>Usuario</label><input type="text" id="username" placeholder="ej. andres.barber" autocomplete="off"></div>
-          <div class="field"><label>Clave</label><input type="password" id="password" placeholder="Mínimo 6 caracteres" autocomplete="off"></div>
+          <div class="field" id="passwordField" style="display:none;"><label>Clave</label><input type="password" id="password" placeholder="Mínimo 6 caracteres" autocomplete="off"></div>
         </div>
         <div class="field" id="comisionField"><label>Comisión (%)</label><input type="number" id="comision" value="40" min="0" max="100" autocomplete="off"></div>
         <div class="field" id="pagoDiarioField" style="display:none;"><label>Pago diario ($)</label><input type="number" id="pagoDiario" value="50000" min="0" autocomplete="off"></div>
@@ -767,16 +774,12 @@
       <div style="font-size:11px; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.4px; margin:18px 0 8px;">Credenciales de acceso</div>
       <div class="field"><label>Usuario de ingreso</label><input type="text" id="editUsername" autocomplete="off"></div>
       <div class="field">
-        <label>Nueva contraseña (déjalo vacío para no cambiarla)</label>
+        <label>PIN de acceso</label>
         <div style="display:flex; gap:8px; align-items:center;">
-          <input type="text" id="editPassword" placeholder="Mínimo 6 caracteres" autocomplete="new-password" style="flex:1;">
-          <button type="button" onclick="generarPasswordColaborador()" style="padding:8px 12px; background:var(--primary); color:#111111; border:none; border-radius:8px; font-size:12px; cursor:pointer; white-space:nowrap;">Generar</button>
+          <div id="editPinEstado" style="flex:1; font-size:12.5px; color:var(--text-secondary);">—</div>
+          <button type="button" id="editResetPinBtn" onclick="reiniciarPinColaborador()" style="padding:8px 12px; background:var(--primary); color:#111111; border:none; border-radius:8px; font-size:12px; cursor:pointer; white-space:nowrap;">Reiniciar PIN</button>
         </div>
-      </div>
-      <div id="credencialesBox" style="display:none; background:var(--glass); border:1px solid var(--primary); border-radius:10px; padding:12px; margin-top:10px;">
-        <div style="font-size:11px; color:var(--text-secondary); margin-bottom:8px;">Credenciales para compartir:</div>
-        <div id="credencialesTexto" style="font-family:monospace; font-size:13px; background:var(--card); padding:10px; border-radius:6px; white-space:pre-line;"></div>
-        <button type="button" onclick="copiarCredenciales()" style="margin-top:10px; width:100%; padding:10px; background:var(--success); color:#111111; border:none; border-radius:8px; font-size:13px; cursor:pointer;">📋 Copiar credenciales</button>
+        <div style="font-size:11px; color:var(--text-secondary); margin-top:6px;">Cada colaborador crea su propio PIN; nadie más lo puede ver. Si lo olvida, reinícialo y lo creará de nuevo al entrar.</div>
       </div>
 
       <div class="modal-actions">
@@ -982,7 +985,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="/assets/utils.js"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/admin-sede-nav.js"></script>
@@ -1025,9 +1028,7 @@
   // Cerrar sesión
   document.getElementById('logoutBtn')?.addEventListener('click', () => {
     if (confirm('¿Seguro que deseas cerrar sesión?')) {
-      dnClearSession();
-      if (typeof dnClearTurnoSede === 'function') dnClearTurnoSede();
-      window.location.href = '../auth.html';
+      dnLogout();
     }
   });
 
@@ -1122,7 +1123,11 @@
       </label>
     `).join('');
   }
-  document.getElementById('tipoColaborador').addEventListener('change', (e) => toggleTipoFields(e.target.value, 'especialidadField', 'comisionField'));
+  document.getElementById('tipoColaborador').addEventListener('change', (e) => {
+    toggleTipoFields(e.target.value, 'especialidadField', 'comisionField');
+    // Solo los administradores de sede usan clave; barberos y aseo crean su PIN
+    document.getElementById('passwordField').style.display = e.target.value === 'admin_sede' ? '' : 'none';
+  });
   document.getElementById('editTipoColaborador').addEventListener('change', (e) => toggleTipoFields(e.target.value, 'editEspecialidadField', 'editComisionField'));
 
   let sedes = [];
@@ -1171,7 +1176,7 @@
 
     if (fullName.length < 2) return showError('Escribe el nombre completo.');
     if (username.length < 3) return showError('Escribe un nombre de usuario válido.');
-    if (password.length < 6) return showError('La clave debe tener al menos 6 caracteres.');
+    if (tipo === 'admin_sede' && password.length < 6) return showError('La clave debe tener al menos 6 caracteres.');
     if (tipo === 'admin_sede' && sedesSeleccionadas.length === 0) return showError('Selecciona al menos una sede para el administrador.');
     if (tipo !== 'admin_sede' && tipo !== 'aseo' && !sedeId) return showError('Elige la sede donde trabajará.');
     if (tipo === 'aseo' && !todasSedesActivo && !sedeId) return showError('Elige la sede o activa "Trabaja en todas las sedes".');
@@ -1191,10 +1196,10 @@
         // Crear usuario con rol admin_sede
         const { data: newUser, error: userError } = await sb.from('usuarios').insert({
           username: username,
-          password_hash: password, // En produccion deberia ser hasheado
+          password_hash: password, // Se mueve cifrada a Supabase Auth y no queda en esta tabla
           full_name: fullName,
           role: 'admin_sede'
-        }).select().single();
+        }).select('id').single();
 
         if (userError) throw userError;
 
@@ -1215,7 +1220,7 @@
         // Flujo normal para barberos y aseo
         const { data, error } = await sb.rpc('crear_cuenta_barbero', {
           p_username: username,
-          p_password: password,
+          p_password: null,
           p_full_name: fullName,
           p_especialidad: tipo === 'barbero' ? (especialidad || null) : null,
           p_codigo_invitacion: BARBER_INVITE_CODE
@@ -1230,7 +1235,7 @@
         }
 
         document.getElementById('createModal').classList.remove('show');
-        toast(`Cuenta creada para ${fullName}. Ya puede entrar con su usuario y clave.`);
+        toast(`Cuenta creada para ${fullName}. La primera vez que entre con su usuario creará su PIN.`);
         loadBarberos();
       }
     } catch (err) {
@@ -1250,7 +1255,7 @@
     try {
       let query = sb
         .from('barberos')
-        .select('id, especialidad, puesto, comision_pct, pago_diario, calificacion, activo, anos_experiencia, dia_descanso, sucursal_id, tipo_colaborador, horario_personalizado, sucursales(nombre), usuarios!barberos_id_fkey(id, username, full_name, avatar_url, instagram, password_hash, avatar_focus_y, avatar_focus_y_reservas, avatar_focus_y_agenda, avatar_focus_y_barbero)');
+        .select('id, especialidad, puesto, comision_pct, pago_diario, calificacion, activo, anos_experiencia, dia_descanso, sucursal_id, tipo_colaborador, horario_personalizado, sucursales(nombre), usuarios!barberos_id_fkey(id, username, full_name, avatar_url, instagram, avatar_focus_y, avatar_focus_y_reservas, avatar_focus_y_agenda, avatar_focus_y_barbero)');
 
       // Filtrar por sede seleccionada (tanto para admin_sede como admin general)
       if (sedeActualId) {
@@ -1297,55 +1302,40 @@
     }).join('');
   }
 
-  // ---- Generador de contraseñas ----
-  function generarPasswordColaborador() {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-    let password = '';
-    for (let i = 0; i < 8; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    document.getElementById('editPassword').value = password;
-    mostrarCredenciales();
+  // ---- PIN de acceso del colaborador ----
+  async function cargarEstadoPin(username) {
+    const el = document.getElementById('editPinEstado');
+    el.textContent = 'Consultando…';
+    const { data: r } = await sb.rpc('dn_login_resolver', { p_identificador: username || '' });
+    if (!r || !r.encontrado) el.textContent = '—';
+    else if (r.metodo === 'pin') el.textContent = '✅ Tiene PIN creado';
+    else if (r.requiere_crear_pin) el.textContent = '⏳ Pendiente: lo creará la próxima vez que entre';
+    else el.textContent = '⚠️ ' + (r.mensaje || 'Sin acceso');
   }
 
-  function mostrarCredenciales() {
-    const username = document.getElementById('editUsername').value.trim();
-    const password = document.getElementById('editPassword').value;
-    if (username && password) {
-      const texto = `Usuario: ${username}\nContraseña: ${password}`;
-      document.getElementById('credencialesTexto').textContent = texto;
-      document.getElementById('credencialesBox').style.display = 'block';
+  async function reiniciarPinColaborador() {
+    if (!currentEditId) return;
+    const b = barberos.find(x => x.id === currentEditId);
+    const nombre = b?.usuarios?.full_name || 'este colaborador';
+    if (!confirm(`¿Reiniciar el PIN de ${nombre}?
+
+Se cerrarán sus sesiones abiertas y tendrá 2 días para crear un PIN nuevo la próxima vez que entre.`)) return;
+    const btn = document.getElementById('editResetPinBtn');
+    btn.disabled = true;
+    try {
+      const { data, error } = await sb.rpc('dn_staff_reiniciar_pin', { p_usuario_id: currentEditId });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'No se pudo reiniciar');
+      toast(`PIN reiniciado. ${nombre} lo creará al volver a entrar.`);
+      cargarEstadoPin(document.getElementById('editUsername').value.trim());
+    } catch (err) {
+      console.error(err);
+      toast(err.message || 'No pudimos reiniciar el PIN.');
+    } finally {
+      btn.disabled = false;
     }
   }
 
-  function copiarCredenciales() {
-    const username = document.getElementById('editUsername').value.trim();
-    const password = document.getElementById('editPassword').value;
-    const texto = `Usuario: ${username}\nContraseña: ${password}`;
-    navigator.clipboard.writeText(texto).then(() => {
-      toast('Credenciales copiadas al portapapeles');
-    }).catch(() => {
-      // Fallback para navegadores sin soporte
-      const ta = document.createElement('textarea');
-      ta.value = texto;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      toast('Credenciales copiadas');
-    });
-  }
-
-  // Mostrar credenciales cuando se escribe contraseña manualmente
-  document.addEventListener('DOMContentLoaded', () => {
-    const passField = document.getElementById('editPassword');
-    if (passField) {
-      passField.addEventListener('input', () => {
-        if (passField.value.length >= 6) mostrarCredenciales();
-        else document.getElementById('credencialesBox').style.display = 'none';
-      });
-    }
-  });
 
   // ---- Edit modal ----
   function openEditModal(id){
@@ -1382,15 +1372,7 @@
     document.getElementById('editSedeId').value = b.sucursal_id || (sedes[0]?.id || '');
     document.getElementById('editActivoSwitch').classList.toggle('on', !!b.activo);
     document.getElementById('editUsername').value = b.usuarios?.username || '';
-    // Mostrar contraseña actual (texto plano) si existe y no es hash bcrypt
-    const currentPass = b.usuarios?.password_hash || '';
-    const isHash = currentPass.startsWith('$2a$') || currentPass.startsWith('$2b$');
-    document.getElementById('editPassword').value = isHash ? '' : currentPass;
-    document.getElementById('credencialesBox').style.display = 'none';
-    // Mostrar credenciales automáticamente si hay contraseña visible
-    if (currentPass && !isHash) {
-      setTimeout(mostrarCredenciales, 100);
-    }
+    cargarEstadoPin(b.usuarios?.username || '');
 
     // Cargar horarios personalizados
     loadHorarioPersonalizadoInModal(b.horario_personalizado);
@@ -1703,12 +1685,10 @@
     const todasSedesActivo = tipo === 'aseo' && document.getElementById('editTodasSedesSwitch').classList.contains('on');
     const sedeId = todasSedesActivo ? null : document.getElementById('editSedeId').value;
     const username = document.getElementById('editUsername').value.trim();
-    const password = document.getElementById('editPassword').value;
 
     if (!fullName) { toast('El nombre no puede estar vacío.'); return; }
     if (!todasSedesActivo && !sedeId) { toast('Elige la sede del colaborador.'); return; }
     if (username.length < 3) { toast('El usuario de ingreso debe tener al menos 3 caracteres.'); return; }
-    if (password && password.length < 6) { toast('La nueva contraseña debe tener al menos 6 caracteres.'); return; }
 
     const saveBtn = document.getElementById('editSaveBtn');
     const instagram = document.getElementById('editInstagram').value.trim().replace('@', '');
@@ -1742,7 +1722,7 @@
         p_caller_id: currentUser.id,
         p_usuario_id: usuarioId,
         p_username: username,
-        p_password: password || null,
+        p_password: null,
         p_full_name: fullName,
         p_instagram: instagram || null,
         p_avatar_url: avatarUrl
@@ -2118,7 +2098,7 @@
       // Crear usuario
       const { data: newUser, error: userErr } = await sb.from('usuarios').insert({
         username, password_hash: password, full_name: fullName, role: 'admin_sede'
-      }).select().single();
+      }).select('id').single();
       if (userErr) throw userErr;
 
       // Asignar sedes
@@ -2126,7 +2106,7 @@
       await sb.from('admin_sede_sedes_asignadas').insert(sedesInsert);
 
       // Guardar permisos
-      await sb.from('admin_sede_permisos').upsert({ usuario_id: newUser.id, permisos: modulosSeleccionados }, { onConflict: 'usuario_id' });
+      await dnGuardarPermisosAdminSede(newUser.id, modulosSeleccionados);
 
       toast(`Admin de sede ${fullName} creado.`);
       document.getElementById('createAdminSedeModal').classList.remove('show');
@@ -2160,9 +2140,7 @@
     renderSedesCheckboxes('editAdminSedeSedesCheckboxes', sedesIds);
 
     // Cargar permisos
-    const { data: permData } = await sb.from('admin_sede_permisos')
-      .select('permisos').eq('usuario_id', userId).maybeSingle();
-    const permisos = permData?.permisos || {};
+    const permisos = await dnGetPermisosAdminSede(userId);
     renderModulosCheckboxes('editAdminSedeModulosCheckboxes', permisos);
 
     document.getElementById('editAdminSedeModal').classList.add('show');
@@ -2217,7 +2195,7 @@
       }
 
       // Actualizar permisos
-      await sb.from('admin_sede_permisos').upsert({ usuario_id: userId, permisos: modulosSeleccionados }, { onConflict: 'usuario_id' });
+      await dnGuardarPermisosAdminSede(userId, modulosSeleccionados);
 
       toast('Admin de sede actualizado.');
       document.getElementById('editAdminSedeModal').classList.remove('show');
@@ -2401,7 +2379,7 @@
 </script>
 
 <script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

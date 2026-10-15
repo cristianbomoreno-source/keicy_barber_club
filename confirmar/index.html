@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -256,7 +257,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script>
 (async function(){
   const loadingState = document.getElementById('loadingState');
@@ -278,19 +279,7 @@
 
   try {
     // Buscar la cita
-    const { data: cita, error } = await sb.from('citas')
-      .select(`
-        id,
-        fecha,
-        hora_inicio,
-        estado,
-        precio,
-        barbero_id,
-        servicios:servicio_id(nombre),
-        sucursal:sucursal_id(nombre, direccion)
-      `)
-      .eq('id', citaId)
-      .single();
+    const { data: cita, error } = await sb.rpc('dn_cita_publica', { p_cita_id: citaId });
 
     if (error || !cita) {
       showError('Cita No Encontrada', 'No pudimos encontrar esta cita');
@@ -335,10 +324,7 @@
     }
 
     // Confirmar la cita (cambiar estado de 'agendada' a 'confirmada')
-    const { error: updateError } = await sb.from('citas')
-      .update({ estado: 'confirmada' })
-      .eq('id', citaId)
-      .eq('estado', 'agendada');
+    const { error: updateError } = await sb.rpc('dn_confirmar_cita', { p_cita_id: citaId });
 
     if (updateError) {
       showError('Error', 'No pudimos confirmar tu cita. Intenta de nuevo.');

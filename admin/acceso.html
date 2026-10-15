@@ -2,10 +2,11 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="../manifest.json">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
-<link rel="icon" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
+<link rel="icon" href="../assets/favicon-32-v3.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
@@ -318,7 +319,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script>
 // Si ya hay sesión de admin, redirigir
@@ -385,53 +386,28 @@ form.addEventListener('submit', async (e) => {
   submitBtn.disabled = true;
 
   try {
-    // Buscar por username o email
-    const { data: usuario, error } = await sb
-      .from('usuarios')
-      .select('id, username, email, phone, role, full_name, password_hash, avatar_url')
-      .or(`username.eq.${user},email.eq.${user}`)
-      .maybeSingle();
-
-    if (error) throw error;
-
-    if (!usuario) {
+    // Login con Supabase Auth (la contraseña se valida en el servidor)
+    let usuario;
+    try {
+      const r = await dnStaffLogin(user, pass);
+      usuario = r.profile;
+    } catch (loginErr) {
       submitBtn.classList.remove('loading');
       submitBtn.disabled = false;
-      userWrap.classList.add('error');
-      userError.textContent = 'Usuario no encontrado';
-      userError.classList.add('show');
+      passWrap.classList.add('error');
+      passError.textContent = loginErr.message || 'Usuario o contraseña incorrectos';
+      passError.classList.add('show');
       return;
     }
 
     // Solo admins y admin_sede pueden entrar aquí
-    if (usuario.role !== 'admin' && usuario.role !== 'admin_sede') {
+    if (!usuario || (usuario.role !== 'admin' && usuario.role !== 'admin_sede')) {
+      dnClearSession();
       submitBtn.classList.remove('loading');
       submitBtn.disabled = false;
       showToast('Este acceso es solo para administradores');
       return;
     }
-
-    // Verificar contraseña (comparación directa por ahora)
-    if (usuario.password_hash !== pass) {
-      submitBtn.classList.remove('loading');
-      submitBtn.disabled = false;
-      passWrap.classList.add('error');
-      passError.textContent = 'Contraseña incorrecta';
-      passError.classList.add('show');
-      return;
-    }
-
-    // Login exitoso
-    const session = {
-      id: usuario.id,
-      username: usuario.username,
-      email: usuario.email,
-      phone: usuario.phone,
-      role: usuario.role,
-      full_name: usuario.full_name,
-      avatar_url: usuario.avatar_url
-    };
-    dnSaveSession(session);
 
     showToast('Acceso correcto', 'success');
 
@@ -453,7 +429,7 @@ form.addEventListener('submit', async (e) => {
 });
 </script>
 
-<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

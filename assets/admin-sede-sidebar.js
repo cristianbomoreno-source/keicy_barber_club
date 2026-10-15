@@ -31,7 +31,7 @@
 
     // Reemplazar contenido completo del sidebar
     sidebar.innerHTML = `
-    <img src="../assets/apple-touch-icon-v2.png" class="sidebar-logo sidebar-logo-icon" id="sidebarLogoIcon" alt="Logo" onclick="toggleSidebar()">
+    <img src="../assets/apple-touch-icon-v3.png" class="sidebar-logo sidebar-logo-icon" id="sidebarLogoIcon" alt="Logo" onclick="toggleSidebar()">
     <img src="../assets/logo.png" class="sidebar-logo sidebar-logo-full" id="sidebarLogoFull" alt="Keicy Barberia" onclick="toggleSidebar()">
 
     <div class="sidebar-card" id="sidebarSedeCard" onclick="toggleSedeSelector()" style="cursor:pointer;">
@@ -206,9 +206,7 @@
     if (logoutBtn) {
       logoutBtn.onclick = function() {
         if (confirm('¿Seguro que deseas cerrar sesión?')) {
-          if (typeof dnClearSession === 'function') dnClearSession();
-          if (typeof dnClearTurnoSede === 'function') dnClearTurnoSede();
-          window.location.href = '../auth.html';
+          if (typeof dnLogout === 'function') dnLogout();
         }
       };
     }

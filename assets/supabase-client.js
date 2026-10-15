@@ -256,7 +256,55 @@ function dnClearSession() {
   try {
     dnDeleteCookie(DN_SESSION_KEY);
   } catch (e) {}
+  // Cerrar también la sesión de Supabase Auth en este dispositivo
+  try {
+    if (sb && sb.auth) sb.auth.signOut({ scope: 'local' });
+  } catch (e) {}
 }
+
+// Cerrar sesión del equipo. Primero borra el perfil (así el aviso de SIGNED_OUT no
+// manda a "sesión expirada"), luego espera a que Supabase Auth revoque la sesión
+// (máx. 3 s) para que no siga contando en "Sesiones activas", y después sale.
+let _dnSaliendo = false;
+async function dnLogout(destino) {
+  if (_dnSaliendo) return;
+  _dnSaliendo = true;
+  try { localStorage.removeItem(DN_SESSION_KEY); } catch (e) {}
+  try { sessionStorage.removeItem(DN_SESSION_KEY); } catch (e) {}
+  try { dnDeleteCookie(DN_SESSION_KEY); } catch (e) {}
+  try { if (typeof dnClearTurnoSede === 'function') dnClearTurnoSede(); } catch (e) {}
+  try {
+    if (sb && sb.auth) {
+      await Promise.race([
+        sb.auth.signOut({ scope: 'local' }),
+        new Promise(r => setTimeout(r, 3000))
+      ]);
+    }
+  } catch (e) {}
+  window.location.replace(destino || '/auth.html');
+}
+
+// Un solo manejador para todos los botones "Cerrar sesión" del panel (#logoutBtn).
+// Va en captura para que funcione aunque la barra lateral se vuelva a dibujar y
+// para que no salgan dos confirmaciones cuando la página también tiene el suyo.
+let _dnConfirmandoSalida = false;
+document.addEventListener('click', async (e) => {
+  const btn = e.target && e.target.closest && e.target.closest('#logoutBtn');
+  if (!btn || !dnEsStaff(dnGetSession())) return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  if (_dnSaliendo || _dnConfirmandoSalida) return;
+  _dnConfirmandoSalida = true;
+  let ok = false;
+  try {
+    ok = typeof dnShowConfirm === 'function'
+      ? await dnShowConfirm({ type: 'warning', icon: '🚪', title: 'Cerrar sesión', message: '¿Seguro que deseas cerrar sesión?', confirmText: 'Cerrar sesión' })
+      : confirm('¿Seguro que deseas cerrar sesión?');
+  } finally {
+    _dnConfirmandoSalida = false;
+  }
+  if (ok) dnLogout();
+}, true);
 
 function dnRequireSession(redirectTo) {
   const user = dnGetSession();
@@ -302,6 +350,167 @@ function dnRequireBarbero(redirectTo) {
 function dnRequireCliente(redirectTo) {
   return dnRequireRole(['cliente'], redirectTo || '../index.html');
 }
+
+// ============================================
+// AUTENTICACIÓN DEL EQUIPO (Supabase Auth)
+// Admin, admins de sede y barberos tienen una sesión real de Supabase Auth.
+// La base de datos solo les da acceso con esa sesión; dn_session queda como
+// caché del perfil para las páginas.
+// ============================================
+const DN_STAFF_ROLES = ['admin', 'admin_sede', 'barbero', 'aseo'];
+
+function dnEsStaff(user) {
+  return !!user && DN_STAFF_ROLES.includes(user.role);
+}
+
+function dnEsPaginaLogin() {
+  const p = window.location.pathname;
+  return p.endsWith('/auth.html') || p.endsWith('/admin/acceso.html');
+}
+
+function dnUrlLogin() {
+  return '/auth.html?sesion=expirada';
+}
+
+// Inicia sesión de un miembro del equipo. Devuelve:
+//  { profile }                      sesión iniciada
+//  { crearPin: { usuarioId, nombre } }  barbero que aún no tiene PIN
+//  { cliente: true }                el usuario es cliente (usar login de clientes)
+async function dnStaffLogin(identificador, clave) {
+  const { data: r, error } = await sb.rpc('dn_login_resolver', { p_identificador: identificador });
+  if (error) throw new Error('No pudimos verificar el usuario. Revisa tu conexión.');
+  if (!r || !r.encontrado) throw new Error('Usuario no encontrado.');
+  if (!DN_STAFF_ROLES.includes(r.role)) return { cliente: true };
+  if (r.bloqueado) throw new Error(r.mensaje || 'Tu acceso no está activo.');
+  if (r.requiere_crear_pin) return { crearPin: { usuarioId: r.usuario_id, nombre: r.nombre } };
+
+  const esPin = r.metodo === 'pin';
+  if (!clave) throw new Error(esPin ? 'Ingresa tu PIN de 6 dígitos.' : 'Ingresa tu contraseña.');
+  const { error: authErr } = await sb.auth.signInWithPassword({ email: r.email_auth, password: clave });
+  if (authErr) {
+    if (authErr.status === 429) throw new Error('Demasiados intentos. Espera unos minutos e intenta de nuevo.');
+    throw new Error(esPin ? 'PIN incorrecto.' : 'Usuario o contraseña incorrectos.');
+  }
+  return { profile: await dnCompletarLoginStaff() };
+}
+
+// Después de iniciar sesión: limita a 2 dispositivos y guarda el perfil.
+async function dnCompletarLoginStaff() {
+  const { data, error } = await sb.rpc('dn_post_login');
+  if (error || !data) {
+    await sb.auth.signOut({ scope: 'local' });
+    throw new Error('No pudimos iniciar tu sesión. Intenta de nuevo.');
+  }
+  dnSaveSession(data);
+  return data;
+}
+
+async function dnCrearPinStaff(usuarioId, pin) {
+  const { data: r, error } = await sb.rpc('dn_crear_pin_staff', { p_usuario_id: usuarioId, p_pin: pin });
+  if (error) throw new Error('No pudimos crear tu PIN. Revisa tu conexión.');
+  if (!r || !r.success) throw new Error(r?.error || 'No pudimos crear tu PIN.');
+  const { error: authErr } = await sb.auth.signInWithPassword({ email: r.email_auth, password: pin });
+  if (authErr) throw new Error('Tu PIN se creó, pero no pudimos iniciar sesión. Entra con tu usuario y PIN.');
+  return dnCompletarLoginStaff();
+}
+
+// Pantalla "Crea tu PIN" (barberos sin PIN). onDone recibe el perfil.
+function dnMostrarCrearPin({ usuarioId, nombre, onDone }) {
+  if (document.getElementById('dnCrearPinOverlay')) return;
+  const ov = document.createElement('div');
+  ov.id = 'dnCrearPinOverlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.88);display:flex;align-items:center;justify-content:center;padding:16px;font-family:inherit;';
+  const primerNombre = (nombre || '').split(' ')[0];
+  ov.innerHTML = `
+    <form id="dnCrearPinForm" style="width:100%;max-width:360px;background:#141414;border:1px solid rgba(255,172,72,0.35);border-radius:18px;padding:24px;color:#fff;box-sizing:border-box;">
+      <div style="font-size:28px;text-align:center;">🔐</div>
+      <div style="font-size:19px;font-weight:700;text-align:center;margin-top:6px;">Crea tu PIN${primerNombre ? ', ' + primerNombre : ''}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.65);text-align:center;margin:8px 0 18px;line-height:1.4;">
+        Para proteger tu cuenta, desde ahora entrarás con tu usuario y un PIN de 6 dígitos. Solo tú lo conoces.
+      </div>
+      <input id="dnPin1" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6" placeholder="PIN de 6 dígitos"
+        style="width:100%;box-sizing:border-box;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:#000000;color:#fff;font-size:20px;letter-spacing:6px;text-align:center;margin-bottom:10px;">
+      <input id="dnPin2" type="password" inputmode="numeric" autocomplete="new-password" maxlength="6" placeholder="Repite el PIN"
+        style="width:100%;box-sizing:border-box;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.15);background:#000000;color:#fff;font-size:20px;letter-spacing:6px;text-align:center;">
+      <div id="dnPinError" style="display:none;color:#ff6b5e;font-size:13px;text-align:center;margin-top:10px;"></div>
+      <button id="dnPinBtn" type="submit" style="width:100%;margin-top:16px;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,#FFAC48,#FFD9A8);color:#111;font-weight:700;font-size:15px;cursor:pointer;">Crear PIN y continuar</button>
+      <div style="font-size:11px;color:rgba(255,255,255,0.45);text-align:center;margin-top:12px;">Evita PIN obvios como 123456 o tu fecha de nacimiento.</div>
+    </form>`;
+  document.body.appendChild(ov);
+
+  const soloDigitos = e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); };
+  ov.querySelector('#dnPin1').addEventListener('input', soloDigitos);
+  ov.querySelector('#dnPin2').addEventListener('input', soloDigitos);
+  ov.querySelector('#dnPin1').focus();
+
+  ov.querySelector('#dnCrearPinForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const pin1 = ov.querySelector('#dnPin1').value;
+    const pin2 = ov.querySelector('#dnPin2').value;
+    const errEl = ov.querySelector('#dnPinError');
+    const btn = ov.querySelector('#dnPinBtn');
+    const mostrarError = msg => { errEl.textContent = msg; errEl.style.display = 'block'; };
+    errEl.style.display = 'none';
+    if (!/^\d{6}$/.test(pin1)) return mostrarError('El PIN debe tener 6 dígitos.');
+    if (pin1 !== pin2) return mostrarError('Los PIN no coinciden.');
+    btn.disabled = true;
+    btn.textContent = 'Creando…';
+    try {
+      const profile = await dnCrearPinStaff(usuarioId, pin1);
+      ov.remove();
+      if (onDone) onDone(profile);
+    } catch (err) {
+      mostrarError(err.message);
+      btn.disabled = false;
+      btn.textContent = 'Crear PIN y continuar';
+    }
+  });
+}
+
+// Espera a que el cliente de Supabase esté listo (puede cargar tarde desde el CDN).
+function dnCuandoSbListo(cb, intentos = 0) {
+  try {
+    if (sb && sb.auth) return cb();
+  } catch (e) {}
+  if (intentos < 100) setTimeout(() => dnCuandoSbListo(cb, intentos + 1), 50);
+}
+
+// En cada página: si hay un perfil del equipo guardado pero no una sesión real
+// de Supabase Auth, pedir crear el PIN (barberos sin PIN) o volver a iniciar sesión.
+async function dnVerificarSesionStaff() {
+  const user = dnGetSession();
+  if (!dnEsStaff(user) || dnEsPaginaLogin()) return;
+  const { data } = await sb.auth.getSession();
+  if (data?.session?.user?.id === user.id) return;
+
+  if (user.role === 'barbero' || user.role === 'aseo') {
+    const { data: r } = await sb.rpc('dn_login_resolver', { p_identificador: user.username || '' });
+    if (r?.requiere_crear_pin && r.usuario_id === user.id) {
+      dnMostrarCrearPin({ usuarioId: user.id, nombre: user.full_name, onDone: () => window.location.reload() });
+      return;
+    }
+  }
+  dnClearSession();
+  window.location.href = dnUrlLogin();
+}
+
+dnCuandoSbListo(() => {
+  // Si la sesión se cierra desde el panel de sesiones activas o por el límite de
+  // dispositivos, el refresco del token falla y Supabase emite SIGNED_OUT.
+  sb.auth.onAuthStateChange((event) => {
+    if (event !== 'SIGNED_OUT' || _dnSaliendo) return;
+    const user = dnGetSession();
+    if (dnEsStaff(user) && !dnEsPaginaLogin()) {
+      dnClearSession();
+      window.location.href = dnUrlLogin();
+    }
+  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => dnVerificarSesionStaff());
+  } else {
+    dnVerificarSesionStaff();
+  }
+});
 
 // Baraja un arreglo sin modificar el original (Fisher-Yates). Se usa, por ejemplo,
 // para que el orden de los barberos en la reserva pública cambie cada vez que se carga.
@@ -1707,7 +1916,7 @@ async function dnGetComisionesPendientes(sucursalId, barberoId = null) {
  */
 async function dnGetPagosColaboradores(turnoId) {
   const { data, error } = await sb.from('pagos_colaboradores')
-    .select('*, usuarios(full_name)')
+    .select('*, usuarios!pagos_colaboradores_usuario_id_fkey(full_name)')
     .eq('turno_id', turnoId);
   if (error) return [];
   return data || [];
@@ -1902,8 +2111,45 @@ function dnGetLealtadSession() {
   return null;
 }
 
+// Encabezados para llamar funciones del servidor que envían mensajes a nombre de
+// la barbería: usan la sesión del equipo (la clave pública ya no alcanza).
+async function dnFuncionHeaders() {
+  let token = null;
+  try { token = (await sb.auth.getSession()).data?.session?.access_token || null; } catch (e) {}
+  return {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${token || SUPABASE_KEY}`
+  };
+}
+
+// Token de sesión del cliente (lo entrega el servidor al iniciar sesión)
+function dnClienteToken() {
+  const s = dnGetLealtadSession() || dnGetSession();
+  return s?.cliente_token || null;
+}
+
+// Llama una función del Club de Leales con el token del cliente.
+// Si la sesión ya no es válida (o es de antes de los tokens), pide iniciar sesión de nuevo.
+async function dnClienteRpc(fn, params) {
+  const token = dnClienteToken();
+  const res = token
+    ? await sb.rpc(fn, { p_token: token, ...(params || {}) })
+    : { data: null, error: { message: 'SESION_INVALIDA' } };
+  if (res.error && /SESION_INVALIDA/.test(res.error.message || '')) {
+    dnClearLealtadSession();
+    try { if (dnGetSession()?.role === 'cliente') dnClearSession(); } catch (e) {}
+    window.location.href = '/cliente/login.html';
+  }
+  return res;
+}
+
 // Limpiar sesión de lealtad
 function dnClearLealtadSession() {
+  try {
+    const t = JSON.parse(localStorage.getItem(DN_LEALTAD_KEY) || 'null')?.cliente_token;
+    if (t) sb.rpc('dn_cliente_cerrar_sesion', { p_token: t }).then(() => {}, () => {});
+  } catch (e) {}
   try {
     localStorage.removeItem(DN_LEALTAD_KEY);
   } catch (e) {}

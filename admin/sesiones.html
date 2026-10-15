@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#000000">
+<title>Sesiones activas · Admin</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css">
+<style>
+  body { background:var(--bg); min-height:100vh; }
+  .container { max-width:900px; margin:0 auto; padding:24px var(--page-padding-x) 100px; padding-top:calc(24px + var(--safe-top)); }
+
+  .header { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
+  .back-btn { width:44px; height:44px; border-radius:14px; background:var(--card); border:1px solid var(--divider); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); text-decoration:none; flex:none; }
+  .back-btn svg { width:20px; height:20px; }
+  .header-text .title { font-size:22px; font-weight:800; }
+  .header-text .sub { font-size:13px; color:var(--text-secondary); margin-top:2px; }
+
+  .resumen { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:18px; }
+  .resumen-item { background:var(--card); border:1px solid var(--divider); border-radius:14px; padding:12px; text-align:center; }
+  .resumen-num { font-size:22px; font-weight:800; }
+  .resumen-label { font-size:11px; color:var(--text-secondary); text-transform:uppercase; margin-top:2px; }
+
+  .filters { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .filter-select, .filter-input { padding:11px 14px; border-radius:12px; background:var(--card); border:1px solid var(--divider); color:var(--text); font-size:14px; }
+  .filter-input { flex:1; min-width:160px; }
+
+  .grupo-titulo { font-size:12px; font-weight:700; color:var(--gold); text-transform:uppercase; letter-spacing:0.5px; margin:18px 0 8px; }
+  .persona { background:var(--card); border:1px solid var(--divider); border-radius:16px; padding:14px; margin-bottom:10px; }
+  .persona-top { display:flex; align-items:center; gap:10px; }
+  .persona-info { flex:1; min-width:0; }
+  .persona-nombre { font-size:15px; font-weight:700; }
+  .persona-meta { font-size:12px; color:var(--text-secondary); margin-top:2px; overflow-wrap:anywhere; }
+  .badge { font-size:11px; font-weight:700; padding:4px 9px; border-radius:20px; white-space:nowrap; }
+  .badge.ok { background:rgba(52,211,153,0.15); color:var(--success); }
+  .badge.pend { background:rgba(255,172,72,0.15); color:var(--gold); }
+  .badge.off { background:rgba(239,83,80,0.12); color:var(--error); }
+
+  .dispositivos { margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+  .dispositivo { display:flex; align-items:center; gap:10px; background:var(--card-2); border:1px solid var(--divider); border-radius:12px; padding:10px; }
+  .dispositivo-icon { font-size:20px; flex:none; }
+  .dispositivo-info { flex:1; min-width:0; font-size:12.5px; }
+  .dispositivo-nombre { font-weight:600; }
+  .dispositivo-meta { color:var(--text-secondary); font-size:11.5px; margin-top:2px; overflow-wrap:anywhere; }
+  .btn-mini { padding:7px 11px; border-radius:9px; border:1px solid var(--divider); background:transparent; color:var(--text); font-size:12px; cursor:pointer; white-space:nowrap; }
+  .btn-mini.danger { border-color:rgba(239,83,80,0.4); color:var(--error); }
+  .btn-mini:disabled { opacity:0.5; cursor:default; }
+  .acciones { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+  .sin-sesiones { font-size:12px; color:var(--text-secondary); margin-top:8px; }
+  .nota { font-size:12px; color:var(--text-secondary); background:var(--card); border:1px solid var(--divider); border-radius:12px; padding:12px; margin-bottom:16px; line-height:1.45; }
+  .empty-state { text-align:center; padding:60px 20px; color:var(--text-secondary); }
+  .toast { position:fixed; left:50%; bottom:calc(24px + var(--safe-bottom, 0px)); transform:translateX(-50%); background:var(--card); border:1px solid var(--divider); color:var(--text); padding:12px 18px; border-radius:12px; font-size:13px; z-index:200; display:none; max-width:calc(100% - 32px); }
+  .toast.show { display:block; }
+
+  @media (max-width:520px) {
+    .resumen-num { font-size:18px; }
+    .dispositivo { flex-wrap:wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header class="header">
+    <a href="barberos.html" class="back-btn" aria-label="Volver">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    </a>
+    <div class="header-text">
+      <div class="title">Sesiones activas</div>
+      <div class="sub">Dispositivos donde está abierta la sesión de cada persona del equipo</div>
+    </div>
+  </header>
+
+  <div class="resumen">
+    <div class="resumen-item"><div class="resumen-num" id="numSesiones">—</div><div class="resumen-label">Dispositivos</div></div>
+    <div class="resumen-item"><div class="resumen-num" id="numConPin">—</div><div class="resumen-label">Con acceso</div></div>
+    <div class="resumen-item"><div class="resumen-num" id="numPendientes">—</div><div class="resumen-label">Sin PIN aún</div></div>
+  </div>
+
+  <div class="nota">
+    Cada persona puede tener la sesión abierta en <b>máximo 2 dispositivos</b>: al entrar en uno nuevo se cierra el más antiguo.
+    Al cerrar una sesión desde aquí, ese dispositivo pierde el acceso en menos de una hora (cuando vence su token) y debe volver a entrar con su usuario y PIN o contraseña.
+  </div>
+
+  <div class="filters">
+    <input class="filter-input" id="filtroTexto" placeholder="Buscar por nombre o usuario" autocomplete="off">
+    <select class="filter-select" id="filtroEstado">
+      <option value="">Todos</option>
+      <option value="sesion">Con sesión abierta</option>
+      <option value="pendiente">Sin PIN aún</option>
+    </select>
+  </div>
+
+  <div id="lista"><div class="empty-state">Cargando…</div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/turbo-loader.js" defer></script>
+<script>
+(function() {
+  const user = dnRequireAdmin('../index.html');
+  if (!user) return;
+
+  let personas = [];
+  const ROLES = { admin: 'Administrador', admin_sede: 'Administradores de sede', barbero: 'Barberos', aseo: 'Personal de aseo' };
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => el.classList.remove('show'), 3200);
+  }
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function hace(fecha) {
+    if (!fecha) return '—';
+    const min = Math.round((Date.now() - new Date(fecha).getTime()) / 60000);
+    if (min < 1) return 'ahora';
+    if (min < 60) return `hace ${min} min`;
+    const h = Math.round(min / 60);
+    if (h < 24) return `hace ${h} h`;
+    const d = Math.round(h / 24);
+    return d === 1 ? 'ayer' : `hace ${d} días`;
+  }
+
+  function fechaCorta(fecha) {
+    if (!fecha) return '—';
+    return new Date(fecha).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+  }
+
+  // Describe el dispositivo a partir del user agent
+  function dispositivo(ua) {
+    ua = ua || '';
+    let so = 'Dispositivo', icono = '💻';
+    if (/iPhone/i.test(ua)) { so = 'iPhone'; icono = '📱'; }
+    else if (/iPad/i.test(ua)) { so = 'iPad'; icono = '📱'; }
+    else if (/Android/i.test(ua)) { so = 'Android'; icono = '📱'; }
+    else if (/Windows/i.test(ua)) so = 'Windows';
+    else if (/Mac OS X|Macintosh/i.test(ua)) so = 'Mac';
+    else if (/Linux/i.test(ua)) so = 'Linux';
+    let nav = '';
+    if (/Edg\//i.test(ua)) nav = 'Edge';
+    else if (/OPR\//i.test(ua)) nav = 'Opera';
+    else if (/Chrome\//i.test(ua)) nav = 'Chrome';
+    else if (/Firefox\//i.test(ua)) nav = 'Firefox';
+    else if (/Safari\//i.test(ua)) nav = 'Safari';
+    return { icono, nombre: nav ? `${so} · ${nav}` : so };
+  }
+
+  function estado(p) {
+    if (!p.activo) return '<span class="badge off">Desactivado</span>';
+    if (p.tiene_acceso) return '<span class="badge ok">Con acceso</span>';
+    if (p.pin_activacion_hasta && new Date(p.pin_activacion_hasta) > new Date()) {
+      return `<span class="badge pend">Sin PIN · vence ${fechaCorta(p.pin_activacion_hasta)}</span>`;
+    }
+    return '<span class="badge off">Sin acceso</span>';
+  }
+
+  function render() {
+    const texto = document.getElementById('filtroTexto').value.trim().toLowerCase();
+    const filtro = document.getElementById('filtroEstado').value;
+    const visibles = personas.filter(p => {
+      if (texto && !(`${p.nombre} ${p.username}`.toLowerCase().includes(texto))) return false;
+      if (filtro === 'sesion' && !p.sesiones.length) return false;
+      if (filtro === 'pendiente' && p.tiene_acceso) return false;
+      return true;
+    });
+
+    document.getElementById('numSesiones').textContent = personas.reduce((n, p) => n + p.sesiones.length, 0);
+    document.getElementById('numConPin').textContent = personas.filter(p => p.tiene_acceso).length;
+    document.getElementById('numPendientes').textContent = personas.filter(p => !p.tiene_acceso && p.role !== 'admin' && p.role !== 'admin_sede').length;
+
+    if (!visibles.length) {
+      document.getElementById('lista').innerHTML = '<div class="empty-state">No hay personas con ese filtro.</div>';
+      return;
+    }
+
+    let html = '';
+    let grupoActual = null;
+    for (const p of visibles) {
+      if (p.role !== grupoActual) {
+        grupoActual = p.role;
+        html += `<div class="grupo-titulo">${ROLES[p.role] || p.role}</div>`;
+      }
+      const esStaffPin = p.role === 'barbero' || p.role === 'aseo';
+      const sesionesHtml = p.sesiones.length
+        ? `<div class="dispositivos">${p.sesiones.map(s => {
+            const d = dispositivo(s.user_agent);
+            return `<div class="dispositivo">
+              <div class="dispositivo-icon">${d.icono}</div>
+              <div class="dispositivo-info">
+                <div class="dispositivo-nombre">${esc(d.nombre)}</div>
+                <div class="dispositivo-meta">Activo ${hace(s.ultima_actividad)} · desde ${fechaCorta(s.creada)}${s.ip ? ' · IP ' + esc(s.ip) : ''}</div>
+              </div>
+              <button class="btn-mini danger" onclick="cerrarSesion('${s.id}', this)">Cerrar</button>
+            </div>`;
+          }).join('')}</div>`
+        : '<div class="sin-sesiones">Sin sesiones abiertas.</div>';
+
+      const pinCreado = p.pin_creado
+        ? ` · PIN creado ${fechaCorta(p.pin_creado.fecha)}${p.pin_creado.user_agent ? ' en ' + esc(dispositivo(p.pin_creado.user_agent).nombre) : ''}`
+        : '';
+
+      html += `<div class="persona">
+        <div class="persona-top">
+          <div class="persona-info">
+            <div class="persona-nombre">${esc(p.nombre)}</div>
+            <div class="persona-meta">@${esc(p.username)}${p.sede ? ' · ' + esc(p.sede) : ''} · Último ingreso: ${hace(p.ultimo_ingreso)}${pinCreado}</div>
+          </div>
+          ${estado(p)}
+        </div>
+        ${sesionesHtml}
+        <div class="acciones">
+          ${p.sesiones.length ? `<button class="btn-mini danger" onclick="cerrarTodas('${p.usuario_id}', this)">Cerrar todas sus sesiones</button>` : ''}
+          ${esStaffPin ? `<button class="btn-mini" onclick="reiniciarPin('${p.usuario_id}', this)">Reiniciar PIN</button>` : ''}
+        </div>
+      </div>`;
+    }
+    document.getElementById('lista').innerHTML = html;
+  }
+
+  async function cargar() {
+    const { data, error } = await sb.rpc('dn_sesiones_activas');
+    if (error) {
+      console.error(error);
+      document.getElementById('lista').innerHTML = '<div class="empty-state">No pudimos cargar las sesiones. Vuelve a iniciar sesión e intenta de nuevo.</div>';
+      return;
+    }
+    personas = data || [];
+    render();
+  }
+
+  window.cerrarSesion = async function(sessionId, btn) {
+    if (!confirm('¿Cerrar la sesión de este dispositivo?')) return;
+    btn.disabled = true;
+    const { data, error } = await sb.rpc('dn_cerrar_sesion', { p_session_id: sessionId });
+    if (error || !data?.success) { toast('No se pudo cerrar la sesión.'); btn.disabled = false; return; }
+    toast('Sesión cerrada.');
+    cargar();
+  };
+
+  window.cerrarTodas = async function(usuarioId, btn) {
+    const p = personas.find(x => x.usuario_id === usuarioId);
+    if (!confirm(`¿Cerrar todas las sesiones de ${p?.nombre || 'esta persona'}?`)) return;
+    btn.disabled = true;
+    const { error } = await sb.rpc('dn_cerrar_sesiones_usuario', { p_usuario_id: usuarioId });
+    if (error) { toast('No se pudieron cerrar las sesiones.'); btn.disabled = false; return; }
+    toast('Sesiones cerradas.');
+    cargar();
+  };
+
+  window.reiniciarPin = async function(usuarioId, btn) {
+    const p = personas.find(x => x.usuario_id === usuarioId);
+    if (!confirm(`¿Reiniciar el PIN de ${p?.nombre || 'esta persona'}?\n\nSe cerrarán sus sesiones y tendrá 2 días para crear un PIN nuevo la próxima vez que entre.`)) return;
+    btn.disabled = true;
+    const { data, error } = await sb.rpc('dn_staff_reiniciar_pin', { p_usuario_id: usuarioId });
+    if (error || !data?.success) { toast(data?.error || 'No se pudo reiniciar el PIN.'); btn.disabled = false; return; }
+    toast('PIN reiniciado.');
+    cargar();
+  };
+
+  document.getElementById('filtroTexto').addEventListener('input', render);
+  document.getElementById('filtroEstado').addEventListener('change', render);
+  dnCuandoSbListo(cargar);
+  setInterval(cargar, 60000);
+})();
+</script>
+</body>
+</html>

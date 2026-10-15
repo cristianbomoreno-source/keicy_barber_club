@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <!-- Preconnect críticos -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -13,11 +14,11 @@
 <link rel="preload" href="../assets/mobile-admin.css" as="style">
 <link rel="preload" href="../assets/agenda-mobile-unified.css" as="style">
 <!-- Preload JS críticos -->
-<link rel="preload" href="../assets/supabase-client.js" as="script">
+<link rel="preload" href="../assets/supabase-client.js?v=20261014e" as="script">
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
-<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
-<link rel="icon" href="../assets/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
+<link rel="icon" href="../assets/favicon-32-v3.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -963,29 +964,6 @@
   .config-cal-btn-save { background:#3B82F6; border:none; color:#fff; display:flex; align-items:center; justify-content:center; gap:8px; }
   .config-cal-btn-save:hover { background:#2563EB; }
 
-  /* Indicador de sincronización WeiBook */
-  .sync-indicator {
-    position:relative;
-  }
-  .sync-indicator .sync-dot {
-    position:absolute; top:-2px; right:-2px; width:10px; height:10px;
-    border-radius:50%; border:2px solid var(--bg-card);
-    transition:background .3s ease;
-  }
-  .sync-indicator .sync-dot.synced { background:#22C55E; box-shadow:0 0 8px rgba(34,197,94,0.5); }
-  .sync-indicator .sync-dot.missing { background:#EF4444; box-shadow:0 0 8px rgba(239,68,68,0.5); animation:pulse-sync 1.5s infinite; }
-  .sync-indicator .sync-dot.checking { background:#FBBF24; }
-  @keyframes pulse-sync {
-    0%, 100% { opacity:1; transform:scale(1); }
-    50% { opacity:0.7; transform:scale(1.1); }
-  }
-  /* Indicador móvil */
-  .am-icon-btn.sync-indicator { position:relative; }
-  .am-icon-btn.sync-indicator .sync-dot {
-    top:-3px; right:-3px; width:8px; height:8px;
-    border:1.5px solid var(--bg, #000000);
-  }
-
   /* Info de cancelación en citas */
   .appt-block .cancel-info {
     font-size:8px; font-weight:700; margin-top:2px; padding:2px 6px;
@@ -1055,7 +1033,7 @@
 <div id="app">
 
   <div class="sidebar" id="sidebar">
-    <img src="../assets/apple-touch-icon-v2.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
+    <img src="../assets/apple-touch-icon-v3.png" class="sidebar-logo sidebar-logo-icon" alt="Keicy Barber" id="sidebarLogoIcon">
     <img src="../assets/logo-transparent.png" class="sidebar-logo sidebar-logo-full" alt="Keicy Barbería" id="sidebarLogoFull">
     <div class="sidebar-card" id="sidebarCard" title="Cambiar de sede">
       <div class="sidebar-card-avatar">DN</div>
@@ -2079,7 +2057,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/admin-sede-nav.js"></script>
 
@@ -2096,8 +2074,7 @@
   // Cerrar sesión
   document.getElementById('logoutBtn')?.addEventListener('click', () => {
     if (confirm('¿Seguro que deseas cerrar sesión?')) {
-      dnClearSession();
-      window.location.href = '../auth.html';
+      dnLogout();
     }
   });
 
@@ -3502,7 +3479,7 @@
       toast('Enviando confirmaciones pendientes...');
       const res = await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/whatsapp-confirmation-cron', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await dnFuncionHeaders(),
         body: JSON.stringify({ tipo: 'immediate', manual: true })
       });
       if (!res.ok) throw new Error('Error al enviar');
@@ -4211,7 +4188,7 @@
       // Cargar historial de citas (últimas 10)
       const { data: historialCitas } = await sb
         .from('citas')
-        .select('id, fecha, hora_inicio, precio, estado, servicios(nombre), barberos(usuarios(full_name))')
+        .select('id, fecha, hora_inicio, precio, estado, servicios(nombre), barberos(usuarios!barberos_id_fkey(full_name))')
         .eq('cliente_id', clienteId)
         .in('estado', ['finalizada', 'pagada'])
         .order('fecha', { ascending: false })
@@ -5913,20 +5890,23 @@
       // Si se cambia de finalizada/pagada a pendiente_pago, anular los pagos asociados
       if (estado === 'pendiente_pago' && ['finalizada', 'pagada'].includes(prevEstado)) {
         const { data: pagosExistentes } = await sb.from('pagos')
-          .select('id, monto, estado')
-          .eq('cita_id', citaId);
+          .select('id')
+          .eq('cita_id', citaId)
+          .eq('estado', 'pagado');
 
         if (pagosExistentes && pagosExistentes.length > 0) {
-          const { error: pagoError } = await sb.from('pagos')
-            .update({ estado: 'anulado' })
-            .eq('cita_id', citaId)
-            .eq('estado', 'pagado');
+          // Borra el ticket completo (pagos, caja, comisiones) igual que "Anular ticket"
+          let pagoError = null;
+          for (const p of pagosExistentes) {
+            const { error } = await sb.rpc('anular_pago_y_cita', { p_pago_id: p.id, p_cita_id: citaId });
+            if (error) { pagoError = error; break; }
+          }
 
           if (pagoError) {
             console.error('[setEstado] Error anulando pagos:', pagoError);
             toast('Advertencia: No se pudo anular el pago en caja');
           } else {
-            toast('Pago anulado en caja');
+            toast('Ticket anulado en caja');
           }
         }
       }
@@ -6012,10 +5992,7 @@
 
       const response = await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/send-service-completed-email', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sb.supabaseKey}`
-        },
+        headers: await dnFuncionHeaders(),
         body: JSON.stringify(payload)
       });
 
@@ -6030,10 +6007,7 @@
     try {
       const response = await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/whatsapp-post-pago', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sb.supabaseKey}`
-        },
+        headers: await dnFuncionHeaders(),
         body: JSON.stringify({ cita_id: citaId })
       });
 
@@ -6496,11 +6470,10 @@
       return;
     }
     const precio = parseInt(option.dataset.precio) || 0;
-    const comisionPct = parseInt(option.dataset.comision) || 0;
-    const comisionMonto = Math.round(precio * comisionPct / 100);
+    const comisionMonto = parseInt(option.dataset.comision) || 0;
 
     document.getElementById('apProductoPrecio').textContent = dnFormatCOP(precio);
-    document.getElementById('apProductoComision').textContent = dnFormatCOP(comisionMonto) + ` (${comisionPct}%)`;
+    document.getElementById('apProductoComision').textContent = dnFormatCOP(comisionMonto);
     info.style.display = 'block';
   });
 
@@ -6540,8 +6513,8 @@
     try {
       const sedeId = dnGetSedeActual();
       const precio = producto.precio || 0;
-      const comisionPct = producto.comision || 0;
-      const comisionMonto = Math.round(precio * comisionPct / 100);
+      // La comisión de productos es un valor fijo en pesos por unidad (igual que en Ventas)
+      const comisionMonto = Number(producto.comision) || 0;
 
       // Insertar venta de producto
       const { error: ventaErr } = await sb.from('ventas_productos').insert({
@@ -6693,125 +6666,12 @@
   window.openClientePerfil = openClientePerfil;
   window.closeClientePerfil = closeClientePerfil;
 
-  // ========== VERIFICACIÓN SINCRONIZACIÓN WEIBOOK ==========
-  let weiBookSyncInterval = null;
-  let weiBookSyncStatus = 'checking'; // 'synced', 'missing', 'checking'
-
-  function updateSyncDots(className, title) {
-    weiBookSyncStatus = className;
-    const dots = [document.getElementById('syncDot'), document.getElementById('syncDotMobile')];
-    dots.forEach(dot => {
-      if (dot) {
-        dot.className = 'sync-dot ' + className;
-        dot.title = title;
-      }
-    });
-  }
-
-  async function checkWeiBookSync(showToast = false) {
-    updateSyncDots('checking', 'Verificando sincronización...');
-
-    try {
-      // Contar citas futuras sincronizadas con WeiBook
-      const hoy = new Date().toISOString().split('T')[0];
-
-      // Obtener citas sincronizadas con WeiBook (tienen sync_weibook_at)
-      const { data: citasWeiBook, error: errWB } = await sb
-        .from('citas')
-        .select('id, sync_weibook_at, fecha, hora_inicio, barbero_id, cliente_id')
-        .not('sync_weibook_at', 'is', null)
-        .gte('fecha', hoy);
-
-      if (errWB) throw errWB;
-
-      // Verificar que tengan cliente y barbero asignados
-      const faltantes = citasWeiBook?.filter(c => !c.cliente_id || !c.barbero_id) || [];
-      const totalWeiBook = citasWeiBook?.length || 0;
-
-      if (faltantes.length === 0) {
-        updateSyncDots('synced', `WeiBook 100% sincronizado (${totalWeiBook} citas)`);
-        if (showToast) {
-          toast(`✅ WeiBook sincronizado: ${totalWeiBook} citas`, 'success');
-        }
-      } else {
-        updateSyncDots('missing', `WeiBook: ${faltantes.length} citas con datos faltantes. Clic para sincronizar.`);
-        if (showToast) {
-          toast(`⚠️ ${faltantes.length} citas WeiBook con datos faltantes`, 'warning');
-        }
-      }
-
-    } catch (err) {
-      console.error('Error verificando sync WeiBook:', err);
-      updateSyncDots('missing', 'Error al verificar. Clic para sincronizar.');
-      if (showToast) {
-        toast('Error al verificar sincronización WeiBook', 'error');
-      }
-    }
-  }
-
-  async function runWeiBookSync() {
-    updateSyncDots('checking', 'Sincronizando con WeiBook...');
-    toast(`🔄 Sincronizando ${selectedDate} con WeiBook...`, 'info');
-
-    try {
-      const response = await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/sync-weibook-citas', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sb.supabaseKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlncm1hbW1jYXVwbnlnZHhtZ3RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTA5MjksImV4cCI6MjEwNjgyNjkyOX0.PCOjKijvxVdhwe6h2wPbhZR6ZSahfJYHfkef2OwKPi0'}`
-        },
-        body: JSON.stringify({ fecha: selectedDate })
-      });
-
-      const result = await response.json();
-      console.log('[WeiBook Sync] Respuesta:', result);
-
-      if (result.success) {
-        const r = result.results || result;
-        toast(`✅ Sync: ${r.created || 0} nuevas, ${r.updated || 0} actualizadas`, 'success');
-        // Recargar citas y verificar estado
-        await loadAll();
-        await checkWeiBookSync(false);
-      } else {
-        throw new Error(result.error || 'Error desconocido');
-      }
-    } catch (err) {
-      console.error('Error sincronizando WeiBook:', err);
-      toast('❌ Error al sincronizar con WeiBook', 'error');
-      updateSyncDots('missing', 'Error de sincronización');
-    }
-  }
-
-  function handleWeiBookClick() {
-    if (weiBookSyncStatus === 'missing') {
-      // Si está en rojo, sincronizar
-      runWeiBookSync();
-    } else {
-      // Si está en verde o verificando, solo mostrar estado
-      checkWeiBookSync(true);
-    }
-  }
-
-  function startWeiBookSyncCheck() {
-    // Verificar al iniciar
-    checkWeiBookSync();
-
-    // Verificar cada minuto
-    if (weiBookSyncInterval) clearInterval(weiBookSyncInterval);
-    weiBookSyncInterval = setInterval(() => checkWeiBookSync(), 60000);
-  }
-
-  // Iniciar verificación cuando carga la página
-  document.addEventListener('DOMContentLoaded', startWeiBookSyncCheck);
-
-  window.checkWeiBookSync = checkWeiBookSync;
-  window.handleWeiBookClick = handleWeiBookClick;
 </script>
 
 <script src="../assets/sidebar-toggle.js"></script>
 <script src="../assets/citas-estados.js"></script>
 <script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
 <script src="../assets/agenda-mobile-unified.js"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
