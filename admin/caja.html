@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://qguxzopvfjmivbngccwz.supabase.co" crossorigin>
@@ -2228,14 +2229,6 @@
           </div>
           <div class="cierre-row-value" id="cierreRetiros">-$0</div>
         </div>
-        <div class="cierre-row" style="flex-wrap:wrap;">
-          <div class="cierre-row-left">
-            <div class="cierre-row-icon minus">👥</div>
-            <span>Pago de colaboradores</span>
-          </div>
-          <div class="cierre-row-value" id="cierreComisiones">-$0</div>
-          <div id="cierreComisionesDesglose" style="width:100%;padding-left:32px;margin-top:-4px;"></div>
-        </div>
       </div>
 
       <!-- Ventas por método de pago -->
@@ -2345,10 +2338,6 @@
           <div class="resumen-ticket-row negative">
             <span class="label">Dinero retirado:</span>
             <span class="value" id="ticketRetirado">(-)$0</span>
-          </div>
-          <div class="resumen-ticket-row negative">
-            <span class="label">Pago de colaboradores:</span>
-            <span class="value" id="ticketComisiones">(-)$0</span>
           </div>
           <div class="resumen-ticket-row total">
             <span class="label">TOTAL EN CAJA EN CIERRE:</span>
@@ -2482,15 +2471,23 @@
 <!-- Modal: Pago de comisión Admin -->
 <div class="modal-bg" id="pagoComisionAdminModalBg" style="z-index:110;">
   <div class="modal-box pc-modal">
-    <h3>Confirmar pago Admin</h3>
+    <h3>Pago admin de sede</h3>
     <div class="pc-header">
       <div style="width:60px; height:60px; background:var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px;">🏪</div>
       <div class="pc-nombre">Admin Sede</div>
     </div>
+    <div class="modal-input-group" style="margin-bottom:10px;">
+      <label for="pcaNombre">¿A quién se le paga?</label>
+      <input type="text" id="pcaNombre" placeholder="Nombre del admin" autocomplete="off">
+    </div>
+    <div class="modal-input-group" style="margin-bottom:12px;">
+      <label for="pcaPagoDia">Pago del día</label>
+      <input type="number" id="pcaPagoDia" placeholder="0" min="0" step="1000" inputmode="numeric" oninput="actualizarTotalPagoAdmin()">
+    </div>
     <div class="pc-breakdown">
       <div class="pc-row"><span>Productos vendidos</span><b id="pcaProductos">—</b></div>
       <div class="pc-row"><span>Total ventas</span><b id="pcaVentas">—</b></div>
-      <div class="pc-row"><span>Comisión calculada</span><b id="pcaComision">—</b></div>
+      <div class="pc-row"><span>Comisión productos</span><b id="pcaComision">—</b></div>
       <div class="pc-divider"></div>
       <div class="pc-row pc-total"><span>Total a pagar</span><b id="pcaTotal" style="color:var(--gold);">—</b></div>
     </div>
@@ -2518,12 +2515,13 @@
       <div class="pc-nombre">Admin Sede</div>
     </div>
     <div class="pc-breakdown">
+      <div class="pc-row"><span>Pagado a</span><b id="rpaNombre">—</b></div>
       <div class="pc-row"><span>Productos</span><b id="rpaProductos">—</b></div>
       <div class="pc-row"><span>Total pagado</span><b id="rpaTotalPagado" style="color:var(--success);">—</b></div>
       <div class="pc-row"><span>Fecha del pago</span><b id="rpaFecha">—</b></div>
     </div>
     <div style="background:rgba(235,87,87,0.1); border-radius:12px; padding:12px; margin-top:12px;">
-      <p style="font-size:13px; color:var(--error); margin:0;">Esta acción marcará los productos como NO cobrados. Si fue en efectivo, deberás agregar el dinero manualmente a la caja.</p>
+      <p style="font-size:13px; color:var(--error); margin:0;">Se borra el pago del admin de hoy. Si fue en efectivo, el dinero vuelve a contar en la caja.</p>
     </div>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeReversarPagoAdminModal()">Cancelar</button>
@@ -2741,7 +2739,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="/assets/utils.js"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/dn-modals.js"></script>
@@ -2767,8 +2765,7 @@
       confirmText: 'Cerrar sesión'
     });
     if (confirmed) {
-      dnClearSession();
-      window.location.href = '../auth.html';
+      dnLogout();
     }
   });
 
@@ -3085,46 +3082,48 @@
     }
 
     try {
-      // Si hay un solo método, actualizar el pago existente
-      if (metodos.length === 1) {
-        const nuevoMetodo = metodos[0];
-        if (movimientoActual.subtipo === 'servicio' && movimientoActual.originalId) {
-          const { error } = await sb.from('pagos').update({ metodo: nuevoMetodo }).eq('id', movimientoActual.originalId);
-          if (error) throw error;
-        } else if (movimientoActual.subtipo === 'producto' && movimientoActual.originalId) {
-          const { error } = await sb.from('ventas_productos').update({ metodo_pago: nuevoMetodo }).eq('id', movimientoActual.originalId);
-          if (error) throw error;
-        }
-      } else {
-        // Múltiples métodos: actualizar el pago principal y crear adicionales
-        // Por ahora, usar el primer método para el pago principal
-        const primerMetodo = metodos[0];
-        const primerMonto = metodosSeleccionados[primerMetodo];
+      const pagosRefs = movimientoActual.pagosRefs || [];
 
-        if (movimientoActual.subtipo === 'servicio' && movimientoActual.originalId) {
-          // Actualizar pago principal
-          const { error } = await sb.from('pagos').update({
-            metodo: primerMetodo,
-            monto: primerMonto
-          }).eq('id', movimientoActual.originalId);
-          if (error) throw error;
-
-          // Crear pagos adicionales para los demás métodos
-          for (let i = 1; i < metodos.length; i++) {
-            const metodo = metodos[i];
-            const monto = metodosSeleccionados[metodo];
-            const pagoRef = movimientoActual.pagoRef;
-
-            const { error: insertError } = await sb.from('pagos').insert({
-              cita_id: pagoRef.cita_id,
-              cliente_id: pagoRef.cliente_id,
-              monto: monto,
-              metodo: metodo,
-              estado: 'pagado'
+      if (pagosRefs.length) {
+        // Venta con ticket: los pagos del ticket pasan a ser uno por método.
+        // Se reutilizan los pagos existentes (las comisiones apuntan a ellos) y
+        // los que sobran quedan anulados.
+        const pagoRef = movimientoActual.pagoRef || pagosRefs[0];
+        for (let i = 0; i < metodos.length; i++) {
+          const metodo = metodos[i];
+          const monto = Number(metodosSeleccionados[metodo]);
+          if (pagosRefs[i]) {
+            const { error } = await sb.from('pagos').update({ metodo, monto, estado: 'pagado' }).eq('id', pagosRefs[i].id);
+            if (error) throw error;
+          } else {
+            const { error } = await sb.from('pagos').insert({
+              cita_id: pagoRef.cita_id || null,
+              ticket_id: pagoRef.ticket_id || null,
+              monto,
+              metodo,
+              estado: 'pagado',
+              pagado_at: pagoRef.pagado_at || new Date().toISOString(),
+              registrado_por: user?.id || null
             });
-            if (insertError) throw insertError;
+            if (error) throw error;
           }
         }
+        const sobrantes = pagosRefs.slice(metodos.length).map(p => p.id);
+        if (sobrantes.length) {
+          const { error } = await sb.from('pagos').update({ estado: 'anulado' }).in('id', sobrantes);
+          if (error) throw error;
+        }
+
+        // Caja y métodos del ticket quedan iguales a los pagos
+        if (pagoRef.ticket_id) {
+          const { data, error } = await sb.rpc('dn_sincronizar_metodos_ticket', { p_ticket_id: pagoRef.ticket_id });
+          if (error) throw error;
+          if (data && data.success === false) throw new Error(data.error);
+        }
+      } else if (movimientoActual.subtipo === 'producto' && movimientoActual.originalId) {
+        // Venta de producto antigua (sin ticket): un solo método
+        const { error } = await sb.from('ventas_productos').update({ metodo_pago: metodos[0] }).eq('id', movimientoActual.originalId);
+        if (error) throw error;
       }
 
       dnToast('Método de pago actualizado', 'success');
@@ -3164,14 +3163,13 @@
 
     try {
       if (movimientoActual.subtipo === 'servicio' && movimientoActual.originalId) {
-        // Anular pago de servicio - actualizar estado a anulado
-        const { error: pagoError } = await sb.from('pagos').update({ estado: 'anulado' }).eq('id', movimientoActual.originalId);
+        // Borra el ticket del pago y deja la cita pendiente de pago
+        const { data, error: pagoError } = await sb.rpc('anular_pago_y_cita', {
+          p_pago_id: movimientoActual.originalId,
+          p_cita_id: movimientoActual.citaId || null
+        });
         if (pagoError) throw pagoError;
-
-        // Si tiene cita asociada, volver a pendiente de pago (órdenes listas para cobrar)
-        if (movimientoActual.citaId) {
-          await sb.from('citas').update({ estado: 'pendiente_pago' }).eq('id', movimientoActual.citaId);
-        }
+        if (data && data.success === false) throw new Error(data.error);
       } else if (movimientoActual.subtipo === 'producto' && movimientoActual.originalId) {
         // Eliminar venta de producto
         const { error } = await sb.from('ventas_productos').delete().eq('id', movimientoActual.originalId);
@@ -3376,6 +3374,7 @@
   let ventasProductosHoy = [];  // ventas de productos (ceras, etc.)
   let pagosComisionesHoy = [];  // pagos de comisiones registrados en pagos_comisiones
   let comisionesAdminHoy = [];  // comisiones de productos para admin_sede
+  let pagosAdminHoy = [];  // pagos del día al admin de sede (pagos_colaboradores)
   let comisionesBarberosProductosHoy = [];  // comisiones de productos para barberos
   let cfg = null;               // configuracion_negocio
 
@@ -3657,9 +3656,17 @@
       .gte('created_at', rangoFiltro.start)
       .lte('created_at', rangoFiltro.end);
 
-    const [cfgRes, pagosRes, citasRes, consumosRes, ventasProductosRes, pagosComisionesRes, comisionesAdminRes, comisionesBarberosProductosRes] = await Promise.all([
+    // Pagos del día al admin de sede
+    const pagosAdminQuery = sb.from('pagos_colaboradores')
+      .select('id, monto, metodo_pago, beneficiario_nombre, caja_movimiento_id, created_at')
+      .eq('sucursal_id', sedeId)
+      .eq('tipo', 'pago_diario_admin')
+      .gte('created_at', rangoFiltro.start)
+      .lte('created_at', rangoFiltro.end);
+
+    const [cfgRes, pagosRes, citasRes, consumosRes, ventasProductosRes, pagosComisionesRes, comisionesAdminRes, comisionesBarberosProductosRes, pagosAdminRes] = await Promise.all([
       sb.from('configuracion_negocio').select('*').eq('id', true).single(),
-      pagosQuery, citasQuery, consumosQuery, ventasProductosQuery, pagosComisionesQuery, comisionesAdminQuery, comisionesBarberosProductosQuery
+      pagosQuery, citasQuery, consumosQuery, ventasProductosQuery, pagosComisionesQuery, comisionesAdminQuery, comisionesBarberosProductosQuery, pagosAdminQuery
     ]);
 
     cfg = cfgRes.data || {};
@@ -3693,6 +3700,7 @@
 
     // Comisiones de productos para admin
     comisionesAdminHoy = comisionesAdminRes.data || [];
+    pagosAdminHoy = pagosAdminRes.data || [];
 
     // Comisiones de productos para barberos
     comisionesBarberosProductosHoy = comisionesBarberosProductosRes.data || [];
@@ -4419,15 +4427,18 @@
       };
     });
 
-    // Agregar Admin Sede como colaborador si hay comisiones de productos admin
-    if (comisionesAdminHoy.length > 0) {
-      const totalComision = comisionesAdminHoy.reduce((sum, p) => sum + (Number(p.comision_monto) || 0), 0);
+    // Admin de sede: siempre aparece, como los barberos. Su pago = pago del día
+    // (se escribe al pagar) + comisión de productos.
+    {
+      const comisionPendiente = comisionAdminPendiente();
       const totalVentas = comisionesAdminHoy.reduce((sum, p) => sum + (Number(p.precio_total) || 0), 0);
-      const todosCobraados = comisionesAdminHoy.every(p => p.comision_admin_cobrada === true);
+      const totalComision = comisionesAdminHoy.reduce((sum, p) => sum + (Number(p.comision_monto) || 0), 0);
+      const pagadoHoy = pagosAdminHoy.reduce((sum, p) => sum + (Number(p.monto) || 0), 0);
+      const pagado = pagosAdminHoy.length > 0 && comisionPendiente === 0;
 
       colaboradoresData.push({
         id: 'admin_sede',
-        nombre: 'Admin Sede',
+        nombre: pagosAdminHoy[0]?.beneficiario_nombre || 'Admin Sede',
         foto: null,
         isAdmin: true,
         servicios: comisionesAdminHoy.length,
@@ -4435,9 +4446,9 @@
         comision: totalComision,
         propinas: 0,
         consumoBebidas: 0,
-        total: totalComision,
-        totalEsperado: totalComision,
-        pagado: todosCobraados
+        total: pagado ? pagadoHoy : comisionPendiente,
+        totalEsperado: comisionPendiente,
+        pagado
       });
     }
 
@@ -4546,25 +4557,51 @@
     }
   }
 
-  function openPagoComisionAdminModal() {
-    if (comisionesAdminHoy.length === 0) return;
+  function comisionAdminPendiente() {
+    return comisionesAdminHoy
+      .filter(p => !p.comision_admin_cobrada)
+      .reduce((sum, p) => sum + (Number(p.comision_monto) || 0), 0);
+  }
 
-    const totalComision = comisionesAdminHoy.reduce((sum, p) => sum + (Number(p.comision_monto) || 0), 0);
-    const totalVentas = comisionesAdminHoy.reduce((sum, p) => sum + (Number(p.precio_total) || 0), 0);
+  function actualizarTotalPagoAdmin() {
+    const pagoDia = Number(document.getElementById('pcaPagoDia').value) || 0;
+    document.getElementById('pcaTotal').textContent = dnFormatCOP(pagoDia + comisionAdminPendiente());
+  }
 
-    document.getElementById('pcaProductos').textContent = comisionesAdminHoy.length;
-    document.getElementById('pcaVentas').textContent = dnFormatCOP(totalVentas);
-    document.getElementById('pcaComision').textContent = dnFormatCOP(totalComision);
-    document.getElementById('pcaTotal').textContent = dnFormatCOP(totalComision);
+  async function openPagoComisionAdminModal() {
+    const pendientes = comisionesAdminHoy.filter(p => !p.comision_admin_cobrada);
+    document.getElementById('pcaProductos').textContent = pendientes.length;
+    document.getElementById('pcaVentas').textContent = dnFormatCOP(pendientes.reduce((s, p) => s + (Number(p.precio_total) || 0), 0));
+    document.getElementById('pcaComision').textContent = dnFormatCOP(comisionAdminPendiente());
 
-    // Reset método de pago
-    pagoComisionAdminMetodo = 'efectivo';
-    document.querySelectorAll('#pagoComisionAdminModalBg .pc-metodo-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.metodo === 'efectivo');
-    });
-    document.getElementById('pcaMetodoNote').textContent = 'Se descontará de la caja';
-    document.getElementById('pcaMetodoNote').style.color = 'rgba(255,255,255,0.4)';
+    // Si ya se le pagó hoy, solo falta la comisión nueva. Si no, se sugiere el
+    // último pago del admin en esta sede. Las cuentas compartidas ("Sede ...") no
+    // sirven como nombre.
+    const nombreInput = document.getElementById('pcaNombre');
+    const pagoInput = document.getElementById('pcaPagoDia');
+    const nombreUsuario = user?.role === 'admin_sede' && !/^sede\b/i.test(user?.full_name || '') ? user.full_name : '';
+    nombreInput.value = pagosAdminHoy[0]?.beneficiario_nombre || nombreUsuario;
+    pagoInput.value = '';
+    if (!pagosAdminHoy.length) {
+      try {
+        const { data: ultimo } = await sb.from('pagos_colaboradores')
+          .select('monto, beneficiario_nombre')
+          .eq('sucursal_id', dnGetSedeActual())
+          .eq('tipo', 'pago_diario_admin')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (ultimo) {
+          if (!nombreInput.value) nombreInput.value = ultimo.beneficiario_nombre || '';
+          pagoInput.value = Number(ultimo.monto) || '';
+        }
+      } catch (e) { console.warn('[PagoAdmin] Sin pago anterior:', e); }
+    } else {
+      pagoInput.value = 0;
+    }
+    actualizarTotalPagoAdmin();
 
+    selectMetodoPagoAdmin('efectivo');
     document.getElementById('pagoComisionAdminModalBg').classList.add('show');
   }
 
@@ -4572,65 +4609,93 @@
     document.getElementById('pagoComisionAdminModalBg').classList.remove('show');
   }
 
+  let _pagandoAdmin = false;
   async function confirmPagoComisionAdmin() {
+    if (_pagandoAdmin) return;
+    const nombre = document.getElementById('pcaNombre').value.trim();
+    const pagoDia = Math.max(0, Number(document.getElementById('pcaPagoDia').value) || 0);
     const pendientes = comisionesAdminHoy.filter(p => !p.comision_admin_cobrada);
-    if (!pendientes.length) {
-      toast('Esa comisión ya está pagada');
-      closePagoComisionAdminModal();
-      return;
-    }
+    const comision = comisionAdminPendiente();
+    const total = pagoDia + comision;
+    if (!nombre) { toast('Escribe a quién se le paga'); return; }
+    if (total <= 0) { toast('Escribe el pago del día'); return; }
 
-    const ids = pendientes.map(p => p.id);
-    const totalComision = pendientes.reduce((sum, p) => sum + (Number(p.comision_monto) || 0), 0);
     const responsable = user?.full_name || user?.username || 'Admin';
+    const sedeId = dnGetSedeActual();
+    const metodo = pagoComisionAdminMetodo;
+    _pagandoAdmin = true;
 
-    // Marcar ventas de productos como cobradas
-    const { error } = await sb.from('ventas_productos')
-      .update({ comision_admin_cobrada: true, comision_admin_cobrada_at: new Date().toISOString() })
-      .in('id', ids);
+    try {
+      // En efectivo sale de la caja (como el pago a los barberos)
+      let movId = null;
+      if (metodo === 'efectivo' && sesionActual && sesionActual.estado === 'abierta') {
+        const { data: mov, error: movErr } = await sb.from('caja_movimientos').insert({
+          sesion_id: sesionActual.id,
+          sucursal_id: sedeId,
+          tipo: 'gasto',
+          categoria: 'pago_colaborador',
+          monto: total,
+          metodo_pago: 'efectivo',
+          afecta_efectivo: true,
+          beneficiario: nombre,
+          descripcion: `Pago admin sede a ${nombre}`,
+          created_by: responsable
+        }).select('id').single();
+        if (movErr) throw movErr;
+        movId = mov.id;
+      }
 
-    if (error) {
-      toast('Error al marcar como pagada');
-      console.error(error);
-      return;
-    }
-
-    // Si es efectivo, registrar como gasto de caja
-    if (pagoComisionAdminMetodo === 'efectivo' && sesionActual && sesionActual.estado === 'abierta') {
-      await sb.from('caja_movimientos').insert({
-        sesion_id: sesionActual.id,
-        tipo: 'gasto',
-        monto: totalComision,
-        descripcion: `Pago comisión Admin Sede (${pendientes.length} productos)`,
-        created_by: responsable
+      const partes = [];
+      if (pagoDia) partes.push(`día ${dnFormatCOP(pagoDia)}`);
+      if (comision) partes.push(`comisión productos ${dnFormatCOP(comision)}`);
+      const { error: pagoErr } = await sb.from('pagos_colaboradores').insert({
+        usuario_id: (user?.role === 'admin_sede' && user.full_name === nombre) ? user.id : null,
+        sucursal_id: sedeId,
+        turno_id: sesionActual?.turno_id || null,
+        sesion_caja_id: sesionActual?.id || null,
+        caja_movimiento_id: movId,
+        tipo: 'pago_diario_admin',
+        concepto: `Pago admin sede: ${partes.join(' + ')}`,
+        monto: total,
+        metodo_pago: metodo,
+        beneficiario_nombre: nombre,
+        created_by: user?.id || null
       });
-    }
+      if (pagoErr) {
+        if (movId) await sb.from('caja_movimientos').delete().eq('id', movId);
+        throw pagoErr;
+      }
 
-    closePagoComisionAdminModal();
-    toast(`Comisión Admin pagada${pagoComisionAdminMetodo === 'efectivo' ? ' (descontado de caja)' : ' por transferencia'}`);
-    loadAll();
+      if (pendientes.length) {
+        await sb.from('ventas_productos')
+          .update({ comision_admin_cobrada: true, comision_admin_cobrada_at: new Date().toISOString() })
+          .in('id', pendientes.map(p => p.id));
+      }
+
+      closePagoComisionAdminModal();
+      toast(`Pago a ${nombre} registrado${metodo === 'efectivo' ? ' (descontado de caja)' : ' por transferencia'}`);
+      loadAll();
+    } catch (err) {
+      console.error('[PagoAdmin]', err);
+      toast('No se pudo registrar el pago del admin');
+    } finally {
+      _pagandoAdmin = false;
+    }
   }
 
-  // ---- Modal: Reversar pago de comisión Admin ----
+  // ---- Modal: Reversar pago del admin ----
   function openReversarPagoAdminModal() {
-    const cobrados = comisionesAdminHoy.filter(p => p.comision_admin_cobrada);
-    if (!cobrados.length) {
-      toast('No hay pagos de admin para reversar');
+    if (!pagosAdminHoy.length) {
+      toast('No hay pagos del admin para reversar');
       return;
     }
+    const total = pagosAdminHoy.reduce((s, p) => s + (Number(p.monto) || 0), 0);
+    const ultimo = pagosAdminHoy.reduce((max, p) => new Date(p.created_at) > max ? new Date(p.created_at) : max, new Date(0));
 
-    const totalComision = cobrados.reduce((sum, p) => sum + (Number(p.comision_monto) || 0), 0);
-    // Buscar la fecha del último pago
-    const ultimaFecha = cobrados.reduce((max, p) => {
-      const fecha = p.comision_admin_cobrada_at ? new Date(p.comision_admin_cobrada_at) : null;
-      return fecha && fecha > max ? fecha : max;
-    }, new Date(0));
-
-    document.getElementById('rpaProductos').textContent = cobrados.length;
-    document.getElementById('rpaTotalPagado').textContent = dnFormatCOP(totalComision);
-    document.getElementById('rpaFecha').textContent = ultimaFecha.getTime() > 0
-      ? ultimaFecha.toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })
-      : '—';
+    document.getElementById('rpaNombre').textContent = pagosAdminHoy[0].beneficiario_nombre || 'Admin Sede';
+    document.getElementById('rpaProductos').textContent = comisionesAdminHoy.filter(p => p.comision_admin_cobrada).length;
+    document.getElementById('rpaTotalPagado').textContent = dnFormatCOP(total);
+    document.getElementById('rpaFecha').textContent = ultimo.toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
 
     document.getElementById('reversarPagoAdminModalBg').classList.add('show');
   }
@@ -4640,22 +4705,21 @@
   }
 
   async function confirmReversarPagoAdmin() {
-    const cobrados = comisionesAdminHoy.filter(p => p.comision_admin_cobrada);
-    if (!cobrados.length) return;
-
-    const ids = cobrados.map(p => p.id);
-    const totalComision = cobrados.reduce((sum, p) => sum + (Number(p.comision_monto) || 0), 0);
-
     try {
-      // Marcar las ventas como NO cobradas
-      const { error } = await sb.from('ventas_productos')
-        .update({ comision_admin_cobrada: false, comision_admin_cobrada_at: null })
-        .in('id', ids);
-
+      const movIds = pagosAdminHoy.map(p => p.caja_movimiento_id).filter(Boolean);
+      const { error } = await sb.from('pagos_colaboradores').delete().in('id', pagosAdminHoy.map(p => p.id));
       if (error) throw error;
+      if (movIds.length) await sb.from('caja_movimientos').delete().in('id', movIds);
+
+      const cobrados = comisionesAdminHoy.filter(p => p.comision_admin_cobrada).map(p => p.id);
+      if (cobrados.length) {
+        await sb.from('ventas_productos')
+          .update({ comision_admin_cobrada: false, comision_admin_cobrada_at: null })
+          .in('id', cobrados);
+      }
 
       closeReversarPagoAdminModal();
-      toast(`Pago Admin reversado - recuerda agregar $${totalComision.toLocaleString()} a la caja si fue efectivo`);
+      toast('Pago del admin reversado');
       loadAll();
     } catch (err) {
       console.error(err);
@@ -5228,47 +5292,36 @@
     dnToast('Anulando ticket...', 'info');
 
     try {
-      console.log('[AnularTicket] Iniciando anulación:', ticket);
-
-      // Usar función RPC que bypasea RLS
+      // anular_pago_y_cita borra el ticket completo del pago (pagos, movimientos de
+      // caja, comisiones) y deja la cita en pendiente de pago para cobrarla de nuevo.
+      // Es idempotente: si dos pagos son del mismo ticket, el segundo ya no encuentra nada.
       const pagoIds = ticket.pagoIds || [];
       const citaIds = [...new Set(ticket.citaIds || [])];
 
-      // Llamar RPC para cada par pago/cita
-      for (let i = 0; i < Math.max(pagoIds.length, citaIds.length); i++) {
-        const pagoId = pagoIds[i] || pagoIds[0]; // usar primer pago si hay más citas
-        const citaId = citaIds[i] || citaIds[0]; // usar primera cita si hay más pagos
-
-        if (pagoId && citaId) {
-          const { data, error } = await sb.rpc('anular_pago_y_cita', {
-            p_pago_id: pagoId,
-            p_cita_id: citaId
-          });
-
-          console.log('[AnularTicket] RPC anular_pago_y_cita:', { pagoId, citaId, data, error: error?.message });
-
-          if (error) {
-            throw new Error(`Error anulando: ${error.message}`);
-          }
-        }
-      }
-
-      // Si hay pagos extra sin cita correspondiente, anularlos individualmente
-      for (let i = citaIds.length; i < pagoIds.length; i++) {
-        const { error } = await sb.rpc('anular_pago_y_cita', {
+      for (let i = 0; i < pagoIds.length; i++) {
+        const { data, error } = await sb.rpc('anular_pago_y_cita', {
           p_pago_id: pagoIds[i],
-          p_cita_id: citaIds[0] // usar la primera cita
+          p_cita_id: citaIds[i] || null
         });
-        console.log('[AnularTicket] Pago extra anulado:', pagoIds[i], error?.message || 'OK');
+        if (error) throw new Error(error.message);
+        if (data && data.success === false) throw new Error(data.error);
       }
 
-      console.log('[AnularTicket] Anulación completada. Recargando datos...');
+      // Citas del ticket que no tenían pago propio en la lista
+      for (const citaId of citaIds.slice(pagoIds.length)) {
+        const { error } = await sb.rpc('anular_pago_y_cita', { p_pago_id: null, p_cita_id: citaId });
+        if (error) throw new Error(error.message);
+      }
 
-      // Recargar datos para reflejar cambios
+      // Venta de producto antigua (sin ticket): solo existe en ventas_productos
+      if (!pagoIds.length && ticket.clienteId === 'producto' && ticket.id) {
+        const { error } = await sb.from('ventas_productos').delete().eq('id', ticket.id);
+        if (error) throw new Error(error.message);
+      }
+
       await loadAll();
-      console.log('[AnularTicket] Datos recargados. Pagos ahora:', pagosHoy.length);
 
-      dnToast('Ticket anulado correctamente', 'success');
+      dnToast('Ticket anulado. La cita quedó pendiente de pago.', 'success');
 
     } catch (err) {
       console.error('Error al anular ticket:', err);
@@ -5319,46 +5372,10 @@
     document.getElementById('cierreBase').textContent = dnFormatCOP(c.base);
     document.getElementById('cierreVentas').textContent = '+' + dnFormatCOP(c.ventasEf);
     document.getElementById('cierreOtrosIngresos').textContent = '+' + dnFormatCOP(c.ingresos);
-    // Mostrar gastos SIN comisiones (las comisiones se muestran aparte)
-    document.getElementById('cierreGastos').textContent = '-' + dnFormatCOP(c.gastosSinComisiones);
+    // Todo el efectivo que salió de caja (gastos y pagos a colaboradores),
+    // así el desglose suma exactamente el saldo final
+    document.getElementById('cierreGastos').textContent = '-' + dnFormatCOP(c.gastosEfectivo);
     document.getElementById('cierreRetiros').textContent = '-' + dnFormatCOP(c.retiros + c.entregas);
-
-    // Comisiones pagadas - TOTAL (todos los métodos)
-    const comisionesPagadasTotal = pagosComisionesHoy
-      .reduce((sum, p) => sum + (Number(p.total_pagado) || 0), 0);
-
-    // Comisiones EN EFECTIVO (las que afectan la caja)
-    let comisionesPagadasEfectivo = pagosComisionesHoy
-      .filter(p => p.metodo_pago === 'efectivo')
-      .reduce((sum, p) => sum + (Number(p.total_pagado) || 0), 0);
-
-    // Fallback: si no hay registros en pagos_comisiones, usar movimientos de caja
-    if (comisionesPagadasEfectivo === 0 && c.comisionesEfectivo > 0) {
-      comisionesPagadasEfectivo = c.comisionesEfectivo;
-    }
-
-    // Comisiones en otros métodos (no efectivo)
-    const comisionesOtrosMetodos = comisionesPagadasTotal - comisionesPagadasEfectivo;
-
-    console.log('[Caja Cierre] Pagos comisiones encontrados:', pagosComisionesHoy.length, pagosComisionesHoy);
-    console.log('[Caja Cierre] Comisiones TOTAL:', comisionesPagadasTotal);
-    console.log('[Caja Cierre] Comisiones en efectivo:', comisionesPagadasEfectivo);
-    console.log('[Caja Cierre] Comisiones otros métodos:', comisionesOtrosMetodos);
-
-    // Mostrar TOTAL de comisiones pagadas (todos los métodos)
-    document.getElementById('cierreComisiones').textContent = '-' + dnFormatCOP(comisionesPagadasTotal);
-
-    // Mostrar desglose de métodos si hay pagos en otros métodos
-    const cierreComisionesDesglose = document.getElementById('cierreComisionesDesglose');
-    if (cierreComisionesDesglose) {
-      if (comisionesOtrosMetodos > 0 && comisionesPagadasEfectivo > 0) {
-        cierreComisionesDesglose.innerHTML = `<span style="font-size:11px;color:var(--text-3);">(${dnFormatCOP(comisionesPagadasEfectivo)} efectivo, ${dnFormatCOP(comisionesOtrosMetodos)} otros)</span>`;
-      } else if (comisionesOtrosMetodos > 0) {
-        cierreComisionesDesglose.innerHTML = `<span style="font-size:11px;color:var(--text-3);">(${dnFormatCOP(comisionesOtrosMetodos)} en transferencia/QR)</span>`;
-      } else {
-        cierreComisionesDesglose.innerHTML = '';
-      }
-    }
 
     // Composición por método de pago (monto y cantidad)
     const porMetodo = {};
@@ -5612,21 +5629,13 @@
     // También cerrar el turno del día si existe
     if (sedeId) {
       const hoy = dnTodayISO();
-      const { data: turnoActivo } = await sb.from('turnos_admin_sede')
-        .select('id')
+      // Cerrar también turnos de días anteriores que hayan quedado abiertos
+      const { error: turnoErr } = await sb.from('turnos_admin_sede')
+        .update({ estado: 'cerrado', cerrado_at: ahora })
         .eq('sucursal_id', sedeId)
-        .eq('fecha', hoy)
-        .eq('estado', 'abierto')
-        .single();
-
-      if (turnoActivo) {
-        await sb.from('turnos_admin_sede').update({
-          estado: 'cerrado',
-          hora_cierre: ahora,
-          efectivo_cierre: real
-        }).eq('id', turnoActivo.id);
-        console.log('[Caja] Turno cerrado automáticamente:', turnoActivo.id);
-      }
+        .lte('fecha', hoy)
+        .eq('estado', 'abierto');
+      if (turnoErr) console.error('[Caja] No se pudo cerrar el turno:', turnoErr);
     }
 
     closeCierreModal();
@@ -5744,15 +5753,9 @@
     document.getElementById('ticketOtrosIngresos').textContent = dnFormatCOP(calculo.ingresos);
     document.getElementById('ticketTotalEfectivo').textContent = dnFormatCOP(calculo.base + calculo.ventasEf + calculo.ingresos);
 
-    // Egresos
-    document.getElementById('ticketEgresos').textContent = `(-)${dnFormatCOP(calculo.gastos)}`;
+    // Egresos en efectivo (incluye pagos a colaboradores)
+    document.getElementById('ticketEgresos').textContent = `(-)${dnFormatCOP(calculo.gastosEfectivo)}`;
     document.getElementById('ticketRetirado').textContent = `(-)${dnFormatCOP(calculo.retiros + calculo.entregas)}`;
-
-    // Comisiones pagadas
-    const comisionesPagadas = movimientos
-      .filter(m => m.tipo === 'gasto' && m.descripcion?.toLowerCase().includes('comisión'))
-      .reduce((sum, m) => sum + (Number(m.monto) || 0), 0);
-    document.getElementById('ticketComisiones').textContent = `(-)${dnFormatCOP(comisionesPagadas)}`;
 
     // Total en caja
     document.getElementById('ticketTotal').textContent = dnFormatCOP(calculo.resultado);
@@ -6040,7 +6043,7 @@
 </script>
 
 <script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

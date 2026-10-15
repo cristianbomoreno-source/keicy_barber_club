@@ -15,8 +15,14 @@ import {
   generateActionToken
 } from '../_shared/whatsapp/config.ts';
 import { sendCitaConfirmacion } from '../_shared/whatsapp/templates.ts';
+import { esLlamadaDeLaApp, respuestaNoAutorizada } from '../_shared/auth.ts';
 
-const responseHeaders = { 'Content-Type': 'application/json' };
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS'
+};
+const responseHeaders = { ...corsHeaders, 'Content-Type': 'application/json' };
 
 interface ClaimedCita {
   cita_id: string;
@@ -34,7 +40,12 @@ interface ClaimedCita {
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('Not allowed', { status: 405 });
+    return new Response('ok', { headers: corsHeaders });
+  }
+
+  // Solo la app (equipo con sesión), las tareas programadas o el servidor
+  if (!(await esLlamadaDeLaApp(req))) {
+    return respuestaNoAutorizada(corsHeaders);
   }
 
   if (req.method !== 'POST') {

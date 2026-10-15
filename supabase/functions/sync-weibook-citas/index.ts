@@ -5,6 +5,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { esLlamadaDeLaApp, respuestaNoAutorizada } from '../_shared/auth.ts';
 
 const WEIBOOK_API = 'https://api.v2.reservation.weibook.co/v1/filter-reservation';
 const WEIBOOK_KEY = 'keicy_barber_club';
@@ -198,6 +199,11 @@ serve(async (req) => {
   // Manejar preflight CORS
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
+  }
+
+  // Solo la app (equipo con sesión), las tareas programadas o el servidor
+  if (!(await esLlamadaDeLaApp(req))) {
+    return respuestaNoAutorizada(corsHeaders);
   }
 
   if (req.method !== 'POST') {

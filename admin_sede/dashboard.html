@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://qguxzopvfjmivbngccwz.supabase.co" crossorigin>
@@ -374,7 +375,7 @@
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script>
 (async function() {
   // Verificar sesion
@@ -520,9 +521,10 @@
     if (typeof window.toggleSidebar === 'function') window.toggleSidebar();
   });
 
-  // Cerrar turno
+  // Cerrar turno: se hace desde el cuadre de caja (el pago a colaboradores ya no
+  // es un paso del cierre; se hace en "Pago a colaboradores")
   document.getElementById('btnCerrarTurno').addEventListener('click', () => {
-    window.location.href = 'cerrar-turno.html';
+    window.location.href = '../admin/caja.html?admin_sede=1';
   });
 
   // Toast
@@ -538,7 +540,7 @@
   cargarColaboradores();
 })();
 </script>
-<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
 <script src="../assets/mobile-nav.js"></script>
 <script src="/assets/turbo-loader.js" defer></script>
 <script src="/assets/offline-manager.js" defer></script>

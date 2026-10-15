@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- Preconnect críticos -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -13,7 +14,7 @@
 <link rel="preload" href="../assets/mobile-admin.css" as="style">
 <link rel="preload" href="../assets/mobile-admin-premium.css" as="style">
 <!-- Preload JS críticos -->
-<link rel="preload" href="../assets/supabase-client.js" as="script">
+<link rel="preload" href="../assets/supabase-client.js?v=20261014e" as="script">
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
@@ -373,6 +374,10 @@
       <a class="nav-link" href="historial-cierres.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         <span class="nav-label">Cierres</span>
+      </a>
+      <a class="nav-link" href="sesiones.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <span class="nav-label">Sesiones</span>
       </a>
       <a class="nav-link" href="marketing.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4h4l6 5V5L7 10H3z"/></svg>
@@ -854,7 +859,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script>
   const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -903,8 +908,7 @@
   // Cerrar sesión
   document.getElementById('logoutBtn')?.addEventListener('click', () => {
     if (confirm('¿Seguro que deseas cerrar sesión?')) {
-      dnClearSession();
-      window.location.href = '../auth.html';
+      dnLogout();
     }
   });
 
@@ -921,6 +925,31 @@
   // Fecha de corte para estadísticas reales (datos antes de esta fecha no se cuentan)
   const FECHA_CORTE_ESTADISTICAS = '2026-10-01';
 
+  // Citas de hoy (sin canceladas): conteo exacto por sede. Sin sede elegida se
+  // muestra el total y el desglose por sede; con sede, solo el de esa sede.
+  async function cargarCitasHoyPorSede(today, sedeFiltro, sedesTestIds) {
+    try {
+      const { data: sedes, error } = await sb.from('sucursales').select('id, nombre').eq('activa', true);
+      if (error) throw error;
+      const mostrar = (sedes || []).filter(s => sedeFiltro ? s.id === sedeFiltro : !sedesTestIds.includes(s.id));
+      const conteos = await Promise.all(mostrar.map(s =>
+        sb.from('citas').select('id', { count: 'exact', head: true })
+          .eq('fecha', today).eq('sucursal_id', s.id).neq('estado', 'cancelada')
+      ));
+      const porSede = mostrar.map((s, i) => ({
+        nombre: s.nombre.replace(/^Keicy Barber( Club)?\s*/i, '') || s.nombre,
+        total: conteos[i].count || 0
+      }));
+      const total = porSede.reduce((a, s) => a + s.total, 0);
+      document.getElementById('kpiCitas').textContent = total;
+      document.getElementById('kpiCitasNote').textContent = sedeFiltro
+        ? `Hoy · ${porSede[0]?.nombre || 'sede'}`
+        : porSede.map(s => `${s.nombre}: ${s.total}`).join(' · ');
+    } catch (err) {
+      console.error('[Dashboard] Citas por sede:', err);
+    }
+  }
+
   async function loadDashboard(){
     if (!user) return;
 
@@ -936,6 +965,8 @@
 
     // AISLAMIENTO TEST: Obtener IDs de sedes TEST para excluirlas
     const sedesTestIds = await dnGetSedesTestIds();
+    // Sede elegida en la barra lateral (vacío = todas las sedes)
+    const sedeFiltro = dnGetSedeActual();
 
     // Pull the week's appointments once, joined, and derive everything from it.
     // Solo incluir citas desde FECHA_CORTE_ESTADISTICAS
@@ -947,10 +978,13 @@
         .from('citas')
         .select('id, fecha, hora_inicio, estado, precio, cliente_id, barbero_id, sucursal_id, created_at, usuarios!citas_cliente_id_fkey(username, full_name), servicios(nombre, categoria_id, categorias_servicio(nombre)), barberos(usuarios!barberos_id_fkey(username, full_name))')
         .gte('fecha', fechaMinima)
+        .lte('fecha', today)
         .order('fecha', { ascending: true })
         .order('hora_inicio', { ascending: true });
-      // Excluir sedes TEST de métricas del dashboard
-      if (sedesTestIds.length > 0) {
+      if (sedeFiltro) {
+        citasQuery = citasQuery.eq('sucursal_id', sedeFiltro);
+      } else if (sedesTestIds.length > 0) {
+        // Excluir sedes TEST de métricas del dashboard
         citasQuery = citasQuery.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
       }
       const { data, error } = await citasQuery;
@@ -968,6 +1002,7 @@
     const ingresosHoy = citasFinalizadasHoy.reduce((s,c) => s + Number(c.precio||0), 0);
     document.getElementById('kpiIngresos').textContent = dnFormatCOP(ingresosHoy);
     document.getElementById('kpiCitas').textContent = citasHoy.length;
+    cargarCitasHoyPorSede(today, sedeFiltro, sedesTestIds);
 
     try {
       const todayRange = dnLocalDayRangeUTC(today); // Rango UTC para día Colombia
@@ -985,7 +1020,9 @@
     }
 
     try {
-      const { data: barberos, error } = await sb.from('barberos').select('calificacion').eq('activo', true);
+      let barberosQuery = sb.from('barberos').select('calificacion').eq('activo', true);
+      if (sedeFiltro) barberosQuery = barberosQuery.eq('sucursal_id', sedeFiltro);
+      const { data: barberos, error } = await barberosQuery;
       if (error) throw error;
       const avg = barberos.length ? (barberos.reduce((s,b) => s + Number(b.calificacion||0), 0) / barberos.length) : 0;
       document.getElementById('kpiCalificacion').textContent = avg.toFixed(1);
@@ -1086,10 +1123,12 @@
 
     // ---- Mejor barbero (por calificación) ----
     try {
-      const { data: barberos, error } = await sb
+      let mejorQuery = sb
         .from('barberos')
         .select('id, calificacion, usuarios!barberos_id_fkey(username, full_name)')
-        .eq('activo', true)
+        .eq('activo', true);
+      if (sedeFiltro) mejorQuery = mejorQuery.eq('sucursal_id', sedeFiltro);
+      const { data: barberos, error } = await mejorQuery
         .order('calificacion', { ascending: false })
         .limit(1);
       if (error) throw error;
@@ -1667,7 +1706,7 @@
 
 <script src="../assets/citas-estados.js" defer></script>
 <script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

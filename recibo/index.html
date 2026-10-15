@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
@@ -425,7 +426,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script>
   const urlParams = new URLSearchParams(window.location.search);
   const citaId = urlParams.get('c');
@@ -464,16 +465,7 @@
     }
 
     try {
-      const { data: cita, error } = await sb.from('citas')
-        .select(`
-          id, fecha, hora_inicio, precio, propina, metodo_pago, pagada_at, estado,
-          servicios_adicionales, barbero_id,
-          usuarios!citas_cliente_id_fkey(full_name, username, phone),
-          servicios(nombre, precio),
-          sucursales(nombre, direccion)
-        `)
-        .eq('id', citaId)
-        .maybeSingle();
+      const { data: cita, error } = await sb.rpc('dn_recibo_cita', { p_cita_id: citaId });
 
       if (error || !cita) {
         showError('No encontramos este recibo.');

@@ -2074,7 +2074,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="/assets/utils.js"></script>
 <script>
   // ============ SPLASH INTELIGENTE ============
@@ -2240,10 +2240,11 @@
     try {
       // Try to find with full number (country code + phone)
       const fullPhone = countryCode + phone;
-      let { data: users } = await sb.from('usuarios').select('id, full_name, email, phone').or(`phone.eq.${fullPhone},phone.eq.${phone}`).limit(1);
+      const { data: found, error: findErr } = await sb.rpc('dn_reserva_buscar_cliente', { p_telefonos: [fullPhone, phone] });
+      if (findErr) throw findErr;
 
-      if (users && users.length > 0) {
-        const user = users[0];
+      if (found?.encontrado) {
+        const user = found;
         state.cliente.id = user.id;
         state.cliente.phone = user.phone;
         state.cliente.isNew = false;
@@ -2252,56 +2253,33 @@
         const nameParts = (user.full_name || '').trim().split(' ');
         state.cliente.name = nameParts[0] || '';
         state.cliente.lastName = nameParts.slice(1).join(' ') || '';
-        state.cliente.email = user.email || '';
+        // El correo no se muestra (no se expone con solo el número); si ya tiene, se conserva
+        state.cliente.email = '';
 
         clientFirstNameInput.value = state.cliente.name;
         clientLastNameInputNew.value = state.cliente.lastName;
-        clientEmailInputNew.value = state.cliente.email;
+        clientEmailInputNew.value = '';
+        if (user.tiene_email) clientEmailInputNew.placeholder = 'Ya tienes un correo registrado';
+        state.cliente.tieneEmail = !!user.tiene_email;
 
         // Buscar citas pendientes del cliente
-        const today = new Date().toISOString().split('T')[0];
-        const { data: citasPendientes } = await sb.from('citas')
-          .select(`
-            id,
-            fecha,
-            hora_inicio,
-            barbero_id,
-            servicios:servicio_id(nombre)
-          `)
-          .eq('cliente_id', user.id)
-          .gte('fecha', today)
-          .in('estado', ['agendada', 'confirmada'])
-          .order('fecha', { ascending: true })
-          .order('hora_inicio', { ascending: true })
-          .limit(5);
+        const citasPendientes = user.citas || [];
 
         const pendingCitasDiv = document.getElementById('clientPendingCitas');
         const pendingCitasList = document.getElementById('pendingCitasList');
 
         if (citasPendientes && citasPendientes.length > 0) {
-          // Obtener nombres de barberos
-          const barberoIds = [...new Set(citasPendientes.map(c => c.barbero_id).filter(Boolean))];
-          let barberosMap = {};
-          if (barberoIds.length > 0) {
-            const { data: barberos } = await sb.from('usuarios')
-              .select('id, full_name')
-              .in('id', barberoIds);
-            if (barberos) {
-              barberos.forEach(b => barberosMap[b.id] = b.full_name);
-            }
-          }
-
           // Mostrar citas pendientes
           pendingCitasList.innerHTML = citasPendientes.map(cita => {
             const fecha = new Date(cita.fecha + 'T12:00:00');
             const fechaStr = fecha.toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' });
             const hora = formatHora12(cita.hora_inicio);
-            const barberoNombre = barberosMap[cita.barbero_id] || 'Barbero disponible';
+            const barberoNombre = cita.barbero_nombre || 'Barbero disponible';
             return `
               <div class="pending-cita-item">
                 <div class="pending-cita-info">
                   <span class="pending-cita-fecha">${capitalize(fechaStr)}</span>
-                  <span class="pending-cita-servicio">✂️ ${cita.servicios?.nombre || 'Servicio'} · ${barberoNombre}</span>
+                  <span class="pending-cita-servicio">✂️ ${cita.servicio_nombre || 'Servicio'} · ${barberoNombre}</span>
                 </div>
                 <span class="pending-cita-hora">${hora}</span>
               </div>
@@ -2322,6 +2300,7 @@
         state.cliente.id = null;
         state.cliente.phone = countryCode === '57' ? phone : fullPhone;
         state.cliente.isNew = true;
+        state.cliente.tieneEmail = false;
         state.cliente.name = '';
         state.cliente.lastName = '';
         state.cliente.email = '';
@@ -2391,42 +2370,23 @@
     const fullName = (state.cliente.name + ' ' + state.cliente.lastName).trim();
 
     // If new client, create in database
-    if (state.cliente.isNew && state.cliente.name) {
+    // Crea el cliente o completa sus datos (lo hace el servidor)
+    if (state.cliente.name) {
       try {
-        const { data, error } = await sb.from('usuarios').insert({
-          username: state.cliente.phone,
-          phone: state.cliente.phone,
-          full_name: fullName,
-          email: state.cliente.email || null,
-          role: 'cliente',
-          origen: 'web_reservas'
-        }).select('id').single();
-
-        if (error && error.code !== '23505') {
+        const { data: id, error } = await sb.rpc('dn_reserva_guardar_cliente', {
+          p_telefono: state.cliente.phone,
+          p_nombre: fullName,
+          p_email: state.cliente.email || null,
+          p_cliente_id: state.cliente.isNew ? null : state.cliente.id
+        });
+        if (error) {
           console.error(error);
-          toast('Error creando cliente');
-          return;
-        }
-
-        if (data) {
-          state.cliente.id = data.id;
-        } else {
-          // Client already existed (409), fetch the ID
-          const { data: existing } = await sb.from('usuarios').select('id').eq('phone', state.cliente.phone).single();
-          if (existing) state.cliente.id = existing.id;
+          if (state.cliente.isNew) { toast('Error creando cliente'); return; }
+        } else if (id) {
+          state.cliente.id = id;
         }
       } catch (e) {
         console.error(e);
-      }
-    } else if (!state.cliente.isNew && state.cliente.id) {
-      // Cliente existente: actualizar nombre y email si han cambiado
-      try {
-        await sb.from('usuarios').update({
-          full_name: fullName,
-          email: state.cliente.email || null
-        }).eq('id', state.cliente.id);
-      } catch (e) {
-        console.error('Error actualizando cliente:', e);
       }
     }
 
@@ -2528,20 +2488,21 @@
 
   let servicioMasElegidoId = null;
 
+  // Estadísticas públicas (servicio más elegido y cortes por barbero), una sola consulta
+  let _statsPromise = null;
+  function dnReservaEstadisticas(){
+    if (!_statsPromise) {
+      _statsPromise = sb.rpc('dn_reserva_estadisticas').then(r => r.data || {}, () => ({}));
+    }
+    return _statsPromise;
+  }
+
   // Cargar "más elegido" en background sin bloquear la UI
   function loadServicioMasElegido(){
     (async () => {
       try {
-        const hace90 = new Date(); hace90.setDate(hace90.getDate() - 90);
-        const hace90ISO = hace90.toISOString().slice(0,10);
-        const sedesTestIds = await dnGetSedesTestIds();
-        let popQuery = sb.from('citas').select('servicio_id').not('estado', 'in', '(cancelada,sin_respuesta)').gte('fecha', hace90ISO).limit(500);
-        if (sedesTestIds.length > 0) popQuery = popQuery.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
-        const { data: popData } = await popQuery;
-        const counts = {};
-        (popData || []).forEach(c => { if (c.servicio_id) counts[c.servicio_id] = (counts[c.servicio_id]||0)+1; });
-        const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
-        servicioMasElegidoId = top ? top[0] : null;
+        const stats = await dnReservaEstadisticas();
+        servicioMasElegidoId = stats?.servicio_mas_elegido || null;
         // Actualizar badge si ya se renderizó la lista
         if (servicioMasElegidoId) {
           const card = document.querySelector(`.svc-card[data-id="${servicioMasElegidoId}"]`);
@@ -2780,6 +2741,15 @@
   }
 
   function confirmarSedeYContinuar(sedeId){
+    // Al cambiar de sede se descarta el barbero/hora elegidos: pertenecen a la
+    // sede anterior y dejarlos permitía agendar en una sede ajena y saltarse su
+    // día de descanso (cita 77c2d73a, 2026-10-12).
+    if (dnGetSedeActual() !== sedeId) {
+      state.barbero = null;
+      state.anyBarber = false;
+      state.hora = null;
+      state.barberos = [];
+    }
     dnSetSedeActual(sedeId);
     sedeActualObj = sedesCargadas.find(s => s.id === sedeId) || null;
     refrescarHeroesPorSede();
@@ -3055,40 +3025,15 @@
 
       // Cargar datos de usuarios por separado para asegurar que traiga el instagram
       const barberoIds = data.map(b => b.id);
-      const { data: usuariosData } = await sb.from('usuarios')
-        .select('id, username, full_name, avatar_url, avatar_focus_y_reservas, instagram')
-        .in('id', barberoIds);
+      const { data: usuariosData } = await sb.rpc('dn_publico_equipo', { p_ids: barberoIds });
 
       const usuariosMap = {};
       (usuariosData || []).forEach(u => { usuariosMap[u.id] = u; });
 
       // Cargar reseñas de todos los barberos de esta sede
-      const { data: resenasData, error: resenasError } = await sb.from('resenas')
-        .select('barbero_id, cliente_id, calificacion, comentario, created_at')
-        .in('barbero_id', barberoIds)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
+      // Reseñas con solo el nombre y nivel del cliente
+      const { data: resenasData, error: resenasError } = await sb.rpc('dn_publico_resenas', { p_barbero_ids: barberoIds, p_limite: 50 });
       if (resenasError) console.error('Error cargando reseñas:', resenasError);
-
-      // Cargar datos de clientes que tienen reseñas (están en tabla usuarios)
-      const clienteIds = [...new Set((resenasData || []).map(r => r.cliente_id).filter(Boolean))];
-      let clientesMap = {};
-      if (clienteIds.length > 0) {
-        const { data: clientesData } = await sb.from('usuarios')
-          .select('id, full_name, username, phone, lealtad_info')
-          .in('id', clienteIds);
-        (clientesData || []).forEach(c => {
-          const lealtad = c.lealtad_info || {};
-          clientesMap[c.id] = {
-            nombre: c.full_name || c.username || 'Cliente',
-            apellido: '',
-            phone: c.phone || null,
-            cortes: lealtad.cortes_total || 0,
-            categoria: lealtad.categoria || null
-          };
-        });
-      }
 
       // Agrupar reseñas por barbero y calcular promedios
       const reviewsByBarber = {};
@@ -3096,8 +3041,6 @@
       (resenasData || []).forEach(r => {
         if (!r.barbero_id) return;
         if (!reviewsByBarber[r.barbero_id]) reviewsByBarber[r.barbero_id] = [];
-        // Agregar datos del cliente a la reseña
-        r.cliente = clientesMap[r.cliente_id] || null;
         reviewsByBarber[r.barbero_id].push(r);
       });
       Object.keys(reviewsByBarber).forEach(bid => {
@@ -3117,17 +3060,17 @@
       }));
 
       state.barberos = dnShuffle(barberosConUsuarios);
+      // Un barbero elegido que no es de esta sede no puede seguir seleccionado
+      if (state.barbero && !state.barberos.some(b => b.id === state.barbero.id)) {
+        state.barbero = null;
+        state.hora = null;
+      }
 
       // Cortes realizados: OPTIMIZADO - últimos 6 meses con límite (excluye TEST)
       let countsByBarber = {};
       try {
-        const hace6m = new Date(); hace6m.setMonth(hace6m.getMonth() - 6);
-        const hace6mISO = hace6m.toISOString().slice(0,10);
-        const sedesTestIds2 = await dnGetSedesTestIds();
-        let finQuery = sb.from('citas').select('barbero_id').eq('estado','finalizada').gte('fecha', hace6mISO).limit(2000);
-        if (sedesTestIds2.length > 0) finQuery = finQuery.not('sucursal_id', 'in', `(${sedesTestIds2.join(',')})`);
-        const { data: fin } = await finQuery;
-        (fin || []).forEach(c => { if (c.barbero_id) countsByBarber[c.barbero_id] = (countsByBarber[c.barbero_id]||0)+1; });
+        const stats = await dnReservaEstadisticas();
+        countsByBarber = { ...(stats?.cortes_por_barbero || {}) };
       } catch (e) { console.error(e); }
 
       // Siempre mostrar tarjeta de máxima disponibilidad primero + barberos
@@ -3304,6 +3247,45 @@
     return slots;
   }
 
+  // Revalida contra la base de datos (no contra el estado de la página) que el
+  // barbero puede atender en la sede actual a esa fecha/hora. Devuelve el
+  // motivo si NO está disponible, o null si se puede reservar.
+  async function validarBarberoAntesDeReservar(barberoId, fecha, horaInicio, horaFin){
+    const sedeId = dnGetSedeActual();
+    if (!state.barberos.some(b => b.id === barberoId)) return 'barbero fuera de la lista de la sede';
+    const [{ data: b, error: bErr }, { data: bqs, error: qErr }, { data: citas, error: cErr }] = await Promise.all([
+      sb.from('barberos').select('sucursal_id, activo, dia_descanso, horario_personalizado').eq('id', barberoId).maybeSingle(),
+      sb.from('bloqueos_barbero').select('tipo, hora_inicio, hora_fin').eq('barbero_id', barberoId).eq('fecha', fecha),
+      sb.rpc('dn_citas_ocupadas', { p_fecha: fecha, p_barbero_id: barberoId })
+    ]);
+    if (bErr || qErr || cErr) return 'no se pudo verificar la disponibilidad';
+    if (!b || !b.activo) return 'barbero inactivo';
+    if (b.sucursal_id !== sedeId) return 'barbero de otra sede';
+
+    const weekday = new Date(fecha + 'T00:00:00').getDay();
+    const habilitado = (bqs || []).some(q => q.tipo === 'habilitado');
+    if (!habilitado) {
+      if (b.dia_descanso !== null && b.dia_descanso !== undefined && Number(b.dia_descanso) === weekday) return 'día de descanso';
+      const dias = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
+      const diaConfig = b.horario_personalizado?.[dias[weekday]];
+      if (diaConfig && !diaConfig.activo) return 'día inactivo en su horario';
+      if (diaConfig?.rangos?.length > 0) {
+        const hs = horaInicio.slice(0, 5);
+        if (!diaConfig.rangos.some(r => hs >= r.desde && hs < r.hasta)) return 'fuera de su horario';
+      }
+      for (const q of (bqs || [])) {
+        if (q.tipo === 'dia') return 'día bloqueado';
+        if (q.tipo === 'horas' && q.hora_inicio && q.hora_fin && horaInicio < q.hora_fin && horaFin > q.hora_inicio) return 'horas bloqueadas';
+      }
+    }
+    const choca = (citas || []).some(c => {
+      const fin = c.hora_fin || (String(Number(c.hora_inicio.slice(0, 2)) + 1).padStart(2, '0') + c.hora_inicio.slice(2));
+      return horaInicio < fin && horaFin > c.hora_inicio;
+    });
+    if (choca) return 'ya tiene una cita a esa hora';
+    return null;
+  }
+
   function periodOf(t){ const h = Number(t.split(':')[0]); return h < 12 ? 'mañana' : (h < 18 ? 'tarde' : 'noche'); }
   function fmtHora(t){ const [h] = t.split(':'); let hour = parseInt(h,10); const ampm = hour>=12?'PM':'AM'; hour = hour%12||12; return { hh: String(hour).padStart(2,'0'), ap: ampm }; }
 
@@ -3314,9 +3296,7 @@
       // Trae todas las citas activas del día (para toda la sede) para calcular demanda real
       // y, si el cliente eligió "cualquiera disponible", para resolver qué barbero queda libre.
       // Incluye hora_fin para bloquear correctamente servicios de más de 1 hora
-      const { data, error } = await sb.from('citas').select('hora_inicio, hora_fin, barbero_id')
-        .eq('fecha', state.fecha).eq('sucursal_id', dnGetSedeActual())
-        .not('estado', 'in', '(cancelada,sin_respuesta)');
+      const { data, error } = await sb.rpc('dn_citas_ocupadas', { p_fecha: state.fecha, p_sucursal_id: dnGetSedeActual() });
       if (error) throw error;
 
       // Cargar bloqueos de todos los barberos para esta fecha
@@ -3345,7 +3325,9 @@
 
         // Verificar día de descanso del barbero (pero permitir si hay habilitación)
         const barbero = state.barberos.find(b => b.id === barberoId);
-        if (barbero && barbero.dia_descanso !== null && barbero.dia_descanso !== undefined) {
+        // Barbero que no pertenece a la sede actual: nunca disponible
+        if (!barbero) return true;
+        if (barbero.dia_descanso !== null && barbero.dia_descanso !== undefined) {
           const weekday = new Date(state.fecha + 'T00:00:00').getDay();
           if (Number(barbero.dia_descanso) === weekday && !tieneHabilitacion) return true;
         }
@@ -3603,6 +3585,9 @@
   document.getElementById('next1').addEventListener('click', () => goToStep(2));
   document.getElementById('next2').addEventListener('click', () => {
     // Validar que se haya seleccionado un barbero
+    if (state.barbero && !state.anyBarber && !state.barberos.some(b => b.id === state.barbero.id)) {
+      state.barbero = null;
+    }
     if (!state.barbero && !state.anyBarber) {
       showCenterPopup('Por favor selecciona un barbero antes de continuar');
       return;
@@ -3648,19 +3633,12 @@
       let clienteId = state.cliente.id;
 
       if (!clienteId) {
-        // Find or create the client by phone
-        const { data: existing } = await sb.from('usuarios').select('id').eq('phone', phoneDigits).maybeSingle();
-        if (existing) {
-          clienteId = existing.id;
-        } else {
-          const usernameBase = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'.').replace(/^\.+|\.+$/g,'');
-          const username = (usernameBase || 'cliente') + '.' + phoneDigits.slice(-4);
-          const { data: created, error: createErr } = await sb.from('usuarios')
-            .insert({ username, phone: phoneDigits, full_name: name, email: state.cliente.email || null, role: 'cliente', origen: 'web_reservas' })
-            .select('id').single();
-          if (createErr) throw createErr;
-          clienteId = created.id;
-        }
+        // Busca o crea el cliente por celular (lo hace el servidor)
+        const { data: id, error: createErr } = await sb.rpc('dn_reserva_guardar_cliente', {
+          p_telefono: phoneDigits, p_nombre: name, p_email: state.cliente.email || null
+        });
+        if (createErr) throw createErr;
+        clienteId = id;
       }
 
       const [principal, ...extras] = state.serviciosSeleccionados;
@@ -3688,26 +3666,37 @@
         return toast('Error: No hay barbero asignado. Vuelve a seleccionar la hora.');
       }
 
+      // VALIDACIÓN CRÍTICA: el barbero debe ser de la sede actual y estar
+      // disponible en esa fecha/hora (la base de datos lo vuelve a validar).
+      const motivoNoDisponible = await validarBarberoAntesDeReservar(barberoId, state.fecha, state.hora, horaFin);
+      if (motivoNoDisponible) {
+        console.warn('[DN] Reserva bloqueada:', motivoNoDisponible);
+        state.barbero = null;
+        state.hora = null;
+        btn.disabled = false;
+        btn.textContent = 'Confirmar reserva';
+        return toast('Ese barbero no está disponible en esta sede para la fecha elegida. Vuelve a elegir barbero y hora.');
+      }
+
       // Log para verificar qué barbero se está guardando
       console.log('[DN] Guardando cita con barbero:', barberoId, state.barbero?.nombre);
 
-      const { data: citaData, error: citaErr } = await sb.from('citas').insert({
-        cliente_id: clienteId,
-        barbero_id: barberoId,
-        servicio_id: principal.id,
-        sucursal_id: dnGetSedeActual(),
-        servicios_adicionales: extras.map(x => ({ id: x.id, nombre: x.nombre, precio: Number(x.precio)||0, duracion_min: Number(x.duracion)||null })),
-        fecha: state.fecha,
-        hora_inicio: state.hora,
-        hora_fin: horaFin,
-        precio: precioTotal,
-        estado: 'agendada',
-        origen: 'web_reservas'
-      }).select('id').single();
+      const { data: nuevaCitaId, error: citaErr } = await sb.rpc('dn_reserva_crear_cita', {
+        p_cliente_id: clienteId,
+        p_barbero_id: barberoId,
+        p_servicio_id: principal.id,
+        p_sucursal_id: dnGetSedeActual(),
+        p_fecha: state.fecha,
+        p_hora_inicio: state.hora,
+        p_hora_fin: horaFin,
+        p_precio: precioTotal,
+        p_servicios_adicionales: extras.map(x => ({ id: x.id, nombre: x.nombre, precio: Number(x.precio)||0, duracion_min: Number(x.duracion)||null }))
+      });
       if (citaErr) throw citaErr;
+      const citaData = { id: nuevaCitaId };
 
       // Enviar email de confirmación (no bloquea el flujo)
-      if (state.cliente.email) {
+      if (state.cliente.email || state.cliente.tieneEmail) {
         try {
           const sedeActual = sedesCargadas?.find(s => s.id === dnGetSedeActual());
           const barberoNombre = state.barbero?.nombre || null;
@@ -3741,7 +3730,7 @@
       }
 
       document.getElementById('confirmMsg').textContent =
-        `${state.cliente.name || name}, tu cita quedó agendada.${state.cliente.email ? ' Te enviamos un correo de confirmación.' : ''}`;
+        `${state.cliente.name || name}, tu cita quedó agendada.${(state.cliente.email || state.cliente.tieneEmail) ? ' Te enviamos un correo de confirmación.' : ''}`;
       goToStep(5);
 
       // Si viene desde la app de cliente, notificar éxito
@@ -3756,6 +3745,9 @@
         toast('Ese teléfono ya está registrado, intenta de nuevo.');
       } else if (err.code === '23P01') {
         toast('Justo se ocupó ese horario. Elige otra hora, por favor.');
+      } else if (err.message?.includes('RESERVA_NO_DISPONIBLE')) {
+        state.barbero = null; state.hora = null;
+        toast('Ese barbero no está disponible en esta sede para la fecha elegida. Vuelve a elegir barbero y hora.');
       } else {
         toast('No pudimos agendar tu cita. Intenta de nuevo.');
       }

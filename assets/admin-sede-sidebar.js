@@ -206,9 +206,7 @@
     if (logoutBtn) {
       logoutBtn.onclick = function() {
         if (confirm('¿Seguro que deseas cerrar sesión?')) {
-          if (typeof dnClearSession === 'function') dnClearSession();
-          if (typeof dnClearTurnoSede === 'function') dnClearTurnoSede();
-          window.location.href = '../auth.html';
+          if (typeof dnLogout === 'function') dnLogout();
         }
       };
     }

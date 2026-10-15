@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
@@ -321,7 +322,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="../assets/dn-modals.js"></script>
 <script>
   // Config
@@ -366,33 +367,16 @@
     try {
       const comentario = document.getElementById('commentInput').value.trim();
 
-      // Build review data
-      const reviewData = {
-        calificacion: currentRating,
-        comentario: comentario || null,
-        created_at: new Date().toISOString()
-      };
-
-      // Add IDs based on what we have
-      if (ticketData) {
-        reviewData.ticket_id = ticketData.id;
-        reviewData.cliente_id = ticketData.cliente_id;
-        if (ticketData.cita_id) reviewData.cita_id = ticketData.cita_id;
-      } else if (citaData) {
-        reviewData.cita_id = citaData.id;
-        reviewData.cliente_id = citaData.cliente_id;
-      }
-
-      // Add barbero if available
-      if (barberoId) {
-        reviewData.barbero_id = barberoId;
-      }
-
-      console.log('[Resena] Guardando reseña:', reviewData);
-
-      // Insert review
-      const { error } = await sb.from('resenas').insert(reviewData);
+      // El servidor guarda la reseña (una sola por servicio)
+      const { data: res, error } = await sb.rpc('dn_crear_resena', {
+        p_ticket_id: ticketData?.id || null,
+        p_cita_id: ticketData ? (ticketData.cita_id || null) : (citaData?.id || null),
+        p_barbero_id: barberoId || null,
+        p_calificacion: currentRating,
+        p_comentario: comentario || null
+      });
       if (error) throw error;
+      if (!res?.success) throw new Error(res?.error || 'No se pudo guardar la reseña');
 
       // Show success
       document.getElementById('reviewCard').classList.add('hide');
@@ -454,12 +438,8 @@
   async function loadData() {
     try {
       if (ticketId) {
-        // Load from tickets table
-        const { data: ticket, error } = await sb
-          .from('tickets')
-          .select('*')
-          .eq('id', ticketId)
-          .maybeSingle();
+        // tickets es privada: la función devuelve solo los datos de este ticket
+        const { data: ticket, error } = await sb.rpc('dn_ticket_resena', { p_ticket_id: ticketId });
 
         console.log('[Resena] Ticket query:', { ticket, error });
 
@@ -469,30 +449,16 @@
         }
         if (!ticket) throw new Error('Ticket no encontrado');
 
-        // Check if review already exists
-        const { data: existingReview } = await sb
-          .from('resenas')
-          .select('id')
-          .eq('ticket_id', ticketId)
-          .maybeSingle();
-
-        if (existingReview) {
+        if (ticket.ya_calificado) {
           showError('Ya has calificado este servicio. Gracias.');
           return;
         }
 
         ticketData = ticket;
 
-        // Get client phone
-        if (ticket.cliente_id) {
-          const { data: cliente } = await sb
-            .from('usuarios')
-            .select('phone')
-            .eq('id', ticket.cliente_id)
-            .maybeSingle();
-          if (cliente?.phone) {
-            clienteTelefono = cliente.phone.replace(/\D/g, '');
-          }
+        // Celular del cliente (para el link de volver a reservar)
+        if (ticket.cliente_telefono) {
+          clienteTelefono = ticket.cliente_telefono.replace(/\D/g, '');
         }
 
         // Get service name from items
@@ -510,7 +476,7 @@
         if (barberoId && !barberoNombre) {
           const { data: barbero } = await sb
             .from('barberos')
-            .select('usuarios(full_name)')
+            .select('usuarios!barberos_id_fkey(full_name)')
             .eq('id', barberoId)
             .maybeSingle();
           if (barbero?.usuarios?.full_name) {
@@ -545,22 +511,11 @@
 
       } else if (citaId) {
         // Load from citas table (fallback)
-        const { data: cita, error } = await sb
-          .from('citas')
-          .select('*, servicios(nombre), barberos(id, usuarios!barberos_id_fkey(full_name)), sucursales(nombre, google_maps_link, whatsapp), usuarios!citas_cliente_id_fkey(phone)')
-          .eq('id', citaId)
-          .single();
+        const { data: cita, error } = await sb.rpc('dn_cita_resena', { p_cita_id: citaId });
 
         if (error || !cita) throw new Error('Cita no encontrada');
 
-        // Check if review already exists
-        const { data: existingReview } = await sb
-          .from('resenas')
-          .select('id')
-          .eq('cita_id', citaId)
-          .maybeSingle();
-
-        if (existingReview) {
+        if (cita.ya_calificado) {
           showError('Ya has calificado este servicio. Gracias.');
           return;
         }
@@ -568,27 +523,27 @@
         citaData = cita;
 
         // Get client phone
-        if (cita.usuarios?.phone) {
-          clienteTelefono = cita.usuarios.phone.replace(/\D/g, '');
+        if (cita.cliente_telefono) {
+          clienteTelefono = cita.cliente_telefono.replace(/\D/g, '');
         }
 
         // Get barber info
-        barberoId = barberoParam || cita.barbero_id || cita.barberos?.id || null;
-        barberoNombre = cita.barberos?.usuarios?.full_name || '';
+        barberoId = barberoParam || cita.barbero_id || null;
+        barberoNombre = cita.barbero_nombre || '';
 
         // Get sucursal info
-        if (cita.sucursales) {
-          sucursalNombre = cita.sucursales.nombre || '';
-          if (cita.sucursales.google_maps_link) {
-            googleMapsLink = cita.sucursales.google_maps_link;
+        if (cita.sucursal) {
+          sucursalNombre = cita.sucursal.nombre || '';
+          if (cita.sucursal.google_maps_link) {
+            googleMapsLink = cita.sucursal.google_maps_link;
           }
-          if (cita.sucursales.whatsapp) {
-            sedeWhatsapp = cita.sucursales.whatsapp.replace(/\D/g, '');
+          if (cita.sucursal.whatsapp) {
+            sedeWhatsapp = cita.sucursal.whatsapp.replace(/\D/g, '');
           }
         }
 
         // Update UI
-        const serviceName = cita.servicios?.nombre || 'Servicio';
+        const serviceName = cita.servicio_nombre || 'Servicio';
 
         document.getElementById('serviceName').textContent = serviceName;
         document.getElementById('serviceDate').textContent = formatDate(cita.fecha);

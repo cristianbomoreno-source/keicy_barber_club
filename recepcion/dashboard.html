@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
@@ -594,7 +595,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="../assets/mobile-nav.js"></script>
 <script>
   const toastEl = document.getElementById('toast');
@@ -1257,7 +1258,7 @@
 
       await fetch('https://ygrmammcaupnygdxmgth.supabase.co/functions/v1/send-service-completed-email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${sb.supabaseKey}` },
+        headers: await dnFuncionHeaders(),
         body: JSON.stringify({
           cliente_nombre: clienteNombre,
           cliente_email: clienteEmail,

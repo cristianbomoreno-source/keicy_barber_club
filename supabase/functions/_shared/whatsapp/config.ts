@@ -313,16 +313,16 @@ export function validateInternalSecret(secretHeader: string | null): boolean {
 
 /**
  * Verifica si una llamada al cron está autorizada.
- * Usa WHATSAPP_CRON_SECRET o el secret por defecto.
+ * Usa WHATSAPP_CRON_SECRET (obsoleto: las funciones usan _shared/auth.ts).
  */
 export function validateCronSecret(secretHeader: string | null): boolean {
   if (!secretHeader) {
     return false;
   }
 
-  // Secret por defecto para pg_cron interno
-  const DEFAULT_CRON_SECRET = 'dn-cron-whatsapp-2024-secure';
-  const expectedSecret = Deno.env.get('WHATSAPP_CRON_SECRET') || DEFAULT_CRON_SECRET;
+  // Sin clave configurada no se acepta nada (antes había una clave por defecto en el código)
+  const expectedSecret = Deno.env.get('WHATSAPP_CRON_SECRET');
+  if (!expectedSecret) return false;
 
   return secretHeader === expectedSecret;
 }

@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
@@ -679,7 +680,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script>
   // State
   let currentClienteId = null;
@@ -688,7 +689,7 @@
 
   // Check existing session
   const existingSession = dnGetLealtadSession();
-  if (existingSession) {
+  if (existingSession && existingSession.cliente_token) {
     window.location.href = 'club.html';
   }
 
@@ -999,7 +1000,8 @@
         ultima_visita: usuario.ultima_visita,
         lealtad_info: usuario.lealtad_info,
         membership_tier: usuario.membership_tier,
-        cliente_desde: usuario.cliente_desde
+        cliente_desde: usuario.cliente_desde,
+        cliente_token: data.token
       });
 
       // Redirect

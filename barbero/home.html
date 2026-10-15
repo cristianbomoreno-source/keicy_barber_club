@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0">
 <!-- Preconnect críticos -->
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -13,7 +14,7 @@
 <link rel="preload" href="../assets/barbero-nav.css" as="style">
 <link rel="preload" href="../assets/barbero-white.css" as="style">
 <!-- Preload JS críticos -->
-<link rel="preload" href="../assets/supabase-client.js" as="script">
+<link rel="preload" href="../assets/supabase-client.js?v=20261014e" as="script">
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
@@ -713,7 +714,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js"></script>
+<script src="../assets/supabase-client.js?v=20261014e"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/mobile-nav.js"></script>
 <script>
@@ -755,6 +756,8 @@
 
   const citasLlamadasHoy = loadSetFromStorage(citasLlamadasKey);
   const citasFinalizadasHoy = loadSetFromStorage(citasFinalizadasKey);
+  // Momento en que se llamó cada cita (solo en memoria): el guard anti-race solo aplica unos segundos
+  const llamadaTs = new Map();
 
   // Cita fijada: evita que cambie automáticamente hasta que el barbero termine
   let citaFijadaId = localStorage.getItem(citaFijadaKey) || null;
@@ -882,8 +885,7 @@
   function closeAccountSheet(){ document.getElementById('accountSheetBg').classList.remove('show'); }
   function logoutBarbero(){
     if (!confirm('¿Cerrar sesión?')) return;
-    dnClearSession();
-    window.location.href = '../auth.html';
+    dnLogout();
   }
 
   function updateHeroDrinkChip(label){
@@ -1649,6 +1651,7 @@
     // Marcar como llamada INMEDIATAMENTE para evitar race condition con realtime/polling
     citasLlamadasHoy.add(citaId);
     saveSetToStorage(citasLlamadasKey, citasLlamadasHoy);
+    llamadaTs.set(citaId, Date.now());
 
     try {
       const ahora = new Date().toISOString();
@@ -1727,7 +1730,9 @@
     { key:'ceras', icon:'🫙', label:'Ceras' },
     { key:'shampoos', icon:'🧴', label:'Shampoos' },
     { key:'aceites', icon:'💧', label:'Aceites' },
-    { key:'otro_producto', icon:'➕', label:'Otro' },
+    { key:'todos_productos', icon:'📦', label:'Todos' },
+    { key:'mas_productos', icon:'🧼', label:'Otros productos' },
+    { key:'otro_producto', icon:'➕', label:'Manual' },
   ];
 
   let allServiciosCache = null;
@@ -1749,7 +1754,10 @@
     }
     // Cargar productos si no están en cache
     if (!allProductosCache) {
-      const { data } = await sb.from('inventario_productos_venta').select('id, nombre, precio, cantidad, categoria').eq('activo', true).gt('cantidad', 0);
+      const sedeId = await getMyBarberoSedeId();
+      let query = sb.from('inventario_productos_venta').select('id, nombre, precio, cantidad, categoria').eq('activo', true).gt('cantidad', 0);
+      if (sedeId) query = query.eq('sucursal_id', sedeId);
+      const { data } = await query.order('nombre');
       allProductosCache = data || [];
     }
     addSheetLevel = 'type';
@@ -1895,12 +1903,19 @@
       'shampoos': ['shampoo', 'champú', 'champu', 'jabon', 'jabón'],
       'aceites': ['aceite', 'oil', 'serum', 'tónico', 'tonico'],
     };
-    const keywords = mapping[catKey] || [];
-    return allProductosCache.filter(p => {
+    const matches = (p, keywords) => {
       const nombre = (p.nombre || '').toLowerCase();
       const cat = (p.categoria || '').toLowerCase();
       return keywords.some(k => nombre.includes(k.toLowerCase()) || cat.includes(k.toLowerCase()));
-    });
+    };
+    if (catKey === 'todos_productos') return allProductosCache;
+    // Productos que no encajan en ninguna categoría (ej. Velo Colágeno, geles, after shave)
+    if (catKey === 'mas_productos') {
+      const allKeywords = Object.values(mapping).flat();
+      return allProductosCache.filter(p => !matches(p, allKeywords));
+    }
+    const keywords = mapping[catKey] || [];
+    return allProductosCache.filter(p => matches(p, keywords));
   }
 
   function selectAddType(type){
@@ -2187,17 +2202,25 @@
       const salaEspera = citasActivas.find(c => c.estado === 'sala_espera');
       const confirmada = citasActivas.find(c => c.estado === 'confirmada');
 
-      // Usar cita fijada si existe, sino buscar por prioridad normal
-      const active = citaFijada || salaEspera || confirmada || null;
+      // Un cliente que ya llegó (sala_espera) siempre tiene prioridad sobre una cita fijada
+      // que sigue en 'confirmada'; si no, el barbero nunca se entera de que su cliente llegó
+      // (p.ej. el de las 3:00 no llegó y el de las 3:30 sí).
+      const active = (citaFijada?.estado === 'sala_espera' ? citaFijada : null)
+        || salaEspera || citaFijada || confirmada || null;
       const estadoActivo = active?.estado === 'sala_espera' ? 'sala_espera' : active?.estado === 'confirmada' ? 'confirmada' : 'empty';
 
-      // Si no hay cita fijada pero encontramos una activa, fijarla
-      if (active && !citaFijada) {
+      // Fijar la cita activa si cambió (o si no había ninguna fijada)
+      if (active && active.id !== citaFijadaId) {
         fijarCita(active.id);
       }
 
       // GUARD: Si la cita ya fue llamada en esta sesión, NO mostrar pantalla de "llamar cliente"
       // Esto evita el bug donde la pantalla reaparece después de unos minutos por race condition con realtime/polling
+      // Pasado ese margen, si la cita sigue en sala_espera es porque se revirtió: volver a mostrarla.
+      if (active && citasLlamadasHoy.has(active.id) && Date.now() - (llamadaTs.get(active.id) || 0) > 20000) {
+        citasLlamadasHoy.delete(active.id);
+        saveSetToStorage(citasLlamadasKey, citasLlamadasHoy);
+      }
       if (active && citasLlamadasHoy.has(active.id)) {
         console.log('[loadCurrentClient] Cita', active.id, 'ya fue llamada pero aún no está en_servicio. Esperando...');
         // No cambiar lastRenderSig ni re-renderizar - esperar a que el realtime traiga el estado correcto
