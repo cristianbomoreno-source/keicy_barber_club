@@ -256,45 +256,5 @@ ALTER TABLE public.pagos_colaboradores ADD CONSTRAINT pagos_colaboradores_metodo
 CREATE INDEX IF NOT EXISTS idx_pagos_colaboradores_sucursal_fecha
   ON public.pagos_colaboradores (sucursal_id, created_at);
 
--- Gastos "Pagos Adm" que eran el pago diario del admin de sede
-WITH pagos_admin AS (
-  SELECT m.id, m.monto, m.metodo_pago, m.created_at, m.sesion_id,
-    COALESCE(m.sucursal_id, cs.sucursal_id) AS sucursal_id,
-    cs.turno_id,
-    CASE
-      WHEN m.descripcion ILIKE 'Pagos Adm: Davsa%' THEN '881cdfd1-3bda-4d13-ba9b-40c0470fbc5b'::uuid
-      WHEN m.descripcion ILIKE 'Pagos Adm: manuel%' THEN 'e676489a-3c7c-45d5-93cb-5d87cb909aae'::uuid
-    END AS usuario_id,
-    CASE
-      WHEN m.descripcion ILIKE 'Pagos Adm: Davsa%' THEN 'David Jesus'
-      WHEN m.descripcion ILIKE 'Pagos Adm: manuel%' THEN 'Manuel Tessarinii'
-      WHEN m.descripcion ILIKE 'Pagos Adm: Vale%' OR m.descripcion ILIKE 'Pagos Adm: pago male%' THEN 'Vale'
-      WHEN m.descripcion ILIKE 'Pagos Adm: pago lucrecia%' THEN 'Lucrecia Sarmiento'
-    END AS nombre,
-    regexp_replace(m.descripcion, '^Pagos Adm: ', '') AS detalle
-  FROM caja_movimientos m
-  LEFT JOIN caja_sesiones cs ON cs.id = m.sesion_id
-  WHERE m.categoria = 'pagos_adm' AND m.tipo = 'gasto'
-),
-validos AS (
-  SELECT * FROM pagos_admin WHERE nombre IS NOT NULL
-),
-insertados AS (
-  INSERT INTO pagos_colaboradores (
-    usuario_id, sucursal_id, turno_id, sesion_caja_id, caja_movimiento_id,
-    tipo, concepto, monto, metodo_pago, beneficiario_nombre, created_at
-  )
-  SELECT v.usuario_id, v.sucursal_id, v.turno_id, v.sesion_id, v.id,
-    'pago_diario_admin', 'Pago admin sede: ' || v.detalle, v.monto,
-    COALESCE(v.metodo_pago, 'efectivo'), v.nombre, v.created_at
-  FROM validos v
-  WHERE NOT EXISTS (SELECT 1 FROM pagos_colaboradores p WHERE p.caja_movimiento_id = v.id)
-  RETURNING caja_movimiento_id, beneficiario_nombre, metodo_pago
-)
-UPDATE caja_movimientos m SET
-  categoria = 'pago_colaborador',
-  beneficiario = i.beneficiario_nombre,
-  descripcion = 'Pago admin sede a ' || i.beneficiario_nombre
-    || CASE WHEN i.metodo_pago = 'efectivo' THEN '' ELSE ' [' || upper(i.metodo_pago) || ']' END
-FROM insertados i
-WHERE m.id = i.caja_movimiento_id;
+-- (Keicy) El traslado de los gastos "Pagos Adm" de octubre a pagos_colaboradores
+-- es propio de Diego Neira (personas y UUID de su equipo) y no se aplica aquí.
