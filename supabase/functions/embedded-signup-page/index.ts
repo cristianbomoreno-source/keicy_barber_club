@@ -585,13 +585,10 @@ serve(async (req) => {
         response_type: 'code',
         override_default_response_type: true,
         extras: {
-          feature: 'whatsapp_embedded_signup',
-          version: 2,
-          sessionInfoVersion: 3,
-          // Habilitar opción de conectar WhatsApp Business App existente
-          setup: {
-            smbApp: true // Pre-seleccionar Business App Coexistence
-          }
+          setup: {},
+          // Habilitar opción de conectar WhatsApp Business App existente (coexistencia)
+          featureType: 'whatsapp_business_app_onboarding',
+          sessionInfoVersion: '3'
         }
       });
     }
