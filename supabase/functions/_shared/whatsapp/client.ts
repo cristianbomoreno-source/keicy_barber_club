@@ -6,6 +6,7 @@ import {
   WHATSAPP_API_BASE_URL,
   getWhatsAppCredentials,
   createSupabaseClient,
+  whatsappHabilitado,
   formatPhoneForWhatsApp
 } from './config.ts';
 import type {
@@ -21,6 +22,12 @@ export async function sendWhatsAppTemplate(
   request: SendTemplateRequest
 ): Promise<SendMessageResponse> {
   const { sucursalId, to, templateName, languageCode, components, citaId } = request;
+
+  // Interruptor general: con WhatsApp desactivado no se llama a Meta
+  if (!(await whatsappHabilitado())) {
+    console.log('[WhatsApp Client] WhatsApp desactivado (app_config.whatsapp_enabled), no se envía');
+    return { success: false, error: 'WhatsApp desactivado', errorCode: 'WHATSAPP_DESACTIVADO' };
+  }
 
   // Obtener credenciales de la sede
   let credentials;
@@ -144,6 +151,12 @@ export async function sendWhatsAppText(
   text: string,
   citaId?: string
 ): Promise<SendMessageResponse> {
+  // Interruptor general: con WhatsApp desactivado no se llama a Meta
+  if (!(await whatsappHabilitado())) {
+    console.log('[WhatsApp Client] WhatsApp desactivado (app_config.whatsapp_enabled), no se envía');
+    return { success: false, error: 'WhatsApp desactivado', errorCode: 'WHATSAPP_DESACTIVADO' };
+  }
+
   let credentials;
   try {
     credentials = await getWhatsAppCredentials(sucursalId);

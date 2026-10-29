@@ -9,16 +9,9 @@ import type { SendMessageResponse, TemplateComponent } from './types.ts';
 // Nombres de las plantillas en Meta
 export const TEMPLATE_RECORDATORIO_CITA = 'recordatorio_cita';
 export const TEMPLATE_CONFIRMACION = 'confirmacion';
-export const TEMPLATE_CONFIRMACION_165 = 'confirmacion_cita';
 
-// =====================================================
-// ⚠️ CONFIGURAR ESTOS VALORES CON TU NÚMERO DE WHATSAPP
-// =====================================================
-// Phone Number IDs - obtener de Meta Business después de agregar el número
-const PHONE_NUMBER_ID_PRINCIPAL = 'TU_PHONE_NUMBER_ID';  // Cambiar
-
-// URL de la imagen de cabecera para confirmaciones
-const HEADER_IMAGE_URL = 'https://keicybarber.com/assets/whatsapp-header.jpg';  // Cambiar dominio
+// Imagen de cabecera (logo de Keicy) para las plantillas con encabezado de imagen
+export const HEADER_IMAGE_URL = 'https://www.keicybarberclub.com/assets/whatsapp-header-keicy.jpg';
 
 /**
  * Formatea la fecha de la cita para el mensaje.
@@ -146,18 +139,7 @@ export async function sendCitaConfirmacion(params: {
     }
   ];
 
-  // Determinar qué plantilla usar según la sede
-  const supabase = createSupabaseClient();
-  const { data: sede } = await supabase
-    .from('sucursales')
-    .select('whatsapp_phone_number_id')
-    .eq('id', sucursalId)
-    .single();
-
-  // Calle 165 usa 'confirmacion_cita', Colina usa 'confirmacion'
-  const templateName = sede?.whatsapp_phone_number_id === PHONE_NUMBER_ID_165
-    ? TEMPLATE_CONFIRMACION_165
-    : TEMPLATE_CONFIRMACION;
+  const templateName = TEMPLATE_CONFIRMACION;
 
   console.log(`[Templates] Enviando confirmación para cita ${citaId} con plantilla ${templateName}`);
 
@@ -209,6 +191,10 @@ export async function sendCitaReminderWithTokens(params: {
 
   // Construir componentes con tokens opacos
   const components: TemplateComponent[] = [
+    {
+      type: 'header',
+      parameters: [{ type: 'image', image: { link: HEADER_IMAGE_URL } }]
+    },
     {
       type: 'body',
       parameters: [

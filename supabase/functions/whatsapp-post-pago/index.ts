@@ -8,6 +8,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { sendWhatsAppText, sendWhatsAppTemplate } from '../_shared/whatsapp/client.ts';
+import { HEADER_IMAGE_URL } from '../_shared/whatsapp/templates.ts';
 import { createSupabaseClient } from '../_shared/whatsapp/config.ts';
 import { esLlamadaDeLaApp, respuestaNoAutorizada } from '../_shared/auth.ts';
 
@@ -183,6 +184,7 @@ ${resenaUrl}
       languageCode: 'es',
       citaId: cita_id,
       components: [
+        { type: 'header', parameters: [{ type: 'image', image: { link: HEADER_IMAGE_URL } }] },
         {
           type: 'body',
           parameters: [

@@ -12,7 +12,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import {
   createSupabaseClient,
-  generateActionToken
+  generateActionToken,
+  whatsappHabilitado
 } from '../_shared/whatsapp/config.ts';
 import { sendCitaConfirmacion } from '../_shared/whatsapp/templates.ts';
 import { esLlamadaDeLaApp, respuestaNoAutorizada } from '../_shared/auth.ts';
@@ -61,6 +62,14 @@ serve(async (req) => {
 
   const startTime = Date.now();
   const supabase = createSupabaseClient();
+
+  // Interruptor general: con WhatsApp desactivado no se reclaman citas (así no quedan como fallidas)
+  if (!(await whatsappHabilitado())) {
+    return new Response(JSON.stringify({ success: true, message: 'WhatsApp desactivado', enviados: 0 }), {
+      status: 200,
+      headers: responseHeaders
+    });
+  }
   const results = { claimed: 0, sent: 0, failed: 0, errors: [] as string[] };
 
   // Leer parámetros del body (opcional, para envío manual)

@@ -12,8 +12,11 @@
 // - WHATSAPP_APP_SECRET: App Secret para validar firmas de webhook
 //
 // Configuración fija:
-// - WABA ID: 851994237367851
-// - App ID: 910914185080805
+// - WABA ID: 1063106458711350 (Keicy Barber Club)
+// - App ID: 910914185080805 (app de Meta compartida con Diego Neira)
+//
+// INTERRUPTOR GENERAL: app_config.whatsapp_enabled. Si no es 'true', no sale
+// ningún mensaje (ver whatsappHabilitado()).
 // =====================================================
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -24,8 +27,21 @@ export const WHATSAPP_API_VERSION = 'v18.0';
 export const WHATSAPP_API_BASE_URL = `https://graph.facebook.com/${WHATSAPP_API_VERSION}`;
 
 // Configuración fija de la cuenta propia
-export const WHATSAPP_WABA_ID = '851994237367851';
+export const WHATSAPP_WABA_ID = '1063106458711350';
 export const META_APP_ID = '910914185080805';
+
+/**
+ * Interruptor general de WhatsApp (app_config.whatsapp_enabled).
+ * Mientras no sea 'true' no se envía ningún mensaje a Meta.
+ */
+export async function whatsappHabilitado(): Promise<boolean> {
+  const { data } = await createSupabaseClient()
+    .from('app_config')
+    .select('value')
+    .eq('key', 'whatsapp_enabled')
+    .maybeSingle();
+  return String(data?.value ?? '').replace(/"/g, '') === 'true';
+}
 
 // Crear cliente de Supabase con service_role para operaciones internas
 export function createSupabaseClient() {
@@ -114,7 +130,7 @@ function getPhoneNumberIdForSede(sedeSlug: string | null): string {
  * - WHATSAPP_ACCESS_TOKEN: Token permanente de usuario del sistema
  * - WHATSAPP_PHONE_NUMBER_ID: ID del número de teléfono en Meta
  *
- * Usa WABA_ID fijo: 851994237367851
+ * Usa WABA_ID fijo: 1063106458711350
  */
 export function getDirectWhatsAppCredentials(): WhatsAppCredentials {
   const accessToken = Deno.env.get('WHATSAPP_ACCESS_TOKEN');
@@ -153,7 +169,7 @@ export async function getWhatsAppCredentials(sucursalId: string): Promise<WhatsA
   // Siempre buscar la sede para obtener su nombre
   const { data: sede, error } = await supabase
     .from('sucursales')
-    .select('id, nombre, whatsapp_phone_number, whatsapp_token_ref')
+    .select('id, nombre, whatsapp_phone_number, whatsapp_phone_number_id, whatsapp_waba_id, whatsapp_token_ref')
     .eq('id', sucursalId)
     .eq('activa', true)
     .single();
@@ -167,8 +183,8 @@ export async function getWhatsAppCredentials(sucursalId: string): Promise<WhatsA
   // Usar el nombre de la sede (o token_ref si existe) para buscar credenciales específicas
   const sedeRef = sede.whatsapp_token_ref || sede.nombre;
 
-  // Obtener Phone Number ID específico de la sede o fallback a global
-  const phoneNumberId = getPhoneNumberIdForSede(sedeRef);
+  // Phone Number ID: el guardado en la sede; si no hay, el de las variables de entorno
+  const phoneNumberId = sede.whatsapp_phone_number_id || getPhoneNumberIdForSede(sedeRef);
 
   // Obtener Access Token específico de la sede o fallback a global
   const accessToken = getAccessTokenForSede(sedeRef);
@@ -177,7 +193,7 @@ export async function getWhatsAppCredentials(sucursalId: string): Promise<WhatsA
 
   return {
     phoneNumberId,
-    wabaId: WHATSAPP_WABA_ID,
+    wabaId: sede.whatsapp_waba_id || WHATSAPP_WABA_ID,
     accessToken,
     phoneNumber: sede.whatsapp_phone_number || ''
   };
