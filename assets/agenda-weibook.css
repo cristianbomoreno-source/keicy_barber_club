@@ -1231,6 +1231,35 @@
     font-size: 8px;
   }
 
+  /* Todas las sedes: columna de horas más angosta y sin ancho mínimo por
+     barbero, para que el último barbero no quede cortado */
+  .agenda-mobile.am-compressed .am-barberos-header {
+    padding-left: 28px !important;
+  }
+  .agenda-mobile.am-compressed .am-barberos-scroll {
+    width: calc(100% - 28px) !important;
+  }
+  .agenda-mobile.am-compressed .am-time-gutter {
+    width: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
+  }
+  .agenda-mobile.am-compressed .am-time-slot {
+    font-size: 8px;
+    letter-spacing: -0.3px;
+    padding-top: 3px;
+  }
+  .agenda-mobile.am-compressed .am-barbero-col-header,
+  .agenda-mobile.am-compressed .am-barbero-col {
+    min-width: 0 !important;
+  }
+  .agenda-mobile.am-compressed .am-grid-wrap {
+    scrollbar-width: none;
+  }
+  .agenda-mobile.am-compressed .am-grid-wrap::-webkit-scrollbar {
+    display: none;
+  }
+
   .agenda-mobile.am-compressed .am-barbero-espacios {
     font-size: 8px;
   }

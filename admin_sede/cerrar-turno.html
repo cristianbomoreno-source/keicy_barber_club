@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#111111">
 <title>Cerrar Turno · Admin Sede</title>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <style>
   /* Variables heredadas de design-system.css */
   body { background:var(--bg); min-height:100vh; min-height:100dvh; }
@@ -372,8 +372,8 @@
 
   <!-- Paso 3: Pagar colaboradores -->
   <div class="step-content" data-step="3">
-    <div class="step-title"><span class="num">3</span> Pagar colaboradores</div>
-    <div class="step-sub">Paga la comision a cada colaborador</div>
+    <div class="step-title"><span class="num">3</span> Comisiones del día</div>
+    <div class="step-sub">Las comisiones se pagan solo desde Caja → Pagar comisión. Aquí ves cuánto le toca a cada uno y si ya se le pagó.</div>
 
     <div id="colaboradoresList">
       <!-- Se llena dinamicamente -->
@@ -405,7 +405,7 @@
         <span class="summary-value" id="s4EfectivoContado">$0</span>
       </div>
       <div class="summary-row">
-        <span class="summary-label">Comisiones pagadas</span>
+        <span class="summary-label">Comisiones del día</span>
         <span class="summary-value" id="s4ComisionesPagadas">$0</span>
       </div>
     </div>
@@ -466,7 +466,7 @@
           <span class="summary-value gold" id="r2Comisiones">$0</span>
         </div>
         <div class="summary-row">
-          <span class="summary-label">Colaboradores pagados</span>
+          <span class="summary-label">Barberos con comisión pagada (en Caja)</span>
           <span class="summary-value" id="r2Pagados">0/0</span>
         </div>
       </div>
@@ -500,8 +500,8 @@
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
-<script src="../assets/mobile-nav.js"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
 <script>
 (async function() {
   const user = dnRequireAdmin('../index.html');
@@ -602,8 +602,14 @@
     personalAseo = aseoData || [];
   }
 
+  // Inventario de nevera (bebidas) desactivado en todas las sedes desde el 17-oct-2026.
+  // Para reactivarlo, poner en true.
+  const NEVERA_ACTIVA = false;
+
   // Bebidas
-  const { data: bebidas } = await sb.from('bebidas_inventario').select('*').eq('activo', true).order('orden');
+  const { data: bebidas } = NEVERA_ACTIVA
+    ? await sb.from('bebidas_inventario').select('*').eq('activo', true).order('orden')
+    : { data: [] };
   const inventarioInicial = turno.inventario_bebidas_inicial || [];
   let inventarioFinal = {};
   (bebidas || []).forEach(b => {
@@ -733,208 +739,64 @@
   }
 
   // Paso 3: Colaboradores
+  // Paso 3: solo muestra las comisiones del día y su estado. El pago se hace únicamente desde
+  // Caja → Pagar comisión (30-oct-2026: se quitó el pago desde el cierre de turno).
+  function estadoPagoBarbero(citasBarbero) {
+    if (!citasBarbero.length) return { cls: '', txt: 'Sin servicios' };
+    const pendientes = citasBarbero.filter(c => !c.comision_pagada);
+    if (!pendientes.length) return { cls: 'pagado', txt: 'Pagada ✓' };
+    return { cls: '', txt: `Pendiente ${dnFormatCOP(pendientes.reduce((s, c) => s + (Number(c.comision_calculada) || 0), 0))}` };
+  }
+
   function renderColaboradores() {
     const container = document.getElementById('colaboradoresList');
     let html = '';
+    const tarjeta = ({ nombre, avatar, detalle, monto, estado, estilo = '', avatarEstilo = '' }) => `
+      <div class="colaborador-card" style="${estilo}">
+        <div class="colaborador-header">
+          <div class="colaborador-avatar" style="${avatarEstilo}">${avatar ? `<img src="${avatar}" alt="">` : dnInitials(nombre)}</div>
+          <div class="colaborador-info">
+            <div class="colaborador-name">${nombre}</div>
+            <div class="colaborador-stats">${detalle}</div>
+          </div>
+        </div>
+        <div class="colaborador-footer">
+          <div class="colaborador-comision">${dnFormatCOP(monto)}</div>
+          <span class="btn-pagar ${estado.cls}" style="cursor:default; pointer-events:none;">${estado.txt}</span>
+        </div>
+      </div>`;
 
-    // 1. Admin Sede (si tiene pago configurado)
     const configPago = adminSedeData?.config_pago || {};
     const salarioDiario = configPago.salario_diario || 0;
-    const comisionPctAdmin = configPago.comision_productos_pct || 0;
-
     if (salarioDiario > 0 || comisionProductosAdmin > 0) {
-      const nombreAdmin = adminSedeData?.full_name || 'Admin Sede';
-      const avatarAdmin = adminSedeData?.avatar_url;
-      const totalAdmin = salarioDiario + comisionProductosAdmin;
-      const pagadoAdmin = cierreData.comisiones_pagadas?.['admin_sede'] || false;
-
-      html += `
-        <div class="colaborador-card" data-id="admin_sede" style="border:1px solid var(--gold);">
-          <div class="colaborador-header">
-            <div class="colaborador-avatar" style="background:var(--gold);color:#141414;">
-              ${avatarAdmin ? `<img src="${avatarAdmin}" alt="">` : dnInitials(nombreAdmin)}
-            </div>
-            <div class="colaborador-info">
-              <div class="colaborador-name">${nombreAdmin}</div>
-              <div class="colaborador-stats">
-                Salario: ${dnFormatCOP(salarioDiario)} + Comisión: ${dnFormatCOP(comisionProductosAdmin)}
-              </div>
-            </div>
-          </div>
-          <div class="colaborador-footer">
-            <div class="colaborador-comision">${dnFormatCOP(totalAdmin)}</div>
-            <button class="btn-pagar ${pagadoAdmin ? 'pagado' : ''}" data-id="admin_sede" data-comision="${totalAdmin}" ${pagadoAdmin ? 'disabled' : ''}>
-              ${pagadoAdmin ? 'Pagado' : 'Pagar'}
-            </button>
-          </div>
-        </div>
-      `;
+      html += tarjeta({
+        nombre: adminSedeData?.full_name || 'Admin Sede', avatar: adminSedeData?.avatar_url,
+        detalle: `Salario: ${dnFormatCOP(salarioDiario)} + Comisión: ${dnFormatCOP(comisionProductosAdmin)}`,
+        monto: salarioDiario + comisionProductosAdmin, estado: { cls: '', txt: 'Se paga en Caja' },
+        estilo: 'border:1px solid var(--gold);', avatarEstilo: 'background:var(--gold);color:#141414;'
+      });
     }
 
-    // 2. Barberos
-    if (barberos && barberos.length > 0) {
-      html += barberos.map(b => {
-        const nombre = b.usuarios?.full_name || 'Colaborador';
-        const avatar = b.usuarios?.avatar_url;
-        const citasBarbero = citasFinalizadas.filter(c => c.barbero_id === b.id);
-        const comision = citasBarbero.reduce((s, c) => s + (Number(c.comision_calculada) || 0), 0);
-        const pagado = cierreData.comisiones_pagadas?.[b.id] || false;
-
-        return `
-          <div class="colaborador-card" data-id="${b.id}">
-            <div class="colaborador-header">
-              <div class="colaborador-avatar">
-                ${avatar ? `<img src="${avatar}" alt="">` : dnInitials(nombre)}
-              </div>
-              <div class="colaborador-info">
-                <div class="colaborador-name">${nombre}</div>
-                <div class="colaborador-stats"><span>${citasBarbero.length}</span> servicios hoy</div>
-              </div>
-            </div>
-            <div class="colaborador-footer">
-              <div class="colaborador-comision">${dnFormatCOP(comision)}</div>
-              <button class="btn-pagar ${pagado ? 'pagado' : ''}" data-id="${b.id}" data-comision="${comision}" ${pagado ? 'disabled' : ''}>
-                ${pagado ? 'Pagado' : 'Pagar'}
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // 3. Personal de aseo
-    if (personalAseo.length > 0) {
-      html += personalAseo.map(p => {
-        const nombre = p.usuarios?.full_name || 'Aseo';
-        const avatar = p.usuarios?.avatar_url;
-        const pago = p.pago_diario || 0;
-        const pagado = cierreData.comisiones_pagadas?.[`aseo_${p.id}`] || false;
-
-        return `
-          <div class="colaborador-card" data-id="aseo_${p.id}" style="border:1px solid var(--success);">
-            <div class="colaborador-header">
-              <div class="colaborador-avatar" style="background:var(--success);color:#111111;">
-                ${avatar ? `<img src="${avatar}" alt="">` : dnInitials(nombre)}
-              </div>
-              <div class="colaborador-info">
-                <div class="colaborador-name">${nombre}</div>
-                <div class="colaborador-stats" style="color:var(--success);">Personal de aseo</div>
-              </div>
-            </div>
-            <div class="colaborador-footer">
-              <div class="colaborador-comision">${dnFormatCOP(pago)}</div>
-              <button class="btn-pagar ${pagado ? 'pagado' : ''}" data-id="aseo_${p.id}" data-comision="${pago}" ${pagado ? 'disabled' : ''}>
-                ${pagado ? 'Pagado' : 'Pagar'}
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    if (!html) {
-      container.innerHTML = '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No hay colaboradores</div>';
-      return;
-    }
-
-    container.innerHTML = html;
-
-    container.querySelectorAll('.btn-pagar').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        const comision = Number(btn.dataset.comision) || 0;
-
-        // Mostrar selector de método de pago
-        const metodo = await mostrarSelectorMetodo();
-        if (!metodo) return;
-
-        btn.disabled = true;
-        btn.textContent = 'Pagando...';
-
-        try {
-          let tipo, usuarioId, barberoId, concepto;
-
-          if (id === 'admin_sede') {
-            tipo = 'pago_diario_admin';
-            usuarioId = user.id;
-            barberoId = null;
-            concepto = 'Pago diario Admin Sede';
-          } else if (id.startsWith('aseo_')) {
-            tipo = 'pago_diario_aseo';
-            const aseoId = id.replace('aseo_', '');
-            const aseoUser = personalAseo.find(p => p.id === aseoId);
-            usuarioId = aseoUser?.usuarios?.id || aseoId;
-            barberoId = aseoId;
-            concepto = 'Pago diario Aseo';
-          } else {
-            tipo = 'comision';
-            const barbero = barberos.find(b => b.id === id);
-            usuarioId = barbero?.usuarios?.id || id;
-            barberoId = id;
-            concepto = 'Comisiones del día';
-          }
-
-          const result = await dnPagarColaborador({
-            usuarioId,
-            barberoId,
-            sucursalId: sedeId,
-            tipo,
-            concepto,
-            monto: comision,
-            metodo
-          });
-
-          if (result.success) {
-            if (!cierreData.comisiones_pagadas) cierreData.comisiones_pagadas = {};
-            cierreData.comisiones_pagadas[id] = { metodo, monto: comision, pagoId: result.pagoId };
-            btn.classList.add('pagado');
-            btn.textContent = 'Pagado ✓';
-            showToast(`Pago registrado: ${dnFormatCOP(comision)} (${metodo})`);
-          } else if (result.duplicado) {
-            btn.classList.add('pagado');
-            btn.textContent = 'Ya pagado';
-            showToast('Este pago ya fue registrado');
-          } else {
-            throw new Error(result.error);
-          }
-        } catch (err) {
-          console.error(err);
-          showToast('Error al registrar pago');
-          btn.disabled = false;
-          btn.textContent = 'Pagar';
-        }
+    (barberos || []).forEach(b => {
+      const citasBarbero = citasFinalizadas.filter(c => c.barbero_id === b.id);
+      html += tarjeta({
+        nombre: b.usuarios?.full_name || 'Colaborador', avatar: b.usuarios?.avatar_url,
+        detalle: `<span>${citasBarbero.length}</span> servicios hoy`,
+        monto: citasBarbero.reduce((s, c) => s + (Number(c.comision_calculada) || 0), 0),
+        estado: estadoPagoBarbero(citasBarbero)
       });
     });
-  }
 
-  // Selector de método de pago
-  function mostrarSelectorMetodo() {
-    return new Promise(resolve => {
-      const overlay = document.createElement('div');
-      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.95);z-index:400;display:flex;align-items:center;justify-content:center;';
-      overlay.innerHTML = `
-        <div style="background:var(--card);border:1px solid var(--divider);border-radius:20px;padding:24px;width:90%;max-width:320px;">
-          <div style="font-size:16px;font-weight:700;margin-bottom:16px;text-align:center;">Método de pago</div>
-          <button class="metodo-opt" data-metodo="efectivo" style="width:100%;padding:14px;border-radius:12px;background:var(--card-2);border:1px solid var(--divider);color:var(--text);font-size:14px;font-weight:600;margin-bottom:10px;cursor:pointer;">💵 Efectivo</button>
-          <button class="metodo-opt" data-metodo="transferencia" style="width:100%;padding:14px;border-radius:12px;background:var(--card-2);border:1px solid var(--divider);color:var(--text);font-size:14px;font-weight:600;margin-bottom:10px;cursor:pointer;">🏦 Transferencia</button>
-          <button class="metodo-opt" data-metodo="nequi" style="width:100%;padding:14px;border-radius:12px;background:var(--card-2);border:1px solid var(--divider);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;">📱 Nequi</button>
-          <button style="width:100%;padding:12px;margin-top:16px;border-radius:12px;background:transparent;border:1px solid var(--divider);color:var(--text-secondary);font-size:13px;cursor:pointer;" id="cancelMetodo">Cancelar</button>
-        </div>
-      `;
-      document.body.appendChild(overlay);
-
-      overlay.querySelectorAll('.metodo-opt').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.body.removeChild(overlay);
-          resolve(btn.dataset.metodo);
-        });
-      });
-
-      overlay.querySelector('#cancelMetodo').addEventListener('click', () => {
-        document.body.removeChild(overlay);
-        resolve(null);
+    personalAseo.forEach(pa => {
+      html += tarjeta({
+        nombre: pa.usuarios?.full_name || 'Aseo', avatar: pa.usuarios?.avatar_url,
+        detalle: '<span style="color:var(--success);">Personal de aseo</span>', monto: pa.pago_diario || 0,
+        estado: { cls: '', txt: 'Se paga en Caja' },
+        estilo: 'border:1px solid var(--success);', avatarEstilo: 'background:var(--success);color:#111111;'
       });
     });
+
+    container.innerHTML = html || '<div style="text-align:center;color:var(--text-secondary);padding:20px;">No hay colaboradores</div>';
   }
 
   // Paso 5: Bebidas
@@ -984,7 +846,10 @@
     const ventasTotales = citasFinalizadas.reduce((s, c) => s + (Number(c.precio) || 0), 0);
     const dif = efectivoContado - efectivoEsperado;
     const totalComisiones = citasFinalizadas.reduce((s, c) => s + (Number(c.comision_calculada) || 0), 0);
-    const pagados = Object.keys(cierreData.comisiones_pagadas || {}).length;
+    const pagados = (barberos || []).filter(b => {
+      const cb = citasFinalizadas.filter(c => c.barbero_id === b.id);
+      return cb.length && cb.every(c => c.comision_pagada);
+    }).length;
 
     document.getElementById('r1Base').textContent = dnFormatCOP(baseInicial);
     document.getElementById('r1Ventas').textContent = dnFormatCOP(ventasTotales);
@@ -1000,9 +865,7 @@
     const totalConAdminYAseo = totalComisiones + salarioDiario + comisionProductosAdmin + personalAseo.reduce((s, p) => s + (p.pago_diario || 0), 0);
 
     // Contar total de colaboradores
-    let totalColaboradores = (barberos?.length || 0);
-    if (salarioDiario > 0 || comisionProductosAdmin > 0) totalColaboradores++;
-    totalColaboradores += personalAseo.length;
+    const totalColaboradores = (barberos || []).filter(b => citasFinalizadas.some(c => c.barbero_id === b.id)).length;
 
     document.getElementById('r2Comisiones').textContent = dnFormatCOP(totalConAdminYAseo);
     document.getElementById('r2Pagados').textContent = `${pagados}/${totalColaboradores}`;
@@ -1067,14 +930,20 @@
   });
   document.getElementById('btnPaso3').addEventListener('click', () => irAPaso(3));
   document.getElementById('btnPaso4').addEventListener('click', () => irAPaso(4));
-  document.getElementById('btnPaso5').addEventListener('click', () => irAPaso(5));
+  // Sin nevera se salta el paso 5 (inventario de bebidas)
+  document.getElementById('btnPaso5').addEventListener('click', () => irAPaso(NEVERA_ACTIVA ? 5 : 6));
   document.getElementById('btnPaso6').addEventListener('click', () => irAPaso(6));
+  if (!NEVERA_ACTIVA) {
+    document.querySelector('.progress-step[data-step="5"]')?.remove();
+    const seccionBebidas = document.getElementById('r3Consumidas')?.closest('.summary-section');
+    if (seccionBebidas) seccionBebidas.style.display = 'none';
+  }
 
   document.getElementById('btnAtras1').addEventListener('click', () => irAPaso(1));
   document.getElementById('btnAtras2').addEventListener('click', () => irAPaso(2));
   document.getElementById('btnAtras3').addEventListener('click', () => irAPaso(3));
   document.getElementById('btnAtras4').addEventListener('click', () => irAPaso(4));
-  document.getElementById('btnAtras5').addEventListener('click', () => irAPaso(5));
+  document.getElementById('btnAtras5').addEventListener('click', () => irAPaso(NEVERA_ACTIVA ? 5 : 4));
 
   // Confirmar cierre
   document.getElementById('btnConfirmarCierre').addEventListener('click', async () => {
@@ -1107,10 +976,7 @@
       // Guardar datos adicionales en el cierre
       await dnActualizarCierreTurno(turno.id, 6, cierreData);
 
-      // Actualizar comisiones pagadas en citas
-      for (const citaId of citasFinalizadas.map(c => c.id)) {
-        await sb.from('citas').update({ comision_pagada: true, comision_pagada_at: new Date().toISOString() }).eq('id', citaId);
-      }
+      // Las comisiones NO se marcan como pagadas al cerrar: solo se pagan desde Caja → Pagar comisión.
 
       // Mostrar resumen del cierre
       const msg = `Turno cerrado. Ganancia neta: ${dnFormatCOP(resultadoCierre.ganancia_neta || 0)}`;

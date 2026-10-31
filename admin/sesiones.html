@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#000000">
 <title>Sesiones activas · Admin</title>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <style>
   body { background:var(--bg); min-height:100vh; }
   .container { max-width:900px; margin:0 auto; padding:24px var(--page-padding-x) 100px; padding-top:calc(24px + var(--safe-top)); }
@@ -86,7 +86,8 @@
   </div>
 
   <div class="nota">
-    Cada persona puede tener la sesión abierta en <b>máximo 2 dispositivos</b>: al entrar en uno nuevo se cierra el más antiguo.
+    Cada persona puede tener la sesión abierta en <b>máximo 2 dispositivos</b> (el admin general, 5): al entrar en uno nuevo se cierra el más antiguo.
+    En iPhone, Safari y cada app instalada en la pantalla de inicio cuentan como dispositivos distintos.
     Al cerrar una sesión desde aquí, ese dispositivo pierde el acceso en menos de una hora (cuando vence su token) y debe volver a entrar con su usuario y PIN o contraseña.
   </div>
 
@@ -105,7 +106,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script>
 (function() {

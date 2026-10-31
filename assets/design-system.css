@@ -754,6 +754,19 @@ img{ display:block; max-width:100%; }
    Usa tokens de --nav-* definidos en :root
    ================================================================ */
 
+/* Logo en blanco cuando el tema es oscuro (el PNG es negro sobre transparente) */
+[data-theme="dark"] img[src*="logo-transparent"] {
+  filter: brightness(0) invert(1) drop-shadow(0 2px 10px rgba(0, 0, 0, 0.5));
+}
+
+/* Barra de navegación en tema oscuro (los --nav-* de :root son del tema claro) */
+[data-theme="dark"] {
+  --nav-bg: rgba(0, 0, 0, 0.94);
+  --nav-border: rgba(255, 255, 255, 0.08);
+  --nav-color: rgba(255, 255, 255, 0.5);
+  --nav-color-active: #FFAC48;
+}
+
 /* Navbar móvil - TODOS LOS ROLES */
 .mobile-nav {
   position: fixed;

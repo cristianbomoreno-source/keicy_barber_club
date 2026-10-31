@@ -37,3 +37,9 @@ supabase/
 # OS files
 .DS_Store
 Thumbs.db
+
+# App Android (TWA) - no se publica en la web
+android/
+
+# Informes internos con datos de clientes - no se publican
+reportes/

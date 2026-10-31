@@ -10,11 +10,11 @@
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
 <!-- Preload CSS críticos -->
-<link rel="preload" href="../assets/design-system.css" as="style">
-<link rel="preload" href="../assets/barbero-nav.css" as="style">
-<link rel="preload" href="../assets/barbero-white.css" as="style">
+<link rel="preload" href="../assets/design-system.css?v=20261015b" as="style">
+<link rel="preload" href="../assets/barbero-nav.css?v=20261015" as="style">
+<link rel="preload" href="../assets/barbero-white.css?v=20261015" as="style">
 <!-- Preload JS críticos -->
-<link rel="preload" href="../assets/supabase-client.js?v=20261014e" as="script">
+<link rel="preload" href="../assets/supabase-client.js?v=20261021" as="script">
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
@@ -26,14 +26,21 @@
 <meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Barbero</title>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
-<link rel="stylesheet" href="../assets/barbero-nav.css">
-<link rel="stylesheet" href="../assets/barbero-white.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
+<link rel="stylesheet" href="../assets/barbero-nav.css?v=20261015">
+<link rel="stylesheet" href="../assets/barbero-white.css?v=20261015">
+<link rel="stylesheet" href="../assets/barbero-estilo.css?v=20261015">
 <style>
   /* Variables heredadas de design-system.css */
-  html{ height:100%; }
+  /* Igual que agenda y perfil: la página no se desplaza, solo #app por dentro.
+     Si el documento se desplaza, Safari iOS oculta/muestra su barra y la
+     navegación inferior cambia de altura al pasar entre pantallas. */
+  html, body{ height:100%; overflow:hidden; overscroll-behavior:none; }
   body{
-    min-height:100%; margin:0;
+    margin:0;
     -webkit-font-smoothing:antialiased;
     background:var(--bg);
   }
@@ -48,7 +55,8 @@
 
   #app{
     max-width:480px; margin:0 auto;
-    min-height:100dvh;
+    height:100dvh; overflow-y:auto; overflow-x:hidden;
+    -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain;
     display:flex; flex-direction:column;
     padding-left: var(--page-padding-x);
     padding-right: var(--page-padding-x);
@@ -68,7 +76,7 @@
   .hero-photo{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
   .hero-fallback{
     position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    font-size:52px; font-weight:800; color:rgba(255,172,72,0.35);
+    font-size:56px; font-weight:800; color:rgba(255,172,72,0.35);
     background:radial-gradient(ellipse 90% 60% at 50% 20%, rgba(255,172,72,0.1), transparent 60%), linear-gradient(165deg, #1c1c1c, #0a0a0a);
   }
   .hero-overlay{
@@ -81,7 +89,7 @@
     background:linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 70%, transparent 100%);
   }
   .hero-topbar-row{ width:100%; display:flex; align-items:center; justify-content:center; position:relative; }
-  .hero-clock{ font-size:13px; font-weight:700; color:rgba(255,255,255,0.9); letter-spacing:.5px; margin-top:2px; }
+  .hero-clock{ font-size:14px; font-weight:700; color:rgba(255,255,255,0.9); letter-spacing:.5px; margin-top:2px; }
   .hero-icon-btn{
     width:38px; height:38px; border-radius:13px; flex-shrink:0; display:flex; align-items:center; justify-content:center; cursor:pointer; position:relative;
     background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
@@ -93,14 +101,14 @@
   .hero-logo{ height:32px; border-radius:8px; opacity:.96; filter:drop-shadow(0 2px 10px rgba(0,0,0,0.55)); }
   .bell-badge{
     position:absolute; top:-3px; right:-3px; min-width:15px; height:15px; padding:0 3px; border-radius:8px;
-    background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-size:9px; font-weight:800;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-size:9.5px; font-weight:800;
     display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.4);
   }
   .hero-content{ position:absolute; left:16px; right:16px; bottom:10px; z-index:2; }
-  .hero-puesto{ font-size:10px; font-weight:800; letter-spacing:1.4px; color:var(--ring-gold); text-transform:uppercase; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
-  .hero-name{ font-size:26px; font-weight:800; letter-spacing:-0.5px; color:#111111; line-height:1.1; margin-top:2px; text-shadow:0 2px 10px rgba(0,0,0,0.7); }
+  .hero-puesto{ font-size:11px; font-weight:800; letter-spacing:1.4px; color:var(--ring-gold); text-transform:uppercase; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
+  .hero-name{ font-size:28px; font-weight:800; letter-spacing:-0.5px; color:#111111; line-height:1.1; margin-top:2px; text-shadow:0 2px 10px rgba(0,0,0,0.7); }
   .hdr-estado{
-    display:inline-flex; align-items:center; gap:4px; font-size:9px; font-weight:700; margin-top:6px;
+    display:inline-flex; align-items:center; gap:4px; font-size:9.5px; font-weight:700; margin-top:6px;
     padding:3px 8px 3px 6px; border-radius:999px; letter-spacing:0.3px; text-transform:uppercase;
     background:rgba(52,211,153,0.2); border:1px solid rgba(52,211,153,0.4); color:#5EEAB2;
     transition:background .3s ease, border-color .3s ease, color .3s ease;
@@ -119,8 +127,14 @@
   .hero-chip-icon{ width:24px; height:24px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(255,172,72,0.25); color:var(--ring-gold); }
   .hero-chip-icon svg{ width:12px; height:12px; }
   .hero-chip-txt{ min-width:0; }
-  .hero-chip-txt .l{ display:block; font-size:7px; font-weight:800; letter-spacing:.5px; color:rgba(255,255,255,0.55); text-transform:uppercase; }
-  .hero-chip-txt .v{ display:block; font-size:10px; font-weight:700; color:#111111; margin-top:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  /* Más espacio para el texto en las 3 tarjetas (barbero-white.css usa 12px de margen e ícono de 32px
+     y no cabían "$59.000" ni "Registrar") */
+  .hero-chip{ padding:9px 8px !important; gap:6px !important; }
+  .hero-chip-icon{ width:28px !important; height:28px !important; }
+  .hero-chip-txt{ flex:1; }
+  .hero-chip-txt .v{ font-size:13px !important; }
+  .hero-chip-txt .l{ display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:7.5px; font-weight:800; letter-spacing:.5px; color:rgba(255,255,255,0.55); text-transform:uppercase; }
+  .hero-chip-txt .v{ display:block; font-size:11px; font-weight:700; color:#111111; margin-top:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 
   .arrival-banner{
     width:100%; flex-shrink:0;
@@ -133,7 +147,7 @@
   .arrival-banner .dot{ width:8px; height:8px; border-radius:50%; background:var(--ring-green); flex-shrink:0; box-shadow:0 0 0 0 rgba(52,211,153,0.5); animation:pulse 1.8s infinite; }
   @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(52,211,153,0.45);} 70%{box-shadow:0 0 0 9px rgba(52,211,153,0);} 100%{box-shadow:0 0 0 0 rgba(52,211,153,0);} }
   @keyframes pulseIn{ from{ opacity:0; transform:translateY(-6px);} to{ opacity:1; transform:translateY(0);} }
-  .arrival-banner .txt{ font-size:12.5px; font-weight:600; color:#5EEAB2; line-height:1.35; }
+  .arrival-banner .txt{ font-size:13.5px; font-weight:600; color:#5EEAB2; line-height:1.35; }
 
   /* ---- Stage ---- */
   .stage{
@@ -148,8 +162,8 @@
     background:var(--glass-card-2); border:1px solid var(--glass-border); backdrop-filter:blur(20px);
   }
   .empty-icon svg{ width:26px; height:26px; }
-  .empty-title{ font-size:17px; font-weight:700; letter-spacing:-0.2px; }
-  .empty-sub{ font-size:13px; color:var(--text-muted); max-width:260px; line-height:1.45; }
+  .empty-title{ font-size:18.5px; font-weight:700; letter-spacing:-0.2px; }
+  .empty-sub{ font-size:14px; color:var(--text-muted); max-width:260px; line-height:1.45; }
   .empty-title{ color:var(--text); }
 
   /* ---- Skeleton loader ---- */
@@ -174,25 +188,25 @@
   .client-card{ flex-shrink:0; padding:8px 12px; position:relative; overflow:hidden; }
   .client-eyebrow-row{ display:flex; align-items:center; gap:5px; }
   .client-eyebrow-row svg{ width:10px; height:10px; opacity:.85; color:var(--ring-gold); }
-  .client-eyebrow{ font-size:9px; font-weight:700; letter-spacing:0.8px; color:var(--ring-gold); text-transform:uppercase; }
-  .client-name{ font-size:17px; font-weight:800; margin-top:3px; letter-spacing:-0.3px; line-height:1.15; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .client-avatar-float{ width:72px; height:72px; border-radius:50%; background:var(--ring-gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:800; margin-bottom:8px; overflow:hidden; border:3px solid rgba(255,172,72,0.3); box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+  .client-eyebrow{ font-size:9.5px; font-weight:700; letter-spacing:0.8px; color:var(--ring-gold); text-transform:uppercase; }
+  .client-name{ font-size:18.5px; font-weight:800; margin-top:3px; letter-spacing:-0.3px; line-height:1.15; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .client-avatar-float{ width:72px; height:72px; border-radius:50%; background:var(--ring-gold); color:#141414; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:800; margin-bottom:8px; overflow:hidden; border:3px solid rgba(255,172,72,0.3); box-shadow:0 8px 24px rgba(0,0,0,0.4); }
   .client-avatar-float img{ width:100%; height:100%; object-fit:cover; }
   .client-service{
-    display:inline-flex; margin-top:4px; font-size:10px; color:var(--ring-gold); font-weight:700;
+    display:inline-flex; margin-top:4px; font-size:11px; color:var(--ring-gold); font-weight:700;
     background:rgba(255,172,72,0.1); border:1px solid rgba(255,172,72,0.25); padding:2px 8px; border-radius:999px;
   }
-  .client-time{ font-size:10px; color:rgba(255,255,255,0.4); margin-top:1px; display:flex; align-items:center; gap:4px; font-weight:500; }
+  .client-time{ font-size:11px; color:rgba(255,255,255,0.4); margin-top:1px; display:flex; align-items:center; gap:4px; font-weight:500; }
   .client-time svg{ width:10px; height:10px; opacity:0.75; }
 
   /* ---- Tiempo restante (timer + barra segmentada + anillo %) ---- */
   .time-card{ flex-shrink:0; flex-grow:1; padding:8px 12px; display:flex; flex-direction:column; }
-  .time-card-label{ font-size:8px; font-weight:800; letter-spacing:1px; color:var(--ring-gold); text-transform:uppercase; margin-bottom:6px; flex-shrink:0; }
+  .time-card-label{ font-size:8.5px; font-weight:800; letter-spacing:1px; color:var(--ring-gold); text-transform:uppercase; margin-bottom:6px; flex-shrink:0; }
   .time-card-row{ flex:1; display:flex; align-items:center; justify-content:space-between; gap:16px; }
   .time-main{ flex:1; min-width:0; }
   .time-value-lg{ font-variant-numeric:tabular-nums; }
-  #timerValue{ font-size:26px; font-weight:800; letter-spacing:-0.5px; color:#111111; transition:color .5s ease; }
-  .time-value-lg .unit{ font-size:13px; font-weight:700; color:rgba(255,255,255,0.35); margin-left:5px; }
+  #timerValue{ font-size:28px; font-weight:800; letter-spacing:-0.5px; color:#111111; transition:color .5s ease; }
+  .time-value-lg .unit{ font-size:14px; font-weight:700; color:rgba(255,255,255,0.35); margin-left:5px; }
   .time-segbar{ display:flex; gap:3.5px; margin-top:11px; }
   .time-seg{ flex:1; height:6px; border-radius:3px; background:rgba(255,255,255,0.08); transition:background .4s ease; }
   .time-seg.filled{ background:linear-gradient(90deg,#34D399,#5EEAB2); }
@@ -203,18 +217,18 @@
   .time-ring-bg{ stroke:rgba(255,255,255,0.07); }
   .time-ring-fg{ stroke-linecap:round; transition:stroke-dashoffset .6s linear, stroke .5s ease; }
   .time-ring-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  .time-ring-pct{ font-size:16px; font-weight:800; }
-  .time-ring-label{ font-size:7px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:.3px; margin-top:1px; text-align:center; line-height:1.2; }
+  .time-ring-pct{ font-size:17.5px; font-weight:800; }
+  .time-ring-label{ font-size:7.5px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:.3px; margin-top:1px; text-align:center; line-height:1.2; }
   .time-next-row{
     display:flex; align-items:center; gap:5px; margin-top:8px; padding-top:8px; border-top:1px solid var(--glass-border-soft);
-    font-size:9px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:.3px;
+    font-size:9.5px; font-weight:700; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:.3px;
   }
   .time-next-row b{ color:var(--ring-gold); font-weight:800; text-transform:none; }
   .time-next-row svg{ width:12px; height:12px; opacity:.6; flex-shrink:0; }
 
   /* ---- Timeline de pasos ---- */
   .steps-card{ flex-shrink:0; padding:8px 12px; position:relative; }
-  .steps-card-label{ font-size:8px; font-weight:800; letter-spacing:1px; color:var(--ring-gold); text-transform:uppercase; margin-bottom:5px; }
+  .steps-card-label{ font-size:8.5px; font-weight:800; letter-spacing:1px; color:var(--ring-gold); text-transform:uppercase; margin-bottom:5px; }
   .steps-grid{ display:grid; grid-template-columns:repeat(5, 1fr); gap:4px; }
   .step-tile{
     display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px; border-radius:12px;
@@ -243,7 +257,7 @@
     display:flex; align-items:center; justify-content:center; border:1.5px solid #0d0d0d;
   }
   .step-tile-check svg{ width:6px; height:6px; }
-  .step-tile-label{ font-size:8px; font-weight:700; text-align:center; line-height:1.1; color:rgba(255,255,255,0.72); }
+  .step-tile-label{ font-size:8.5px; font-weight:700; text-align:center; line-height:1.1; color:rgba(255,255,255,0.72); }
   .step-tile.done .step-tile-label{ color:#5EEAB2; }
   .step-tile.active .step-tile-label{ color:var(--ring-gold); }
 
@@ -251,7 +265,7 @@
   .bebida-opt{
     display:flex; align-items:center; gap:12px; padding:13px 15px; border-radius:16px; margin-bottom:8px;
     background:var(--glass-card-2); border:1px solid var(--glass-border-soft); cursor:pointer;
-    font-size:14px; font-weight:700; transition:transform .14s var(--ease-ios), background .15s ease;
+    font-size:15px; font-weight:700; transition:transform .14s var(--ease-ios), background .15s ease;
   }
   .bebida-opt:active{ transform:scale(0.97); background:var(--glass-card); }
   .bebida-opt .ic{ width:22px; height:22px; flex-shrink:0; color:var(--ring-gold); display:flex; align-items:center; justify-content:center; }
@@ -260,9 +274,9 @@
   /* ---- Total + agregar servicio ---- */
   .total-row{ flex-shrink:0; display:flex; align-items:center; gap:6px; }
   .total-card{ flex:1.15; padding:8px 12px; cursor:pointer; min-width:0; }
-  .total-label{ font-size:8px; font-weight:700; letter-spacing:0.8px; color:rgba(255,255,255,0.4); text-transform:uppercase; }
-  .total-value{ font-size:18px; font-weight:800; letter-spacing:-0.4px; margin-top:1px; color:#111111; }
-  .total-badge{ font-size:9px; font-weight:700; color:rgba(255,255,255,0.42); margin-top:1px; }
+  .total-label{ font-size:8.5px; font-weight:700; letter-spacing:0.8px; color:rgba(255,255,255,0.4); text-transform:uppercase; }
+  .total-value{ font-size:19.5px; font-weight:800; letter-spacing:-0.4px; margin-top:1px; color:#111111; }
+  .total-badge{ font-size:9.5px; font-weight:700; color:rgba(255,255,255,0.42); margin-top:1px; }
   .add-service-btn{
     flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:8px 6px;
     border-radius:18px; cursor:pointer; text-align:center;
@@ -276,10 +290,10 @@
     display:flex; align-items:center; justify-content:center;
   }
   .add-service-btn svg{ width:14px; height:14px; stroke:#141414; }
-  .add-service-btn span{ font-size:9px; font-weight:800; color:#141414; }
+  .add-service-btn span{ font-size:9.5px; font-weight:800; color:#141414; }
 
-  .waiting-note{ font-size:12px; color:rgba(255,255,255,0.42); line-height:1.5; text-align:center; max-width:280px; margin:0 auto; }
-  .action-btn{ width:100%; height:44px; font-size:14px; flex-shrink:0; border-radius:16px; }
+  .waiting-note{ font-size:13px; color:rgba(255,255,255,0.42); line-height:1.5; text-align:center; max-width:280px; margin:0 auto; }
+  .action-btn{ width:100%; height:44px; font-size:15px; flex-shrink:0; border-radius:16px; }
 
   /* ---- Slider "Desliza para enviar a caja" ---- */
   .swipe-track{
@@ -302,8 +316,8 @@
   }
   @keyframes swipeShine{ 0%{ background-position:150% 0; } 100%{ background-position:-50% 0; } }
   .swipe-label{ position:absolute; left:0; right:0; text-align:center; pointer-events:none; }
-  .swipe-label .t{ font-size:11px; font-weight:800; letter-spacing:0.4px; color:rgba(255,255,255,0.92); }
-  .swipe-label .s{ font-size:8px; color:rgba(255,255,255,0.36); margin-top:0; }
+  .swipe-label .t{ font-size:12px; font-weight:800; letter-spacing:0.4px; color:rgba(255,255,255,0.92); }
+  .swipe-label .s{ font-size:8.5px; color:rgba(255,255,255,0.36); margin-top:0; }
   .swipe-icon-hint{ position:absolute; right:18px; top:50%; transform:translateY(-50%); opacity:0.45; pointer-events:none; }
   .swipe-icon-hint svg{ width:18px; height:18px; }
   .swipe-handle{
@@ -324,7 +338,7 @@
     border:1px solid var(--glass-border-soft); display:flex; align-items:center; gap:10px;
   }
   .swipe-pending svg{ width:16px; height:16px; stroke:rgba(255,255,255,0.4); flex-shrink:0; }
-  .swipe-pending-txt{ font-size:10px; color:rgba(255,255,255,0.42); line-height:1.3; }
+  .swipe-pending-txt{ font-size:11px; color:rgba(255,255,255,0.42); line-height:1.3; }
   .swipe-pending-txt b{ color:rgba(255,255,255,0.62); }
 
   /* ---- Confirmación de envío (overlay in-place, sin sheet ni foto) ---- */
@@ -347,8 +361,8 @@
   }
   .send-check svg{ width:30px; height:30px; stroke:#5EEAB2; }
   @keyframes successPop{ from{ transform:scale(0.55); opacity:0; } to{ transform:scale(1); opacity:1; } }
-  .send-title{ font-size:18px; font-weight:800; letter-spacing:-0.2px; }
-  .send-sub{ font-size:13px; color:rgba(255,255,255,0.44); margin-top:6px; }
+  .send-title{ font-size:19.5px; font-weight:800; letter-spacing:-0.2px; }
+  .send-sub{ font-size:14px; color:rgba(255,255,255,0.44); margin-top:6px; }
 
   /* ---- Modales centrados (antes bottom sheets) ---- */
   .sheet-bg{ position:fixed; inset:0; background:rgba(0,0,0,0.72); backdrop-filter:blur(8px); z-index:100; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.28s var(--ease-ios); padding:20px; }
@@ -362,8 +376,8 @@
   }
   .sheet-bg.show .sheet-box{ transform:scale(1) translateY(0); opacity:1; }
   .sheet-handle{ display:none; }
-  .sheet-title{ font-size:17px; font-weight:800; margin-bottom:4px; letter-spacing:-0.2px; padding-right:36px; }
-  .sheet-sub{ font-size:12.5px; color:rgba(255,255,255,0.42); line-height:1.5; margin-bottom:18px; }
+  .sheet-title{ font-size:18.5px; font-weight:800; margin-bottom:4px; letter-spacing:-0.2px; padding-right:36px; }
+  .sheet-sub{ font-size:13.5px; color:rgba(255,255,255,0.42); line-height:1.5; margin-bottom:18px; }
   .sheet-close{ position:absolute; top:18px; right:18px; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform .14s var(--ease-ios), background .15s ease; }
   .sheet-close:hover{ background:rgba(255,255,255,0.12); }
   .sheet-close:active{ transform:scale(0.88); }
@@ -377,14 +391,14 @@
     transition:transform .14s var(--ease-ios), border-color .15s ease, background .15s ease;
   }
   .type-card:active{ transform:scale(0.96); }
-  .type-card .type-icon{ font-size:32px; }
-  .type-card .type-label{ font-size:14px; font-weight:800; }
+  .type-card .type-icon{ font-size:34.5px; }
+  .type-card .type-label{ font-size:15px; font-weight:800; }
   .type-card.selected{ border-color:var(--gold); background:rgba(255,172,72,0.12); }
 
   .add-back-btn{
     display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:12px; margin-bottom:14px;
     background:rgba(255,255,255,0.06); border:1px solid var(--glass-border-soft); cursor:pointer;
-    font-size:12px; font-weight:700; color:rgba(255,255,255,0.7); transition:background .15s ease;
+    font-size:13px; font-weight:700; color:rgba(255,255,255,0.7); transition:background .15s ease;
   }
   .add-back-btn:active{ background:rgba(255,255,255,0.1); }
   .add-back-btn svg{ width:14px; height:14px; }
@@ -397,24 +411,24 @@
   }
   .cat-chip:active{ transform:scale(0.94); }
   .cat-chip.selected{ border-color:var(--gold); background:rgba(255,172,72,0.12); }
-  .cat-chip .ic{ font-size:20px; }
-  .cat-chip .t{ font-size:11px; font-weight:700; }
+  .cat-chip .ic{ font-size:21.5px; }
+  .cat-chip .t{ font-size:12px; font-weight:700; }
 
   .variant-list{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
   .variant-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-radius:16px; background:rgba(255,255,255,0.045); border:1px solid var(--glass-border-soft); cursor:pointer; }
-  .variant-row .n{ font-size:13px; font-weight:700; }
-  .variant-row .p{ font-size:13px; font-weight:800; color:var(--gold); }
+  .variant-row .n{ font-size:14px; font-weight:700; }
+  .variant-row .p{ font-size:14px; font-weight:800; color:var(--gold); }
 
   .manual-form{ margin-top:14px; display:flex; flex-direction:column; gap:10px; }
-  .manual-form input{ width:100%; background:rgba(255,255,255,0.045); border:1px solid var(--glass-border-soft); border-radius:14px; padding:12px 14px; color:#111111; font-size:14px; outline:none; }
+  .manual-form input{ width:100%; background:rgba(255,255,255,0.045); border:1px solid var(--glass-border-soft); border-radius:14px; padding:12px 14px; color:#111111; font-size:15px; outline:none; }
   .manual-form input:focus{ border-color:var(--gold); }
 
   .added-list{ margin-top:16px; }
-  .added-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:13px; }
+  .added-row{ display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.06); font-size:14px; }
   .added-row:last-child{ border-bottom:none; }
   .added-row .p{ font-weight:800; color:var(--gold); margin-right:8px; }
   .added-row .rm{
-    color:#111111; font-size:10px; font-weight:700; cursor:pointer;
+    color:#111111; font-size:11px; font-weight:700; cursor:pointer;
     background:rgba(255,107,94,0.2); border:1px solid rgba(255,107,94,0.4);
     padding:4px 10px; border-radius:8px;
     transition:background .15s ease;
@@ -438,8 +452,8 @@
   .added-row .edit-btn svg{ width:14px; height:14px; stroke:var(--gold); }
 
   .order-total-row{ display:flex; justify-content:space-between; align-items:center; padding-top:14px; margin-top:6px; border-top:1px solid rgba(255,255,255,0.08); }
-  .order-total-row .l{ font-size:13px; font-weight:700; }
-  .order-total-row .v{ font-size:23px; font-weight:800; color:var(--gold); }
+  .order-total-row .l{ font-size:14px; font-weight:700; }
+  .order-total-row .v{ font-size:25px; font-weight:800; color:var(--gold); }
 
   /* Toast y Tab-bar estilos en barbero-nav.css */
 
@@ -461,25 +475,42 @@
   .ganancias-modal-head {
     display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;
   }
-  .ganancias-modal-title { font-size:18px; font-weight:800; }
+  .ganancias-modal-title { font-size:19.5px; font-weight:800; }
+
+  /* Modal de reseñas: colores por variables de tema (claro/oscuro) */
+  .resenas-promedio { font-size:52px; font-weight:800; color:var(--bw-gold-dark, #CC7A14); line-height:1.1; }
+  [data-theme="dark"] .resenas-promedio { color:var(--bw-gold, #FFAC48); }
+  .resenas-count { font-size:14px; color:var(--bw-text-secondary, #6B7280); }
+  /* Estrellas con relleno proporcional (4.5 → cuatro y media) */
+  .rating-stars { position:relative; display:inline-block; font-size:28px; line-height:1; margin:6px 0; }
+  .rating-stars .rs-base { color:var(--bw-border, #E5E7EB); }
+  [data-theme="dark"] .rating-stars .rs-base { color:#4A4E58; }
+  .rating-stars .rs-fill { position:absolute; top:0; left:0; overflow:hidden; white-space:nowrap; color:#F5B800; }
+  .resena-card { padding:14px; background:var(--bw-bg-secondary, #F5F5F5); border:1px solid var(--bw-border, #E5E7EB); border-radius:14px; }
+  .resena-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .resena-fecha { font-size:12px; color:var(--bw-text-secondary, #6B7280); }
+  .resena-texto { margin:0; font-size:15px; line-height:1.4; color:var(--bw-text, #1A1A1A); }
+  .resena-sin { margin:0; font-size:14px; font-style:italic; color:var(--bw-text-muted, #9CA3AF); }
+  .resenas-vacio { text-align:center; padding:30px 20px; color:var(--bw-text-secondary, #6B7280); }
+  .resena-star-off { stroke:var(--bw-text-muted, #9CA3AF); }
   .ganancias-modal-close {
     width:32px; height:32px; border-radius:10px; background:rgba(255,255,255,0.08);
     display:flex; align-items:center; justify-content:center; cursor:pointer;
-    font-size:16px; color:#8A8780;
+    font-size:17.5px; color:#8A8780;
   }
   .ganancias-avatar {
     width:64px; height:64px; border-radius:50%; margin:0 auto 16px;
     display:flex; align-items:center; justify-content:center;
-    font-size:22px; font-weight:800; color:var(--ring-gold);
+    font-size:24px; font-weight:800; color:var(--ring-gold);
     background:rgba(255,172,72,0.15); border:2px solid rgba(255,172,72,0.3);
   }
   .ganancias-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
-  .ganancias-name { text-align:center; font-size:16px; font-weight:700; margin-bottom:20px; }
+  .ganancias-name { text-align:center; font-size:17.5px; font-weight:700; margin-bottom:20px; }
   .ganancias-breakdown { display:flex; flex-direction:column; gap:0; }
   .ganancias-row {
     display:flex; justify-content:space-between; align-items:center;
     padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.06);
-    font-size:14px; color:#B0B0B0;
+    font-size:15px; color:#B0B0B0;
   }
   .ganancias-row:last-child { border-bottom:none; }
   .ganancias-row b { color:#111111; font-weight:700; }
@@ -490,10 +521,10 @@
     border:1px solid rgba(52,211,153,0.3);
     display:flex; justify-content:space-between; align-items:center;
   }
-  .ganancias-total span { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#5EEAB2; }
-  .ganancias-total b { font-size:22px; font-weight:800; color:#111111; }
+  .ganancias-total span { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#5EEAB2; }
+  .ganancias-total b { font-size:24px; font-weight:800; color:#111111; }
   .ganancias-estado {
-    margin-top:14px; text-align:center; font-size:12px; font-weight:700;
+    margin-top:14px; text-align:center; font-size:13px; font-weight:700;
     padding:8px 16px; border-radius:20px;
   }
   .ganancias-estado.pendiente { background:rgba(255,107,94,0.15); color:#FF6B5E; }
@@ -503,21 +534,21 @@
     #app{ gap:0; }
     .stage{ gap:5px; }
     .hero{ height:26vh; min-height:150px; }
-    .hero-name{ font-size:24px; }
+    .hero-name{ font-size:26px; }
     .client-card{ padding:8px 12px; }
     .time-card{ padding:6px 10px; }
     .steps-card{ padding:6px 10px; }
   }
   @media (max-height:640px){
     .hero{ height:22vh; min-height:120px; max-height:140px; }
-    .hero-name{ font-size:22px; }
+    .hero-name{ font-size:24px; }
     .stage{ gap:4px; padding-top:4px; }
     .time-card{ flex-grow:0; }
   }
 </style>
 </head>
 <body>
-<script src="../assets/splash-screen.js"></script>
+<script src="../assets/splash-screen.js?v=20261015"></script>
 
 <div id="app">
 
@@ -548,11 +579,11 @@
         </div>
         <div class="hero-chip" onclick="openBebidaSheet('barbero')">
           <span class="hero-chip-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h12l-1.2 15.5A2 2 0 0 1 14.8 20H9.2a2 2 0 0 1-2-1.5L6 3Z" stroke-linejoin="round"/><path d="M5 8h14" stroke-linecap="round"/></svg></span>
-          <div class="hero-chip-txt"><span class="l">Tu bebida</span><span class="v" id="heroDrinkVal">Registrar</span></div>
+          <div class="hero-chip-txt"><span class="l">Bebida</span><span class="v" id="heroDrinkVal">Registrar</span></div>
         </div>
         <div class="hero-chip" onclick="openResenasModal()">
           <span class="hero-chip-icon" style="background:rgba(255,172,72,0.2); color:#FFAC48;"><svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="0.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></span>
-          <div class="hero-chip-txt"><span class="l">Calificacion</span><span class="v" id="heroResenasVal">—</span></div>
+          <div class="hero-chip-txt"><span class="l">Reseñas</span><span class="v" id="heroResenasVal">—</span></div>
         </div>
       </div>
     </div>
@@ -626,9 +657,9 @@
       <div class="ganancias-modal-close" onclick="closeResenasModal()">✕</div>
     </div>
     <div style="text-align:center; margin-bottom:16px;">
-      <div id="resenasPromedio" style="font-size:48px; font-weight:800; color:#FFAC48;">—</div>
-      <div id="resenasStars" style="font-size:24px; margin:4px 0;">☆☆☆☆☆</div>
-      <div id="resenasCount" style="font-size:13px; color:rgba(0,0,0,0.5);">Sin reseñas</div>
+      <div id="resenasPromedio" class="resenas-promedio">—</div>
+      <div id="resenasStars"></div>
+      <div id="resenasCount" class="resenas-count">Sin reseñas</div>
     </div>
     <div id="resenasLista" style="display:flex; flex-direction:column; gap:12px;"></div>
   </div>
@@ -685,7 +716,7 @@
     <div class="sheet-title">Mi cuenta</div>
     <div class="sheet-sub" id="accountSheetName">—</div>
     <div style="margin-top:18px; padding:16px; border-radius:18px; background:rgba(255,107,94,0.1); border:1px solid rgba(255,107,94,0.3); display:flex; align-items:center; justify-content:space-between; cursor:pointer;" onclick="logoutBarbero()">
-      <span style="font-size:14.5px; font-weight:700; color:var(--ring-red);">Cerrar sesión</span>
+      <span style="font-size:15.5px; font-weight:700; color:var(--ring-red);">Cerrar sesión</span>
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FF6B5E" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-linecap="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
   </div>
@@ -714,9 +745,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
+<script src="../assets/push.js?v=20261026" defer></script>
 <script src="../assets/turbo-loader.js" defer></script>
-<script src="../assets/mobile-nav.js"></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
 <script>
   const toastEl = document.getElementById('toast');
   const toastText = document.getElementById('toastText');
@@ -866,7 +898,7 @@
       const timeLabel = mins < 60 ? `Hace ${mins} min` : `Hace ${Math.round(mins/60)} h`;
       return `<div style="padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; gap:10px; align-items:flex-start;">
         <div style="width:7px; height:7px; border-radius:50%; margin-top:5px; flex-shrink:0; background:${a.leida ? 'rgba(255,255,255,0.18)' : 'var(--gold)'};"></div>
-        <div style="flex:1;"><div style="font-size:12.5px; font-weight:600;">${a.mensaje}</div><div style="font-size:10.5px; color:rgba(255,255,255,0.36); margin-top:2px;">${timeLabel}</div></div>
+        <div style="flex:1;"><div style="font-size:13.5px; font-weight:600;">${a.mensaje}</div><div style="font-size:11.5px; color:rgba(255,255,255,0.36); margin-top:2px;">${timeLabel}</div></div>
       </div>`;
     }).join('') : '<div class="waiting-note">Sin notificaciones.</div>';
     document.getElementById('alertsSheetBg').classList.add('show');
@@ -946,13 +978,13 @@
       <div class="stage" style="justify-content:center;">
         <div class="empty-state fade-in" style="gap:12px;">
           ${avatarHtml}
-          <div class="client-eyebrow">Próximo cliente</div>
-          <div class="client-name" style="font-size:23px; white-space:normal;">${clientName}</div>
+          <div class="client-eyebrow">Próximo cliente${cita.estado === 'agendada' ? ' · sin confirmar' : ''}</div>
+          <div class="client-name" style="font-size:25px; white-space:normal;">${clientName}</div>
           <div class="client-service">${cita.servicios?.nombre || 'Servicio'}</div>
           <div class="client-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${fmtTime(cita.hora_inicio)}</div>
           <div style="width:32px; height:1px; background:rgba(255,255,255,0.1); margin:2px auto;"></div>
           <div class="timer-label">Tiempo restante</div>
-          <div class="timer-value" style="font-size:27px;" id="proximoFaltanVal">${faltanLabel(cita)}</div>
+          <div class="timer-value" style="font-size:29px;" id="proximoFaltanVal">${faltanLabel(cita)}</div>
           <button class="btn-gold action-btn" style="max-width:280px; margin-top:10px;" id="callBtnProximo">Llamar cliente</button>
         </div>
       </div>`;
@@ -989,7 +1021,7 @@
         <div class="empty-state fade-in" style="gap:12px;">
           ${avatarHtml}
           <div class="client-eyebrow">Cliente en sala de espera</div>
-          <div class="client-name" style="font-size:23px; white-space:normal;">${clientName}</div>
+          <div class="client-name" style="font-size:25px; white-space:normal;">${clientName}</div>
           <div class="client-service">${cita.servicios?.nombre || 'Servicio'}</div>
           <div class="client-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${fmtTime(cita.hora_inicio)}</div>
           <button class="btn-gold action-btn" style="max-width:280px; margin-top:10px;" id="callBtn">Llamar cliente</button>
@@ -1036,12 +1068,14 @@
 
   async function completarPaso(key){
     if (!currentCita) return;
-    if (key === 'bebida') { openBebidaSheet('cliente'); return; }
+    if (key === 'bebida' && NEVERA_ACTIVA) { openBebidaSheet('cliente'); return; }
     vibrate(25);
     const pasos = { ...(currentCita.pasos_servicio || {}) };
     pasos[key] = new Date().toISOString();
+    // Bebida: se marca como un paso más, sin preguntar cuál ni tocar la nevera
+    const extra = key === 'bebida' ? { bebida_entregada: true, bebida_entregada_at: pasos[key] } : {};
     try {
-      const { error } = await sb.from('citas').update({ pasos_servicio: pasos }).eq('id', currentCita.id);
+      const { error } = await sb.from('citas').update({ pasos_servicio: pasos, ...extra }).eq('id', currentCita.id);
       if (error) throw error;
       currentCita.pasos_servicio = pasos;
       lastRenderSig = citaSig(currentCita, 'en_servicio');
@@ -1053,6 +1087,10 @@
       toast('No pudimos guardar ese paso.');
     }
   }
+
+  // Inventario de nevera (bebidas) desactivado en todas las sedes desde el 17-oct-2026.
+  // Para reactivarlo, poner en true.
+  const NEVERA_ACTIVA = false;
 
   // ---- Bebidas: selector para el cliente (paso del servicio) y para el barbero (control de inventario) ----
   const DRINK_OPTIONS = [
@@ -1068,7 +1106,7 @@
     bebidaMode = mode;
     document.getElementById('bebidaSheetTitle').textContent = mode === 'barbero' ? 'Tu bebida' : 'Bebida para el cliente';
     document.getElementById('bebidaSheetSub').textContent = mode === 'barbero'
-      ? 'Se descuenta del inventario y de tu pago al finalizar el turno.'
+      ? (NEVERA_ACTIVA ? 'Se descuenta del inventario y de tu pago al finalizar el turno.' : 'Se descuenta de tu pago al finalizar el turno.')
       : 'Se registra en la cita y se descuenta del inventario.';
     const opciones = mode === 'cliente' ? [...DRINK_OPTIONS, NO_DRINK_OPTION] : DRINK_OPTIONS;
     document.getElementById('bebidaOptionsList').innerHTML = opciones.map(d =>
@@ -1092,14 +1130,14 @@
   async function openInsumosSheet(){
     document.getElementById('insumosSheetBg').classList.add('show');
     const list = document.getElementById('insumosOptionsList');
-    list.innerHTML = '<div style="padding:14px 0; color:rgba(255,255,255,0.5); font-size:13px;">Cargando…</div>';
+    list.innerHTML = '<div style="padding:14px 0; color:rgba(255,255,255,0.5); font-size:14px;">Cargando…</div>';
     try {
       await getMyBarberoSedeId();
       const { data, error } = await sb.from('inventario_insumos').select('*').eq('activo', true).order('orden');
       if (error) throw error;
       insumosCatalogo = data || [];
       if (!insumosCatalogo.length) {
-        list.innerHTML = '<div style="padding:14px 0; color:rgba(255,255,255,0.5); font-size:13px;">Todavía no hay insumos disponibles para solicitar.</div>';
+        list.innerHTML = '<div style="padding:14px 0; color:rgba(255,255,255,0.5); font-size:14px;">Todavía no hay insumos disponibles para solicitar.</div>';
         return;
       }
       list.innerHTML = insumosCatalogo.map(i => {
@@ -1108,7 +1146,7 @@
       }).join('');
     } catch (err) {
       console.error(err);
-      list.innerHTML = '<div style="padding:14px 0; color:rgba(255,255,255,0.5); font-size:13px;">No pudimos cargar los insumos.</div>';
+      list.innerHTML = '<div style="padding:14px 0; color:rgba(255,255,255,0.5); font-size:14px;">No pudimos cargar los insumos.</div>';
     }
   }
   function closeInsumosSheet(){ document.getElementById('insumosSheetBg').classList.remove('show'); }
@@ -1134,7 +1172,7 @@
     try {
       const { data } = await sb.from('bebidas_inventario').select('id, nombre, cantidad, precio');
       const row = (data || []).find(r => opt.match.some(m => (r.nombre || '').toLowerCase() === m.toLowerCase()));
-      if (row && row.cantidad > 0) {
+      if (NEVERA_ACTIVA && row && row.cantidad > 0) {
         await sb.from('bebidas_inventario').update({ cantidad: row.cantidad - 1 }).eq('id', row.id);
       }
       return row || null;
@@ -1840,7 +1878,7 @@
             <span class="n">${item.nombre}</span>
             <span class="p">${dnFormatCOP(item.precio)}</span>
           </div>`
-        ).join('') : '<div style="padding:16px; text-align:center; color:rgba(255,255,255,0.5); font-size:13px;">No hay items disponibles</div>'}</div>`;
+        ).join('') : '<div style="padding:16px; text-align:center; color:rgba(255,255,255,0.5); font-size:14px;">No hay items disponibles</div>'}</div>`;
 
       // Agregar event listeners
       document.querySelectorAll('#itemsList .variant-row').forEach(row => {
@@ -2031,7 +2069,7 @@
     if (!el) return;
     el.innerHTML = currentItems.length ? currentItems.map(i =>
       `<div class="added-row"><span>${i.nombre}</span><span><span class="p">${dnFormatCOP(i.precio)}</span><span class="rm" onclick="quitarItem('${i.id}')">Quitar</span></span></div>`
-    ).join('') : '<div style="font-size:12px; color:rgba(255,255,255,0.4); padding:8px 0;">Sin servicios adicionales todavía.</div>';
+    ).join('') : '<div style="font-size:13px; color:rgba(255,255,255,0.4); padding:8px 0;">Sin servicios adicionales todavía.</div>';
   }
 
   function updateTotalsUI(){
@@ -2060,7 +2098,7 @@
     });
     // Si no hay nada, mostrar mensaje
     if (rows.length === 0) {
-      rows.push(`<div style="font-size:12px; color:rgba(255,255,255,0.4); padding:12px 0; text-align:center;">Sin servicios. Agrega al menos uno antes de enviar.</div>`);
+      rows.push(`<div style="font-size:13px; color:rgba(255,255,255,0.4); padding:12px 0; text-align:center;">Sin servicios. Agrega al menos uno antes de enviar.</div>`);
     }
     document.getElementById('orderItemsList').innerHTML = rows.join('');
     document.getElementById('orderSheetTotal').textContent = dnFormatCOP(calcTotal(c));
@@ -2148,7 +2186,7 @@
                   servicios(nombre, duracion_min)`)
         .eq('barbero_id', user.id)
         .eq('fecha', today)
-        .in('estado', ['confirmada','sala_espera','en_servicio'])
+        .in('estado', ['agendada','confirmada','sala_espera','en_servicio'])
         .order('hora_inicio', { ascending: true });
 
       if (error) throw error;
@@ -2200,14 +2238,19 @@
       const citaFijada = citaFijadaId ? citasActivas.find(c => c.id === citaFijadaId) : null;
 
       const salaEspera = citasActivas.find(c => c.estado === 'sala_espera');
-      const confirmada = citasActivas.find(c => c.estado === 'confirmada');
+      // La más temprana que falta, esté confirmada o no: una cita 'agendada' (el cliente aún no
+      // respondió el WhatsApp) también es el próximo turno. Antes se ignoraba y el barbero con
+      // cita a las 10:00 veía "6h" hasta la de las 16:00.
+      const proxima = citasActivas.find(c => c.estado === 'confirmada' || c.estado === 'agendada');
 
       // Un cliente que ya llegó (sala_espera) siempre tiene prioridad sobre una cita fijada
       // que sigue en 'confirmada'; si no, el barbero nunca se entera de que su cliente llegó
       // (p.ej. el de las 3:00 no llegó y el de las 3:30 sí).
+      // La fijación solo se respeta para clientes que ya llegaron: un "próximo cliente" fijado
+      // no debe tapar otra cita más temprana que se creó o confirmó después.
       const active = (citaFijada?.estado === 'sala_espera' ? citaFijada : null)
-        || salaEspera || citaFijada || confirmada || null;
-      const estadoActivo = active?.estado === 'sala_espera' ? 'sala_espera' : active?.estado === 'confirmada' ? 'confirmada' : 'empty';
+        || salaEspera || proxima || null;
+      const estadoActivo = active?.estado === 'sala_espera' ? 'sala_espera' : active ? 'confirmada' : 'empty';
 
       // Fijar la cita activa si cambió (o si no había ninguna fijada)
       if (active && active.id !== citaFijadaId) {
@@ -2229,7 +2272,7 @@
         return;
       }
 
-      const sig = citaSig(active, estadoActivo);
+      const sig = citaSig(active, active?.estado || estadoActivo);
       currentCita = active;
 
       if (sig === lastRenderSig) {
@@ -2244,7 +2287,7 @@
 
       if (active?.estado === 'sala_espera') {
         renderLlegoBanner(active);
-      } else if (active?.estado === 'confirmada') {
+      } else if (active) {
         renderProximo(active);
       } else {
         fijarCita(null); // Limpiar cita fijada si no hay citas
@@ -2259,6 +2302,7 @@
 
   // ---- Ganancias del día ----
   const COMISION_PRODUCTO_FIJA = 5000; // $5,000 por producto
+  const dnEscapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
   let gananciasData = { servicios:0, ventas:0, comision:0, propinas:0, descuento:0, comisionPct:0, pagado:true, nombre:'', foto:null, citasDetalle:[], productosComisiones:[], comisionProductos:0 };
 
   async function loadGanancias() {
@@ -2271,7 +2315,7 @@
 
       // Consultas en paralelo: citas, bebidas y comisiones de productos
       const todayRange = dnLocalDayRangeUTC(today);
-      const [citasRes, bebidasRes, productosRes] = await Promise.all([
+      const [citasRes, bebidasRes, productosRes, ventasProdRes] = await Promise.all([
         sb.from('citas')
           .select('id, precio, propina, comision_pagada, servicios(nombre), usuarios!citas_cliente_id_fkey(full_name)')
           .eq('barbero_id', user.id)
@@ -2284,15 +2328,39 @@
           .gte('created_at', todayRange.start)
           .lte('created_at', todayRange.end),
         sb.from('comisiones')
-          .select('id, tipo, concepto, valor_comision')
+          .select('id, tipo, concepto, valor_comision, created_at')
           .eq('barbero_id', user.id)
           .eq('tipo', 'producto')
           .gte('created_at', todayRange.start)
           .lte('created_at', todayRange.end)
+          .order('created_at', { ascending: true }),
+        // Nombres de los productos vendidos (la comisión no guarda cuál fue)
+        sb.from('ventas_productos')
+          .select('created_at, cantidad, inventario_productos_venta(nombre)')
+          .eq('barbero_id', user.id)
+          .gte('created_at', todayRange.start)
+          .lte('created_at', todayRange.end)
+          .order('created_at', { ascending: true })
       ]);
 
       const citas = citasRes.data || [];
       const productosComisiones = productosRes.data || [];
+
+      // Asociar cada comisión con las ventas registradas en el mismo cobro (segundos de diferencia)
+      const ventasProd = (ventasProdRes.data || []).map(v => ({ ...v, t: new Date(v.created_at).getTime(), usada: false }));
+      productosComisiones.forEach(p => {
+        const t = new Date(p.created_at).getTime();
+        const nombres = [];
+        ventasProd.forEach(v => {
+          if (!v.usada && Math.abs(v.t - t) < 30000) {
+            v.usada = true;
+            const nombre = v.inventario_productos_venta?.nombre || 'Producto';
+            nombres.push(v.cantidad > 1 ? `${nombre} x${v.cantidad}` : nombre);
+          }
+        });
+        p.productos = nombres;
+        p.cliente = p.concepto?.split(' - ').slice(1).join(' - ') || '';
+      });
 
       let servicios = 0, ventas = 0, comision = 0, propinas = 0, pagado = true;
       const citasDetalle = [];
@@ -2357,17 +2425,17 @@
     // Renderizar detalle de servicios
     const detalleServiciosEl = document.getElementById('gananciasDetalleServicios');
     if (d.citasDetalle && d.citasDetalle.length > 0) {
-      let html = `<div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
+      let html = `<div style="font-size:12px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
         <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.5 7.5 20 19M8.5 16.5 20 5"/></svg>
         Servicios (${d.citasDetalle.length})
       </div>`;
       d.citasDetalle.forEach(c => {
         html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; margin-bottom:6px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,0,0,0.08);">
           <div>
-            <div style="font-size:13px; font-weight:600;">${c.servicio}</div>
-            <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-top:2px;">${c.cliente} · ${d.comisionPct}% de ${dnFormatCOP(c.precio)}</div>
+            <div style="font-size:14px; font-weight:600;">${c.servicio}</div>
+            <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-top:2px;">${c.cliente} · ${d.comisionPct}% de ${dnFormatCOP(c.precio)}</div>
           </div>
-          <div style="font-size:14px; font-weight:700; color:#5EEAB2;">+${dnFormatCOP(c.comision)}</div>
+          <div style="font-size:15px; font-weight:700; color:#5EEAB2;">+${dnFormatCOP(c.comision)}</div>
         </div>`;
       });
       detalleServiciosEl.innerHTML = html;
@@ -2378,7 +2446,7 @@
     // Renderizar detalle de productos
     const detalleProductosEl = document.getElementById('gananciasDetalleProductos');
     if (d.productosComisiones && d.productosComisiones.length > 0) {
-      let html = `<div style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
+      let html = `<div style="font-size:12px; font-weight:700; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px;">
         <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-right:4px;"><path d="M3 8l9-5 9 5-9 5-9-5z"/><path d="M3 8v8l9 5 9-5V8"/></svg>
         Productos (${d.productosComisiones.length})
       </div>`;
@@ -2387,10 +2455,10 @@
         const cantidad = match ? parseInt(match[1]) : 1;
         html += `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; margin-bottom:6px; border-radius:10px; background:rgba(255,255,255,0.03); border:1px solid rgba(0,0,0,0.08);">
           <div>
-            <div style="font-size:13px; font-weight:600;">Venta de producto${cantidad > 1 ? 's' : ''}</div>
-            <div style="font-size:10px; color:rgba(255,255,255,0.4); margin-top:2px;">${cantidad} ${cantidad > 1 ? 'uds' : 'ud'} · $${COMISION_PRODUCTO_FIJA.toLocaleString('es-CO')} c/u</div>
+            <div style="font-size:14px; font-weight:600;">${p.productos?.length ? dnEscapeHtml(p.productos.join(', ')) : `Venta de producto${cantidad > 1 ? 's' : ''}`}</div>
+            <div style="font-size:11px; color:rgba(255,255,255,0.4); margin-top:2px;">${p.cliente ? dnEscapeHtml(p.cliente) + ' · ' : ''}${cantidad} ${cantidad > 1 ? 'uds' : 'ud'} · $${COMISION_PRODUCTO_FIJA.toLocaleString('es-CO')} c/u</div>
           </div>
-          <div style="font-size:14px; font-weight:700; color:#5EEAB2;">+${dnFormatCOP(p.valor_comision)}</div>
+          <div style="font-size:15px; font-weight:700; color:#5EEAB2;">+${dnFormatCOP(p.valor_comision)}</div>
         </div>`;
       });
       detalleProductosEl.innerHTML = html;
@@ -2440,7 +2508,7 @@
         .select('id, calificacion, comentario, created_at')
         .eq('barbero_id', user.id)
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(200);
 
       if (error) throw error;
       resenasCache = data || [];
@@ -2455,13 +2523,20 @@
       const sum = resenasCache.reduce((s, r) => s + (r.calificacion || 0), 0);
       let avg = sum / total;
 
-      // Si el promedio es >= 4.9, aproximar a 5.0
-      if (avg >= 4.9) avg = 5.0;
+      avg = dnRatingValor(avg) ?? avg;
 
       document.getElementById('heroResenasVal').textContent = avg.toFixed(1) + '★';
     } catch (err) {
       console.error('Error cargando reseñas:', err);
     }
+  }
+
+  // Cinco estrellas con el dorado proporcional al promedio (4.5 → 90%)
+  function renderRatingStars(avg) {
+    const pct = Math.max(0, Math.min(5, Number(avg) || 0)) / 5 * 100;
+    return `<span class="rating-stars" aria-label="${(Number(avg) || 0).toFixed(1)} de 5">
+      <span class="rs-base">★★★★★</span><span class="rs-fill" style="width:${pct}%">★★★★★</span>
+    </span>`;
   }
 
   function openResenasModal() {
@@ -2473,38 +2548,25 @@
 
     if (total === 0) {
       promedioEl.textContent = '—';
-      starsEl.innerHTML = '<span style="color:#ccc;">☆☆☆☆☆</span>';
+      starsEl.innerHTML = renderRatingStars(0);
       countEl.textContent = 'Sin reseñas aun';
       listaEl.innerHTML = `
-        <div style="text-align:center; padding:30px 20px; color:rgba(0,0,0,0.4);">
+        <div class="resenas-vacio">
           <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:12px; opacity:0.4;">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
           </svg>
-          <p style="margin:0; font-size:14px;">Aun no tienes reseñas</p>
-          <p style="margin:6px 0 0; font-size:12px;">Tus clientes podran calificarte despues de cada servicio</p>
+          <p style="margin:0; font-size:15px;">Aun no tienes reseñas</p>
+          <p style="margin:6px 0 0; font-size:13px;">Tus clientes podran calificarte despues de cada servicio</p>
         </div>
       `;
     } else {
       const sum = resenasCache.reduce((s, r) => s + (r.calificacion || 0), 0);
       let avg = sum / total;
-      if (avg >= 4.9) avg = 5.0;
+      avg = dnRatingValor(avg) ?? avg;
 
       promedioEl.textContent = avg.toFixed(1);
 
-      // Generar estrellas visuales
-      const fullStars = Math.floor(avg);
-      const hasHalf = avg - fullStars >= 0.5;
-      let starsHTML = '';
-      for (let i = 1; i <= 5; i++) {
-        if (i <= fullStars) {
-          starsHTML += '<span style="color:#FFAC48;">★</span>';
-        } else if (i === fullStars + 1 && hasHalf) {
-          starsHTML += '<span style="color:#FFAC48;">★</span>';
-        } else {
-          starsHTML += '<span style="color:#ddd;">☆</span>';
-        }
-      }
-      starsEl.innerHTML = starsHTML;
+      starsEl.innerHTML = renderRatingStars(avg);
       countEl.textContent = `${total} reseña${total !== 1 ? 's' : ''}`;
 
       // Generar lista de reseñas
@@ -2517,18 +2579,18 @@
         for (let i = 1; i <= 5; i++) {
           stars += i <= r.calificacion
             ? '<svg viewBox="0 0 24 24" width="14" height="14" fill="#FFAC48" stroke="#FFAC48" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>'
-            : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#ddd" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+            : '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" class="resena-star-off" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
         }
 
         return `
-          <div style="padding:14px; background:rgba(0,0,0,0.03); border-radius:14px; border:1px solid rgba(0,0,0,0.06);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div class="resena-card">
+            <div class="resena-head">
               <div style="display:flex; gap:2px;">${stars}</div>
-              <span style="font-size:11px; color:rgba(0,0,0,0.4);">${fechaStr}</span>
+              <span class="resena-fecha">${fechaStr}</span>
             </div>
             ${r.comentario
-              ? `<p style="margin:0; font-size:14px; color:#333; line-height:1.4;">"${r.comentario}"</p>`
-              : `<p style="margin:0; font-size:13px; color:rgba(0,0,0,0.35); font-style:italic;">Sin comentario</p>`}
+              ? `<p class="resena-texto">"${dnEscapeHtml(r.comentario)}"</p>`
+              : `<p class="resena-sin">Sin comentario</p>`}
           </div>
         `;
       }).join('');

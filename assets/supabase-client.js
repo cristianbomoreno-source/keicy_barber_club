@@ -394,7 +394,7 @@ async function dnStaffLogin(identificador, clave) {
   return { profile: await dnCompletarLoginStaff() };
 }
 
-// Después de iniciar sesión: limita a 2 dispositivos y guarda el perfil.
+// Después de iniciar sesión: limita los dispositivos (2; admin general 5) y guarda el perfil.
 async function dnCompletarLoginStaff() {
   const { data, error } = await sb.rpc('dn_post_login');
   if (error || !data) {
@@ -538,6 +538,19 @@ function dnInitials(name) {
   if (!name) return '??';
   const parts = name.trim().split(/\s+/);
   return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+}
+
+// Calificación de barbero para mostrar: desde 4.85 se muestra 5.0; por debajo, el valor real con un decimal.
+// Devuelve null si no hay calificación.
+const DN_RATING_REDONDEO_A_5 = 4.85;
+function dnRatingValor(v) {
+  const n = Number(v);
+  if (!isFinite(n) || n <= 0) return null;
+  return n >= DN_RATING_REDONDEO_A_5 - 1e-9 ? 5 : n;
+}
+function dnFormatRating(v, vacio = '—') {
+  const n = dnRatingValor(v);
+  return n === null ? vacio : n.toFixed(1);
 }
 
 function dnFormatCOP(n) {
@@ -1505,6 +1518,7 @@ function dnGenerarIdempotencyKey() {
  * @param {string} [params.barberoNombre] - Nombre del barbero
  * @param {string} [params.tipo='servicio'] - Tipo de cobro (servicio, producto, mixto, walk_in)
  * @param {string} [params.idempotencyKey] - Clave de idempotencia (se genera si no se proporciona)
+ * @param {string} [params.descuentoMotivo] - Motivo del descuento (se guarda en el ticket si hay descuento)
  * @returns {Promise<{success: boolean, ticketId?: string, numeroTicket?: string, error?: string, yaExistia?: boolean}>}
  */
 async function dnRegistrarCobroV2({
@@ -1523,7 +1537,8 @@ async function dnRegistrarCobroV2({
   barberoNombre,
   tipo = 'servicio',
   idempotencyKey,
-  notas
+  notas,
+  descuentoMotivo
 }) {
   // Validaciones básicas en frontend (el server también valida)
   if (!sucursalId) {
@@ -1589,6 +1604,13 @@ async function dnRegistrarCobroV2({
         console.warn('[dnRegistrarCobroV2] Cobro ya existía (idempotencia):', rpcResult);
       } else {
         console.log('[dnRegistrarCobroV2] Cobro registrado:', rpcResult);
+      }
+      // El motivo va aparte para no tocar registrar_cobro_v2; si falla, el cobro sigue valiendo
+      if (rpcResult.success && rpcResult.ticketId && Number(descuento) > 0 && descuentoMotivo) {
+        const { error: motivoErr } = await sb.rpc('dn_ticket_descuento_motivo', {
+          p_ticket_id: rpcResult.ticketId, p_motivo: descuentoMotivo
+        });
+        if (motivoErr) console.error('[dnRegistrarCobroV2] No se guardó el motivo del descuento:', motivoErr);
       }
       return rpcResult;
     }

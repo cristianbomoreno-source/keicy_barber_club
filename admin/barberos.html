@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Barberos</title>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <link rel="stylesheet" href="../assets/mobile-admin.css">
 <style>
   /* Variables heredadas de design-system.css */
@@ -306,6 +306,41 @@
   }
   .error-box.show{ display:block; }
 
+  /* ---- Informe y certificación por colaborador ---- */
+  .panel-head-actions{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; justify-content:flex-end; }
+  .inf-open-btn{ display:flex; align-items:center; gap:7px; padding:11px 14px; border-radius:14px; cursor:pointer; background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text); font-weight:700; font-size:13px; font-family:inherit; }
+  .inf-open-btn svg{ width:16px; height:16px; }
+  .inf-open-btn:hover{ border-color:var(--gold); }
+  .card-inf-btn{ margin-top:8px; padding:6px 11px; border-radius:999px; border:1px solid rgba(255,172,72,0.45); background:transparent; color:var(--gold); font-size:11px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .card-inf-btn:hover{ background:rgba(255,172,72,0.12); }
+  .sin-informes .solo-admin{ display:none !important; }
+  @media (max-width: 767px){ .barber-card .card-inf-btn{ margin-top:6px; padding:5px 10px; font-size:10.5px; } }
+  .inf-box-modal{ max-width:560px; }
+  .inf-presets{ display:flex; flex-wrap:wrap; gap:6px; margin:-2px 0 14px; }
+  .inf-chip{ padding:7px 12px; border-radius:999px; border:1px solid var(--glass-border); background:var(--glass-2); color:var(--text-secondary); font-size:12px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .inf-chip.on{ border-color:var(--gold); color:var(--gold); background:rgba(255,172,72,0.12); }
+  #infResultado{ margin-top:16px; }
+  .inf-head-res{ font-size:13px; font-weight:800; margin-bottom:10px; }
+  .inf-kpis{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; }
+  .inf-kpi{ background:var(--glass-2); border:1px solid var(--glass-border); border-radius:14px; padding:11px 10px; min-width:0; }
+  .inf-kpi .v{ font-size:16px; font-weight:800; white-space:nowrap; }
+  @media (max-width: 480px){ .inf-kpi{ padding:10px 8px; } .inf-kpi .v{ font-size:13.5px; } }
+  .field-row > .field{ min-width:0; }
+  .field input[type=date]{ min-width:0; max-width:100%; }
+  .inf-kpi .l{ font-size:11px; color:var(--text-secondary); margin-top:3px; }
+  .inf-kpi.gold{ border-color:rgba(255,172,72,0.45); background:rgba(255,172,72,0.1); }
+  .inf-kpi.gold .v{ color:var(--gold); }
+  .inf-box{ background:var(--glass-2); border:1px solid var(--glass-border); border-radius:14px; padding:4px 14px; margin-bottom:12px; }
+  .inf-row{ display:flex; justify-content:space-between; gap:12px; padding:9px 0; font-size:13px; border-bottom:1px solid var(--glass-border); }
+  .inf-row:last-child{ border-bottom:0; }
+  .inf-row span{ color:var(--text-secondary); }
+  .inf-row small{ color:var(--text-secondary); font-weight:600; }
+  .inf-row b{ white-space:nowrap; }
+  .inf-row.strong span, .inf-row.strong b{ color:var(--text); font-weight:800; }
+  .inf-row.neg b{ color:var(--error); }
+  .inf-row.warn b{ color:#F5B946; }
+  .inf-sub{ font-size:11px; font-weight:800; letter-spacing:.4px; text-transform:uppercase; color:var(--gold); margin:4px 0 8px; }
+  #infAcciones .modal-actions{ margin-top:8px; }
   .modal-actions{ display:flex; gap:10px; margin-top:6px; }
   .modal-actions button{ flex:1; height:48px; border-radius:14px; font-size:13.5px; font-weight:700; cursor:pointer; }
   .btn-cancel{ background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text); }
@@ -575,7 +610,13 @@
           <div class="panel-title">Tu equipo <span class="team-count" id="teamCount"></span></div>
           <div class="panel-sub">Toca en un barbero para editar su perfil.</div>
         </div>
-        <div class="add-btn" onclick="openCreateModal()" style="display:flex; align-items:center; gap:8px; padding:12px 16px; border-radius:14px; cursor:pointer; background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-weight:800; font-size:13px;">+ Crear colaborador</div>
+        <div class="panel-head-actions">
+          <button type="button" class="inf-open-btn solo-admin" onclick="abrirInformeColaborador()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6" stroke-linecap="round"/></svg>
+            Informes y pagos
+          </button>
+          <div class="add-btn" onclick="openCreateModal()" style="display:flex; align-items:center; gap:8px; padding:12px 16px; border-radius:14px; cursor:pointer; background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-weight:800; font-size:13px;">+ Crear colaborador</div>
+        </div>
       </div>
       <div id="barberList" class="barber-cards-grid" style="margin-top:14px;"><div class="empty-row" style="grid-column:1/-1;">Cargando…</div></div>
     </div>
@@ -608,6 +649,81 @@
   </div>
 
   <!-- Crear cuenta -->
+  <!-- Informe de ventas y pagos por colaborador (assets/informe-colaborador.js) -->
+  <div class="modal-overlay" id="informeModal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-box inf-box-modal">
+      <span class="modal-close" onclick="document.getElementById('informeModal').classList.remove('show')">✕ Cerrar</span>
+      <div class="modal-title">Informe de ventas y pagos</div>
+      <div class="modal-sub">Lo que vendió cada colaborador, cuánto ganó y cuánto se le pagó en las fechas que elijas.</div>
+      <div class="field"><label>Colaborador</label><select id="infColaborador"></select></div>
+      <div class="inf-presets" id="infPresets">
+        <button type="button" class="inf-chip" data-p="quincena">Esta quincena</button>
+        <button type="button" class="inf-chip" data-p="quincena_ant">Quincena anterior</button>
+        <button type="button" class="inf-chip" data-p="semana">Esta semana</button>
+        <button type="button" class="inf-chip" data-p="mes">Este mes</button>
+        <button type="button" class="inf-chip" data-p="mes_ant">Mes anterior</button>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Desde</label><input type="date" id="infDesde"></div>
+        <div class="field"><label>Hasta</label><input type="date" id="infHasta"></div>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn-save" id="infGenerarBtn">Generar informe</button></div>
+      <div id="infResultado"></div>
+      <div id="infAcciones" hidden>
+        <div class="modal-actions">
+          <button type="button" class="btn-cancel" id="infPdfBtn">Descargar PDF</button>
+          <button type="button" class="btn-cancel" id="infExcelBtn">Descargar Excel</button>
+        </div>
+        <div class="modal-actions"><button type="button" class="btn-save" id="infCertBtn">Crear certificación de ingresos</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Certificación de ingresos -->
+  <div class="modal-overlay" id="certModal" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal-box">
+      <span class="modal-close" onclick="document.getElementById('certModal').classList.remove('show')">✕ Cerrar</span>
+      <div class="modal-title" id="certTitulo">Certificación de ingresos</div>
+      <div class="modal-sub">Los datos quedan guardados para la próxima certificación. Los ingresos salen de los pagos registrados en el sistema.</div>
+      <div class="error-box" id="certError"></div>
+      <div class="inf-sub">Colaborador</div>
+      <div class="field-row">
+        <div class="field"><label>Tipo de documento</label>
+          <select id="certTipoDoc"><option value="CC">Cédula de ciudadanía</option><option value="CE">Cédula de extranjería</option><option value="PPT">PPT</option><option value="PA">Pasaporte</option></select></div>
+        <div class="field"><label>Número</label><input type="text" id="certDocumento" inputmode="numeric" autocomplete="off"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Fecha de ingreso</label><input type="date" id="certIngreso"></div>
+        <div class="field"><label>Cargo</label><input type="text" id="certCargo" autocomplete="off"></div>
+      </div>
+      <div class="field"><label>Tipo de vínculo</label>
+        <select id="certVinculo">
+          <option value="prestacion">Prestación de servicios (pago por comisión)</option>
+          <option value="comision">Participación por comisión</option>
+          <option value="laboral">Contrato de trabajo</option>
+        </select></div>
+      <div class="field-row">
+        <div class="field"><label>Ingresos desde</label><input type="date" id="certDesde"></div>
+        <div class="field"><label>Hasta</label><input type="date" id="certHasta"></div>
+      </div>
+      <div class="field"><label>Dirigida a</label><input type="text" id="certDirigido" autocomplete="off"></div>
+      <div class="inf-sub">Quién certifica</div>
+      <div class="field-row">
+        <div class="field"><label>Razón social</label><input type="text" id="certRazon" autocomplete="off"></div>
+        <div class="field"><label>NIT</label><input type="text" id="certNit" autocomplete="off"></div>
+      </div>
+      <div class="field"><label>Nombre de quien firma</label><input type="text" id="certFirmante" autocomplete="off"></div>
+      <div class="field-row">
+        <div class="field"><label>Cédula de quien firma</label><input type="text" id="certFirmanteDoc" inputmode="numeric" autocomplete="off"></div>
+        <div class="field"><label>Cargo de quien firma</label><input type="text" id="certFirmanteCargo" autocomplete="off"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-cancel" onclick="document.getElementById('certModal').classList.remove('show')">Cancelar</button>
+        <button type="button" class="btn-save" id="certGenerarBtn">Descargar certificación (PDF)</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="createModal" onclick="if(event.target===this)this.classList.remove('show')">
     <div class="modal-box">
       <span class="modal-close" onclick="document.getElementById('createModal').classList.remove('show')">✕ Cerrar</span>
@@ -805,7 +921,7 @@
       <form id="createAdminForm">
         <div class="field"><label>Nombre completo</label><input type="text" id="adminFullName" placeholder="ej. Keicy Barber" autocomplete="off"></div>
         <div class="field-row">
-          <div class="field"><label>Usuario</label><input type="text" id="adminUsername" placeholder="ej. diego.admin" autocomplete="off"></div>
+          <div class="field"><label>Usuario</label><input type="text" id="adminUsername" placeholder="ej. keicy.admin" autocomplete="off"></div>
           <div class="field"><label>Clave</label><input type="password" id="adminPassword" placeholder="Mínimo 6 caracteres" autocomplete="off"></div>
         </div>
         <div class="modal-actions">
@@ -985,7 +1101,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
 <script src="/assets/utils.js"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/admin-sede-nav.js"></script>
@@ -1033,6 +1149,9 @@
   });
 
   const user = dnRequireAdmin();
+  // Informes de pagos y certificaciones: solo el administrador principal
+  const esAdminPrincipal = user?.role === 'admin';
+  if (!esAdminPrincipal) document.documentElement.classList.add('sin-informes');
   dnInitSidebarCard(function(nuevaSedeId) {
     sedeActualId = nuevaSedeId;
     loadBarberos();
@@ -1286,7 +1405,7 @@
       const photo = b.usuarios?.avatar_url;
       const avatarInner = photo ? `<img src="${photo}" alt="${name}">` : dnInitials(name);
       const specs = tipo === 'barbero' ? (b.especialidad || 'Barbero') : 'Aseo';
-      const rating = tipo === 'barbero' ? Number(b.calificacion).toFixed(1) : null;
+      const rating = tipo === 'barbero' ? dnFormatRating(b.calificacion) : null;
       return `
         <div class="barber-card" onclick="openEditModal('${b.id}')">
           <span class="card-role ${tipo}">${tipo === 'barbero' ? 'Barbero' : 'Aseo'}</span>
@@ -1296,6 +1415,7 @@
             <div class="card-username">@${b.usuarios?.username || ''}</div>
             ${rating ? `<div class="card-rating"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>${rating}</div>` : ''}
             <div class="card-spec">${specs}${b.sucursales?.nombre ? ` · ${b.sucursales.nombre}` : ''}</div>
+            ${esAdminPrincipal ? `<button type="button" class="card-inf-btn" onclick="abrirInformeColaborador('${b.id}', event)">Informe y pagos</button>` : ''}
           </div>
           <span class="card-status ${b.activo ? 'active' : 'inactive'}">${b.activo ? 'Activo' : 'Inactivo'}</span>
         </div>`;
@@ -1459,7 +1579,7 @@ Se cerrarán sus sesiones abiertas y tendrá 2 días para crear un PIN nuevo la 
 
       // Calcular promedio y total
       const total = data?.length || 0;
-      const promedio = total > 0 ? (data.reduce((sum, r) => sum + (r.calificacion || 0), 0) / total).toFixed(1) : '-';
+      const promedio = total > 0 ? dnFormatRating(data.reduce((sum, r) => sum + (r.calificacion || 0), 0) / total, '-') : '-';
 
       promedioEl.textContent = promedio;
       totalEl.textContent = total;
@@ -2378,8 +2498,12 @@ Se cerrarán sus sesiones abiertas y tendrá 2 días para crear un PIN nuevo la 
 
 </script>
 
-<script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+<script src="../assets/informe-colaborador.js?v=20261027"></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261015b"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

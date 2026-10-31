@@ -10,10 +10,10 @@
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
 <!-- Preload CSS críticos -->
-<link rel="preload" href="../assets/design-system.css" as="style">
-<link rel="preload" href="../assets/barbero-nav.css" as="style">
+<link rel="preload" href="../assets/design-system.css?v=20261015b" as="style">
+<link rel="preload" href="../assets/barbero-nav.css?v=20261015" as="style">
 <!-- Preload JS críticos -->
-<link rel="preload" href="../assets/supabase-client.js?v=20261014e" as="script">
+<link rel="preload" href="../assets/supabase-client.js?v=20261021" as="script">
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
@@ -25,8 +25,12 @@
 <meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Mi agenda</title>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
-<link rel="stylesheet" href="../assets/barbero-nav.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
+<link rel="stylesheet" href="../assets/barbero-nav.css?v=20261015">
+<link rel="stylesheet" href="../assets/barbero-estilo.css?v=20261015">
 <style>
   /* Variables heredadas de design-system.css */
   html, body{ height:100%; overflow-x:hidden; }
@@ -56,18 +60,19 @@
   .fade-in{ animation:fadeUp 0.42s var(--ease-ios) both; }
 
   /* ---- Header (idéntico a home.html) ---- */
-  .hdr-clock{ text-align:center; font-size:10.5px; font-weight:600; color:var(--text-muted); letter-spacing:0.5px; flex-shrink:0; padding-bottom:2px; }
+  .hdr-clock{ text-align:center; font-size:11.5px; font-weight:600; color:var(--text-muted); letter-spacing:0.5px; flex-shrink:0; padding-bottom:2px; }
   .hdr-main{ display:flex; align-items:center; justify-content:space-between; flex-shrink:0; padding:2px 0 10px; }
   .hdr-barber{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; cursor:pointer; }
   .hdr-avatar-wrap{ position:relative; flex-shrink:0; width:44px; height:44px; }
   .hdr-avatar{ width:44px; height:44px; border-radius:50%; object-fit:cover; display:block; }
-  .hdr-avatar-fallback{ width:44px; height:44px; font-size:14px; }
+  /* Las iniciales van encima, en el mismo círculo (antes quedaban debajo y tapaban "Mi agenda") */
+  .hdr-avatar-fallback{ position:absolute; inset:0; width:100%; height:100%; font-size:15px; }
   .hdr-avatar-ring{ position:absolute; inset:-2px; border-radius:50%; border:1.5px solid rgba(255,172,72,0.55); pointer-events:none; }
   .hdr-textcol{ min-width:0; }
-  .hdr-name{ font-size:15px; font-weight:700; line-height:1.2; letter-spacing:-0.1px; color:var(--text); }
-  .hdr-puesto{ font-size:10.5px; color:var(--text-muted); font-weight:500; margin-top:1px; }
+  .hdr-name{ font-size:16px; font-weight:700; line-height:1.2; letter-spacing:-0.1px; color:var(--text); }
+  .hdr-puesto{ font-size:11.5px; color:var(--text-muted); font-weight:500; margin-top:1px; }
   .hdr-estado{
-    display:inline-flex; align-items:center; gap:5px; font-size:10px; font-weight:700; margin-top:5px;
+    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; margin-top:5px;
     padding:3.5px 9px 3.5px 7px; border-radius:999px; letter-spacing:0.2px;
     background:rgba(52,211,153,0.14); border:1px solid rgba(52,211,153,0.25); color:#5EEAB2;
   }
@@ -85,7 +90,7 @@
   .bell-btn svg{ width:17px; height:17px; opacity:0.92; }
   .bell-badge{
     position:absolute; top:-3px; right:-3px; min-width:15px; height:15px; padding:0 3px; border-radius:8px;
-    background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-size:9px; font-weight:800;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold)); color:#141414; font-size:9.5px; font-weight:800;
     display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,0.4);
   }
 
@@ -96,10 +101,10 @@
   }
 
   .page-title-row{ flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding-bottom:6px; }
-  .page-title{ font-size:21px; font-weight:800; letter-spacing:-0.4px; color:var(--text); }
-  .page-sub{ font-size:12px; color:var(--text-muted); margin-top:1px; }
+  .page-title{ font-size:22.5px; font-weight:800; letter-spacing:-0.4px; color:var(--text); }
+  .page-sub{ font-size:13px; color:var(--text-muted); margin-top:1px; }
   .today-btn{
-    font-size:11.5px; font-weight:700; color:var(--gold); background:rgba(255,172,72,0.12);
+    font-size:12.5px; font-weight:700; color:var(--gold); background:rgba(255,172,72,0.12);
     border:1px solid rgba(255,172,72,0.3); padding:7px 13px; border-radius:12px; cursor:pointer;
     transition:transform .14s var(--ease-ios);
   }
@@ -109,7 +114,7 @@
   .view-tabs{ flex-shrink:0; display:flex; gap:4px; padding:4px; background:var(--glass-card-2); border-radius:14px; margin-bottom:10px; }
   .view-tab{
     flex:1; padding:8px 12px; border-radius:10px; text-align:center; cursor:pointer;
-    font-size:12px; font-weight:700; color:var(--text-muted);
+    font-size:13px; font-weight:700; color:var(--text-muted);
     transition:all .2s ease;
   }
   .view-tab:active{ transform:scale(0.95); }
@@ -120,55 +125,53 @@
     display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px; flex-shrink:0;
   }
   .week-nav-arrows{ display:flex; align-items:center; gap:6px; }
-  .week-range-label{ font-size:14px; font-weight:700; color:var(--text); text-align:center; flex:1; }
+  .week-range-label{ font-size:15px; font-weight:700; color:var(--text); text-align:center; flex:1; }
   .week-today-btn{
-    font-size:11px; font-weight:700; color:var(--gold); background:rgba(255,172,72,0.12);
+    font-size:12px; font-weight:700; color:var(--gold); background:rgba(255,172,72,0.12);
     border:1px solid rgba(255,172,72,0.3); padding:6px 10px; border-radius:10px; cursor:pointer;
     transition:transform .14s var(--ease-ios);
   }
   .week-today-btn:active{ transform:scale(0.93); }
 
   .week-scroll-container{
-    flex:1; min-height:0; overflow-x:auto; overflow-y:hidden;
-    -webkit-overflow-scrolling:touch; scroll-snap-type:x mandatory;
-    scrollbar-width:none; -ms-overflow-style:none;
+    flex:1; min-height:0; overflow:hidden;
     padding-bottom:env(safe-area-inset-bottom, 0px);
   }
-  .week-scroll-container::-webkit-scrollbar{ display:none; }
 
+  /* Los 7 días (lunes a domingo) visibles a la vez, sin scroll horizontal */
   .week-cards-wrapper{
-    display:flex; gap:10px; min-width:max-content; padding:0 4px 20px;
+    display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:4px; padding:0 0 20px;
   }
 
   .week-day-card{
-    flex:0 0 calc((100vw - 72px) / 3); min-width:100px; max-width:140px;
+    min-width:0;
     background:var(--glass-card); backdrop-filter:blur(14px);
-    border:1px solid var(--glass-border); border-radius:18px;
-    padding:12px; display:flex; flex-direction:column;
-    scroll-snap-align:start; transition:border-color .2s ease;
+    border:1px solid var(--glass-border); border-radius:12px;
+    padding:6px 3px; display:flex; flex-direction:column;
+    transition:border-color .2s ease;
   }
   .week-day-card.is-today{ border-color:var(--gold); }
-  .week-day-card.is-today .week-day-head{ background:linear-gradient(165deg, var(--gold-bright), var(--gold)); border-radius:10px; padding:6px 8px; margin:-4px -4px 6px; }
+  .week-day-card.is-today .week-day-head{ background:linear-gradient(165deg, var(--gold-bright), var(--gold)); border-radius:8px; padding:3px 2px; margin:-3px -1px 4px; }
   .week-day-card.is-today .week-day-head .dname,
   .week-day-card.is-today .week-day-head .dnum{ color:#111111 !important; }
 
-  .week-day-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px; flex-shrink:0; }
-  .week-day-head .dname{ font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:.4px; }
-  .week-day-head .dnum{ font-size:18px; font-weight:800; color:var(--text); }
+  .week-day-head{ display:flex; flex-direction:column; align-items:center; margin-bottom:4px; flex-shrink:0; line-height:1.1; }
+  .week-day-head .dname{ font-size:9.5px; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:.4px; }
+  .week-day-head .dnum{ font-size:16px; font-weight:800; color:var(--text); }
 
-  .week-day-disp{ font-size:10px; color:var(--gold); font-weight:700; margin-bottom:8px; flex-shrink:0; }
+  .week-day-disp{ font-size:9px; color:var(--gold); font-weight:700; margin-bottom:5px; flex-shrink:0; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
   .week-day-scroll{ flex:1; overflow-y:auto; max-height:calc(100vh - 340px); }
   .week-day-scroll::-webkit-scrollbar{ width:0; }
 
   .week-slot{
-    font-size:10.5px; padding:8px 10px; border-radius:12px; margin-bottom:6px;
+    font-size:9.5px; padding:5px 3px; border-radius:7px; margin-bottom:4px; min-width:0; text-align:center;
     cursor:pointer; transition:background .15s ease, transform .12s ease; border:1px solid transparent;
   }
   .week-slot:active{ transform:scale(0.97); }
-  .week-slot .ws-time{ font-weight:800; color:var(--gold); font-size:11px; }
+  .week-slot .ws-time{ font-weight:800; color:var(--gold); font-size:9.5px; white-space:nowrap; }
   .week-slot .ws-name{ font-weight:600; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
-  .week-slot .ws-service{ font-size:9.5px; color:var(--text-secondary); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .week-slot .ws-service{ font-size:8.5px; color:var(--text-secondary); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
   /* Estados de citas */
   .week-slot.st-agendada{ background:rgba(78,140,203,0.18); border-color:rgba(78,140,203,0.35); }
@@ -186,7 +189,7 @@
   /* Bloqueo */
   .week-slot.bloqueado{ background:rgba(255,107,94,0.08); border:1px dashed rgba(255,107,94,0.25); }
   .week-slot.bloqueado .ws-time{ color:rgba(255,107,94,0.6); }
-  .week-slot.bloqueado .ws-name{ color:rgba(255,255,255,0.4); display:flex; align-items:center; gap:4px; }
+  .week-slot.bloqueado .ws-name{ color:rgba(255,255,255,0.4); }
 
   /* Día de descanso */
   .week-day-card.dia-cerrado{ opacity:0.6; }
@@ -195,29 +198,37 @@
   }
   .week-slot.descanso{
     background:rgba(100,100,120,0.1); border:1px dashed rgba(255,255,255,0.15);
-    text-align:center; padding:16px 8px;
+    text-align:center; padding:12px 2px;
   }
-  .week-slot.descanso .ws-name{ justify-content:center; font-size:11px; }
+  .week-slot.descanso .ws-name{ font-size:9.5px; white-space:normal; }
 
-  .week-empty-msg{ font-size:10.5px; color:var(--text-muted); text-align:center; padding:12px 4px; }
+  .week-empty-msg{ font-size:11.5px; color:var(--text-muted); text-align:center; padding:12px 4px; }
 
-  /* Responsive */
-  @media (max-width: 380px) {
-    .week-day-card{ flex:0 0 calc((100vw - 56px) / 2.5); min-width:90px; padding:10px; }
-    .week-slot{ padding:6px 8px; font-size:10px; }
+  /* En pantallas angostas se oculta el servicio para que quepan los 7 días */
+  @media (max-width: 767px) {
+    .week-slot{ padding:4px 2px; }
+    .week-slot .ws-name{ white-space:normal; overflow-wrap:anywhere; text-overflow:clip; font-size:9px; line-height:1.15; }
   }
-  @media (min-width: 500px) {
-    .week-day-card{ flex:0 0 calc((100vw - 80px) / 4); max-width:130px; }
+  @media (max-width: 499px) {
+    .week-slot .ws-service{ display:none; }
   }
   @media (min-width: 768px) {
-    .week-day-card{ flex:0 0 calc((100% - 84px) / 7); max-width:none; }
+    .week-cards-wrapper{ gap:10px; }
+    .week-day-card{ padding:12px; border-radius:18px; }
+    .week-slot{ font-size:11.5px; padding:8px 10px; text-align:left; }
+    .week-slot .ws-time{ font-size:12px; }
+    .week-slot .ws-service{ font-size:10.5px; }
+    .week-day-head{ flex-direction:row; align-items:baseline; justify-content:space-between; }
+    .week-day-head .dname{ font-size:11px; }
+    .week-day-head .dnum{ font-size:19.5px; }
+    .week-day-disp{ font-size:11px; text-align:left; }
   }
 
   /* ---- Vista Mensual ---- */
   .month-nav{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
-  .month-label{ font-size:16px; font-weight:800; color:var(--text); }
+  .month-label{ font-size:17.5px; font-weight:800; color:var(--text); }
   .month-grid-header{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin-bottom:6px; }
-  .month-grid-header span{ text-align:center; font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase; }
+  .month-grid-header span{ text-align:center; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; }
   .month-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
   .month-day{
     aspect-ratio:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
@@ -228,15 +239,15 @@
   .month-day.other-month{ opacity:0.3; }
   .month-day.today{ border:1.5px solid var(--gold); }
   .month-day.selected{ background:rgba(255,172,72,0.2); }
-  .month-day .d{ font-size:13px; font-weight:700; color:var(--text); }
+  .month-day .d{ font-size:14px; font-weight:700; color:var(--text); }
   .month-day .s{
-    position:absolute; bottom:3px; font-size:8px; font-weight:700;
+    position:absolute; bottom:3px; font-size:8.5px; font-weight:700;
     padding:1px 4px; border-radius:4px; background:rgba(52,211,153,0.2); color:#5EEAB2;
   }
   .month-day .s.busy{ background:rgba(255,107,94,0.2); color:#FF8A7E; }
   .month-day .s.some{ background:rgba(242,201,76,0.2); color:#FFC27A; }
   .month-day.cerrado{ opacity:0.5; }
-  .month-day.cerrado .s{ background:rgba(100,100,120,0.2); color:rgba(255,255,255,0.5); font-size:10px; }
+  .month-day.cerrado .s{ background:rgba(100,100,120,0.2); color:rgba(255,255,255,0.5); font-size:11px; }
 
   /* ---- Tira de días ---- */
   .day-strip-row{ flex-shrink:0; display:flex; align-items:center; gap:6px; margin-bottom:10px; }
@@ -255,8 +266,8 @@
     border:1px solid var(--glass-border-soft); transition:transform .14s var(--ease-ios), background .15s ease, border-color .15s ease;
   }
   .day-chip:active{ transform:scale(0.92); }
-  .day-chip .dow{ font-size:9px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.3px; }
-  .day-chip .num{ font-size:15px; font-weight:800; margin-top:1px; color:var(--text); }
+  .day-chip .dow{ font-size:9.5px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.3px; }
+  .day-chip .num{ font-size:16px; font-weight:800; margin-top:1px; color:var(--text); }
   .day-chip.today .num{ color:var(--gold); }
   .day-chip.selected{ background:linear-gradient(165deg, var(--gold-bright), var(--gold)); border-color:transparent; }
   .day-chip.selected .dow, .day-chip.selected .num{ color:#111111; }
@@ -270,32 +281,32 @@
   /* ---- Resumen del día ---- */
   .day-kpis{ flex-shrink:0; display:flex; gap:9px; margin-bottom:10px; }
   .day-kpi{ flex:1; padding:11px 14px; }
-  .day-kpi .l{ font-size:9.5px; font-weight:700; letter-spacing:0.5px; color:var(--text-muted); text-transform:uppercase; }
-  .day-kpi .v{ font-size:17px; font-weight:800; margin-top:3px; color:var(--text); }
+  .day-kpi .l{ font-size:10.5px; font-weight:700; letter-spacing:0.5px; color:var(--text-muted); text-transform:uppercase; }
+  .day-kpi .v{ font-size:18.5px; font-weight:800; margin-top:3px; color:var(--text); }
   .day-kpi .v.gold{ color:var(--gold); }
 
   /* ---- Timeline (mismo lenguaje visual que admin/calendario.html) ---- */
   .agenda-list-wrap{ flex:1; min-height:0; overflow-y:auto; padding-bottom:90px; position:relative; }
   .tl-inner{ display:grid; grid-template-columns:38px 1fr; position:relative; }
   .tl-gutter{ position:relative; }
-  .tl-hmark{ position:absolute; left:0; right:4px; font-size:9.5px; color:var(--text-muted); font-weight:700; text-align:right; transform:translateY(-7px); }
+  .tl-hmark{ position:absolute; left:0; right:4px; font-size:10.5px; color:var(--text-muted); font-weight:700; text-align:right; transform:translateY(-7px); }
   .tl-track{
     position:relative; border-left:1px solid var(--divider); margin-left:6px;
     background-image:repeating-linear-gradient(to bottom, var(--divider) 0, var(--divider) 1px, transparent 1px, transparent var(--tl-hour-px));
   }
-  .tl-libre{ position:absolute; left:8px; right:8px; text-align:center; font-size:10px; color:var(--text-muted); font-weight:700; letter-spacing:.3px; pointer-events:none; }
+  .tl-libre{ position:absolute; left:8px; right:8px; text-align:center; font-size:11px; color:var(--text-muted); font-weight:700; letter-spacing:.3px; pointer-events:none; }
   .tl-block{
     position:absolute; left:8px; right:8px; border-radius:14px; padding:6px 10px; overflow:hidden; cursor:pointer;
     border:1px solid transparent; box-shadow:0 3px 10px rgba(0,0,0,0.2); transition:transform .14s var(--ease-ios);
   }
   .tl-block:active{ transform:scale(0.97); }
   .tl-block .row1{ display:flex; align-items:center; justify-content:space-between; gap:6px; }
-  .tl-block .t{ font-size:10.5px; font-weight:800; opacity:.92; }
-  .tl-block .dur{ font-size:8.5px; font-weight:700; opacity:.75; background:rgba(0,0,0,0.2); padding:1px 6px; border-radius:6px; }
-  .tl-block .n{ font-size:12.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
-  .tl-block .s{ font-size:10px; opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
-  .tl-block .price{ font-size:9.5px; font-weight:700; color:var(--gold); margin-top:2px; }
-  .tl-block .pagada-badge{ display:inline-flex; align-items:center; gap:3px; font-size:9px; font-weight:700; color:#10B981; background:rgba(16,185,129,0.15); padding:2px 6px; border-radius:6px; margin-top:3px; }
+  .tl-block .t{ font-size:11.5px; font-weight:800; opacity:.92; }
+  .tl-block .dur{ font-size:9px; font-weight:700; opacity:.75; background:rgba(0,0,0,0.2); padding:1px 6px; border-radius:6px; }
+  .tl-block .n{ font-size:13.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+  .tl-block .s{ font-size:11px; opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+  .tl-block .price{ font-size:10.5px; font-weight:700; color:var(--gold); margin-top:2px; }
+  .tl-block .pagada-badge{ display:inline-flex; align-items:center; gap:3px; font-size:9.5px; font-weight:700; color:#10B981; background:rgba(16,185,129,0.15); padding:2px 6px; border-radius:6px; margin-top:3px; }
   .tl-block .pagada-badge svg{ width:10px; height:10px; }
   .tl-block.st-nueva{ background:rgba(159,159,159,0.18); border-color:rgba(159,159,159,0.4); color:#C7C7C7; }
   .tl-block.st-agendada{ background:rgba(78,140,203,0.24); border-color:rgba(78,140,203,0.45); color:#9FCBFA; }
@@ -306,7 +317,7 @@
   .tl-now-line{ position:absolute; left:0; right:0; height:2px; background:#FF5449; z-index:8; pointer-events:none; box-shadow:0 0 8px rgba(255,84,73,0.5); }
   .tl-now-dot{ position:absolute; left:30px; top:-5px; width:10px; height:10px; border-radius:50%; background:#FF5449; box-shadow:0 0 0 4px rgba(255,84,73,0.2); }
   .tl-now-time{
-    position:absolute; left:46px; top:-10px; font-size:9px; font-weight:800; color:#111111; background:#FF5449;
+    position:absolute; left:46px; top:-10px; font-size:9.5px; font-weight:800; color:#111111; background:#FF5449;
     padding:2px 6px; border-radius:999px; white-space:nowrap;
   }
 
@@ -316,8 +327,8 @@
     background:var(--glass-card-2); border:1px solid var(--glass-border);
   }
   .empty-icon svg{ width:24px; height:24px; }
-  .empty-title{ font-size:16px; font-weight:700; }
-  .empty-sub{ font-size:12.5px; color:var(--text-muted); max-width:250px; }
+  .empty-title{ font-size:17.5px; font-weight:700; }
+  .empty-sub{ font-size:13.5px; color:var(--text-muted); max-width:250px; }
 
   .skel{ background:linear-gradient(100deg, rgba(255,255,255,0.045) 30%, rgba(255,255,255,0.09) 50%, rgba(255,255,255,0.045) 70%); background-size:220% 100%; animation:skelShine 1.5s ease-in-out infinite; border-radius:18px; }
   @keyframes skelShine{ 0%{ background-position:120% 0; } 100%{ background-position:-20% 0; } }
@@ -334,12 +345,12 @@
     }
     .hdr-avatar, .hdr-avatar-fallback { width: 52px; height: 52px; }
     .hdr-avatar-wrap { width: 52px; height: 52px; }
-    .hdr-name { font-size: 17px; }
-    .page-title { font-size: 24px; }
+    .hdr-name { font-size: 18.5px; }
+    .page-title { font-size: 26px; }
     .day-chip { min-width: 50px; padding: 10px 8px; }
     .slot-row { padding: 14px 18px; }
-    .slot-client-name { font-size: 15px; }
-    .slot-price { font-size: 15px; }
+    .slot-client-name { font-size: 16px; }
+    .slot-price { font-size: 16px; }
   }
 
   @media (min-width: 1024px) {
@@ -359,8 +370,8 @@
   @media (max-height: 640px) {
     .hdr-avatar, .hdr-avatar-fallback { width: 38px; height: 38px; }
     .hdr-avatar-wrap { width: 38px; height: 38px; }
-    .hdr-name { font-size: 14px; }
-    .page-title { font-size: 18px; }
+    .hdr-name { font-size: 15px; }
+    .page-title { font-size: 19.5px; }
     .slot-row { padding: 10px 14px; }
     .day-chip { min-width: 38px; padding: 8px 6px; }
   }
@@ -567,16 +578,17 @@
     <div class="sheet-title">Mi cuenta</div>
     <div class="sheet-sub" id="accountSheetName">—</div>
     <div style="margin-top:18px; padding:16px; border-radius:18px; background:rgba(255,107,94,0.1); border:1px solid rgba(255,107,94,0.3); display:flex; align-items:center; justify-content:space-between; cursor:pointer;" onclick="logoutBarbero()">
-      <span style="font-size:14.5px; font-weight:700; color:var(--ring-red);">Cerrar sesión</span>
+      <span style="font-size:15.5px; font-weight:700; color:var(--ring-red);">Cerrar sesión</span>
       <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FF6B5E" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke-linecap="round"/><path d="M16 17l5-5-5-5M21 12H9" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
+<script src="../assets/push.js?v=20261026" defer></script>
 <script src="../assets/turbo-loader.js" defer></script>
-<script src="../assets/mobile-nav.js"></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
 <script>
   const toastEl = document.getElementById('toast');
   const toastText = document.getElementById('toastText');
@@ -610,8 +622,14 @@
     const avatarUrl = data?.usuarios?.avatar_url;
     const img = document.getElementById('hdrAvatarImg');
     const fallback = document.getElementById('hdrAvatarFallback');
-    if (avatarUrl) { img.src = avatarUrl; img.style.opacity = '1'; fallback.style.display = 'none'; }
-    else { fallback.textContent = dnInitials(name); fallback.style.display = 'flex'; img.style.opacity = '0'; }
+    fallback.textContent = dnInitials(name);
+    const mostrarIniciales = () => { img.style.display = 'none'; fallback.style.display = 'flex'; };
+    if (avatarUrl) {
+      img.onerror = mostrarIniciales;
+      img.src = avatarUrl; img.style.display = 'block'; img.style.opacity = '1'; fallback.style.display = 'none';
+    } else {
+      mostrarIniciales();
+    }
   }
 
   async function checkEstadoHoy(){
@@ -640,7 +658,7 @@
       const timeLabel = mins < 60 ? `Hace ${mins} min` : `Hace ${Math.round(mins/60)} h`;
       return `<div style="padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.07); display:flex; gap:10px; align-items:flex-start;">
         <div style="width:7px; height:7px; border-radius:50%; margin-top:5px; flex-shrink:0; background:${a.leida ? 'rgba(255,255,255,0.18)' : 'var(--gold)'};"></div>
-        <div style="flex:1;"><div style="font-size:12.5px; font-weight:600;">${a.mensaje}</div><div style="font-size:10.5px; color:rgba(255,255,255,0.36); margin-top:2px;">${timeLabel}</div></div>
+        <div style="flex:1;"><div style="font-size:13.5px; font-weight:600;">${a.mensaje}</div><div style="font-size:11.5px; color:rgba(255,255,255,0.36); margin-top:2px;">${timeLabel}</div></div>
       </div>`;
     }).join('') : '<div class="waiting-note">Sin notificaciones.</div>';
     document.getElementById('alertsSheetBg').classList.add('show');
@@ -788,7 +806,7 @@
     }
   }
 
-  function toMin(hhmmss){ const [h,m] = hhmmss.split(':').map(Number); return h*60+m; }
+  function toMin(hhmmss){ const [h,m] = String(hhmmss || '00:00').split(':').map(Number); return h*60+(m||0); }
 
   async function loadAgenda(){
     // Cargar horario de sede si no está cargado
@@ -991,7 +1009,7 @@
           .neq('estado', 'cancelada')
           .order('hora_inicio', { ascending: true }),
         sb.from('bloqueos_barbero')
-          .select('id, fecha, hora_inicio, hora_fin, motivo')
+          .select('id, fecha, hora_inicio, hora_fin, motivo, tipo')
           .eq('barbero_id', user.id)
           .gte('fecha', weekStart)
           .lte('fecha', weekEnd)
@@ -1037,7 +1055,12 @@
             ${days.map(({ date, iso }) => {
               const isToday = iso === todayIso;
               const dayCitas = citasPorDia[iso] || [];
-              const dayBloqueos = bloqueosPorDia[iso] || [];
+              // Bloqueos del día: 'habilitado' abre un día de descanso, los de día completo no traen hora
+              // (antes rompían la semana al leer su hora) y los de horas ocupan sus franjas.
+              const bloqueosDelDia = bloqueosPorDia[iso] || [];
+              const habilitado = bloqueosDelDia.some(b => b.tipo === 'habilitado');
+              const bloqueoDia = bloqueosDelDia.find(b => b.tipo !== 'habilitado' && !b.hora_inicio);
+              const dayBloqueos = bloqueosDelDia.filter(b => b.tipo !== 'habilitado' && b.hora_inicio);
 
               // Obtener horario del día
               const diaSemana = DIAS_SEMANA_BARBERO[date.getDay()];
@@ -1046,7 +1069,7 @@
 
               // Verificar día de descanso del barbero (0=domingo, 1=lunes, etc.)
               const dayOfWeek = date.getDay();
-              if (diaDescansobarbero !== null && diaDescansobarbero === dayOfWeek) {
+              if (diaDescansobarbero !== null && diaDescansobarbero === dayOfWeek && !habilitado) {
                 diaCerrado = true;
               }
 
@@ -1064,11 +1087,14 @@
                 }
               }
 
-              // Generar los 9 slots (1 hora cada uno)
-              const slotsHtml = generarSlotsDelDia(abreMin, cierraMin, dayCitas, dayBloqueos, iso, diaCerrado);
+              // Día bloqueado completo: se muestra el motivo (las citas que tenga se listan igual)
+              const slotsHtml = bloqueoDia && !diaCerrado
+                ? `<div class="week-slot bloqueado"><div class="ws-name">🚫 ${String(bloqueoDia.motivo || 'Bloqueado').replace(/[<>&"]/g, '')}</div></div>` +
+                  dayCitas.map(c => citaWeekSlotHtml(c, iso)).join('')
+                : generarSlotsDelDia(abreMin, cierraMin, dayCitas, dayBloqueos, iso, diaCerrado);
 
               // Calcular disponibles
-              const disponibles = calcularDisponiblesDelDia(abreMin, dayCitas, dayBloqueos, diaCerrado);
+              const disponibles = bloqueoDia ? 0 : calcularDisponiblesDelDia(abreMin, dayCitas, dayBloqueos, diaCerrado);
 
               return `
                 <div class="week-day-card ${isToday ? 'is-today' : ''} ${diaCerrado ? 'dia-cerrado' : ''}" data-iso="${iso}">
@@ -1076,7 +1102,7 @@
                     <span class="dname">${DOW[date.getDay()]}</span>
                     <span class="dnum">${date.getDate()}</span>
                   </div>
-                  <div class="week-day-disp">${diaCerrado ? 'Cerrado' : `${disponibles}/${TOTAL_SLOTS_DIA} disp.`}</div>
+                  <div class="week-day-disp">${diaCerrado ? 'Cerrado' : `${disponibles}/${TOTAL_SLOTS_DIA}`}</div>
                   <div class="week-day-scroll">
                     ${slotsHtml}
                   </div>
@@ -1087,10 +1113,7 @@
         </div>
       `;
 
-      // Posicionar scroll para mostrar el día actual al centro
-      positionWeekScrollToToday(days, todayIso);
-
-      // Agregar listeners para cambio de semana al hacer swipe al final
+      // Deslizar a izquierda/derecha cambia de semana
       setupWeekSwipeNavigation();
 
     } catch (err) {
@@ -1131,11 +1154,25 @@
     }, { passive: true });
   }
 
+  function citaWeekSlotHtml(cita, iso){
+    const cls = ESTADO_CLASS[cita.estado] || 'st-agendada';
+    const name = cita.usuarios?.full_name || cita.usuarios?.username || 'Cliente';
+    // Solo el primer nombre: la semana completa debe caber en pantalla
+    const firstName = name.trim().split(/\s+/)[0];
+    return `
+          <div class="week-slot ${cls}" onclick="handleWeekSlotClick('${cita.id}', '${iso}')" title="${name}">
+            <div class="ws-time">${String(cita.hora_inicio || '').slice(0, 5)}</div>
+            <div class="ws-name">${firstName}</div>
+            <div class="ws-service">${cita.servicios?.nombre || 'Servicio'}</div>
+          </div>
+        `;
+  }
+
   function generarSlotsDelDia(abreMin, cierraMin, citas, bloqueos, iso, diaCerrado){
     if (diaCerrado) {
       return `
         <div class="week-slot descanso">
-          <div class="ws-name">😴 Día de descanso</div>
+          <div class="ws-name">😴 Descanso</div>
         </div>
       `;
     }
@@ -1173,16 +1210,7 @@
           </div>
         `;
       } else if (cita) {
-        const cls = ESTADO_CLASS[cita.estado] || 'st-agendada';
-        const name = cita.usuarios?.full_name || cita.usuarios?.username || 'Cliente';
-        const timeDisplay = fmtTime(cita.hora_inicio);
-        html += `
-          <div class="week-slot ${cls}" onclick="handleWeekSlotClick('${cita.id}', '${iso}')">
-            <div class="ws-time">${timeDisplay.h} ${timeDisplay.a}</div>
-            <div class="ws-name">${name}</div>
-            <div class="ws-service">${cita.servicios?.nombre || 'Servicio'}</div>
-          </div>
-        `;
+        html += citaWeekSlotHtml(cita, iso);
       } else if (bloqueo) {
         const icon = bloqueo.motivo?.toLowerCase().includes('descanso') ? '☕' : '🚫';
         html += `
@@ -1195,7 +1223,7 @@
         html += `
           <div class="week-slot libre" onclick="selectDayFromWeek('${iso}')">
             <div class="ws-time">${slotTimeStr}</div>
-            <div class="ws-name">Disponible</div>
+            <div class="ws-name">Libre</div>
           </div>
         `;
       }
@@ -1236,23 +1264,6 @@
     }
 
     return disponibles;
-  }
-
-  function positionWeekScrollToToday(days, todayIso){
-    const todayIdx = days.findIndex(d => d.iso === todayIso);
-    if (todayIdx === -1) return;
-
-    const scrollContainer = document.getElementById('weekScrollContainer');
-    if (!scrollContainer) return;
-
-    // Calcular posición para mostrar día actual visible (no necesariamente centrado)
-    const cardWidth = 110; // ancho aproximado de cada tarjeta + gap
-    const visibleCards = 3;
-    const targetScroll = Math.max(0, (todayIdx - 1) * cardWidth);
-
-    setTimeout(() => {
-      scrollContainer.scrollLeft = targetScroll;
-    }, 50);
   }
 
   function shiftWeek(dir){

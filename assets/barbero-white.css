@@ -157,7 +157,7 @@ body {
   color: #000 !important;
   padding: 4px 10px !important;
   border-radius: 6px !important;
-  font-size: 9px !important;
+  font-size: 9.5px !important;
   display: inline-block !important;
 }
 
@@ -205,12 +205,12 @@ body {
 
 .hero-chip-txt .l {
   color: var(--bw-text-secondary) !important;
-  font-size: 9px !important;
+  font-size: 9.5px !important;
 }
 
 .hero-chip-txt .v {
   color: var(--bw-text) !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
   font-weight: 700 !important;
 }
 
@@ -259,7 +259,7 @@ body {
 
 .client-name {
   color: var(--bw-text) !important;
-  font-size: 20px !important;
+  font-size: 21.5px !important;
 }
 
 .client-service {
@@ -267,7 +267,7 @@ body {
   border: none !important;
   color: var(--bw-gold-dark) !important;
   padding: 4px 12px !important;
-  font-size: 12px !important;
+  font-size: 13px !important;
 }
 
 .client-time {
@@ -306,7 +306,7 @@ body {
 
 .time-card-label {
   color: var(--bw-text-secondary) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   letter-spacing: 1.2px !important;
   display: flex !important;
   align-items: center !important;
@@ -322,7 +322,7 @@ body {
 
 #timerValue {
   color: var(--bw-text) !important;
-  font-size: 48px !important;
+  font-size: 52px !important;
   font-weight: 800 !important;
   letter-spacing: -2px !important;
 }
@@ -367,7 +367,7 @@ body {
 
 .time-ring-pct {
   color: var(--bw-text) !important;
-  font-size: 18px !important;
+  font-size: 19.5px !important;
 }
 
 .time-ring-label {
@@ -408,7 +408,7 @@ body {
 
 .steps-card-label {
   color: var(--bw-text-secondary) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   letter-spacing: 1.2px !important;
   margin-bottom: 16px !important;
   display: flex !important;
@@ -543,7 +543,7 @@ body {
 
 /* Label del paso */
 .step-tile-label {
-  font-size: 10px !important;
+  font-size: 11px !important;
   font-weight: 600 !important;
   color: var(--bw-text-muted) !important;
   text-align: center !important;
@@ -573,7 +573,7 @@ body {
 
 .total-label {
   color: var(--bw-text-secondary) !important;
-  font-size: 10px !important;
+  font-size: 11px !important;
   letter-spacing: 1px !important;
   display: flex !important;
   align-items: center !important;
@@ -589,7 +589,7 @@ body {
 
 .total-value {
   color: var(--bw-text) !important;
-  font-size: 28px !important;
+  font-size: 30px !important;
   font-weight: 800 !important;
 }
 
@@ -618,7 +618,7 @@ body {
 }
 
 .add-service-btn span {
-  font-size: 12px !important;
+  font-size: 13px !important;
   font-weight: 700 !important;
   color: #000 !important;
 }
@@ -642,7 +642,7 @@ body {
 
 .note-card span {
   color: var(--bw-text-muted) !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
 }
 
 /* ================================================================
@@ -679,7 +679,7 @@ body {
 
 .swipe-label .t {
   color: var(--bw-text) !important;
-  font-size: 13px !important;
+  font-size: 14px !important;
 }
 
 .swipe-label .s {

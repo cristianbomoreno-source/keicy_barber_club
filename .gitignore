@@ -52,3 +52,14 @@ Thumbs.db
 *.temp
 .cache/
 .vercel
+
+# Android (TWA) - artefactos de build y llaves
+android/twa/.gradle/
+android/twa/app/build/
+android/twa/build/
+android/twa/local.properties
+android/twa/*.apk
+android/twa/*.aab
+android/twa/*.idsig
+*.keystore
+*.jks

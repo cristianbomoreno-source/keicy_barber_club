@@ -3,9 +3,9 @@
 // VERSIÓN OPTIMIZADA - Carga ultra rápida
 // ============================================
 
-const CACHE_NAME = 'keicy-barber-club-v37';
-const STATIC_CACHE = 'keicy-barber-club-static-v37';
-const API_CACHE = 'keicy-barber-club-api-v37';
+const CACHE_NAME = 'keicy-barber-club-v38';
+const STATIC_CACHE = 'keicy-barber-club-static-v38';
+const API_CACHE = 'keicy-barber-club-api-v38';
 const OFFLINE_PAGE = '/offline.html';
 
 // Assets críticos para pre-cachear (carga instantánea)
@@ -18,7 +18,7 @@ const PRECACHE_ASSETS = [
   '/assets/barbero-white.css',
   '/assets/dn-modals.css',
   // JS críticos
-  '/assets/supabase-client.js?v=20261014e',
+  '/assets/supabase-client.js?v=20261021',
   '/assets/theme-manager.js',
   '/assets/mobile-nav.js',
   '/assets/sidebar-toggle.js',

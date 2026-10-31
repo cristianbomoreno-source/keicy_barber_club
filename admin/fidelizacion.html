@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Fidelización</title>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <link rel="stylesheet" href="../assets/mobile-admin.css">
 <style>
   /* Variables heredadas de design-system.css */
@@ -109,6 +109,10 @@
   .tab-btn.active{ background:var(--gold); color:#141414; border-color:var(--gold); }
   .tab-panel{ display:none; }
   .tab-panel.active{ display:block; }
+  .al-niveles{ display:flex; gap:16px; flex-wrap:wrap; }
+  .field .al-niveles label{ display:flex; gap:6px; align-items:center; margin:0; font-size:14px; font-weight:600; letter-spacing:0; text-transform:none; color:var(--text-primary, inherit); }
+  .field .al-niveles input[type=checkbox]{ width:auto; }
+  .al-niveles-grid{ display:grid; grid-template-columns:auto 1fr; gap:8px 12px; align-items:center; }
 
   .item-row{ display:flex; align-items:center; gap:13px; padding:13px 4px; border-bottom:1px solid var(--glass-border); }
   .item-row:last-child{ border-bottom:none; }
@@ -318,6 +322,7 @@
         <div class="tab-btn" data-tab="cupones">Cupones</div>
         <div class="tab-btn" data-tab="recompensas">Recompensas</div>
         <div class="tab-btn" data-tab="beneficios">Beneficios Club</div>
+        <div class="tab-btn" data-tab="alianzas">Alianzas</div>
       </div>
 
       <!-- Miembros Club de Leales -->
@@ -375,8 +380,78 @@
         </div>
         <div id="beneficiosList"><div class="empty-row">Cargando…</div></div>
       </div>
+
+      <!-- Alianzas con negocios aliados -->
+      <div class="tab-panel" data-panel="alianzas">
+        <div class="panel-sub" style="margin-bottom:12px;">
+          Cortesías de negocios aliados para el Club de Leales. Cada aliado entra en <b>/aliados</b> con su usuario y clave, ve a los clientes con derecho
+          (nombre, inicial del apellido y últimos 4 dígitos del celular) y marca quién ya reclamó.
+        </div>
+        <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+          <div class="add-btn" onclick="openAliadoModal()">+ Nueva alianza</div>
+        </div>
+        <div id="aliadosList"><div class="empty-row">Cargando…</div></div>
+      </div>
     </div>
 
+  </div>
+</div>
+
+<!-- Modal: alianza -->
+<div class="modal-overlay" id="aliadoModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box">
+    <span class="modal-close" onclick="document.getElementById('aliadoModal').classList.remove('show')">✕ Cerrar</span>
+    <div class="modal-title" id="aliadoModalTitle">Nueva alianza</div>
+    <div class="modal-sub">Una cortesía por cliente. Los niveles se pueden cambiar cuando quieras.</div>
+    <div class="field"><label>Negocio aliado</label><input type="text" id="alNombre" placeholder="Ej. La Hamburguesería"></div>
+    <div class="field"><label>Cortesía general</label><input type="text" id="alBeneficio" placeholder="Ej. Hamburguesa de cortesía"></div>
+    <div class="field">
+      <label>Niveles con derecho y beneficio de cada uno</label>
+      <div id="alNiveles" class="al-niveles al-niveles-grid">
+        <label><input type="checkbox" value="black"> Black</label><input type="text" class="al-benef" data-nivel="black" placeholder="Igual a la cortesía general">
+        <label><input type="checkbox" value="oro"> Oro</label><input type="text" class="al-benef" data-nivel="oro" placeholder="Igual a la cortesía general">
+        <label><input type="checkbox" value="plata"> Plata</label><input type="text" class="al-benef" data-nivel="plata" placeholder="Igual a la cortesía general">
+        <label><input type="checkbox" value="bronce"> Bronce</label><input type="text" class="al-benef" data-nivel="bronce" placeholder="Igual a la cortesía general">
+      </div>
+    </div>
+    <div class="field"><label>Válida hasta (vacío = sin fecha)</label><input type="date" id="alVigencia"></div>
+    <div class="field"><label>Logo del aliado (enlace a la imagen, opcional)</label><input type="text" id="alLogo" placeholder="https://… o /assets/aliados/logo.webp" autocomplete="off"></div>
+    <div class="field-row">
+      <div class="field"><label>Usuario del aliado</label><input type="text" id="alUsuario" placeholder="Ej. hamburgueseria" autocapitalize="none" spellcheck="false" autocomplete="off"></div>
+      <div class="field"><label id="alClaveLbl">Clave</label><input type="text" id="alClave" placeholder="Mínimo 6 caracteres" autocomplete="off"></div>
+    </div>
+    <div class="toggle-row">
+      <div class="lbl">Alianza activa</div>
+      <div class="switch on" id="alActivoSwitch" onclick="this.classList.toggle('on')"><div class="knob"></div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('aliadoModal').classList.remove('show')">Cancelar</button>
+      <button class="btn-save" id="aliadoSaveBtn" onclick="saveAliado()">Crear alianza</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: enlace del aliado -->
+<div class="modal-overlay" id="aliadoLinkModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box">
+    <span class="modal-close" onclick="document.getElementById('aliadoLinkModal').classList.remove('show')">✕ Cerrar</span>
+    <div class="modal-title">Datos de acceso del aliado</div>
+    <div class="modal-sub">Envíaselos al negocio aliado. La clave no se vuelve a mostrar; si la pierden, escribe una nueva al editar la alianza.</div>
+    <div class="field"><textarea id="aliadoLinkInput" readonly rows="4" onclick="this.select()"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="window.open('/aliados/', '_blank')">Abrir página</button>
+      <button class="btn-save" onclick="copiarEnlaceAliado()">Copiar datos</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: cortesías reclamadas del aliado -->
+<div class="modal-overlay" id="aliadoCanjesModal" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box">
+    <span class="modal-close" onclick="document.getElementById('aliadoCanjesModal').classList.remove('show')">✕ Cerrar</span>
+    <div class="modal-title" id="aliadoCanjesTitle">Cortesías reclamadas</div>
+    <div class="modal-sub">Si el aliado marcó a alguien por error, quítalo de aquí.</div>
+    <div id="aliadoCanjesList" style="max-height:60vh; overflow:auto;"></div>
   </div>
 </div>
 
@@ -519,7 +594,7 @@
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/admin-sede-nav.js"></script>
 
@@ -1227,18 +1302,209 @@
     renderMiembrosList();
   });
 
-  // Cargar beneficios y miembros junto con el resto
+  // ---- Alianzas ----
+  let aliados = [];
+  let aliadoEditId = null;
+  const NIVEL_ALIADO = { black: 'Black', oro: 'Oro', plata: 'Plata', bronce: 'Bronce' };
+  const escAl = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  async function loadAliados() {
+    const el = document.getElementById('aliadosList');
+    try {
+      const [{ data, error }, { data: resumen, error: resErr }] = await Promise.all([
+        sb.from('aliados').select('id, nombre, beneficio, beneficios_nivel, logo_url, niveles, usuario, activo, vigente_hasta, created_at').order('created_at', { ascending: false }),
+        sb.rpc('aliados_resumen')
+      ]);
+      if (error) throw error;
+      if (resErr) throw resErr;
+      const porId = Object.fromEntries((resumen || []).map(r => [r.aliado_id, r]));
+      aliados = (data || []).map(a => ({ ...a, elegibles: porId[a.id]?.elegibles || 0, reclamados: porId[a.id]?.reclamados || 0 }));
+      renderAliados();
+    } catch (err) {
+      console.error(err);
+      el.innerHTML = '<div class="empty-row">Error cargando alianzas</div>';
+    }
+  }
+
+  function renderAliados() {
+    const el = document.getElementById('aliadosList');
+    if (!aliados.length) {
+      el.innerHTML = '<div class="empty-row">Aún no hay alianzas. Crea la primera con el botón "+".</div>';
+      return;
+    }
+    el.innerHTML = aliados.map(a => {
+      const bn = a.beneficios_nivel || {};
+      const niveles = (a.niveles || []).map(n => (NIVEL_ALIADO[n] || n) + (bn[n] ? ': ' + bn[n] : '')).join(' · ');
+      const vence = a.vigente_hasta ? ` · hasta ${new Date(a.vigente_hasta + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' })}` : '';
+      return `
+      <div class="item-row">
+        <div class="item-mid">
+          <div class="name">${escAl(a.nombre)} <span style="color:var(--gold); font-weight:800;">· ${escAl(a.beneficio)}</span></div>
+          <div class="meta">${escAl(niveles)}${vence} · ${a.reclamados} de ${a.elegibles} reclamadas · ${a.usuario ? 'usuario: ' + escAl(a.usuario) : 'sin usuario'}</div>
+        </div>
+        <div class="status-pill ${a.activo ? 'active' : 'inactive'}">${a.activo ? 'Activa' : 'Inactiva'}</div>
+        <div class="row-actions">
+          <div class="icon-btn-sm" onclick="verCanjesAliado('${a.id}')" title="Ver reclamadas">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          </div>
+          <div class="icon-btn-sm" onclick="openAliadoModal('${a.id}')" title="Editar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function openAliadoModal(id) {
+    const a = id ? aliados.find(x => x.id === id) : null;
+    aliadoEditId = a ? a.id : null;
+    document.getElementById('aliadoModalTitle').textContent = a ? 'Editar alianza' : 'Nueva alianza';
+    document.getElementById('aliadoSaveBtn').textContent = a ? 'Guardar cambios' : 'Crear alianza';
+    document.getElementById('alNombre').value = a?.nombre || '';
+    document.getElementById('alBeneficio').value = a?.beneficio || '';
+    document.getElementById('alVigencia').value = a?.vigente_hasta || '';
+    document.getElementById('alLogo').value = a?.logo_url || '';
+    const niveles = a?.niveles || ['oro', 'black'];
+    document.querySelectorAll('#alNiveles input[type=checkbox]').forEach(cb => { cb.checked = niveles.includes(cb.value); });
+    document.querySelectorAll('#alNiveles .al-benef').forEach(inp => { inp.value = a?.beneficios_nivel?.[inp.dataset.nivel] || ''; });
+    document.getElementById('alActivoSwitch').classList.toggle('on', a ? a.activo : true);
+    document.getElementById('alUsuario').value = a?.usuario || '';
+    document.getElementById('alClave').value = '';
+    document.getElementById('alClaveLbl').textContent = a?.usuario ? 'Nueva clave (vacío = no cambiar)' : 'Clave';
+    document.getElementById('aliadoModal').classList.add('show');
+  }
+
+  async function saveAliado() {
+    const nombre = document.getElementById('alNombre').value.trim();
+    const beneficio = document.getElementById('alBeneficio').value.trim();
+    const niveles = [...document.querySelectorAll('#alNiveles input[type=checkbox]:checked')].map(cb => cb.value);
+    // Beneficio propio por nivel (vacío = se usa la cortesía general)
+    const beneficios_nivel = {};
+    document.querySelectorAll('#alNiveles .al-benef').forEach(inp => {
+      if (niveles.includes(inp.dataset.nivel) && inp.value.trim()) beneficios_nivel[inp.dataset.nivel] = inp.value.trim();
+    });
+    const vigente_hasta = document.getElementById('alVigencia').value || null;
+    const logo_url = document.getElementById('alLogo').value.trim() || null;
+    const activo = document.getElementById('alActivoSwitch').classList.contains('on');
+    if (!nombre) { toast('Escribe el nombre del negocio aliado.'); return; }
+    if (!beneficio) { toast('Escribe la cortesía.'); return; }
+    if (!niveles.length) { toast('Elige al menos un nivel.'); return; }
+    const usuario = document.getElementById('alUsuario').value.trim().toLowerCase();
+    const clave = document.getElementById('alClave').value;
+    const editando = aliados.find(x => x.id === aliadoEditId);
+    if (!usuario) { toast('Escribe el usuario del aliado.'); return; }
+    if (!clave && !editando?.usuario) { toast('Escribe una clave.'); return; }
+    if (clave && clave.length < 6) { toast('La clave debe tener al menos 6 caracteres.'); return; }
+
+    const btn = document.getElementById('aliadoSaveBtn');
+    btn.disabled = true;
+    try {
+      if (aliadoEditId) {
+        const { error } = await sb.from('aliados').update({ nombre, beneficio, beneficios_nivel, logo_url, niveles, vigente_hasta, activo }).eq('id', aliadoEditId);
+        if (error) throw error;
+      } else {
+        const { data, error } = await sb.from('aliados').insert({ nombre, beneficio, beneficios_nivel, logo_url, niveles, vigente_hasta, activo }).select('id').single();
+        if (error) throw error;
+        // Si el acceso falla (ej. usuario repetido) se reintenta sobre la misma alianza
+        aliadoEditId = data.id;
+        aliados.push({ id: data.id, usuario: null });
+      }
+
+      const { data: acceso, error: accErr } = await sb.rpc('aliado_set_acceso', {
+        p_aliado_id: aliadoEditId, p_usuario: usuario, p_clave: clave || null
+      });
+      if (accErr) throw accErr;
+      if (!acceso?.success) {
+        toast(acceso?.error || 'No pudimos guardar el usuario.');
+        loadAliados();
+        return;
+      }
+
+      document.getElementById('aliadoModal').classList.remove('show');
+      if (clave) {
+        mostrarAccesoAliado(nombre, acceso.usuario, clave);
+      } else {
+        toast('Alianza guardada.');
+      }
+      loadAliados();
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos guardar la alianza.');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function mostrarAccesoAliado(nombre, usuario, clave) {
+    document.getElementById('aliadoLinkInput').value =
+      `Acceso aliados Keicy Barber Club (${nombre})\n${location.origin}/aliados/\nUsuario: ${usuario}\nClave: ${clave}`;
+    document.getElementById('aliadoLinkModal').classList.add('show');
+  }
+
+  async function copiarEnlaceAliado() {
+    const input = document.getElementById('aliadoLinkInput');
+    try {
+      await navigator.clipboard.writeText(input.value);
+    } catch (e) {
+      input.select();
+      document.execCommand('copy');
+    }
+    toast('Enlace copiado.');
+  }
+
+  async function verCanjesAliado(id) {
+    const a = aliados.find(x => x.id === id);
+    document.getElementById('aliadoCanjesTitle').textContent = `Reclamadas · ${a?.nombre || ''}`;
+    const el = document.getElementById('aliadoCanjesList');
+    el.innerHTML = '<div class="empty-row">Cargando…</div>';
+    document.getElementById('aliadoCanjesModal').classList.add('show');
+    const { data, error } = await sb.from('aliado_canjes')
+      .select('id, nivel, beneficio, atendido_por, reclamado_at, usuarios!cliente_id(full_name, phone)')
+      .eq('aliado_id', id).order('reclamado_at', { ascending: false });
+    if (error) {
+      console.error(error);
+      el.innerHTML = '<div class="empty-row">Error cargando</div>';
+      return;
+    }
+    if (!data.length) {
+      el.innerHTML = '<div class="empty-row">Nadie ha reclamado todavía.</div>';
+      return;
+    }
+    el.innerHTML = data.map(c => `
+      <div class="item-row">
+        <div class="item-mid">
+          <div class="name">${escAl(c.usuarios?.full_name || 'Cliente')} <span style="color:var(--text-secondary); font-weight:600;">· ${escAl(NIVEL_ALIADO[c.nivel] || c.nivel || '')}</span>${c.beneficio ? ' <span style="color:var(--gold); font-weight:700;">· ' + escAl(c.beneficio) + '</span>' : ''}</div>
+          <div class="meta">${escAl(c.usuarios?.phone || '')} · ${new Date(c.reclamado_at).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}${c.atendido_por ? ' · atendió ' + escAl(c.atendido_por) : ''}</div>
+        </div>
+        <div class="row-actions">
+          <div class="icon-btn-sm" onclick="quitarCanjeAliado('${c.id}', '${id}')" title="Quitar" style="background:rgba(239,83,80,0.1); border-color:rgba(239,83,80,0.2);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#EF5350" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>
+          </div>
+        </div>
+      </div>`).join('');
+  }
+
+  async function quitarCanjeAliado(canjeId, aliadoId) {
+    if (!confirm('¿Quitar esta cortesía reclamada? El cliente podrá reclamarla de nuevo.')) return;
+    const { error } = await sb.from('aliado_canjes').delete().eq('id', canjeId);
+    if (error) { console.error(error); toast('No pudimos quitarla.'); return; }
+    toast('Cortesía quitada.');
+    verCanjesAliado(aliadoId);
+    loadAliados();
+  }
+
+  // Cargar beneficios, miembros y alianzas junto con el resto
   const originalLoadAll = loadAll;
   loadAll = async function() {
     await originalLoadAll();
-    await Promise.all([loadBeneficios(), loadMiembros()]);
+    await Promise.all([loadBeneficios(), loadMiembros(), loadAliados()]);
   };
 
   loadAll();
 </script>
 
-<script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261015b"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

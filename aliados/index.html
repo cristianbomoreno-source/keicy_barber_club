@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0a0a">
+<title>Cortesías Club de Leales - Keicy Barber Club</title>
+<style>
+  :root {
+    --bg: #0a0a0a; --card: #151515; --border: #262626; --text: #fff; --muted: rgba(255,255,255,0.6);
+    --gold: #FFAC48; --ok: #4CAF50; --err: #ef4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 20px 16px 48px; }
+  .brand { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); font-weight: 700; }
+  .logos { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 4px 0 14px; }
+  .logos img { display: block; }
+  .logo-dn { height: 64px; width: auto; }
+  .logo-aliado { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; }
+  .logos .x { color: var(--muted); font-size: 22px; font-weight: 300; }
+  h1 { font-size: 22px; margin: 6px 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; }
+  .niveles { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 3px 9px; border-radius: 6px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+  .badge.black { background: #000; color: #fff; border: 1px solid #444; }
+  .badge.oro { background: #FFAC48; color: #141414; }
+  .badge.plata { background: #A0A0A0; color: #141414; }
+  .badge.bronce { background: #CD7F32; color: #141414; }
+  .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 12px; }
+  .chip { padding: 8px 12px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: pointer; background: var(--card); border: 1px solid var(--border); color: var(--muted); }
+  .chip.active { background: var(--gold); border-color: var(--gold); color: #141414; }
+  .row .meta a { color: var(--text); text-decoration: none; font-weight: 600; }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+  .stat .lbl { font-size: 12px; color: var(--muted); }
+  .stat .val { font-size: 24px; font-weight: 800; margin-top: 2px; }
+  .stat.tap { cursor: pointer; text-align: left; font: inherit; color: inherit; width: 100%; }
+  .stat.tap .ver { font-size: 11px; color: var(--gold); margin-top: 2px; font-weight: 700; }
+  .stat.tap.active { border-color: var(--gold); background: rgba(255,172,72,0.12); }
+  .field { margin-bottom: 10px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 16px; }
+  input:focus { outline: none; border-color: var(--gold); }
+  .tip { font-size: 13px; color: var(--muted); background: rgba(255,172,72,0.08); border: 1px solid rgba(255,172,72,0.25); border-radius: 10px; padding: 10px 12px; margin: 4px 0 14px; }
+  .row { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; }
+  .row .info { flex: 1; min-width: 0; }
+  .row .name { font-weight: 700; font-size: 15px; }
+  .row .meta { font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .row.done { opacity: 0.75; }
+  .btn { border: none; border-radius: 10px; padding: 10px 12px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .btn-mark { background: var(--gold); color: #141414; }
+  .btn-mark.confirm { background: var(--ok); color: #fff; }
+  .btn-undo { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-undo.confirm-undo { border-color: var(--err); color: var(--err); }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .benef { font-size: 13px; color: var(--gold); font-weight: 700; margin-top: 3px; }
+  .benef-lista { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+  .benef-lista div { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .ok-tag { color: var(--ok); font-weight: 700; font-size: 13px; }
+  .empty { text-align: center; color: var(--muted); padding: 28px 10px; font-size: 14px; }
+  .center { min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px; }
+  .spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #222; border: 1px solid var(--border); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: calc(100% - 32px); }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="cargando" class="center"><div class="spinner"></div><div class="sub">Cargando…</div></div>
+
+  <form id="login" class="center" style="display:none;" autocomplete="on">
+    <img src="/assets/logo-oro.png" alt="Keicy Barber Club" class="logo-dn" style="height:84px;">
+    <div style="font-size:20px; font-weight:700;">Aliados · Club de Leales</div>
+    <div class="sub" id="loginMsg">Entra con el usuario y la clave que te dio la barbería.</div>
+    <div style="width:100%; max-width:340px; text-align:left; margin-top:8px;">
+      <div class="field"><label for="lgUsuario">Usuario</label><input id="lgUsuario" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
+      <div class="field"><label for="lgClave">Clave</label><input id="lgClave" name="password" type="password" autocomplete="current-password" required></div>
+      <button class="btn btn-mark" id="lgBtn" type="submit" style="width:100%; padding:13px; font-size:15px;">Entrar</button>
+      <div class="sub" id="lgError" style="color:var(--err); margin-top:10px; min-height:18px;"></div>
+    </div>
+  </form>
+
+  <div id="app" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <div class="brand">Keicy Barber Club × <span id="aliadoNombre"></span></div>
+      <button class="btn btn-undo" id="btnSalir" type="button">Salir</button>
+    </div>
+    <div class="logos">
+      <img src="/assets/logo-oro.png" alt="Keicy Barber Club" class="logo-dn">
+      <span class="x" id="logoX" style="display:none;">×</span>
+      <img id="logoAliado" class="logo-aliado" alt="" style="display:none;">
+    </div>
+    <h1 id="beneficio"></h1>
+    <div class="sub" id="vigencia"></div>
+    <div class="niveles" id="niveles"></div>
+
+    <div class="stats">
+      <button type="button" class="stat tap" id="stTodos"><div class="lbl">Clientes con cortesía</div><div class="val" id="sElegibles">—</div><div class="ver">Ver todos</div></button>
+      <button type="button" class="stat tap" id="stReclamados"><div class="lbl">Ya reclamadas</div><div class="val" id="sReclamados">—</div><div class="ver">Ver quién reclamó</div></button>
+    </div>
+
+    <div class="field">
+      <label for="atiende">¿Quién atiende?</label>
+      <input id="atiende" type="text" maxlength="60" placeholder="Tu nombre" autocomplete="name">
+    </div>
+    <div class="field">
+      <label for="buscar">Buscar cliente</label>
+      <input id="buscar" type="search" inputmode="search" placeholder="Nombre o número de celular" autocomplete="off">
+    </div>
+    <div class="filtros" id="filtros"></div>
+    <div class="tip">Antes de marcar, confirma con el cliente su nombre y su número de celular.</div>
+
+    <div id="lista"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://ygrmammcaupnygdxmgth.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlncm1hbW1jYXVwbnlnZHhtZ3RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyNTA5MjksImV4cCI6MjEwNjgyNjkyOX0.PCOjKijvxVdhwe6h2wPbhZR6ZSahfJYHfkef2OwKPi0';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } });
+
+  const SESION_KEY = 'dn_aliado_sesion';
+  let token = '';
+  try { token = localStorage.getItem(SESION_KEY) || ''; } catch (e) {}
+  const NIVEL_LABEL = { black: 'Black', oro: 'Oro', plata: 'Plata', bronce: 'Bronce' };
+  let clientes = [];
+  let pendienteConfirmar = null;
+  let nivelFiltro = null;
+  let estadoFiltro = null; // null = todos, 'reclamados' = solo quienes ya reclamaron
+  let infoAliado = null;
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmtFecha = iso => new Date(iso).toLocaleString('es-CO', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'America/Bogota' });
+
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  // Sesión vencida, clave cambiada o alianza desactivada: volver a entrar
+  function mostrarInvalido(msg) {
+    token = '';
+    try { localStorage.removeItem(SESION_KEY); } catch (e) {}
+    $('cargando').style.display = 'none';
+    $('app').style.display = 'none';
+    $('login').style.display = 'flex';
+    if (msg) $('loginMsg').textContent = msg;
+  }
+
+  function esEnlaceInvalido(error) {
+    return /ENLACE_INVALIDO/.test(error?.message || '');
+  }
+
+  try { $('atiende').value = localStorage.getItem('dn_aliado_atiende') || ''; } catch (e) {}
+  $('atiende').addEventListener('change', () => {
+    try { localStorage.setItem('dn_aliado_atiende', $('atiende').value.trim()); } catch (e) {}
+  });
+
+  async function cargarInfo() {
+    const { data, error } = await sb.rpc('aliado_info', { p_token: token });
+    if (error) {
+      if (esEnlaceInvalido(error)) return mostrarInvalido('Tu sesión terminó. Entra de nuevo.');
+      throw error;
+    }
+    $('aliadoNombre').textContent = data.nombre;
+    if (data.logo_url) {
+      $('logoAliado').src = data.logo_url;
+      $('logoAliado').alt = data.nombre;
+      $('logoAliado').style.display = '';
+      $('logoX').style.display = '';
+    }
+    $('beneficio').textContent = data.beneficio;
+    $('vigencia').textContent = data.vigente_hasta
+      ? `Válido hasta el ${new Date(data.vigente_hasta + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`
+      : 'Una cortesía por cliente.';
+    // Si cada nivel tiene su propio beneficio, se lista nivel por nivel
+    const bn = data.beneficios_nivel || {};
+    const ordenNiv = ['black', 'oro', 'plata', 'bronce'].filter(n => (data.niveles || []).includes(n));
+    const distintos = new Set(ordenNiv.map(n => bn[n] || data.beneficio)).size > 1;
+    $('niveles').innerHTML = distintos
+      ? `<div class="benef-lista">${ordenNiv.map(n => `<div><span class="badge ${esc(n)}">${esc(NIVEL_LABEL[n])}</span> ${esc(bn[n] || data.beneficio)}</div>`).join('')}</div>`
+      : ordenNiv.map(n => `<span class="badge ${esc(n)}">${esc(NIVEL_LABEL[n] || n)}</span>`).join('');
+    infoAliado = data;
+    renderFiltros();
+    $('sElegibles').textContent = data.elegibles;
+    $('sReclamados').textContent = data.reclamados;
+    return true;
+  }
+
+  function renderFiltros() {
+    const orden = ['black', 'oro', 'plata', 'bronce'].filter(n => (infoAliado?.niveles || []).includes(n));
+    const porNivel = infoAliado?.por_nivel || {};
+    const chips = [`<div class="chip ${!nivelFiltro ? 'active' : ''}" data-nivel="">Todos (${infoAliado?.elegibles ?? 0})</div>`]
+      .concat(orden.map(n => `<div class="chip ${nivelFiltro === n ? 'active' : ''}" data-nivel="${n}">${NIVEL_LABEL[n]} (${porNivel[n] || 0})</div>`));
+    $('filtros').innerHTML = orden.length > 1 ? chips.join('') : '';
+  }
+
+  $('filtros').addEventListener('click', (e) => {
+    const chip = e.target.closest('[data-nivel]');
+    if (!chip) return;
+    nivelFiltro = chip.dataset.nivel || null;
+    renderFiltros();
+    cargarClientes();
+  });
+
+  async function cargarClientes() {
+    const buscar = $('buscar').value.trim();
+    const { data, error } = await sb.rpc('aliado_clientes', { p_token: token, p_buscar: buscar || null, p_nivel: nivelFiltro, p_estado: estadoFiltro });
+    if (error) {
+      if (esEnlaceInvalido(error)) return mostrarInvalido('Tu sesión terminó. Entra de nuevo.');
+      toast('No se pudo cargar la lista');
+      return;
+    }
+    clientes = data || [];
+    renderLista();
+  }
+
+  function renderLista() {
+    const el = $('lista');
+    if (!clientes.length) {
+      el.innerHTML = `<div class="empty">${estadoFiltro === 'reclamados'
+        ? (($('buscar').value.trim() || nivelFiltro) ? 'Nadie que coincida con la búsqueda ha reclamado todavía.' : 'Todavía nadie ha reclamado la cortesía.')
+        : ($('buscar').value.trim() || nivelFiltro ? 'No hay clientes con cortesía que coincidan con la búsqueda.' : 'No hay clientes con cortesía.')}</div>`;
+      return;
+    }
+    const aviso = clientes.length >= 300
+      ? '<div class="tip">Se muestran los primeros 300. Usa el buscador o filtra por nivel para encontrar a un cliente.</div>'
+      : '';
+    const titulo = estadoFiltro === 'reclamados'
+      ? `<div class="tip">Clientes que ya reclamaron (${clientes.length}${clientes.length >= 300 ? '+' : ''}), los más recientes primero. Toca de nuevo «Ya reclamadas» para ver a todos.</div>`
+      : '';
+    el.innerHTML = titulo + aviso + clientes.map(c => {
+      const tel = String(c.celular || '').replace(/[^\d+]/g, '');
+      const cel = c.celular ? `Cel. <a href="tel:${esc(tel)}">${esc(c.celular)}</a>` : 'Sin celular';
+      const nivel = `<span class="badge ${esc(c.nivel)}">${esc(NIVEL_LABEL[c.nivel] || c.nivel)}</span>`;
+      if (c.reclamado_at) {
+        return `<div class="row done">
+          <div class="info">
+            <div class="name">${esc(c.nombre)} ${nivel}</div>
+            <div class="meta">${cel}</div>
+            ${c.beneficio ? `<div class="meta">Recibió: ${esc(c.beneficio)}</div>` : ''}
+            <div class="meta"><span class="ok-tag">✓ Reclamada</span> · ${esc(fmtFecha(c.reclamado_at))}${c.atendido_por ? ' · ' + esc(c.atendido_por) : ''}</div>
+          </div>
+          <button class="btn btn-undo ${pendienteConfirmar === 'undo:' + c.cliente_id ? 'confirm-undo' : ''}" data-undo="${esc(c.cliente_id)}">${pendienteConfirmar === 'undo:' + c.cliente_id ? 'Confirmar' : 'Volver a no reclamada'}</button>
+        </div>`;
+      }
+      const confirmando = pendienteConfirmar === c.cliente_id;
+      return `<div class="row">
+        <div class="info">
+          <div class="name">${esc(c.nombre)} ${nivel}</div>
+          <div class="meta">${cel}</div>
+          ${c.beneficio ? `<div class="benef">🎁 ${esc(c.beneficio)}</div>` : ''}
+        </div>
+        <button class="btn btn-mark ${confirmando ? 'confirm' : ''}" data-mark="${esc(c.cliente_id)}">${confirmando ? 'Confirmar' : 'Marcar reclamada'}</button>
+      </div>`;
+    }).join('');
+  }
+
+  $('lista').addEventListener('click', async (e) => {
+    const markBtn = e.target.closest('[data-mark]');
+    const undoBtn = e.target.closest('[data-undo]');
+
+    if (markBtn) {
+      const id = markBtn.dataset.mark;
+      // Primer toque pide confirmar, el segundo marca
+      if (pendienteConfirmar !== id) {
+        pendienteConfirmar = id;
+        renderLista();
+        clearTimeout(renderLista._t);
+        renderLista._t = setTimeout(() => { pendienteConfirmar = null; renderLista(); }, 4000);
+        return;
+      }
+      pendienteConfirmar = null;
+      markBtn.disabled = true;
+      const { data, error } = await sb.rpc('aliado_marcar_reclamado', {
+        p_token: token, p_cliente_id: id, p_atendido_por: $('atiende').value.trim() || null
+      });
+      if (error) {
+        if (esEnlaceInvalido(error)) return mostrarInvalido('Tu sesión terminó. Entra de nuevo.');
+        toast('No se pudo marcar, intenta de nuevo');
+      } else if (!data?.success) {
+        toast(data?.reclamado_at ? `Ya la reclamó el ${fmtFecha(data.reclamado_at)}` : (data?.error || 'No se pudo marcar'));
+      } else {
+        toast(data?.beneficio ? `Entregado: ${data.beneficio}` : 'Cortesía marcada como reclamada');
+      }
+      await Promise.all([cargarInfo(), cargarClientes()]);
+    }
+
+    if (undoBtn) {
+      // Primer toque pide confirmar, el segundo la devuelve a no reclamada
+      const clave = 'undo:' + undoBtn.dataset.undo;
+      if (pendienteConfirmar !== clave) {
+        pendienteConfirmar = clave;
+        renderLista();
+        clearTimeout(renderLista._t);
+        renderLista._t = setTimeout(() => { pendienteConfirmar = null; renderLista(); }, 4000);
+        return;
+      }
+      pendienteConfirmar = null;
+      undoBtn.disabled = true;
+      const { data, error } = await sb.rpc('aliado_deshacer_reclamado', { p_token: token, p_cliente_id: undoBtn.dataset.undo });
+      if (error) {
+        if (esEnlaceInvalido(error)) return mostrarInvalido('Tu sesión terminó. Entra de nuevo.');
+        toast('No se pudo deshacer');
+      } else {
+        toast(data?.success ? 'Quedó como no reclamada' : (data?.error || 'No se pudo deshacer'));
+      }
+      await Promise.all([cargarInfo(), cargarClientes()]);
+    }
+  });
+
+  function setEstado(estado) {
+    estadoFiltro = estado;
+    $('stTodos').classList.toggle('active', estado === null);
+    $('stReclamados').classList.toggle('active', estado === 'reclamados');
+    cargarClientes();
+  }
+  $('stTodos').addEventListener('click', () => setEstado(null));
+  $('stReclamados').addEventListener('click', () => setEstado(estadoFiltro === 'reclamados' ? null : 'reclamados'));
+  $('stTodos').classList.add('active');
+
+  let buscarTimer;
+  $('buscar').addEventListener('input', () => {
+    clearTimeout(buscarTimer);
+    buscarTimer = setTimeout(cargarClientes, 300);
+  });
+
+  async function iniciar() {
+    if (!token) return mostrarInvalido();
+    $('login').style.display = 'none';
+    $('cargando').style.display = 'flex';
+    try {
+      const ok = await cargarInfo();
+      if (!ok) return;
+      await cargarClientes();
+      $('cargando').style.display = 'none';
+      $('app').style.display = 'block';
+    } catch (err) {
+      console.error(err);
+      $('cargando').innerHTML = '<div class="sub">No se pudo cargar. Revisa tu conexión y recarga la página.</div>';
+    }
+  }
+
+  $('login').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = $('lgBtn');
+    btn.disabled = true;
+    $('lgError').textContent = '';
+    try {
+      const { data, error } = await sb.rpc('aliado_login', { p_usuario: $('lgUsuario').value, p_clave: $('lgClave').value });
+      if (error) throw error;
+      if (!data?.success) {
+        $('lgError').textContent = data?.error || 'No se pudo entrar';
+        return;
+      }
+      token = data.token;
+      try { localStorage.setItem(SESION_KEY, token); } catch (e2) {}
+      $('lgClave').value = '';
+      await iniciar();
+    } catch (err) {
+      console.error(err);
+      $('lgError').textContent = 'No se pudo entrar. Revisa tu conexión.';
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('btnSalir').addEventListener('click', async () => {
+    try { await sb.rpc('aliado_logout', { p_token: token }); } catch (e) {}
+    $('buscar').value = '';
+    $('lista').innerHTML = '';
+    mostrarInvalido('Saliste. Entra con tu usuario y clave.');
+  });
+
+  iniciar();
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+/**
+ * Estilo visual de la app de barberos (tipografía e íconos).
+ * Referencia: íconos de línea gruesa con puntas redondeadas y tipografía
+ * sans-serif geométrica con títulos gruesos.
+ * Se carga DESPUÉS de design-system.css / barbero-nav.css / barbero-white.css.
+ */
+
+/* ---- Tipografía ---- */
+:root {
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Etiquetas de la barra inferior un poco más grandes */
+  --nav-font-size: 11px;
+  --nav-icon-size: 24px;
+  --barbero-nav-font-size: 10.5px;
+}
+
+html, body, button, input, select, textarea {
+  font-family: var(--font-family);
+  font-feature-settings: 'cv11', 'ss01'; /* a y l más limpias en Inter */
+}
+
+/* Títulos más gruesos y compactos, como en la referencia */
+.page-title, .ganancias-modal-title, .sheet-title, .hdr-name, .resenas-promedio {
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* ---- Íconos de línea: 2px, puntas y esquinas redondeadas ----
+   Solo íconos 24×24 (el anillo de progreso usa otro viewBox y no se toca).
+   Los trazos finos (1.5–1.9 o sin grosor definido) pasan a 2px; los que ya
+   son más gruesos (chulos de 2.5/3) y las estrellas rellenas (1) se respetan. */
+svg[viewBox="0 0 24 24"] {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+svg[viewBox="0 0 24 24"][stroke]:not([stroke-width]),
+svg[viewBox="0 0 24 24"]:is([stroke-width="1.5"], [stroke-width="1.6"], [stroke-width="1.7"], [stroke-width="1.8"], [stroke-width="1.9"]),
+svg[viewBox="0 0 24 24"] :is([stroke-width="1.5"], [stroke-width="1.6"], [stroke-width="1.7"], [stroke-width="1.8"], [stroke-width="1.9"]) {
+  stroke-width: 2;
+}
+
+/* Barra inferior (design-system.css le fija 1.8 por CSS) */
+.mobile-nav-item svg {
+  stroke-width: 2;
+}

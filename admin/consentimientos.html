@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="theme-color" content="#000000">
+<title>Consentimientos · Admin</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
+<style>
+  body { background:var(--bg); min-height:100vh; }
+  .container { max-width:960px; margin:0 auto; padding:24px var(--page-padding-x) 100px; padding-top:calc(24px + var(--safe-top)); }
+  .header { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
+  .back-btn { width:44px; height:44px; border-radius:14px; background:var(--card); border:1px solid var(--divider); display:flex; align-items:center; justify-content:center; color:var(--text); text-decoration:none; flex:none; }
+  .back-btn svg { width:20px; height:20px; }
+  .header-text .title { font-size:22px; font-weight:800; }
+  .header-text .sub { font-size:13px; color:var(--text-secondary); margin-top:2px; }
+  .nota { font-size:12.5px; color:var(--text-secondary); background:var(--card); border:1px solid var(--divider); border-radius:12px; padding:12px; margin-bottom:16px; line-height:1.5; }
+  .filters { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+  .filter-input { flex:1; min-width:180px; padding:11px 14px; border-radius:12px; background:var(--card); border:1px solid var(--divider); color:var(--text); font-size:14px; }
+  .btn { padding:11px 14px; border-radius:12px; border:1px solid var(--divider); background:var(--card); color:var(--text); font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+  .btn.gold { background:var(--gold); color:#111; border-color:var(--gold); }
+  .btn.danger { color:var(--error); border-color:rgba(239,83,80,0.4); }
+  .item { background:var(--card); border:1px solid var(--divider); border-radius:14px; padding:12px 14px; margin-bottom:8px; font-size:13px; }
+  .item-top { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .item-nombre { font-weight:700; font-size:14px; }
+  .item-meta { color:var(--text-secondary); font-size:12px; margin-top:4px; overflow-wrap:anywhere; line-height:1.45; }
+  .badge { font-size:11px; font-weight:700; padding:3px 8px; border-radius:20px; white-space:nowrap; }
+  .badge.ok { background:rgba(52,211,153,0.15); color:var(--success); }
+  .badge.no { background:rgba(239,83,80,0.12); color:var(--error); }
+  .badge.doc { background:rgba(255,172,72,0.15); color:var(--gold); }
+  details { margin-top:6px; } summary { cursor:pointer; color:var(--text-secondary); font-size:12px; }
+  .acciones { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+  .empty-state { text-align:center; padding:50px 20px; color:var(--text-secondary); }
+  .toast { position:fixed; left:50%; bottom:calc(24px + var(--safe-bottom, 0px)); transform:translateX(-50%); background:var(--card); border:1px solid var(--divider); color:var(--text); padding:12px 18px; border-radius:12px; font-size:13px; z-index:200; display:none; max-width:calc(100% - 32px); }
+  .toast.show { display:block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="header">
+    <a href="dashboard.html" class="back-btn" aria-label="Volver">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+    </a>
+    <div class="header-text">
+      <div class="title">Consentimientos</div>
+      <div class="sub">Prueba de cuándo y cómo cada cliente aceptó términos, política de datos, publicidad y cookies</div>
+    </div>
+  </header>
+
+  <div class="nota">
+    Este registro <b>no se puede editar ni borrar</b> (ni siquiera desde la base de datos): cada aceptación, rechazo o retiro queda como una fila nueva con fecha y hora, canal, versión del documento, texto exacto mostrado, IP y navegador.
+    Si la Superintendencia de Industria y Comercio pregunta por un titular, busca su celular y usa <b>Exportar CSV</b>.
+    Los documentos aceptados están en <a href="../terms.html" target="_blank">términos</a>, <a href="../privacy.html" target="_blank">datos</a>, <a href="../cookies.html" target="_blank">cookies</a> y <a href="../reembolsos.html" target="_blank">reembolsos</a>; cada versión queda en el historial de git y en la tabla <code>documentos_legales</code> con su huella SHA-256.
+  </div>
+
+  <div class="filters">
+    <input class="filter-input" id="q" placeholder="Celular, nombre o ID del cliente (vacío = últimos registros)" autocomplete="off">
+    <button class="btn gold" id="buscar">Buscar</button>
+  </div>
+  <div class="acciones">
+    <button class="btn" id="exportar">Exportar CSV</button>
+    <button class="btn danger" id="revocarPublicidad">Registrar retiro de publicidad</button>
+    <button class="btn danger" id="revocarDatos">Registrar revocación de datos</button>
+  </div>
+
+  <div id="lista"><div class="empty-state">Cargando…</div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
+<script src="../assets/legal.js?v=1"></script>
+<script src="../assets/turbo-loader.js" defer></script>
+<script>
+(function () {
+  const user = dnRequireAdmin('../index.html');
+  if (!user) return;
+
+  const DOCS = { terminos: 'Términos', privacidad: 'Política de datos', reembolsos: 'Reembolsos', publicidad: 'Publicidad',
+    cookies_analitica: 'Cookies analítica', cookies_publicidad: 'Cookies publicidad' };
+  const CANALES = { web_reservas: 'Reserva web', club_registro: 'Registro Club', banner_cookies: 'Aviso de cookies',
+    revocacion: 'Revocación', migracion: 'Migrado (registro anterior)' };
+  let filas = [];
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('show'), 3500);
+  }
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+  function fecha(f) {
+    return new Date(f).toLocaleString('es-CO', { timeZone: 'America/Bogota', dateStyle: 'medium', timeStyle: 'medium' });
+  }
+
+  async function cargar() {
+    const lista = document.getElementById('lista');
+    lista.innerHTML = '<div class="empty-state">Cargando…</div>';
+    const q = document.getElementById('q').value.trim();
+    const { data, error } = await sb.rpc('dn_admin_consentimientos', { p_busqueda: q || null, p_limite: q ? 2000 : 200 });
+    if (error) { lista.innerHTML = `<div class="empty-state">No se pudo cargar: ${esc(error.message)}</div>`; return; }
+    filas = data || [];
+    if (!filas.length) { lista.innerHTML = '<div class="empty-state">Sin registros para esta búsqueda.</div>'; return; }
+    lista.innerHTML = filas.map(c => `
+      <div class="item">
+        <div class="item-top">
+          <span class="item-nombre">${esc(c.nombre || 'Visitante sin identificar')}</span>
+          <span class="badge doc">${esc(DOCS[c.documento] || c.documento)} v${esc(c.version)}</span>
+          <span class="badge ${c.aceptado ? 'ok' : 'no'}">${c.aceptado ? 'Aceptó' : 'Rechazó / retiró'}</span>
+        </div>
+        <div class="item-meta">
+          ${esc(fecha(c.created_at))} · ${esc(CANALES[c.canal] || c.canal)} · ${esc(c.telefono || 'sin celular')}
+          · IP ${esc(c.ip || '—')} · Dispositivo ${esc(c.dispositivo_id || '—')}
+        </div>
+        <details>
+          <summary>Ver evidencia</summary>
+          <div class="item-meta"><b>Texto mostrado:</b> ${esc(c.texto_aceptado || '—')}</div>
+          <div class="item-meta"><b>Página:</b> ${esc(c.url || '—')}</div>
+          <div class="item-meta"><b>Navegador:</b> ${esc(c.user_agent || '—')}</div>
+          <div class="item-meta"><b>Cliente ID:</b> ${esc(c.usuario_id || '—')} · <b>Registro #</b>${esc(c.id)}</div>
+          <div class="item-meta"><b>Otros:</b> ${esc(JSON.stringify(c.evidencia || {}))}</div>
+        </details>
+      </div>`).join('');
+  }
+
+  function exportar() {
+    if (!filas.length) { toast('No hay registros para exportar.'); return; }
+    const cols = ['id', 'created_at', 'usuario_id', 'telefono', 'nombre', 'documento', 'version', 'aceptado', 'canal',
+      'metodo', 'texto_aceptado', 'url', 'ip', 'user_agent', 'dispositivo_id', 'evidencia'];
+    const csv = [cols.join(',')].concat(filas.map(f => cols.map(k => {
+      const v = k === 'evidencia' ? JSON.stringify(f[k] || {}) : (f[k] ?? '');
+      return '"' + String(v).replace(/"/g, '""') + '"';
+    }).join(','))).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' }));
+    const q = document.getElementById('q').value.trim().replace(/\W+/g, '_') || 'ultimos';
+    a.download = `consentimientos_${q}_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+  }
+
+  // Registra un retiro que el cliente pidió por WhatsApp, correo o en la sede.
+  async function revocar(documentos, etiqueta) {
+    const tel = prompt(`${etiqueta}\n\nCelular del cliente:`);
+    if (!tel || tel.replace(/\D/g, '').length < 7) return;
+    const medio = prompt('¿Por qué medio lo pidió? (WhatsApp, correo, en la sede…)', 'WhatsApp');
+    if (medio === null) return;
+    const { data: cli } = await sb.rpc('dn_reserva_buscar_cliente', { p_telefonos: [tel.replace(/\D/g, ''), '57' + tel.replace(/\D/g, '')] });
+    const ok = await DN_LEGAL.registrar({
+      canal: 'revocacion',
+      usuarioId: cli?.encontrado ? cli.id : null,
+      telefono: tel,
+      documentos: documentos.map(d => ({ documento: d, aceptado: false })),
+      texto: `${etiqueta}. Solicitado por: ${medio}. Registrado por: ${user.full_name || user.username || user.id}.`
+    });
+    toast(ok ? 'Retiro registrado.' : 'No se pudo registrar. Intenta de nuevo.');
+    document.getElementById('q').value = tel;
+    cargar();
+  }
+
+  document.getElementById('buscar').onclick = cargar;
+  document.getElementById('q').addEventListener('keydown', e => { if (e.key === 'Enter') cargar(); });
+  document.getElementById('exportar').onclick = exportar;
+  document.getElementById('revocarPublicidad').onclick = () => revocar(['publicidad'], 'Retiro de autorización de publicidad');
+  document.getElementById('revocarDatos').onclick = () => revocar(['privacidad', 'publicidad'],
+    'Revocación de autorización de tratamiento de datos (luego tramita la supresión de sus datos)');
+  cargar();
+})();
+</script>
+</body>
+</html>

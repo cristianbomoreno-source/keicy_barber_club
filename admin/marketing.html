@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Marketing</title>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <link rel="stylesheet" href="../assets/mobile-admin.css">
 <style>
   /* Variables heredadas de design-system.css */
@@ -315,11 +315,15 @@
 
       <!-- WhatsApp broadcast -->
       <div class="tab-panel active" data-panel="whatsapp">
-        <div class="panel-sub" style="margin-bottom:14px;">Genera un enlace de WhatsApp por cada cliente del segmento elegido. No hay envío automático — Keicy Barbería usa esto como ayuda para escribirles uno por uno, sin depender de una API de WhatsApp Business.</div>
+        <div class="panel-sub" style="margin-bottom:14px;">Genera un enlace de WhatsApp por cada cliente del segmento elegido. No hay envío automático — Keicy Barber Club usa esto como ayuda para escribirles uno por uno, sin depender de una API de WhatsApp Business.</div>
+        <div class="panel-sub" style="margin-bottom:14px;padding:10px 12px;border:1px solid var(--border, rgba(0,0,0,.1));border-radius:10px;">
+          <b>Solo aparecen clientes que autorizaron recibir publicidad</b> (Ley 1581 de 2012). Por la Ley 2300 de 2023, los mensajes publicitarios solo se pueden enviar de lunes a viernes de 7:00 a.m. a 7:00 p.m. y sábados de 8:00 a.m. a 3:00 p.m.; nunca domingos ni festivos, y máximo una vez por semana a cada cliente. Si un cliente pide no recibir más, regístralo en <a href="consentimientos.html">Consentimientos</a>.
+        </div>
+        <div id="waHorario" class="panel-sub" style="display:none;margin-bottom:14px;color:#c0392b;font-weight:600;"></div>
         <div class="field">
           <label>Segmento de clientes</label>
           <select id="waSegmento">
-            <option value="todos">Todos los clientes con teléfono</option>
+            <option value="todos">Todos los que autorizaron publicidad</option>
             <option value="con_puntos">Clientes con puntos acumulados</option>
             <option value="sin_visitas_30">Sin visitas en los últimos 30 días</option>
             <option value="gold">Nivel Gold</option>
@@ -426,7 +430,7 @@
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script>
   const toastEl = document.getElementById('toast');
@@ -478,13 +482,29 @@
   }
 
   // ---- WhatsApp broadcast helper ----
+  // Ley 2300 de 2023: horario permitido para mensajes publicitarios (hora de Colombia)
+  function horarioPublicidadPermitido(){
+    const ahora = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Bogota' }));
+    const dia = ahora.getDay(), min = ahora.getHours() * 60 + ahora.getMinutes();
+    const mmdd = String(ahora.getMonth() + 1).padStart(2, '0') + '-' + String(ahora.getDate()).padStart(2, '0');
+    const festivos = ['01-01','01-12','03-23','04-02','04-03','05-01','05-18','06-08','06-15','06-29','07-20','08-07','08-17','10-12','11-02','11-16','12-08','12-25'];
+    if (dia === 0 || festivos.includes(mmdd)) return false;
+    if (dia === 6) return min >= 8 * 60 && min < 15 * 60;
+    return min >= 7 * 60 && min < 19 * 60;
+  }
+
   async function generarListaWhatsApp(){
     const segmento = document.getElementById('waSegmento').value;
     const el = document.getElementById('waList');
+    const avisoHorario = document.getElementById('waHorario');
+    const permitido = horarioPublicidadPermitido();
+    avisoHorario.style.display = permitido ? 'none' : 'block';
+    avisoHorario.textContent = permitido ? '' : 'Fuera del horario permitido por la Ley 2300 de 2023: puedes preparar la lista, pero los botones de envío se habilitan en el horario legal.';
     el.innerHTML = '<div class="empty-row">Cargando…</div>';
     try {
       // OPTIMIZADO: Query con filtros específicos según segmento para reducir transferencia
-      let query = sb.from('usuarios').select('id, full_name, username, phone, points, membership_tier').eq('role', 'cliente').not('phone', 'is', null);
+      // Solo clientes con autorización de publicidad vigente (casilla opcional al reservar o en el Club)
+      let query = sb.from('usuarios').select('id, full_name, username, phone, points, membership_tier').eq('role', 'cliente').eq('autoriza_publicidad', true).not('phone', 'is', null);
 
       // Aplicar filtros en la query según segmento
       if (segmento === 'con_puntos') {
@@ -514,7 +534,7 @@
       }
       filtrados = filtrados.filter(c => c.phone);
 
-      if (!filtrados.length) { el.innerHTML = '<div class="empty-row">Ningún cliente de este segmento tiene teléfono registrado.</div>'; return; }
+      if (!filtrados.length) { el.innerHTML = '<div class="empty-row">Ningún cliente de este segmento ha autorizado recibir publicidad todavía.</div>'; return; }
 
       const template = document.getElementById('waMensaje').value || 'Hola {nombre}';
       el.innerHTML = filtrados.map(c => {
@@ -524,7 +544,7 @@
         return `
           <div class="wa-list-row">
             <div class="wa-mid"><div class="n">${nombre}</div><div class="p">${c.phone}</div></div>
-            <a class="wa-send-btn" href="https://wa.me/${phone}?text=${msg}" target="_blank">
+            <a class="wa-send-btn" href="https://wa.me/${phone}?text=${msg}" target="_blank" ${permitido ? '' : 'style="pointer-events:none;opacity:.4" aria-disabled="true"'}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5z"/></svg>
               Enviar
             </a>
@@ -697,8 +717,8 @@
   }
 </script>
 
-<script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261015b"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

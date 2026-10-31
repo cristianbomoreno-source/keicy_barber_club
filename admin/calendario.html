@@ -10,11 +10,11 @@
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
 <!-- Preload CSS críticos -->
-<link rel="preload" href="../assets/design-system.css" as="style">
+<link rel="preload" href="../assets/design-system.css?v=20261015b" as="style">
 <link rel="preload" href="../assets/mobile-admin.css" as="style">
 <link rel="preload" href="../assets/agenda-mobile-unified.css" as="style">
 <!-- Preload JS críticos -->
-<link rel="preload" href="../assets/supabase-client.js?v=20261014e" as="script">
+<link rel="preload" href="../assets/supabase-client.js?v=20261021" as="script">
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
@@ -26,10 +26,10 @@
 <meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Calendario</title>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <link rel="stylesheet" href="../assets/mobile-admin.css">
 <link rel="stylesheet" href="../assets/agenda-mobile-unified.css">
-<link rel="stylesheet" href="../assets/agenda-weibook.css">
+<link rel="stylesheet" href="../assets/agenda-weibook.css?v=20261017">
 <style>
   :root{
     /* Layout específico del calendario */
@@ -1129,7 +1129,7 @@
         <div class="icon-pill" onclick="openPanel('resumen')" title="Resumen del día">
           <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><path d="M4 20V10M11 20V4M18 20v-7" stroke-linecap="round"/></svg>
         </div>
-        <div class="icon-pill" onclick="openPanel('nevera')" title="Estado de la nevera" style="position:relative;">
+        <div class="icon-pill" onclick="openPanel('nevera')" title="Estado de la nevera" style="position:relative; display:none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M5 11h14M9 5v3M9 14v3" stroke-linecap="round"/></svg>
           <span class="badge-count" id="railBadgeNevera" style="background:var(--error);display:none;">0</span>
         </div>
@@ -2057,7 +2057,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
+<script src="../assets/push.js?v=20261026" defer></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/admin-sede-nav.js"></script>
 
@@ -3063,13 +3064,10 @@
       openBloqueoOptions(bloqueoDia.id || '', barberoId, barberoName, bloqueoInfo);
       return;
     }
-    // Si es un día habilitado, mostrar opciones para deshabilitar
-    if (bloqueoDia && bloqueoDia.tipo === 'habilitado') {
-      const bloqueoInfo = {tipo:'habilitado', motivo:bloqueoDia.motivo||'', autorizado_por:bloqueoDia.autorizado_por||''};
-      openBloqueoOptions(bloqueoDia.id || '', barberoId, barberoName, bloqueoInfo);
-      return;
-    }
-
+    // Un día habilitado se trabaja como cualquier otro: el toque abre las opciones del
+    // horario (nueva cita / bloquear horas). Antes abría la habilitación y "Editar"
+    // la convertía en un bloqueo de horas, con lo que el día volvía a ser descanso.
+    // "Volver a bloquear" sigue disponible dentro del menú de bloqueo.
     openSlotOptions(barberoId, hora, barberoName);
   }
 
@@ -4801,6 +4799,7 @@
   }
 
   function bloquearTodaLaSede() {
+    if (!dnGetSedeActual()) { toast('Elige primero la sede que quieres bloquear'); return; }
     bloqueoEsSede = true;
     bloqueoSelectedColabId = null;
     bloqueoSelectedColabName = 'Toda la sede';
@@ -4911,8 +4910,11 @@
 
     try {
       if (bloqueoEsSede) {
-        // Bloquear toda la sede: crear bloqueos para todos los barberos activos
-        const promesas = allBarberos.filter(b => b.activo).map(b => {
+        // Bloquear toda la sede: crear bloqueos para todos los barberos de la sede
+        // (allBarberos ya viene solo con los activos de la sede elegida)
+        if (!dnGetSedeActual()) { toast('Elige primero la sede que quieres bloquear'); return; }
+        if (!allBarberos.length) { toast('No hay colaboradores en esta sede'); return; }
+        const promesas = allBarberos.map(b => {
           const payload = {
             barbero_id: b.id,
             fecha: bloqueoSelectedDate,
@@ -4926,8 +4928,13 @@
           }
           return sb.from('bloqueos_barbero').insert(payload);
         });
-        await Promise.all(promesas);
-        toast(bloqueoSelectedType === 'horas' ? 'Sede bloqueada en ese horario' : 'Sede bloqueada para ese día');
+        const resultados = await Promise.all(promesas);
+        const fallidos = resultados.filter(r => r.error);
+        if (fallidos.length === resultados.length) throw fallidos[0].error;
+        if (fallidos.length) {
+          console.error(fallidos.map(r => r.error));
+          toast(`Se bloquearon ${resultados.length - fallidos.length} de ${resultados.length} colaboradores; revisa y vuelve a intentar`);
+        } else toast(bloqueoSelectedType === 'horas' ? 'Sede bloqueada en ese horario' : 'Sede bloqueada para ese día');
       } else {
         // Bloquear un colaborador específico
         const payload = {
@@ -5011,7 +5018,11 @@
     }
 
     try {
-      // Si estamos editando, actualizar en lugar de insertar
+      // Si estamos editando, actualizar en lugar de insertar.
+      // Una habilitación nunca se edita: si llegara aquí, el bloqueo se crea aparte.
+      const editandoHabilitacion = window._editingBloqueoId &&
+        allBloqueos.some(x => x.id === window._editingBloqueoId && x.tipo === 'habilitado');
+      if (editandoHabilitacion) window._editingBloqueoId = null;
       if (window._editingBloqueoId) {
         const { error } = await sb.from('bloqueos_barbero').update(payload).eq('id', window._editingBloqueoId);
         if (error) throw error;
@@ -6335,7 +6346,7 @@
       // No hacer INSERT directo a caja_movimientos
 
       // Registrar ventas de productos para compatibilidad (con ticket_id)
-      // NOTA: El descuento de inventario ya lo hace el RPC server-side
+      // El inventario lo descuenta el trigger trg_ventas_productos_stock al insertar en ventas_productos
       for (const [productoId, p] of Object.entries(productosSeleccionados)) {
         const comisionMonto = p.comision * p.cantidad;
         await sb.from('ventas_productos').insert({
@@ -6370,9 +6381,13 @@
   });
 
   // ---- Realtime ----
+  // Inventario de nevera (bebidas) desactivado en todas las sedes desde el 17-oct-2026.
+  // Para reactivarlo, poner en true.
+  const NEVERA_ACTIVA = false;
   let neveraStock = [];
   let neveraBajosPrev = 0;
   async function loadNeveraEstado(){
+    if (!NEVERA_ACTIVA) return;
     try {
       const { data, error } = await sb.from('bebidas_inventario').select('*').eq('activo', true).order('orden');
       if (error) throw error;
@@ -6581,9 +6596,11 @@
     whatsappChannel = sb.channel('whatsapp-' + Date.now())
       .on('postgres_changes', { event:'*', schema:'public', table:'whatsapp_cron_logs' }, () => loadWhatsappStats())
       .subscribe();
-    neveraChannel = sb.channel('nevera-' + Date.now())
-      .on('postgres_changes', { event:'*', schema:'public', table:'bebidas_inventario' }, () => loadNeveraEstado())
-      .subscribe();
+    if (NEVERA_ACTIVA) {
+      neveraChannel = sb.channel('nevera-' + Date.now())
+        .on('postgres_changes', { event:'*', schema:'public', table:'bebidas_inventario' }, () => loadNeveraEstado())
+        .subscribe();
+    }
   }
 
   function cleanupRealtimeChannels() {
@@ -6670,8 +6687,8 @@
 
 <script src="../assets/sidebar-toggle.js"></script>
 <script src="../assets/citas-estados.js"></script>
-<script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261015b"></script>
 <script src="../assets/agenda-mobile-unified.js"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>

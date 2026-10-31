@@ -1832,7 +1832,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
 <script>
   // Booking state
   let bookingPrefs = null;
@@ -2955,7 +2955,7 @@
         const user = b.usuarios || {};
         const name = user.full_name || user.username || 'Barbero';
         const avatar = user.avatar_url;
-        const rating = b.calificacion ? parseFloat(b.calificacion).toFixed(1) : null;
+        const rating = dnRatingValor(b.calificacion) !== null ? dnFormatRating(b.calificacion) : null;
         const initial = name.charAt(0).toUpperCase();
 
         return `

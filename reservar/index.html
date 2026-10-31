@@ -17,7 +17,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Trirong:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
@@ -729,7 +729,7 @@
   /* Estadísticas: 3 columnas iguales */
   .barber-stats{
     display:grid;
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:repeat(2,1fr);
     gap:6px;
     padding-top:10px;
     border-top:1px solid rgba(255,255,255,0.15);
@@ -1043,6 +1043,15 @@
     margin-left: -8px;
   }
 
+  .legal-consent{ margin:14px 0 2px; display:flex; flex-direction:column; gap:10px; text-align:left; }
+  .legal-check{ display:flex; gap:10px; align-items:flex-start; font-size:12.5px; line-height:1.45; color:var(--text-secondary); cursor:pointer; }
+  .legal-check input{ width:18px; height:18px; margin:1px 0 0; flex:none; accent-color:var(--gold); cursor:pointer; }
+  .legal-check a{ color:var(--text); text-decoration:underline; }
+  .legal-check .legal-req{ color:var(--error, #d33); }
+  .legal-aviso{ margin:10px 0 0; font-size:11.5px; line-height:1.45; color:var(--text-secondary); text-align:center; }
+  .legal-aviso a{ color:var(--text); text-decoration:underline; }
+  .legal-links{ display:flex; flex-wrap:wrap; justify-content:center; gap:4px 12px; font-size:11px; margin:8px 0 0; }
+  .legal-links a{ color:var(--text-secondary); text-decoration:underline; }
   .privacy-note{ display:flex; align-items:center; justify-content:center; gap:5px; font-size:10px; color:var(--text-secondary); margin:10px 0 0; }
   .privacy-note svg{ width:11px; height:11px; }
 
@@ -1734,14 +1743,25 @@
           </div>
 
           <div class="form-group">
-            <label class="form-label">Correo electrónico <span style="color:var(--error);">*</span></label>
+            <label class="form-label">Correo electrónico <span style="color:var(--text-secondary);font-weight:400;">(opcional)</span></label>
             <input type="email" class="form-input" id="clientEmailNew" placeholder="tu@email.com">
+          </div>
+
+          <!-- Autorizaciones (Ley 1581 de 2012 y Ley 1480 de 2011). La de datos se da al tocar
+               Continuar con el aviso a la vista (conducta inequívoca, Decreto 1377/2013 art. 7).
+               La de publicidad es aparte, opcional y nunca viene marcada. -->
+          <div class="legal-consent">
+            <label class="legal-check">
+              <input type="checkbox" id="aceptoPublicidad">
+              <span id="aceptoPublicidadTexto">Quiero recibir promociones y beneficios exclusivos del Club (descuentos y cortesías con negocios aliados) por WhatsApp, SMS o correo. Opcional; puedo cancelarlo cuando quiera.</span>
+            </label>
           </div>
 
           <button class="btn-gold" id="clientContinueBtn" disabled style="width:100%; height:48px; border-radius:12px; font-size:14px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px; margin-top:14px;">
             Continuar
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#111" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
           </button>
+          <p class="legal-aviso" id="aceptoLegalTexto">Al dar Continuar aceptas los <a href="/terms.html" target="_blank">Términos y Condiciones</a> y la <a href="/reembolsos.html" target="_blank">Política de Cancelaciones</a>, y autorizas a Keicy Barber Club a tratar tus datos según la <a href="/privacy.html" target="_blank">Política de Tratamiento de Datos</a> para gestionar tus citas y enviarte confirmaciones y recordatorios por WhatsApp.</p>
         </div>
       </div>
 
@@ -1984,6 +2004,12 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
       Tus datos están protegidos.
     </div>
+    <div class="legal-links">
+      <a href="/terms.html" target="_blank">Términos</a>
+      <a href="/privacy.html" target="_blank">Datos personales</a>
+      <a href="/reembolsos.html" target="_blank">Cancelaciones y reembolsos</a>
+      <a href="/cookies.html" target="_blank">Cookies</a>
+    </div>
   </div>
 
   <!-- Step 5: éxito -->
@@ -2074,8 +2100,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
 <script src="/assets/utils.js"></script>
+<script src="/assets/legal.js?v=1"></script>
 <script>
   // ============ SPLASH INTELIGENTE ============
   // Tiempo mínimo: 1.5s (para mostrar la marca)
@@ -2349,11 +2376,39 @@
   clientLastNameInputNew.addEventListener('input', () => { state.cliente.lastName = clientLastNameInputNew.value.trim(); validateClientForm(); });
   clientEmailInputNew.addEventListener('input', () => { state.cliente.email = clientEmailInputNew.value.trim(); validateClientForm(); });
 
+  const aceptoPublicidadInput = document.getElementById('aceptoPublicidad');
+
   function validateClientForm() {
     const hasPhone = clientPhoneInputNew.value.replace(/\D/g, '').length >= 7;
     const hasName = state.cliente.name.length > 0;
-    // Email es opcional
+    // Email es opcional; términos y política de datos se aceptan al tocar Continuar
     clientContinueBtn.disabled = !(hasPhone && hasName);
+  }
+
+  // Deja prueba de la aceptación en el registro de consentimientos (Ley 1581).
+  // Una sola vez por combinación cliente/publicidad para no duplicar filas.
+  let consentimientoRegistrado = '';
+  function registrarConsentimientoReserva(clienteId, telefono, nombre) {
+    if (!window.DN_LEGAL) return;
+    const publicidad = aceptoPublicidadInput.checked;
+    const clave = `${clienteId || telefono}|${publicidad}`;
+    if (consentimientoRegistrado === clave) return;
+    consentimientoRegistrado = clave;
+    DN_LEGAL.registrar({
+      canal: 'web_reservas',
+      usuarioId: clienteId,
+      telefono,
+      nombre,
+      documentos: [
+        { documento: 'terminos', aceptado: true },
+        { documento: 'reembolsos', aceptado: true },
+        { documento: 'privacidad', aceptado: true },
+        { documento: 'publicidad', aceptado: publicidad }
+      ],
+      texto: document.getElementById('aceptoLegalTexto').textContent.replace(/\s+/g, ' ').trim() +
+        ' | Publicidad: ' + (publicidad ? 'SÍ' : 'NO') + ' — ' +
+        document.getElementById('aceptoPublicidadTexto').textContent.trim()
+    });
   }
 
   clientContinueBtn.addEventListener('click', async () => {
@@ -2389,6 +2444,7 @@
         console.error(e);
       }
     }
+    registrarConsentimientoReserva(state.cliente.id, state.cliente.phone, fullName);
 
     // If only one sede, skip sede selection
     if (sedesCargadas && sedesCargadas.length === 1) {
@@ -2906,7 +2962,7 @@
     const focusY = b.usuarios?.avatar_focus_y_reservas ?? 30;
     const instagram = b.usuarios?.instagram;
     const rawRating = b.avgRating ?? b.calificacion ?? null;
-    const avgRating = rawRating !== null ? Number(rawRating).toFixed(1) : '—';
+    const avgRating = rawRating !== null ? dnFormatRating(rawRating) : '—';
     const reviewsCount = b.reviewsCount || 0;
     const reviews = barberoReviews[b.id] || [];
 
@@ -2948,7 +3004,6 @@
           <div class="barber-stats">
             <div class="barber-stat"><b>${citasCount}</b><span>Cortes</span></div>
             <div class="barber-stat"><b>${avgRating}</b><span>Calificación</span></div>
-            <div class="barber-stat"><b>${b.activo ? 'Hoy' : '—'}</b><span>Disponibilidad</span></div>
           </div>
           <div class="barber-reviews-section">
             ${reviews.length > 0 ? reviewsHTML : '<p class="barber-no-reviews">Sin reseñas aún</p>'}
@@ -3003,7 +3058,6 @@
           <div class="barber-stats">
             <div class="barber-stat"><b>+</b><span>Flexibilidad</span></div>
             <div class="barber-stat"><b>-</b><span>Espera</span></div>
-            <div class="barber-stat"><b>Hoy</b><span>Disponibilidad</span></div>
           </div>
         </div>
       </div>`;
@@ -3011,6 +3065,7 @@
 
   // Store reviews data globally for modal
   let barberoReviews = {};
+  let barberoReviewStats = {};
 
   async function loadBarberos(){
     const carousel = document.getElementById('barberCarousel');
@@ -3032,22 +3087,24 @@
 
       // Cargar reseñas de todos los barberos de esta sede
       // Reseñas con solo el nombre y nivel del cliente
-      const { data: resenasData, error: resenasError } = await sb.rpc('dn_publico_resenas', { p_barbero_ids: barberoIds, p_limite: 50 });
+      // Hasta 200 por barbero (el límite es por barbero, no por sede)
+      const [{ data: resenasData, error: resenasError }, { data: statsData, error: statsError }] = await Promise.all([
+        sb.rpc('dn_publico_resenas', { p_barbero_ids: barberoIds, p_limite: 200 }),
+        sb.rpc('dn_publico_resenas_stats', { p_barbero_ids: barberoIds })
+      ]);
       if (resenasError) console.error('Error cargando reseñas:', resenasError);
+      if (statsError) console.error('Error cargando totales de reseñas:', statsError);
 
-      // Agrupar reseñas por barbero y calcular promedios
+      // Agrupar reseñas por barbero
       const reviewsByBarber = {};
-      const avgByBarber = {};
       (resenasData || []).forEach(r => {
         if (!r.barbero_id) return;
         if (!reviewsByBarber[r.barbero_id]) reviewsByBarber[r.barbero_id] = [];
         reviewsByBarber[r.barbero_id].push(r);
       });
-      Object.keys(reviewsByBarber).forEach(bid => {
-        const reviews = reviewsByBarber[bid];
-        const sum = reviews.reduce((s, r) => s + (r.calificacion || 0), 0);
-        avgByBarber[bid] = reviews.length > 0 ? (sum / reviews.length) : null;
-      });
+      // Total, promedio y distribución reales (todas las reseñas, no solo las cargadas)
+      barberoReviewStats = {};
+      (statsData || []).forEach(s => { barberoReviewStats[s.barbero_id] = s; });
       barberoReviews = reviewsByBarber;
 
 
@@ -3055,8 +3112,8 @@
       const barberosConUsuarios = data.map(b => ({
         ...b,
         usuarios: usuariosMap[b.id] || {},
-        reviewsCount: (reviewsByBarber[b.id] || []).length,
-        avgRating: avgByBarber[b.id] !== undefined ? avgByBarber[b.id] : (b.calificacion || null)
+        reviewsCount: barberoReviewStats[b.id] ? Number(barberoReviewStats[b.id].total) : (reviewsByBarber[b.id] || []).length,
+        avgRating: barberoReviewStats[b.id] ? Number(barberoReviewStats[b.id].promedio) : (b.calificacion || null)
       }));
 
       state.barberos = dnShuffle(barberosConUsuarios);
@@ -3273,10 +3330,11 @@
         const hs = horaInicio.slice(0, 5);
         if (!diaConfig.rangos.some(r => hs >= r.desde && hs < r.hasta)) return 'fuera de su horario';
       }
-      for (const q of (bqs || [])) {
-        if (q.tipo === 'dia') return 'día bloqueado';
-        if (q.tipo === 'horas' && q.hora_inicio && q.hora_fin && horaInicio < q.hora_fin && horaFin > q.hora_inicio) return 'horas bloqueadas';
-      }
+      if ((bqs || []).some(q => q.tipo === 'dia')) return 'día bloqueado';
+    }
+    // La habilitación abre el día de descanso, pero los bloqueos de horas siguen valiendo
+    for (const q of (bqs || [])) {
+      if (q.tipo === 'horas' && q.hora_inicio && q.hora_fin && horaInicio < q.hora_fin && horaFin > q.hora_inicio) return 'horas bloqueadas';
     }
     const choca = (citas || []).some(c => {
       const fin = c.hora_fin || (String(Number(c.hora_inicio.slice(0, 2)) + 1).padStart(2, '0') + c.hora_inicio.slice(2));
@@ -3331,11 +3389,9 @@
           const weekday = new Date(state.fecha + 'T00:00:00').getDay();
           if (Number(barbero.dia_descanso) === weekday && !tieneHabilitacion) return true;
         }
-        // Si tiene habilitación, está disponible (ignora otros bloqueos del día)
-        if (tieneHabilitacion) return false;
-
-        // Verificar horario personalizado del barbero
-        if (barbero?.horario_personalizado) {
+        // La habilitación ignora el descanso, el horario personalizado y el bloqueo de día
+        // completo, pero NO los bloqueos de horas que se pongan ese mismo día.
+        if (!tieneHabilitacion && barbero?.horario_personalizado) {
           const weekday = new Date(state.fecha + 'T00:00:00').getDay();
           const diasSemana = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
           const diaConfig = barbero.horario_personalizado[diasSemana[weekday]];
@@ -3351,9 +3407,8 @@
           }
         }
 
-        // Verificar bloqueos específicos (solo si NO tiene habilitación)
         for (const bq of bqs) {
-          if (bq.tipo === 'dia') return true;
+          if (bq.tipo === 'dia' && !tieneHabilitacion) return true;
           if (bq.tipo === 'horas' && bq.hora_inicio && bq.hora_fin) {
             if (hora >= bq.hora_inicio && hora < bq.hora_fin) return true;
           }
@@ -3639,6 +3694,7 @@
         });
         if (createErr) throw createErr;
         clienteId = id;
+        if (!fromClientApp) registrarConsentimientoReserva(clienteId, phoneDigits, name);
       }
 
       const [principal, ...extras] = state.serviciosSeleccionados;
@@ -3760,12 +3816,13 @@
     try {
       const { data: cfg } = await sb.from('configuracion_negocio').select('pixel_meta_id, pixel_google_id').eq('id', true).maybeSingle();
       if (!cfg) return;
-      if (cfg.pixel_meta_id) {
+      // Solo se cargan si la persona acepta esas cookies (Ley 1581; ver /cookies.html)
+      if (cfg.pixel_meta_id) DN_LEGAL.cookies.cuandoAcepte('publicidad', () => {
         const s = document.createElement('script');
         s.innerHTML = `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${cfg.pixel_meta_id}');fbq('track','PageView');`;
         document.head.appendChild(s);
-      }
-      if (cfg.pixel_google_id) {
+      });
+      if (cfg.pixel_google_id) DN_LEGAL.cookies.cuandoAcepte(/^G-/i.test(cfg.pixel_google_id) ? 'analitica' : 'publicidad', () => {
         const gs = document.createElement('script');
         gs.async = true;
         gs.src = `https://www.googletagmanager.com/gtag/js?id=${cfg.pixel_google_id}`;
@@ -3773,7 +3830,7 @@
         const cfgScript = document.createElement('script');
         cfgScript.innerHTML = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${cfg.pixel_google_id}');`;
         document.head.appendChild(cfgScript);
-      }
+      });
     } catch (e) { /* si falla, la reserva sigue funcionando igual sin el píxel */ }
   }
 
@@ -3883,17 +3940,23 @@
       `;
     } else {
       // Calcular estadísticas
-      const total = reviews.length;
-      const sum = reviews.reduce((s, r) => s + (r.calificacion || 0), 0);
-      const avg = (sum / total).toFixed(1);
+      const st = barberoReviewStats[barberoId];
+      const total = st ? Number(st.total) : reviews.length;
+      const avg = st
+        ? Number(st.promedio).toFixed(1)
+        : (reviews.reduce((s, r) => s + (r.calificacion || 0), 0) / reviews.length).toFixed(1);
 
       // Distribución de estrellas
-      const dist = [0, 0, 0, 0, 0];
-      reviews.forEach(r => {
-        if (r.calificacion >= 1 && r.calificacion <= 5) {
-          dist[r.calificacion - 1]++;
-        }
-      });
+      let dist = [0, 0, 0, 0, 0];
+      if (st && Array.isArray(st.dist)) {
+        dist = st.dist.map(Number);
+      } else {
+        reviews.forEach(r => {
+          if (r.calificacion >= 1 && r.calificacion <= 5) {
+            dist[r.calificacion - 1]++;
+          }
+        });
+      }
 
       subtitle.textContent = `${total} opinión${total !== 1 ? 'es' : ''} · Promedio ${avg}★`;
 

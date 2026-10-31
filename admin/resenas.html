@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v2.png">
+<link rel="icon" href="../assets/favicon-32.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Keicy Barber">
+<meta name="theme-color" content="#000000">
+<title>Reseñas · Admin</title>
+<script src="../assets/theme-manager.js"></script>
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
+<style>
+  body { background:var(--bg); min-height:100vh; }
+  .container { max-width:900px; margin:0 auto; padding:24px var(--page-padding-x) 100px; padding-top:calc(24px + var(--safe-top)); }
+
+  .header { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
+  .back-btn { width:44px; height:44px; border-radius:14px; background:var(--card); border:1px solid var(--divider); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); text-decoration:none; flex:none; }
+  .back-btn svg { width:20px; height:20px; }
+  .header-text .title { font-size:22px; font-weight:800; }
+  .header-text .sub { font-size:13px; color:var(--text-secondary); margin-top:2px; }
+
+  /* Filtros */
+  .chips { display:flex; gap:6px; overflow-x:auto; padding-bottom:4px; margin-bottom:10px; scrollbar-width:none; }
+  .chips::-webkit-scrollbar { display:none; }
+  .chip { flex:none; padding:8px 13px; border-radius:999px; background:var(--card); border:1px solid var(--divider); color:var(--text); font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; font-family:inherit; }
+  .chip.active { background:linear-gradient(135deg,#FFAC48,#FFD9A8); color:#111; border-color:transparent; }
+  .filters { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
+  .filter-select, .filter-input { width:100%; box-sizing:border-box; padding:11px 12px; border-radius:12px; background:var(--card); border:1px solid var(--divider); color:var(--text); font-size:14px; font-family:inherit; }
+  .rango-custom { display:none; grid-column:1 / -1; grid-template-columns:1fr 1fr; gap:8px; }
+  .rango-custom.show { display:grid; }
+
+  /* KPIs */
+  .kpis { display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:6px; }
+  .kpi { background:var(--card); border:1px solid var(--divider); border-radius:14px; padding:12px 8px; text-align:center; min-width:0; }
+  .kpi-num { font-size:22px; font-weight:800; line-height:1.15; }
+  .kpi-num.gold { color:var(--gold); }
+  .kpi-label { font-size:10.5px; color:var(--text-secondary); text-transform:uppercase; letter-spacing:.3px; margin-top:3px; }
+  .kpi-sub { font-size:11px; color:var(--text-secondary); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .delta { font-size:11px; font-weight:700; margin-top:3px; white-space:nowrap; }
+  .delta.up { color:#22C55E; } .delta.down { color:#EF4444; } .delta.eq { color:var(--text-secondary); }
+  .comparacion-nota { font-size:11.5px; color:var(--text-secondary); margin:0 0 16px; text-align:center; }
+
+  .card { background:var(--card); border:1px solid var(--divider); border-radius:16px; padding:14px; margin-bottom:14px; }
+  .card-head { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; }
+  .card-title { font-size:15px; font-weight:800; }
+  .card-hint { font-size:11.5px; color:var(--text-secondary); }
+  .link-btn { border:none; background:none; color:var(--gold); font:inherit; font-size:13px; font-weight:700; cursor:pointer; padding:4px 0; }
+
+  .bar { height:10px; border-radius:99px; background:rgba(127,127,127,0.15); overflow:hidden; }
+  .bar > i { display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,#FFAC48,#FFD9A8); }
+  .bar.bad > i { background:linear-gradient(90deg,#EF4444,#F59E0B); }
+
+  /* Distribución por estrellas */
+  .dist-row { display:grid; grid-template-columns:34px 1fr 64px; align-items:center; gap:8px; padding:5px 4px; cursor:pointer; border-radius:8px; }
+  .dist-row.sel { background:rgba(255,172,72,0.12); }
+  .dist-lbl { font-size:13px; font-weight:700; }
+  .dist-num { font-size:12px; color:var(--text-secondary); text-align:right; white-space:nowrap; }
+
+  /* Sedes */
+  .sedes { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:8px; }
+  .sede { border:1px solid var(--divider); border-radius:14px; padding:12px; cursor:pointer; }
+  .sede.sel { border-color:var(--gold); }
+  .sede-nombre { font-size:13px; font-weight:700; margin-bottom:6px; }
+  .sede-stats { display:flex; gap:14px; }
+  .sede-stats b { display:block; font-size:18px; font-weight:800; }
+  .sede-stats span { font-size:10.5px; color:var(--text-secondary); text-transform:uppercase; }
+
+  /* Segmentado */
+  .seg { display:flex; gap:4px; padding:3px; background:rgba(127,127,127,0.1); border-radius:12px; margin-bottom:10px; }
+  .seg button { flex:1; border:none; background:none; color:var(--text-secondary); font:inherit; font-size:12.5px; font-weight:700; padding:8px 4px; border-radius:9px; cursor:pointer; }
+  .seg button.active { background:var(--card); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,0.12); }
+
+  /* Filas genéricas (ranking, servicios, día/hora, metas) */
+  .row { display:grid; grid-template-columns:28px 1fr auto; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--divider); }
+  .row:first-child { border-top:none; }
+  .row.click { cursor:pointer; }
+  .row.dos { grid-template-columns:1fr auto; }
+  .row-pos { font-size:14px; font-weight:800; color:var(--text-secondary); text-align:center; }
+  .row-pos.top { color:var(--gold); }
+  .row-name { font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .row-meta { font-size:11.5px; color:var(--text-secondary); margin-top:1px; }
+  .row-meta .bar { margin-top:5px; height:6px; }
+  .row-val { text-align:right; }
+  .row-val b { display:block; font-size:16px; font-weight:800; }
+  .row-val span { font-size:11px; color:var(--text-secondary); }
+  .row-val b.malo { color:#EF4444; }
+
+  /* Metas */
+  .metas-resumen { display:flex; align-items:center; gap:12px; padding:12px; border-radius:14px; background:rgba(255,172,72,0.1); margin-bottom:10px; }
+  .metas-resumen b { font-size:24px; font-weight:800; color:var(--gold); }
+  .metas-resumen span { font-size:13px; color:var(--text-secondary); line-height:1.3; }
+  .meta-pill { display:inline-block; font-size:11.5px; font-weight:700; padding:3px 8px; border-radius:99px; margin-left:4px; white-space:nowrap; }
+  .meta-pill.ok { background:rgba(34,197,94,0.14); color:#22C55E; }
+  .meta-pill.no { background:rgba(239,68,68,0.12); color:#EF4444; }
+  .metas-form { display:none; grid-template-columns:1fr 1fr auto; gap:8px; align-items:end; margin-bottom:12px; }
+  .metas-form.show { display:grid; }
+  .metas-form label { font-size:11.5px; color:var(--text-secondary); display:block; margin-bottom:4px; }
+  .btn-gold { padding:11px 14px; border-radius:12px; border:none; background:linear-gradient(135deg,#FFAC48,#FFD9A8); color:#111; font:inherit; font-weight:800; cursor:pointer; }
+
+  /* Tendencia */
+  .trend { display:flex; align-items:flex-end; gap:3px; height:120px; padding-top:8px; }
+  .trend-col { flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+  .trend-bar { width:100%; max-width:22px; border-radius:5px 5px 2px 2px; background:linear-gradient(180deg,#FFD9A8,#FFAC48); min-height:2px; }
+  .trend-n { font-size:9.5px; color:var(--text-secondary); margin-bottom:2px; }
+  .trend-x { display:flex; gap:3px; margin-top:4px; }
+  .trend-x span { flex:1; min-width:0; font-size:9px; color:var(--text-secondary); text-align:center; overflow:hidden; white-space:nowrap; }
+
+  /* Lista */
+  .list-filters { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; align-items:center; }
+  .list-filters .filter-input { flex:1; min-width:150px; }
+  .list-filters .filter-select { width:auto; flex:none; }
+  .check { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--text-secondary); cursor:pointer; }
+  .resena { padding:12px 6px; border-top:1px solid var(--divider); cursor:pointer; border-radius:10px; }
+  .resena:first-child { border-top:none; }
+  .resena:active { background:rgba(127,127,127,0.08); }
+  .resena-top { display:flex; justify-content:space-between; gap:8px; }
+  .resena-cliente { font-size:14px; font-weight:700; }
+  .resena-meta { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+  .resena-meta b { color:var(--gold); font-weight:600; }
+  .resena-fecha { font-size:11px; color:var(--text-secondary); white-space:nowrap; }
+  .stars { color:#F5B800; font-size:13px; letter-spacing:1px; margin-top:4px; }
+  .stars .off { color:rgba(127,127,127,0.35); }
+  .resena-texto { font-size:13.5px; line-height:1.4; margin-top:6px; }
+  .resena.baja { background:rgba(239,68,68,0.06); border-top-color:transparent; }
+  .resena-seg { font-size:12px; font-weight:700; margin-top:6px; }
+  .resena-seg.ok { color:#22C55E; }
+  .resena-seg.pend { color:#EF4444; }
+  .ver-mas { width:100%; margin-top:10px; padding:11px; border-radius:12px; border:1px solid var(--divider); background:none; color:var(--text); font:inherit; font-weight:700; cursor:pointer; }
+  .alerta-bajas { display:none; width:100%; align-items:center; gap:12px; margin:0 0 14px; padding:12px 14px; border-radius:16px; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.35); color:inherit; font:inherit; text-align:left; cursor:pointer; box-sizing:border-box; }
+  .alerta-bajas.show { display:flex; }
+  .alerta-ico { width:36px; height:36px; border-radius:12px; background:#EF4444; color:#fff; display:flex; align-items:center; justify-content:center; flex:none; }
+  .alerta-t { display:block; font-size:14px; font-weight:800; }
+  .alerta-s { display:block; font-size:12px; color:var(--text-secondary); margin-top:1px; }
+  .empty-state { text-align:center; color:var(--text-secondary); padding:22px 10px; font-size:13px; }
+  .filtro-activo { display:inline-flex; align-items:center; gap:6px; font-size:12px; padding:4px 10px; border-radius:99px; background:rgba(255,172,72,0.15); color:var(--gold); font-weight:700; cursor:pointer; }
+
+  @media (max-width:420px) {
+    .kpi-num { font-size:19px; }
+    .metas-form { grid-template-columns:1fr 1fr; }
+    .metas-form .btn-gold { grid-column:1 / -1; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <a class="back-btn" href="dashboard.html" id="btnVolver" aria-label="Volver">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <div class="header-text">
+      <div class="title">Reseñas</div>
+      <div class="sub" id="subtitulo">Cargando…</div>
+    </div>
+  </div>
+
+  <!-- Reseñas bajas (1-3★) sin atender, de cualquier fecha -->
+  <button class="alerta-bajas" id="alertaBajas" type="button">
+    <span class="alerta-ico"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>
+    <span style="flex:1; min-width:0;"><span class="alerta-t" id="alertaBajasT">Reseñas bajas sin atender</span><span class="alerta-s">Toca para verlas y hacer seguimiento</span></span>
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="flex:none; opacity:.6;"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+
+  <div class="chips" id="presets">
+    <button class="chip" data-p="hoy">Hoy</button>
+    <button class="chip active" data-p="7">7 días</button>
+    <button class="chip" data-p="30">30 días</button>
+    <button class="chip" data-p="mes">Este mes</button>
+    <button class="chip" data-p="mesant">Mes anterior</button>
+    <button class="chip" data-p="todo">Todo</button>
+    <button class="chip" data-p="custom">Personalizado</button>
+  </div>
+
+  <div class="filters">
+    <div class="rango-custom" id="rangoCustom">
+      <input type="date" class="filter-input" id="fDesde" aria-label="Desde">
+      <input type="date" class="filter-input" id="fHasta" aria-label="Hasta">
+    </div>
+    <select class="filter-select" id="fSede"><option value="">Todas las sedes</option></select>
+    <select class="filter-select" id="fBarbero"><option value="">Todos los barberos</option></select>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="kpi-num" id="kTotal">—</div><div class="kpi-label">Reseñas</div><div class="delta" id="dTotal"></div></div>
+    <div class="kpi"><div class="kpi-num gold" id="kProm">—</div><div class="kpi-label">Promedio</div><div class="delta" id="dProm"></div></div>
+    <div class="kpi"><div class="kpi-num" id="kCinco">—</div><div class="kpi-label">5 estrellas</div><div class="delta" id="dCinco"></div></div>
+    <div class="kpi"><div class="kpi-num" id="kTasa">—</div><div class="kpi-label">Tasa de reseña</div><div class="delta" id="dTasa"></div></div>
+    <div class="kpi"><div class="kpi-num" id="kComent">—</div><div class="kpi-label">Con comentario</div><div class="delta" id="dComent"></div></div>
+    <div class="kpi"><div class="kpi-num" id="kBajas">—</div><div class="kpi-label">Bajas (1–3★)</div><div class="delta" id="dBajas"></div></div>
+  </div>
+  <div class="comparacion-nota" id="comparacionNota"></div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">Distribución por estrellas</div><div class="card-hint">Toca para filtrar</div></div>
+    <div id="dist"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">Por sede</div><div class="card-hint">Toca para filtrar</div></div>
+    <div class="sedes" id="sedes"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">Ranking de barberos</div></div>
+    <div class="seg" id="rankModo">
+      <button class="active" data-m="cantidad">Más reseñas</button>
+      <button data-m="promedio">Mejor promedio</button>
+      <button data-m="tasa">Tasa de reseña</button>
+    </div>
+    <div id="ranking"></div>
+    <div class="card-hint" id="rankNota" style="margin-top:8px;"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">Metas por barbero</div><button class="link-btn" id="editarMetas">Editar metas</button></div>
+    <div class="metas-form" id="metasForm">
+      <div><label for="mTasa">Tasa mínima (%)</label><input type="number" class="filter-input" id="mTasa" min="0" max="100" step="1"></div>
+      <div><label for="mProm">Promedio mínimo</label><input type="number" class="filter-input" id="mProm" min="1" max="5" step="0.05"></div>
+      <button class="btn-gold" id="guardarMetas">Guardar</button>
+    </div>
+    <div id="metas"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">Calificación por servicio</div><div class="card-hint">Servicio principal de la cita</div></div>
+    <div id="servicios"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">Día y hora de la cita</div></div>
+    <div class="seg" id="dhModo">
+      <button class="active" data-m="dia">Día de la semana</button>
+      <button data-m="hora">Hora</button>
+    </div>
+    <div id="diaHora"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><div class="card-title">Tendencia</div><div class="card-hint" id="trendHint"></div></div>
+    <div id="trend"></div>
+  </div>
+
+  <div class="card" id="listaCard">
+    <div class="card-head"><div class="card-title">Reseñas</div><div class="card-hint" id="listaCount"></div></div>
+    <div class="list-filters">
+      <input class="filter-input" id="fTexto" placeholder="Buscar cliente o comentario" autocomplete="off">
+      <select class="filter-select" id="fEstado" aria-label="Seguimiento">
+        <option value="">Todas</option>
+        <option value="pendientes">Bajas sin atender</option>
+        <option value="atendidas">Atendidas</option>
+      </select>
+      <label class="check"><input type="checkbox" id="fComent"> Con comentario</label>
+      <span id="fEstrellaTag"></span>
+    </div>
+    <div id="lista"><div class="empty-state">Cargando…</div></div>
+    <button class="ver-mas" id="verMas" style="display:none;">Ver más</button>
+  </div>
+</div>
+
+<div id="toast"><span class="toast-dot"></span><span id="toastText"></span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
+<script src="../assets/push.js?v=20261026" defer></script>
+<script src="../assets/resenas-acciones.js?v=20261015b"></script>
+<script src="../assets/turbo-loader.js" defer></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
+<script>
+(function() {
+  const user = dnRequireAdmin('../index.html');
+  if (!user) return;
+
+  const MIN_RESENAS_PROMEDIO = 5; // "Mejor promedio": evita que 1 reseña de 5★ encabece
+  const PAGINA = 30;
+  const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  const pctNum = (a, b) => b > 0 ? a / b * 100 : null;
+  const pct = (a, b) => b > 0 ? Math.round(a / b * 100) + '%' : '—';
+  const fechaCorta = d => d.toLocaleDateString('es-CO', { day:'numeric', month:'short' });
+  const estrellas = n => '<span>' + '★'.repeat(n) + '</span><span class="off">' + '★'.repeat(5 - n) + '</span>';
+  const promedio = arr => arr.length ? arr.reduce((s, r) => s + r.calificacion, 0) / arr.length : 0;
+
+  function toast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  let sedes = {};        // id -> nombre corto
+  let barberos = {};     // id -> { nombre, sucursal_id }
+  let resenas = [];      // período actual con filtros de sede/barbero
+  let serviciosPorBarbero = {};
+  let previo = null;     // { resenas, servicios } del período anterior (null en "Todo")
+  let metas = { tasa_min: 25, promedio_min: 4.8 };
+  // Admin de sede: solo sus sedes asignadas y sin editar metas
+  const modoSede = user.role === 'admin_sede' || new URLSearchParams(location.search).get('admin_sede') === '1';
+  let sedesPermitidas = null; // null = todas (admin)
+  let rango = null;
+  let filtroEstrella = null;
+  let rankModo = 'cantidad';
+  let dhModo = 'dia';
+  let mostrados = PAGINA;
+
+  // ---- Fechas ----
+  function isoLocal(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function sumarDias(iso, n) { const d = new Date(iso + 'T12:00:00'); d.setDate(d.getDate() + n); return isoLocal(d); }
+  function calcularRango(p) {
+    const hoy = new Date(dnTodayISO() + 'T12:00:00');
+    if (p === 'hoy') return { desde: isoLocal(hoy), hasta: isoLocal(hoy), label: 'Hoy', comparable: 'ayer' };
+    if (p === '7' || p === '30') return { desde: sumarDias(isoLocal(hoy), -(Number(p) - 1)), hasta: isoLocal(hoy), label: `Últimos ${p} días`, comparable: `los ${p} días anteriores` };
+    if (p === 'mes') {
+      // Mes en curso vs. los mismos días del mes anterior
+      const ini = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      return { desde: isoLocal(ini), hasta: isoLocal(hoy), label: 'Este mes', comparable: 'el mismo tramo del mes anterior',
+        previo: { desde: isoLocal(new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1)), hasta: isoLocal(new Date(hoy.getFullYear(), hoy.getMonth() - 1, Math.min(hoy.getDate(), new Date(hoy.getFullYear(), hoy.getMonth(), 0).getDate()))) } };
+    }
+    if (p === 'mesant') {
+      const ini = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1), fin = new Date(hoy.getFullYear(), hoy.getMonth(), 0);
+      return { desde: isoLocal(ini), hasta: isoLocal(fin), label: 'Mes anterior', comparable: 'el mes previo',
+        previo: { desde: isoLocal(new Date(hoy.getFullYear(), hoy.getMonth() - 2, 1)), hasta: isoLocal(new Date(hoy.getFullYear(), hoy.getMonth() - 1, 0)) } };
+    }
+    if (p === 'todo') return { desde: '2020-01-01', hasta: isoLocal(hoy), label: 'Todo el historial', comparable: null };
+    const a = document.getElementById('fDesde').value || isoLocal(hoy);
+    const b = document.getElementById('fHasta').value || a;
+    return { desde: a <= b ? a : b, hasta: a <= b ? b : a, label: 'Personalizado', comparable: 'el período anterior de igual duración' };
+  }
+  function rangoPrevio(r) {
+    if (!r.comparable) return null;
+    if (r.previo) return r.previo;
+    const dias = Math.round((new Date(r.hasta + 'T12:00:00') - new Date(r.desde + 'T12:00:00')) / 86400000) + 1;
+    return { desde: sumarDias(r.desde, -dias), hasta: sumarDias(r.desde, -1) };
+  }
+
+  // ---- Carga ----
+  async function cargarCatalogos() {
+    const [sRes, bRes, mRes] = await Promise.all([
+      sb.from('sucursales').select('id, nombre').order('nombre'),
+      sb.from('barberos').select('id, sucursal_id, tipo_colaborador, usuarios!barberos_id_fkey(full_name)'),
+      sb.from('configuracion_global').select('value').eq('key', 'metas_resenas').maybeSingle()
+    ]);
+    (sRes.data || []).forEach(s => {
+      const corto = s.nombre.replace(/^Keicy Barber( Club)?\s*/i, '') || s.nombre;
+      sedes[s.id] = corto.charAt(0).toUpperCase() + corto.slice(1);
+    });
+    // Solo barberos: 'aseo' no recibe reseñas reales (la cuenta de prueba es tipo aseo)
+    (bRes.data || []).filter(b => b.tipo_colaborador === 'barbero').forEach(b => {
+      barberos[b.id] = { nombre: b.usuarios?.full_name || 'Barbero', sucursal_id: b.sucursal_id };
+    });
+    if (mRes.data?.value) metas = { ...metas, ...mRes.data.value };
+
+    if (user.role === 'admin_sede') {
+      const { data: asignadas } = await sb.from('admin_sede_sedes_asignadas')
+        .select('sucursal_id').eq('usuario_id', user.id).eq('activo', true);
+      sedesPermitidas = (asignadas || []).map(a => a.sucursal_id).filter(id => sedes[id]);
+      Object.keys(sedes).forEach(id => { if (!sedesPermitidas.includes(id)) delete sedes[id]; });
+      Object.keys(barberos).forEach(id => { if (!sedesPermitidas.includes(barberos[id].sucursal_id)) delete barberos[id]; });
+    }
+
+    const selSede = document.getElementById('fSede');
+    Object.entries(sedes).forEach(([id, n]) => selSede.insertAdjacentHTML('beforeend', `<option value="${id}">${esc(n)}</option>`));
+    const sedeActual = dnGetSedeActual();
+    if (sedeActual && sedes[sedeActual]) selSede.value = sedeActual;
+    if (sedesPermitidas && sedesPermitidas.length === 1) {
+      selSede.value = sedesPermitidas[0];
+      selSede.querySelector('option[value=""]').remove();
+    } else if (sedesPermitidas) {
+      selSede.querySelector('option[value=""]').textContent = 'Mis sedes';
+    }
+    llenarBarberos();
+  }
+
+  function llenarBarberos() {
+    const sede = document.getElementById('fSede').value;
+    const sel = document.getElementById('fBarbero');
+    const actual = sel.value;
+    sel.innerHTML = '<option value="">Todos los barberos</option>' +
+      Object.entries(barberos)
+        .filter(([, b]) => !sede || b.sucursal_id === sede)
+        .sort((a, b) => a[1].nombre.localeCompare(b[1].nombre))
+        .map(([id, b]) => `<option value="${id}">${esc(b.nombre)}</option>`).join('');
+    if ([...sel.options].some(o => o.value === actual)) sel.value = actual;
+  }
+
+  async function traerTodo(query) {
+    // PostgREST devuelve máx. 1000 filas por petición
+    let out = [], desde = 0;
+    for (;;) {
+      const { data, error } = await query().range(desde, desde + 999);
+      if (error) throw error;
+      out = out.concat(data || []);
+      if (!data || data.length < 1000) return out;
+      desde += 1000;
+    }
+  }
+
+  async function traerPeriodo(r, completo) {
+    const ini = dnLocalDayRangeUTC(r.desde).start, fin = dnLocalDayRangeUTC(r.hasta).end;
+    const campos = completo
+      ? 'id, calificacion, comentario, created_at, barbero_id, sucursal_id, cliente_id, atendida, atendida_at, atendida_por, nota_seguimiento, usuarios!resenas_cliente_id_fkey(full_name, phone), citas!resenas_cita_id_fkey(sucursal_id, fecha, hora_inicio, servicios(nombre))'
+      : 'calificacion, comentario, barbero_id, sucursal_id, citas!resenas_cita_id_fkey(sucursal_id)';
+    const [rs, citas] = await Promise.all([
+      traerTodo(() => sb.from('resenas').select(campos).gte('created_at', ini).lte('created_at', fin).order('created_at', { ascending: false })),
+      traerTodo(() => sb.from('citas').select('barbero_id, sucursal_id').eq('estado', 'finalizada').gte('fecha', r.desde).lte('fecha', r.hasta))
+    ]);
+    const sede = document.getElementById('fSede').value;
+    const barbero = document.getElementById('fBarbero').value;
+    const lista = rs
+      .filter(x => barberos[x.barbero_id])
+      .map(x => ({ ...x, sede_id: x.sucursal_id || x.citas?.sucursal_id || barberos[x.barbero_id]?.sucursal_id || null }))
+      .filter(x => (!sede || x.sede_id === sede) && (!barbero || x.barbero_id === barbero))
+      .filter(x => !sedesPermitidas || sedesPermitidas.includes(x.sede_id));
+    const servicios = {};
+    citas.filter(c => barberos[c.barbero_id] && (!sede || c.sucursal_id === sede) && (!barbero || c.barbero_id === barbero)
+        && (!sedesPermitidas || sedesPermitidas.includes(c.sucursal_id)))
+      .forEach(c => { servicios[c.barbero_id] = (servicios[c.barbero_id] || 0) + 1; });
+    return { resenas: lista, servicios };
+  }
+
+  async function cargar() {
+    const p = document.querySelector('#presets .chip.active').dataset.p;
+    rango = calcularRango(p);
+    document.getElementById('lista').innerHTML = '<div class="empty-state">Cargando…</div>';
+    try {
+      const prev = rangoPrevio(rango);
+      const [actual, anterior] = await Promise.all([traerPeriodo(rango, true), prev ? traerPeriodo(prev, false) : null]);
+      resenas = actual.resenas;
+      serviciosPorBarbero = actual.servicios;
+      previo = anterior;
+      mostrados = PAGINA;
+      render();
+    } catch (err) {
+      console.error('Error cargando reseñas:', err);
+      document.getElementById('lista').innerHTML = '<div class="empty-state">No se pudieron cargar las reseñas.</div>';
+    }
+  }
+
+  // ---- KPIs y comparación ----
+  function kpisDe(lista, servicios) {
+    const total = lista.length;
+    const serv = Object.values(servicios).reduce((a, b) => a + b, 0);
+    return {
+      total, serv,
+      prom: total ? promedio(lista) : null,
+      cinco: pctNum(lista.filter(r => r.calificacion === 5).length, total),
+      tasa: pctNum(total, serv),
+      coment: pctNum(lista.filter(r => (r.comentario || '').trim()).length, total),
+      bajas: lista.filter(r => r.calificacion <= 3).length
+    };
+  }
+  // menorEsMejor: para "bajas", subir es malo
+  function delta(id, act, ant, tipo, menorEsMejor = false) {
+    const el = document.getElementById(id);
+    if (act === null || ant === null || ant === undefined) { el.textContent = ''; el.className = 'delta'; return; }
+    const d = act - ant;
+    let txt;
+    if (tipo === 'num') txt = (d > 0 ? '+' : '') + d + (ant > 0 ? ` (${d > 0 ? '+' : ''}${Math.round(d / ant * 100)}%)` : '');
+    else if (tipo === 'prom') txt = (d > 0 ? '+' : '') + d.toFixed(2);
+    else txt = (d > 0 ? '+' : '') + Math.round(d) + ' pts';
+    const umbral = tipo === 'prom' ? 0.005 : tipo === 'pts' ? 0.5 : 0;
+    const mejor = menorEsMejor ? d < 0 : d > 0;
+    el.className = 'delta ' + (Math.abs(d) <= umbral ? 'eq' : mejor ? 'up' : 'down');
+    el.textContent = (Math.abs(d) <= umbral ? '= ' : d > 0 ? '▲ ' : '▼ ') + (Math.abs(d) <= umbral ? 'igual' : txt);
+  }
+
+  function render() {
+    const fmtR = d => new Date(d + 'T12:00:00').toLocaleDateString('es-CO', { day:'numeric', month:'short', year:'numeric' });
+    document.getElementById('subtitulo').textContent = rango.desde === rango.hasta ? fmtR(rango.desde) : `${fmtR(rango.desde)} – ${fmtR(rango.hasta)}`;
+
+    const k = kpisDe(resenas, serviciosPorBarbero);
+    const a = previo ? kpisDe(previo.resenas, previo.servicios) : null;
+    document.getElementById('kTotal').textContent = k.total;
+    document.getElementById('kProm').textContent = k.prom !== null ? dnFormatRating(k.prom) + '★' : '—';
+    document.getElementById('kCinco').textContent = k.cinco !== null ? Math.round(k.cinco) + '%' : '—';
+    document.getElementById('kTasa').textContent = k.tasa !== null ? Math.round(k.tasa) + '%' : '—';
+    document.getElementById('kComent').textContent = k.coment !== null ? Math.round(k.coment) + '%' : '—';
+    const kB = document.getElementById('kBajas');
+    kB.textContent = k.bajas; kB.style.color = k.bajas ? '#EF4444' : '';
+
+    delta('dTotal', k.total, a?.total, 'num');
+    delta('dProm', k.prom, a?.prom, 'prom');
+    delta('dCinco', k.cinco, a?.cinco, 'pts');
+    delta('dTasa', k.tasa, a?.tasa, 'pts');
+    delta('dComent', k.coment, a?.coment, 'pts');
+    delta('dBajas', k.bajas, a?.bajas, 'num', true);
+    document.getElementById('comparacionNota').textContent = a
+      ? `Comparado con ${rango.comparable} (${a.total} reseñas${a.prom !== null ? ', ' + dnFormatRating(a.prom) + '★' : ''}). Promedio real: ${k.prom !== null ? k.prom.toFixed(2) : '—'}.`
+      : (k.prom !== null ? `Promedio real: ${k.prom.toFixed(2)}.` : '');
+
+    renderDist();
+    renderSedes();
+    renderRanking();
+    renderMetas();
+    renderServicios();
+    renderDiaHora();
+    renderTrend();
+    renderLista();
+  }
+
+  function renderDist() {
+    const total = resenas.length;
+    const el = document.getElementById('dist');
+    el.innerHTML = [5, 4, 3, 2, 1].map(n => {
+      const c = resenas.filter(r => r.calificacion === n).length;
+      return `<div class="dist-row ${filtroEstrella === n ? 'sel' : ''}" data-n="${n}">
+        <div class="dist-lbl">${n}★</div>
+        <div class="bar ${n <= 3 ? 'bad' : ''}"><i style="width:${total ? c / total * 100 : 0}%"></i></div>
+        <div class="dist-num">${c} · ${pct(c, total)}</div>
+      </div>`;
+    }).join('');
+    el.querySelectorAll('.dist-row').forEach(row => row.onclick = () => {
+      const n = Number(row.dataset.n);
+      filtroEstrella = filtroEstrella === n ? null : n;
+      mostrados = PAGINA;
+      renderDist(); renderLista();
+      document.getElementById('listaCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  function renderSedes() {
+    const sedeSel = document.getElementById('fSede').value;
+    const grupos = {};
+    resenas.forEach(r => { const k = r.sede_id || 'sin'; (grupos[k] = grupos[k] || []).push(r); });
+    const serviciosSede = {};
+    Object.entries(serviciosPorBarbero).forEach(([bid, n]) => { const s = barberos[bid]?.sucursal_id || 'sin'; serviciosSede[s] = (serviciosSede[s] || 0) + n; });
+    const ids = Object.keys(sedes).filter(id => !sedeSel || id === sedeSel);
+    document.getElementById('sedes').innerHTML = ids.map(id => {
+      const g = grupos[id] || [];
+      return `<div class="sede ${sedeSel === id ? 'sel' : ''}" data-id="${id}">
+        <div class="sede-nombre">${esc(sedes[id])}</div>
+        <div class="sede-stats">
+          <div><b>${g.length}</b><span>Reseñas</span></div>
+          <div><b style="color:var(--gold)">${g.length ? dnFormatRating(promedio(g)) + '★' : '—'}</b><span>Promedio</span></div>
+          <div><b>${pct(g.length, serviciosSede[id] || 0)}</b><span>Tasa</span></div>
+        </div>
+      </div>`;
+    }).join('') || '<div class="empty-state">Sin sedes</div>';
+    document.querySelectorAll('#sedes .sede').forEach(el => el.onclick = () => {
+      const s = document.getElementById('fSede');
+      s.value = s.value === el.dataset.id ? '' : el.dataset.id;
+      llenarBarberos(); cargar();
+    });
+  }
+
+  // Estadística por barbero (incluye barberos con servicios pero sin reseñas)
+  function filasBarberos() {
+    const porBarbero = {};
+    resenas.forEach(r => { const b = porBarbero[r.barbero_id] = porBarbero[r.barbero_id] || { n: 0, suma: 0 }; b.n++; b.suma += r.calificacion; });
+    return Object.keys({ ...porBarbero, ...serviciosPorBarbero }).map(id => {
+      const b = porBarbero[id] || { n: 0, suma: 0 };
+      const serv = serviciosPorBarbero[id] || 0;
+      return { id, nombre: barberos[id]?.nombre || 'Barbero', sede: sedes[barberos[id]?.sucursal_id] || '', n: b.n, prom: b.n ? b.suma / b.n : 0, serv, tasa: serv ? b.n / serv * 100 : 0 };
+    });
+  }
+
+  function filtrarPorBarbero(id) {
+    const s = document.getElementById('fBarbero');
+    s.value = s.value === id ? '' : id;
+    cargar();
+  }
+
+  function renderRanking() {
+    let filas = filasBarberos();
+    let nota = '';
+    if (rankModo === 'cantidad') filas = filas.filter(f => f.n > 0).sort((a, b) => b.n - a.n || b.prom - a.prom);
+    if (rankModo === 'promedio') {
+      filas = filas.filter(f => f.n >= MIN_RESENAS_PROMEDIO).sort((a, b) => b.prom - a.prom || b.n - a.n);
+      nota = `Solo barberos con ${MIN_RESENAS_PROMEDIO} o más reseñas en el período.`;
+    }
+    if (rankModo === 'tasa') {
+      filas = filas.filter(f => f.serv > 0).sort((a, b) => b.tasa - a.tasa || b.n - a.n);
+      nota = 'Reseñas recibidas sobre servicios finalizados en el período.';
+    }
+    document.getElementById('rankNota').textContent = nota;
+    const valor = f => rankModo === 'cantidad' ? f.n : rankModo === 'promedio' ? f.prom : f.tasa;
+    const max = Math.max(1, ...filas.map(valor));
+    document.getElementById('ranking').innerHTML = filas.length ? filas.map((f, i) => {
+      const principal = rankModo === 'cantidad' ? `${f.n}` : rankModo === 'promedio' ? `${dnFormatRating(f.prom)}★` : `${Math.round(f.tasa)}%`;
+      const secundario = rankModo === 'cantidad' ? `${dnFormatRating(f.prom)}★ prom.` : rankModo === 'promedio' ? `${f.n} reseñas` : `${f.n}/${f.serv}`;
+      return `<div class="row click" data-id="${f.id}">
+        <div class="row-pos ${i < 3 ? 'top' : ''}">${i < 3 ? ['🥇','🥈','🥉'][i] : i + 1}</div>
+        <div style="min-width:0;"><div class="row-name">${esc(f.nombre)}</div>
+          <div class="row-meta">${esc(f.sede)}<div class="bar"><i style="width:${valor(f) / max * 100}%"></i></div></div></div>
+        <div class="row-val"><b>${principal}</b><span>${secundario}</span></div>
+      </div>`;
+    }).join('') : '<div class="empty-state">Sin datos en este período</div>';
+    document.querySelectorAll('#ranking .row').forEach(el => el.onclick = () => filtrarPorBarbero(el.dataset.id));
+  }
+
+  // ---- Metas ----
+  function renderMetas() {
+    const filas = filasBarberos().filter(f => f.serv > 0)
+      .map(f => ({ ...f, okTasa: f.tasa >= metas.tasa_min, okProm: f.n > 0 && f.prom >= metas.promedio_min }))
+      .sort((a, b) => (a.okTasa && a.okProm) - (b.okTasa && b.okProm) || a.tasa - b.tasa);
+    const cumplen = filas.filter(f => f.okTasa && f.okProm).length;
+    document.getElementById('metas').innerHTML = filas.length ? `
+      <div class="metas-resumen"><b>${cumplen}/${filas.length}</b>
+        <span>barberos cumplen ambas metas<br>Tasa ≥ ${metas.tasa_min}% · Promedio ≥ ${Number(metas.promedio_min).toFixed(2)}</span></div>
+      ${filas.map(f => `<div class="row dos click" data-id="${f.id}">
+        <div style="min-width:0;"><div class="row-name">${esc(f.nombre)}</div><div class="row-meta">${esc(f.sede)} · ${f.n} reseñas de ${f.serv} servicios</div></div>
+        <div class="row-val" style="white-space:nowrap;">
+          <span class="meta-pill ${f.okTasa ? 'ok' : 'no'}">${f.okTasa ? '✓' : '✗'} ${Math.round(f.tasa)}%</span>
+          <span class="meta-pill ${f.okProm ? 'ok' : 'no'}">${f.okProm ? '✓' : '✗'} ${f.n ? f.prom.toFixed(2) : '—'}</span>
+        </div>
+      </div>`).join('')}` : '<div class="empty-state">Sin servicios en este período</div>';
+    document.querySelectorAll('#metas .row').forEach(el => el.onclick = () => filtrarPorBarbero(el.dataset.id));
+  }
+
+  document.getElementById('editarMetas').onclick = () => {
+    const f = document.getElementById('metasForm');
+    f.classList.toggle('show');
+    document.getElementById('mTasa').value = metas.tasa_min;
+    document.getElementById('mProm').value = metas.promedio_min;
+  };
+  document.getElementById('guardarMetas').onclick = async () => {
+    const tasa = Number(document.getElementById('mTasa').value);
+    const prom = Number(document.getElementById('mProm').value);
+    if (!(tasa >= 0 && tasa <= 100) || !(prom >= 1 && prom <= 5)) { toast('Revisa los valores: tasa 0–100 y promedio 1–5.'); return; }
+    const nuevo = { tasa_min: Math.round(tasa), promedio_min: Math.round(prom * 100) / 100 };
+    const { error } = await sb.from('configuracion_global').upsert({ key: 'metas_resenas', value: nuevo, updated_at: new Date().toISOString() });
+    if (error) { console.error(error); toast('No se pudieron guardar las metas.'); return; }
+    metas = nuevo;
+    document.getElementById('metasForm').classList.remove('show');
+    renderMetas();
+    toast('Metas guardadas');
+  };
+
+  // ---- Por servicio ----
+  function renderServicios() {
+    const g = {};
+    resenas.forEach(r => { const k = r.citas?.servicios?.nombre || 'Sin servicio'; (g[k] = g[k] || []).push(r); });
+    const filas = Object.entries(g).map(([nombre, arr]) => ({ nombre, n: arr.length, prom: promedio(arr), bajas: arr.filter(r => r.calificacion <= 3).length }))
+      .sort((a, b) => b.n - a.n);
+    const max = Math.max(1, ...filas.map(f => f.n));
+    document.getElementById('servicios').innerHTML = filas.length ? filas.map(f => `
+      <div class="row dos">
+        <div style="min-width:0;"><div class="row-name">${esc(f.nombre)}</div>
+          <div class="row-meta">${f.n} reseñas${f.bajas ? ` · <span style="color:#EF4444">${f.bajas} baja${f.bajas === 1 ? "" : "s"}</span>` : ''}<div class="bar"><i style="width:${f.n / max * 100}%"></i></div></div></div>
+        <div class="row-val"><b class="${f.prom < 4.5 ? 'malo' : ''}">${dnFormatRating(f.prom)}★</b><span>real ${f.prom.toFixed(2)}</span></div>
+      </div>`).join('') : '<div class="empty-state">Sin datos en este período</div>';
+  }
+
+  // ---- Día de la semana y hora (de la cita) ----
+  function renderDiaHora() {
+    const g = {};
+    resenas.forEach(r => {
+      const f = r.citas?.fecha ? new Date(r.citas.fecha + 'T12:00:00') : new Date(r.created_at);
+      const k = dhModo === 'dia' ? (f.getDay() + 6) % 7 : (r.citas?.hora_inicio ? Number(r.citas.hora_inicio.slice(0, 2)) : null);
+      if (k === null) return;
+      (g[k] = g[k] || []).push(r);
+    });
+    const claves = dhModo === 'dia' ? [0, 1, 2, 3, 4, 5, 6] : Object.keys(g).map(Number).sort((a, b) => a - b);
+    const max = Math.max(1, ...claves.map(k => (g[k] || []).length));
+    const promGeneral = promedio(resenas);
+    const etiqueta = k => dhModo === 'dia' ? DIAS[k] : `${((k + 11) % 12) + 1}:00 ${k < 12 ? 'a. m.' : 'p. m.'}`;
+    document.getElementById('diaHora').innerHTML = resenas.length ? claves.map(k => {
+      const arr = g[k] || [];
+      const p = promedio(arr);
+      const bajas = arr.filter(r => r.calificacion <= 3).length;
+      return `<div class="row dos">
+        <div style="min-width:0;"><div class="row-name">${etiqueta(k)}</div>
+          <div class="row-meta">${arr.length} reseñas${bajas ? ` · <span style="color:#EF4444">${bajas} baja${bajas === 1 ? "" : "s"}</span>` : ''}<div class="bar"><i style="width:${arr.length / max * 100}%"></i></div></div></div>
+        <div class="row-val"><b class="${arr.length && p < promGeneral - 0.1 ? 'malo' : ''}">${arr.length ? dnFormatRating(p) + '★' : '—'}</b><span>${arr.length ? 'real ' + p.toFixed(2) : ''}</span></div>
+      </div>`;
+    }).join('') + `<div class="card-hint" style="margin-top:8px;">En rojo: más de 0.1 por debajo del promedio del período (${promGeneral.toFixed(2)}).</div>`
+      : '<div class="empty-state">Sin datos en este período</div>';
+  }
+
+  // ---- Tendencia ----
+  function renderTrend() {
+    const d0 = new Date(rango.desde + 'T12:00:00'), d1 = new Date(rango.hasta + 'T12:00:00');
+    // En "Todo" el rango empieza en 2020: arrancar desde la primera reseña
+    if (resenas.length) {
+      const primera = resenas.reduce((m, r) => r.created_at < m ? r.created_at : m, resenas[0].created_at);
+      const dp = new Date(primera); dp.setHours(12, 0, 0, 0);
+      if (dp > d0) d0.setTime(dp.getTime());
+    }
+    const dias = Math.round((d1 - d0) / 86400000) + 1;
+    const semanal = dias > 31;
+    const buckets = [];
+    const cur = new Date(d0);
+    if (semanal) cur.setDate(cur.getDate() - (cur.getDay() + 6) % 7);
+    while (cur <= d1) {
+      const ini = new Date(cur), fin = new Date(cur); fin.setDate(fin.getDate() + (semanal ? 6 : 0));
+      buckets.push({ ini: isoLocal(ini), fin: isoLocal(fin), n: 0, suma: 0, label: semanal ? fechaCorta(ini) : String(ini.getDate()) });
+      cur.setDate(cur.getDate() + (semanal ? 7 : 1));
+    }
+    resenas.forEach(r => {
+      const k = isoLocal(new Date(r.created_at));
+      const b = buckets.find(b => k >= b.ini && k <= b.fin);
+      if (b) { b.n++; b.suma += r.calificacion; }
+    });
+    document.getElementById('trendHint').textContent = semanal ? 'Por semana' : 'Por día';
+    const max = Math.max(1, ...buckets.map(b => b.n));
+    const cada = Math.ceil(buckets.length / 10);
+    document.getElementById('trend').innerHTML = buckets.length > 1 ? `
+      <div class="trend">${buckets.map(b => `<div class="trend-col" title="${b.ini}${semanal ? ' – ' + b.fin : ''}: ${b.n} reseñas${b.n ? ', ' + dnFormatRating(b.suma / b.n) + '★' : ''}">
+        ${b.n ? `<div class="trend-n">${b.n}</div>` : ''}<div class="trend-bar" style="height:${b.n / max * 100}%"></div></div>`).join('')}</div>
+      <div class="trend-x">${buckets.map((b, i) => `<span>${i % cada === 0 ? b.label : ''}</span>`).join('')}</div>`
+      : '<div class="empty-state">Elige un rango de más de un día para ver la tendencia.</div>';
+  }
+
+  // ---- Lista + seguimiento ----
+  function paraAcciones(r) {
+    return {
+      id: r.id, calificacion: r.calificacion, comentario: r.comentario, created_at: r.created_at,
+      cliente_id: r.cliente_id, cliente_nombre: r.usuarios?.full_name, cliente_phone: r.usuarios?.phone,
+      barbero_nombre: barberos[r.barbero_id]?.nombre, sede_nombre: sedes[r.sede_id] || '',
+      cita_fecha: r.citas?.fecha, cita_hora: r.citas?.hora_inicio, servicio_nombre: r.citas?.servicios?.nombre,
+      atendida: r.atendida, atendida_at: r.atendida_at, atendida_por: r.atendida_por, nota_seguimiento: r.nota_seguimiento
+    };
+  }
+
+  function renderLista() {
+    const texto = document.getElementById('fTexto').value.trim().toLowerCase();
+    const soloComent = document.getElementById('fComent').checked;
+    const estado = document.getElementById('fEstado').value;
+    const lista = resenas.filter(r =>
+      (!filtroEstrella || r.calificacion === filtroEstrella) &&
+      (!soloComent || (r.comentario || '').trim()) &&
+      (estado !== 'pendientes' || (r.calificacion <= 3 && !r.atendida)) &&
+      (estado !== 'atendidas' || r.atendida) &&
+      (!texto || (r.usuarios?.full_name || '').toLowerCase().includes(texto) || (r.comentario || '').toLowerCase().includes(texto) || (r.nota_seguimiento || '').toLowerCase().includes(texto)));
+
+    document.getElementById('fEstrellaTag').innerHTML = filtroEstrella ? `<span class="filtro-activo" id="quitarEstrella">${filtroEstrella}★ ✕</span>` : '';
+    const q = document.getElementById('quitarEstrella');
+    if (q) q.onclick = () => { filtroEstrella = null; renderDist(); renderLista(); };
+
+    document.getElementById('listaCount').textContent = `${lista.length} de ${resenas.length}`;
+    document.getElementById('lista').innerHTML = lista.length ? lista.slice(0, mostrados).map(r => {
+      const f = new Date(r.created_at);
+      const seg = r.atendida
+        ? `<div class="resena-seg ok">✓ Atendida${r.nota_seguimiento ? ' · ' + esc(r.nota_seguimiento) : ''}</div>`
+        : (r.calificacion <= 3 ? '<div class="resena-seg pend">Pendiente de atender · toca para hacer seguimiento</div>' : (r.nota_seguimiento ? `<div class="resena-seg" style="color:var(--text-secondary)">Nota: ${esc(r.nota_seguimiento)}</div>` : ''));
+      return `<div class="resena ${r.calificacion <= 3 && !r.atendida ? 'baja' : ''}" data-id="${r.id}">
+        <div class="resena-top">
+          <div style="min-width:0;">
+            <div class="resena-cliente">${esc(r.usuarios?.full_name || 'Cliente')}</div>
+            <div class="resena-meta">para <b>${esc(barberos[r.barbero_id]?.nombre)}</b>${r.sede_id && sedes[r.sede_id] ? ' · ' + esc(sedes[r.sede_id]) : ''}${r.citas?.servicios?.nombre ? ' · ' + esc(r.citas.servicios.nombre) : ''}</div>
+          </div>
+          <div class="resena-fecha">${fechaCorta(f)} · ${f.toLocaleTimeString('es-CO', { hour:'2-digit', minute:'2-digit' })}</div>
+        </div>
+        <div class="stars">${estrellas(r.calificacion)}</div>
+        ${(r.comentario || '').trim() ? `<div class="resena-texto">"${esc(r.comentario)}"</div>` : ''}
+        ${seg}
+      </div>`;
+    }).join('') : '<div class="empty-state">No hay reseñas con estos filtros.</div>';
+    document.getElementById('verMas').style.display = lista.length > mostrados ? 'block' : 'none';
+
+    document.querySelectorAll('#lista .resena').forEach(el => el.onclick = () => {
+      const r = resenas.find(x => x.id === el.dataset.id);
+      if (!r) return;
+      dnAbrirAccionesResena(paraAcciones(r), { onGuardado: act => {
+        Object.assign(r, { atendida: act.atendida, atendida_at: act.atendida_at, atendida_por: act.atendida_por, nota_seguimiento: act.nota_seguimiento });
+        renderLista();
+        cargarAlertaBajas();
+        toast(act.atendida ? 'Reseña marcada como atendida' : 'Seguimiento guardado');
+      }});
+    });
+  }
+
+  // ---- Eventos ----
+  document.getElementById('presets').addEventListener('click', e => {
+    const chip = e.target.closest('.chip'); if (!chip) return;
+    document.querySelectorAll('#presets .chip').forEach(c => c.classList.toggle('active', c === chip));
+    const custom = chip.dataset.p === 'custom';
+    document.getElementById('rangoCustom').classList.toggle('show', custom);
+    if (custom && !document.getElementById('fDesde').value) {
+      document.getElementById('fHasta').value = dnTodayISO();
+      document.getElementById('fDesde').value = sumarDias(dnTodayISO(), -13);
+    }
+    cargar();
+  });
+  ['fDesde', 'fHasta'].forEach(id => document.getElementById(id).addEventListener('change', cargar));
+  document.getElementById('fSede').addEventListener('change', () => { llenarBarberos(); cargar(); });
+  document.getElementById('fBarbero').addEventListener('change', cargar);
+  ['fTexto', 'fComent', 'fEstado'].forEach(id => document.getElementById(id).addEventListener(id === 'fTexto' ? 'input' : 'change', () => { mostrados = PAGINA; renderLista(); }));
+  document.getElementById('verMas').addEventListener('click', () => { mostrados += PAGINA; renderLista(); });
+  document.getElementById('rankModo').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    rankModo = b.dataset.m;
+    document.querySelectorAll('#rankModo button').forEach(x => x.classList.toggle('active', x === b));
+    renderRanking();
+  });
+  document.getElementById('dhModo').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    dhModo = b.dataset.m;
+    document.querySelectorAll('#dhModo button').forEach(x => x.classList.toggle('active', x === b));
+    renderDiaHora();
+  });
+
+  // ---- Aviso de reseñas bajas sin atender (todas las fechas, según la sede elegida) ----
+  async function cargarAlertaBajas() {
+    const sede = document.getElementById('fSede').value;
+    const limitar = sede || sedesPermitidas;
+    let q = sb.from('resenas')
+      .select(limitar ? 'id, citas!inner(sucursal_id)' : 'id', { count: 'exact', head: true })
+      .lte('calificacion', 3).eq('atendida', false);
+    if (sede) q = q.eq('citas.sucursal_id', sede);
+    else if (sedesPermitidas) q = q.in('citas.sucursal_id', sedesPermitidas.length ? sedesPermitidas : ['00000000-0000-0000-0000-000000000000']);
+    const { count, error } = await q;
+    if (error) { console.error('Error cargando aviso de reseñas bajas:', error); return; }
+    const n = count || 0;
+    document.getElementById('alertaBajas').classList.toggle('show', n > 0);
+    document.getElementById('alertaBajasT').textContent = n === 1 ? '1 reseña baja sin atender' : `${n} reseñas bajas sin atender`;
+  }
+  document.getElementById('alertaBajas').addEventListener('click', () => {
+    document.querySelectorAll('#presets .chip').forEach(c => c.classList.toggle('active', c.dataset.p === 'todo'));
+    document.getElementById('rangoCustom').classList.remove('show');
+    document.getElementById('fEstado').value = 'pendientes';
+    filtroEstrella = null;
+    cargar().then(() => document.getElementById('listaCard').scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  });
+  document.getElementById('fSede').addEventListener('change', cargarAlertaBajas);
+
+  if (modoSede) {
+    document.getElementById('btnVolver').href = '../admin_sede/dashboard.html';
+    document.getElementById('editarMetas').style.display = 'none';
+  }
+
+  // Desde el dashboard: resenas.html?filtro=pendientes
+  const desdeAlerta = new URLSearchParams(location.search).get('filtro') === 'pendientes';
+  if (desdeAlerta) {
+    document.querySelectorAll('#presets .chip').forEach(c => c.classList.toggle('active', c.dataset.p === 'todo'));
+    document.getElementById('fEstado').value = 'pendientes';
+  }
+
+  dnCuandoSbListo(async () => {
+    await cargarCatalogos();
+    cargarAlertaBajas();
+    await cargar();
+    if (desdeAlerta) document.getElementById('listaCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+})();
+</script>
+</body>
+</html>

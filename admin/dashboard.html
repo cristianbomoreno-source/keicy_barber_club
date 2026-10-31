@@ -10,11 +10,11 @@
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
 <!-- Preload CSS críticos -->
-<link rel="preload" href="../assets/design-system.css" as="style">
+<link rel="preload" href="../assets/design-system.css?v=20261015b" as="style">
 <link rel="preload" href="../assets/mobile-admin.css" as="style">
 <link rel="preload" href="../assets/mobile-admin-premium.css" as="style">
 <!-- Preload JS críticos -->
-<link rel="preload" href="../assets/supabase-client.js?v=20261014e" as="script">
+<link rel="preload" href="../assets/supabase-client.js?v=20261021" as="script">
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
@@ -25,7 +25,7 @@
 <meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Resumen</title>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <link rel="stylesheet" href="../assets/mobile-admin.css">
 <link rel="stylesheet" href="../assets/mobile-admin-premium.css">
 <style>
@@ -310,7 +310,7 @@
 </style>
 </head>
 <body>
-<script src="../assets/splash-screen.js"></script>
+<script src="../assets/splash-screen.js?v=20261015"></script>
 
 <div id="app">
 
@@ -378,6 +378,10 @@
       <a class="nav-link" href="sesiones.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
         <span class="nav-label">Sesiones</span>
+      </a>
+      <a class="nav-link" href="consentimientos.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><path d="M12 2L3 7v7c0 5 3.5 9.7 9 11 5.5-1.3 9-6 9-11V7l-9-5z"/></svg>
+        <span class="nav-label">Consentimientos</span>
       </a>
       <a class="nav-link" href="marketing.html">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10v4h4l6 5V5L7 10H3z"/></svg>
@@ -498,7 +502,8 @@
           </div>
           <span class="premium-shortcut-label">Reportes</span>
         </a>
-        <a href="#resenasHoy" class="premium-shortcut" onclick="document.getElementById('resenasHoySection').scrollIntoView({behavior:'smooth'}); return false;">
+        <a href="resenas.html" class="premium-shortcut" style="position:relative;">
+          <span id="resenasAlertBadge" style="display:none; position:absolute; top:-4px; right:calc(50% - 30px); min-width:20px; height:20px; padding:0 6px; box-sizing:border-box; border-radius:99px; background:#EF4444; color:#fff; font-size:11px; font-weight:800; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(239,68,68,.45); z-index:2;">0</span>
           <div class="premium-shortcut-icon" style="background:linear-gradient(135deg,#FFAC48,#FFD9A8);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
           </div>
@@ -859,7 +864,9 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
+<script src="../assets/push.js?v=20261026" defer></script>
+<script src="../assets/resenas-acciones.js?v=20261015b"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script>
   const months = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -925,6 +932,19 @@
   // Fecha de corte para estadísticas reales (datos antes de esta fecha no se cuentan)
   const FECHA_CORTE_ESTADISTICAS = '2026-10-01';
 
+  // Supabase devuelve máximo 1000 filas por consulta; con todas las sedes el mes
+  // supera ese límite y los totales quedaban cortados. Se pide por páginas.
+  async function fetchAllRows(buildQuery){
+    const PAGE = 1000;
+    const rows = [];
+    for (let fromRow = 0; ; fromRow += PAGE) {
+      const { data, error } = await buildQuery().order('id').range(fromRow, fromRow + PAGE - 1);
+      if (error) throw error;
+      rows.push(...(data || []));
+      if (!data || data.length < PAGE) return rows;
+    }
+  }
+
   // Citas de hoy (sin canceladas): conteo exacto por sede. Sin sede elegida se
   // muestra el total y el desglose por sede; con sede, solo el de esa sede.
   async function cargarCitasHoyPorSede(today, sedeFiltro, sedesTestIds) {
@@ -974,21 +994,22 @@
     try {
       // Usar la mayor entre week[0] y FECHA_CORTE_ESTADISTICAS
       const fechaMinima = week[0] > FECHA_CORTE_ESTADISTICAS ? week[0] : FECHA_CORTE_ESTADISTICAS;
-      let citasQuery = sb
-        .from('citas')
-        .select('id, fecha, hora_inicio, estado, precio, cliente_id, barbero_id, sucursal_id, created_at, usuarios!citas_cliente_id_fkey(username, full_name), servicios(nombre, categoria_id, categorias_servicio(nombre)), barberos(usuarios!barberos_id_fkey(username, full_name))')
-        .gte('fecha', fechaMinima)
-        .lte('fecha', today)
-        .order('fecha', { ascending: true })
-        .order('hora_inicio', { ascending: true });
-      if (sedeFiltro) {
-        citasQuery = citasQuery.eq('sucursal_id', sedeFiltro);
-      } else if (sedesTestIds.length > 0) {
-        // Excluir sedes TEST de métricas del dashboard
-        citasQuery = citasQuery.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
-      }
-      const { data, error } = await citasQuery;
-      if (error) throw error;
+      const data = await fetchAllRows(() => {
+        let citasQuery = sb
+          .from('citas')
+          .select('id, fecha, hora_inicio, estado, precio, cliente_id, barbero_id, sucursal_id, created_at, usuarios!citas_cliente_id_fkey(username, full_name), servicios(nombre, categoria_id, categorias_servicio(nombre)), barberos(usuarios!barberos_id_fkey(username, full_name))')
+          .gte('fecha', fechaMinima)
+          .lte('fecha', today)
+          .order('fecha', { ascending: true })
+          .order('hora_inicio', { ascending: true });
+        if (sedeFiltro) {
+          citasQuery = citasQuery.eq('sucursal_id', sedeFiltro);
+        } else if (sedesTestIds.length > 0) {
+          // Excluir sedes TEST de métricas del dashboard
+          citasQuery = citasQuery.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+        }
+        return citasQuery;
+      });
       // Filtrar adicionalmente para asegurar que solo se incluyen datos >= fecha de corte
       citas = (data || []).filter(c => c.fecha >= FECHA_CORTE_ESTADISTICAS);
     } catch (err) {
@@ -1025,7 +1046,7 @@
       const { data: barberos, error } = await barberosQuery;
       if (error) throw error;
       const avg = barberos.length ? (barberos.reduce((s,b) => s + Number(b.calificacion||0), 0) / barberos.length) : 0;
-      document.getElementById('kpiCalificacion').textContent = avg.toFixed(1);
+      document.getElementById('kpiCalificacion').textContent = dnFormatRating(avg, '0.0');
     } catch (err) {
       console.error(err);
     }
@@ -1138,10 +1159,10 @@
         const citasBarbero = citas.filter(c => c.barbero_id === b.id).length;
         document.getElementById('topBarbero').innerHTML = `
           <div class="avatar" style="width:34px;height:34px;font-size:11px;">${dnInitials(name)}</div>
-          <div><div style="font-size:12.5px; font-weight:600;">${name}</div><div style="font-size:11px; color:var(--gold);">${Number(b.calificacion).toFixed(1)} ★ · ${citasBarbero} citas esta semana</div></div>
+          <div><div style="font-size:12.5px; font-weight:600;">${name}</div><div style="font-size:11px; color:var(--gold);">${dnFormatRating(b.calificacion)} ★ · ${citasBarbero} citas esta semana</div></div>
         `;
         const mResumenBarberoEl = document.getElementById('mResumenBarbero');
-        if (mResumenBarberoEl) mResumenBarberoEl.textContent = `${name} (${Number(b.calificacion).toFixed(1)} ★)`;
+        if (mResumenBarberoEl) mResumenBarberoEl.textContent = `${name} (${dnFormatRating(b.calificacion)} ★)`;
       }
     } catch (err) {
       console.error(err);
@@ -1225,18 +1246,20 @@
     // AISLAMIENTO TEST: Excluir sedes TEST de métricas
     let ventasMes = 0;
     try {
-      let query = sb
-        .from('citas')
-        .select('precio')
-        .gte('fecha', monthStart)
-        .lte('fecha', todayDate)
-        .in('estado', ['finalizada', 'cobrada']);
-      if (sedeActual) {
-        query = query.eq('sucursal_id', sedeActual);
-      } else if (sedesTestIds.length > 0) {
-        query = query.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
-      }
-      const { data: citasMes } = await query;
+      const citasMes = await fetchAllRows(() => {
+        let query = sb
+          .from('citas')
+          .select('id, precio')
+          .gte('fecha', monthStart)
+          .lte('fecha', todayDate)
+          .in('estado', ['finalizada', 'cobrada']);
+        if (sedeActual) {
+          query = query.eq('sucursal_id', sedeActual);
+        } else if (sedesTestIds.length > 0) {
+          query = query.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+        }
+        return query;
+      });
       ventasMes = (citasMes || []).reduce((sum, c) => sum + Number(c.precio || 0), 0);
     } catch (err) { console.error(err); }
     document.getElementById('mVentasMes').textContent = dnFormatCOP(ventasMes);
@@ -1279,18 +1302,20 @@
       const prevMonthSameDay = new Date(now.getFullYear(), now.getMonth() - 1, currentDay).toISOString().split('T')[0];
       // Solo consultar si el rango es válido (después de la fecha de corte)
       if (prevMonthSameDay >= FECHA_CORTE_ESTADISTICAS) {
-        let queryPrev = sb
-          .from('citas')
-          .select('precio')
-          .gte('fecha', prevMonthStart)
-          .lte('fecha', prevMonthSameDay)
-          .in('estado', ['finalizada', 'cobrada']);
-        if (sedeActual) {
-          queryPrev = queryPrev.eq('sucursal_id', sedeActual);
-        } else if (sedesTestIds.length > 0) {
-          queryPrev = queryPrev.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
-        }
-        const { data: citasPrev } = await queryPrev;
+        const citasPrev = await fetchAllRows(() => {
+          let queryPrev = sb
+            .from('citas')
+            .select('id, precio')
+            .gte('fecha', prevMonthStart)
+            .lte('fecha', prevMonthSameDay)
+            .in('estado', ['finalizada', 'cobrada']);
+          if (sedeActual) {
+            queryPrev = queryPrev.eq('sucursal_id', sedeActual);
+          } else if (sedesTestIds.length > 0) {
+            queryPrev = queryPrev.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`);
+          }
+          return queryPrev;
+        });
         ventasMesAnterior = (citasPrev || []).reduce((sum, c) => sum + Number(c.precio || 0), 0);
       }
     } catch (err) {}
@@ -1371,9 +1396,11 @@
     try {
       const monthStartRange = dnLocalDayRangeUTC(monthStart);
       const todayEndRange = dnLocalDayRangeUTC(todayDate);
-      let queryGastos = sb.from('caja_movimientos').select('monto').eq('tipo', 'gasto').gte('created_at', monthStartRange.start).lte('created_at', todayEndRange.end);
-      if (sedeActual) queryGastos = queryGastos.eq('sucursal_id', sedeActual);
-      const { data: gastosData } = await queryGastos;
+      const gastosData = await fetchAllRows(() => {
+        let queryGastos = sb.from('caja_movimientos').select('id, monto').eq('tipo', 'gasto').gte('created_at', monthStartRange.start).lte('created_at', todayEndRange.end);
+        if (sedeActual) queryGastos = queryGastos.eq('sucursal_id', sedeActual);
+        return queryGastos;
+      });
       gastosMes = (gastosData || []).reduce((sum, g) => sum + Number(g.monto || 0), 0);
 
       // Gastos mes anterior para delta (solo si está después de FECHA_CORTE)
@@ -1383,9 +1410,11 @@
         const prevMonthStart = rawPrevMonthStart > FECHA_CORTE_ESTADISTICAS ? rawPrevMonthStart : FECHA_CORTE_ESTADISTICAS;
         const prevMonthStartRange = dnLocalDayRangeUTC(prevMonthStart);
         const prevMonthEndRange = dnLocalDayRangeUTC(prevMonthSameDay);
-        let queryGastosPrev = sb.from('caja_movimientos').select('monto').eq('tipo', 'gasto').gte('created_at', prevMonthStartRange.start).lte('created_at', prevMonthEndRange.end);
-        if (sedeActual) queryGastosPrev = queryGastosPrev.eq('sucursal_id', sedeActual);
-        const { data: gastosPrevData } = await queryGastosPrev;
+        const gastosPrevData = await fetchAllRows(() => {
+          let queryGastosPrev = sb.from('caja_movimientos').select('id, monto').eq('tipo', 'gasto').gte('created_at', prevMonthStartRange.start).lte('created_at', prevMonthEndRange.end);
+          if (sedeActual) queryGastosPrev = queryGastosPrev.eq('sucursal_id', sedeActual);
+          return queryGastosPrev;
+        });
         gastosMesAnterior = (gastosPrevData || []).reduce((sum, g) => sum + Number(g.monto || 0), 0);
       }
     } catch (err) {}
@@ -1640,10 +1669,10 @@
 
       const { data, error } = await sb.from('resenas')
         .select(`
-          id, calificacion, comentario, created_at,
-          usuarios!resenas_cliente_id_fkey(full_name),
+          id, calificacion, comentario, created_at, cliente_id, atendida, atendida_at, atendida_por, nota_seguimiento,
+          usuarios!resenas_cliente_id_fkey(full_name, phone),
           barberos!resenas_barbero_id_fkey(id, usuarios!barberos_id_fkey(full_name)),
-          citas!resenas_cita_id_fkey(sucursal_id)
+          citas!resenas_cita_id_fkey(sucursal_id, fecha, hora_inicio, servicios(nombre), sucursales(nombre))
         `)
         .gte('created_at', todayRange.start)
         .lte('created_at', todayRange.end)
@@ -1665,6 +1694,18 @@
         return;
       }
 
+      resenasHoyCache = {};
+      filteredData.forEach(r => {
+        resenasHoyCache[r.id] = {
+          id: r.id, calificacion: r.calificacion, comentario: r.comentario, created_at: r.created_at,
+          cliente_id: r.cliente_id, cliente_nombre: r.usuarios?.full_name, cliente_phone: r.usuarios?.phone,
+          barbero_nombre: r.barberos?.usuarios?.full_name,
+          sede_nombre: (r.citas?.sucursales?.nombre || '').replace(/^Keicy Barber( Club)?\s*/i, ''),
+          cita_fecha: r.citas?.fecha, cita_hora: r.citas?.hora_inicio, servicio_nombre: r.citas?.servicios?.nombre,
+          atendida: r.atendida, atendida_at: r.atendida_at, atendida_por: r.atendida_por, nota_seguimiento: r.nota_seguimiento
+        };
+      });
+
       listEl.innerHTML = filteredData.map(r => {
         const hora = new Date(r.created_at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
         const cliente = r.usuarios?.full_name || 'Cliente';
@@ -1672,14 +1713,15 @@
         const stars = '⭐'.repeat(r.calificacion || 0);
 
         return `
-          <div class="premium-visit-item" style="padding:14px;border-bottom:1px solid var(--glass-border);">
+          <div class="premium-visit-item" style="padding:14px;border-bottom:1px solid var(--glass-border);cursor:pointer;${r.calificacion <= 3 && !r.atendida ? 'background:rgba(239,68,68,0.07);' : ''}" onclick="abrirResenaHoy('${r.id}')">
             <div style="display:flex;align-items:center;gap:12px;">
               <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FFAC48,#FFD9A8);display:flex;align-items:center;justify-content:center;font-size:18px;">⭐</div>
               <div style="flex:1;min-width:0;">
                 <div style="font-weight:700;font-size:13px;margin-bottom:2px;">${cliente}</div>
                 <div style="font-size:11px;color:var(--text-secondary);">para <span style="color:var(--gold);font-weight:600;">${barbero}</span></div>
                 <div style="font-size:12px;margin-top:4px;">${stars}</div>
-                ${r.comentario ? `<div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:4px;line-height:1.3;">"${r.comentario}"</div>` : ''}
+                ${r.comentario ? `<div style="font-size:11px;color:var(--text-secondary);font-style:italic;margin-top:4px;line-height:1.3;">"${escResena(r.comentario)}"</div>` : ''}
+                ${r.atendida ? `<div style="font-size:11px;color:#22C55E;font-weight:700;margin-top:4px;">✓ Atendida${r.nota_seguimiento ? ' · ' + escResena(r.nota_seguimiento) : ''}</div>` : ''}
               </div>
               <div style="font-size:10px;color:var(--text-secondary);white-space:nowrap;">${hora}</div>
             </div>
@@ -1690,6 +1732,46 @@
       listEl.innerHTML = '<div class="premium-empty">Error al cargar reseñas</div>';
     }
   }
+
+  let resenasHoyCache = {};
+  const escResena = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+
+  window.abrirResenaHoy = function(id) {
+    const r = resenasHoyCache[id];
+    if (!r || typeof dnAbrirAccionesResena !== 'function') return;
+    dnAbrirAccionesResena(r, { onGuardado: () => {
+      loadResenasHoy(document.getElementById('resenasDatePicker')?.value || null);
+      cargarAlertaResenas();
+    }});
+  };
+
+  // ---- Alerta de reseñas bajas (1-3★) sin atender ----
+  let resenasBajasPrevias = null;
+  async function cargarAlertaResenas() {
+    try {
+      const sede = dnGetSedeActual();
+      let q = sb.from('resenas')
+        .select(sede ? 'id, citas!inner(sucursal_id)' : 'id', { count: 'exact', head: true })
+        .lte('calificacion', 3).eq('atendida', false);
+      if (sede) q = q.eq('citas.sucursal_id', sede);
+      const { count, error } = await q;
+      if (error) throw error;
+      const n = count || 0;
+      // El aviso completo está en la página de Reseñas; aquí solo el contador del acceso directo
+      const badge = document.getElementById('resenasAlertBadge');
+      if (badge) { badge.textContent = n > 99 ? '99+' : n; badge.style.display = n ? 'flex' : 'none'; }
+      if (resenasBajasPrevias !== null && n > resenasBajasPrevias) {
+        toast('Nueva reseña baja: revísala en Reseñas');
+        if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+        loadResenasHoy(document.getElementById('resenasDatePicker')?.value || null);
+      }
+      resenasBajasPrevias = n;
+    } catch (err) {
+      console.error('Error cargando alerta de reseñas:', err);
+    }
+  }
+  cargarAlertaResenas();
+  setInterval(() => { if (!document.hidden) cargarAlertaResenas(); }, 120000);
 
   // Inicializar date picker de reseñas
   const resenasDatePicker = document.getElementById('resenasDatePicker');
@@ -1705,8 +1787,8 @@
 </script>
 
 <script src="../assets/citas-estados.js" defer></script>
-<script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261015b"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

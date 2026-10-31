@@ -61,8 +61,8 @@
   ];
 
   // Configuración de la navegación para admin_sede
-  // ÚNICA FUENTE DE VERDAD: 5 opciones fijas
-  // Caja | Agenda | Venta | Historial | Config
+  // ÚNICA FUENTE DE VERDAD: 6 opciones fijas
+  // Caja | Agenda | Venta | Historial | Reseñas | Config
   const adminSedeNavItems = [
     {
       href: 'caja.html',
@@ -89,6 +89,13 @@
       label: 'Historial',
       icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="9"/></svg>',
       activeOn: ['historial.html']
+    },
+    {
+      // Vive en /admin/; ruta absoluta para que no se reescriba a /admin_sede/
+      href: '/admin/resenas.html?admin_sede=1',
+      label: 'Reseñas',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z" stroke-linejoin="round"/></svg>',
+      activeOn: ['resenas.html']
     },
     {
       href: 'configuracion.html',

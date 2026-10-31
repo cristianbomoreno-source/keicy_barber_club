@@ -256,6 +256,9 @@
   html.popup-mode .cart-totals .total-row.main .value { font-size: 16px !important; font-weight: 700 !important; color: #FFAC48 !important; }
   html.popup-mode .cart-totals .total-row.discount { display: none !important; }
 
+  .desc-motivos{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .desc-motivos button{ padding:6px 10px; border-radius:999px; border:1px solid var(--border, rgba(255,255,255,0.15)); background:transparent; color:inherit; font-size:12px; cursor:pointer; }
+  .desc-motivos button:hover{ border-color:var(--gold, #FFAC48); }
   /* Botón de descuento en popup */
   html.popup-mode .discount-btn {
     display: flex !important;
@@ -467,7 +470,7 @@
   }
 </style>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <link rel="stylesheet" href="../assets/mobile-admin.css">
 <link rel="stylesheet" href="../assets/dn-modals.css">
 <style>
@@ -1228,6 +1231,15 @@
     white-space:nowrap; flex-shrink:0;
     text-shadow:0 1px 2px rgba(0,0,0,0.3);
   }
+
+  .cart-price-input {
+    width:112px; flex-shrink:0; text-align:right;
+    font-size:15px; font-weight:700; color:var(--gold); font-family:inherit;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);
+    border-radius:8px; padding:6px 8px;
+  }
+  .cart-price-input:focus { outline:none; border-color:var(--gold); }
+  .cart-price-input.sin-precio { border-color:#ef4444; color:#ef4444; background:rgba(239,68,68,0.08); }
 
   .cart-item-bottom {
     display:flex; align-items:center; justify-content:space-between;
@@ -3531,8 +3543,16 @@
       <div id="descuentoItemsList" style="display:flex; flex-direction:column; gap:8px;"></div>
     </div>
     <div class="field" id="descuentoMotivoField">
-      <label>Motivo (opcional)</label>
-      <input type="text" id="descuentoMotivo" placeholder="Ej: Cupon BIENVENIDA">
+      <label>Motivo del descuento <span style="color:#ef4444;">*</span></label>
+      <div class="desc-motivos" id="descuentoMotivoChips">
+        <button type="button" data-motivo="Beneficio Club de Leales">Beneficio Club</button>
+        <button type="button" data-motivo="Cumpleaños">Cumpleaños</button>
+        <button type="button" data-motivo="Cupón">Cupón</button>
+        <button type="button" data-motivo="Promoción">Promoción</button>
+        <button type="button" data-motivo="Amigo o familiar">Amigo o familiar</button>
+        <button type="button" data-motivo="Compensación por inconveniente">Compensación</button>
+      </div>
+      <input type="text" id="descuentoMotivo" maxlength="200" placeholder="Escribe el motivo o elige uno arriba (ej: Cupón BIENVENIDA)">
     </div>
     <div id="descuentoCortesiaInfo" style="display:none; background:linear-gradient(135deg,rgba(52,211,153,0.15),rgba(52,211,153,0.1)); border:1px solid var(--status-fin); border-radius:12px; padding:16px; margin-top:8px;">
       <div style="display:flex; align-items:center; gap:10px; color:var(--status-fin); font-weight:600; font-size:14px;">
@@ -3671,7 +3691,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
 <script src="../assets/dn-modals.js"></script>
 <script>
 (async function() {
@@ -3911,6 +3931,7 @@
 
   // Estado
   let productos = [];
+  let productosInventario = []; // incluye los que no tienen unidades, para los que agrega el barbero
   let servicios = [];
   let barberos = [];
   let categorias = [];
@@ -4830,14 +4851,42 @@
     updateAgendaBtns();
   }
 
+  // Ítem que el barbero agregó a la cita (cita_items_adicionales) → ítem del carrito.
+  // La tabla no tiene "tipo": los productos vienen con categoria 'Producto'. Si entraban
+  // como servicio, el descuento los incluía y el pago con Nequi se rechazaba.
+  // Para productos se busca el producto del inventario (por nombre) para registrar la venta.
+  function itemAdicionalACart(item, extra) {
+    const esProducto = item.tipo === 'productos' || /producto/i.test(item.categoria || '');
+    const nombre = (item.nombre || '').trim().toLowerCase();
+    const producto = esProducto ? productosInventario.find(p => (p.nombre || '').trim().toLowerCase() === nombre) : null;
+    return {
+      id: producto?.id || item.servicio_id || item.producto_id || item.id,
+      tipo: esProducto ? 'productos' : 'servicios',
+      nombre: item.nombre,
+      precio: Number(item.precio) || 0,
+      cantidad: item.cantidad || 1,
+      itemAdicionalId: item.id,
+      agregadoPor: item.agregado_por,
+      // Sin la comisión del inventario la venta quedaba con comision_monto 0
+      ...(esProducto ? {
+        comision: Number(producto?.comision) || 0,
+        maxStock: producto?.cantidad ?? 999,
+        foto_url: producto?.foto_url || null,
+        comisionPara: extra?.barberoId || 'admin_sede'
+      } : {}),
+      ...extra
+    };
+  }
+
   // Cargar datos
   async function loadProductos() {
-    let query = sb.from('inventario_productos_venta').select('*').eq('activo', true).gt('cantidad', 0);
+    let query = sb.from('inventario_productos_venta').select('*').eq('activo', true);
     if (sedeId) {
       query = query.eq('sucursal_id', sedeId);
     }
     const { data } = await query.order('nombre');
-    productos = data || [];
+    productosInventario = data || [];
+    productos = productosInventario.filter(p => (p.cantidad || 0) > 0);
   }
 
   async function loadServicios() {
@@ -4933,6 +4982,47 @@
   });
 
   // Registrar comisión del barbero para cortesías
+  // Cortesías: agrupa los servicios del carrito por cita, igual que el cobro normal. Los servicios
+  // agregados en caja (sin cita propia) se suman a la cita principal. Antes cada servicio se procesaba
+  // por separado y la comisión salía del precio original de la cita (27-oct: Corte y Barba + Cejas +
+  // Limpieza Premium quedó con la comisión de $75.000 y repetida).
+  function agruparServiciosPorCita(servicios) {
+    const principal = servicios.find(s => s.citaExistente)?.citaExistente || null;
+    const porCita = {}, sinCita = [];
+    for (const s of servicios) {
+      const id = s.citaExistente || principal;
+      if (id) (porCita[id] = porCita[id] || []).push(s);
+      else sinCita.push(s);
+    }
+    return { porCita, sinCita };
+  }
+
+  // Cierra una cita como cortesía con el total de sus servicios y registra UNA comisión sobre ese total.
+  async function cerrarCitaComoCortesia(citaId, items, { metodo, embajador, etiqueta, concepto }) {
+    const { data: cita } = await sb.from('citas').select('barbero_id, precio').eq('id', citaId).single();
+    const sumaCarrito = items.reduce((t, i) => t + (Number(i.precio) || 0) * (i.cantidad || 1), 0);
+    const precioTotal = sumaCarrito > 0 ? sumaCarrito : (Number(cita?.precio) || 0);
+    const updateData = {
+      estado: 'finalizada',
+      pagada_at: new Date().toISOString(),
+      metodo_pago: metodo,
+      precio: precioTotal,
+      servicios_adicionales: items.slice(1).map(i => ({ id: i.id, nombre: i.nombre, precio: i.precio, duracion: i.duracion || 30 })),
+      notas: (items[0]?.notas || '') + ' ' + etiqueta
+    };
+    if (embajador) updateData.es_cortesia_embajador = true;
+    else updateData.es_cortesia = true;
+    const { error } = await sb.from('citas').update(updateData).eq('id', citaId);
+    if (error) throw error;
+    console.log(`[${concepto}] Cita ${citaId}: ${items.length} servicio(s), total ${precioTotal}`);
+
+    // La comisión del barbero se paga sobre el total aunque sea cortesía
+    const barberoId = cita?.barbero_id || items[0]?.barberoId || barberoVenta?.id;
+    if (barberoId && precioTotal > 0) {
+      await registrarComisionCortesia({ barberoId, citaId, precio: precioTotal, concepto });
+    }
+  }
+
   async function registrarComisionCortesia({ barberoId, citaId, precio, concepto = 'Cortesía' }) {
     if (!barberoId || !precio) {
       console.log('[Comision] No se puede registrar: falta barberoId o precio');
@@ -5973,6 +6063,32 @@
     updateTotals();
   };
 
+  // Solo el servicio de Color tiene precio variable: se escribe en el carrito
+  function esPrecioEditable(item) {
+    return item?.tipo === 'servicios' && /color/i.test(item.nombre || '');
+  }
+
+  // claseFija: clase del precio cuando no es editable ('cart-item-price' escritorio, 'price' móvil)
+  function precioServicioInput(item, i, claseFija) {
+    const precio = Number(item.precio) || 0;
+    if (!esPrecioEditable(item)) {
+      return `<div class="${claseFija}">${dnFormatCOP(precio * (item.cantidad || 1))}</div>`;
+    }
+    return `<input class="cart-price-input ${precio > 0 ? '' : 'sin-precio'}" type="text" inputmode="numeric"
+      value="${precio > 0 ? dnFormatCOP(precio) : ''}" placeholder="$ Precio" title="Editar precio"
+      onfocus="this.select()" onkeydown="if(event.key==='Enter')this.blur()"
+      onchange="setPrecioServicio(${i}, this.value)">`;
+  }
+
+  window.setPrecioServicio = function(index, value) {
+    const item = cart[index];
+    if (!esPrecioEditable(item)) return;
+    item.precio = parseInt(String(value).replace(/\D/g, ''), 10) || 0;
+    renderCart();
+    renderMobileCart();
+    if (document.getElementById('cobroTotal')) updateCobroTotals();
+  };
+
   // Asignar a quién va la comisión del producto
   window.setComisionPara = function(index, value) {
     const item = cart[index];
@@ -6053,7 +6169,7 @@
                   <div class="cart-item-type">${tipoLabel}</div>
                   ${extraInfo}
                 </div>
-                <div class="cart-item-price">${dnFormatCOP(precioTotal)}</div>
+                ${precioServicioInput(item, i, 'cart-item-price')}
               </div>
               ${agendarBtn}
               <div class="cart-item-bottom">
@@ -6375,6 +6491,15 @@
     document.getElementById('descuentoModal').classList.add('open');
   };
 
+  // Los motivos rápidos llenan el campo (se puede completar a mano, ej. "Cupón BIENVENIDA")
+  document.getElementById('descuentoMotivoChips').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-motivo]');
+    if (!b) return;
+    const input = document.getElementById('descuentoMotivo');
+    input.value = b.dataset.motivo;
+    input.focus();
+  });
+
   window.closeDescuentoModal = function() {
     document.getElementById('descuentoModal').classList.remove('open');
   };
@@ -6436,6 +6561,11 @@
       toast('Ingresa un valor valido');
       return;
     }
+    if (motivo.length < 3) {
+      toast('Escribe el motivo del descuento');
+      document.getElementById('descuentoMotivo').focus();
+      return;
+    }
 
     if (tipo === 'porcentaje' && valor > 100) {
       toast('El porcentaje no puede ser mayor a 100%');
@@ -6449,14 +6579,41 @@
     }
     descuento = { tipo, valor, motivo, seleccion };
     closeDescuentoModal();
+    reajustarMetodosAlTotal();
     updateTotals();
     toast('Descuento aplicado');
   };
 
   window.removeDiscount = function() {
     descuento = null;
+    reajustarMetodosAlTotal();
     updateTotals();
   };
+
+  // Si el método de pago se eligió antes del descuento, su monto quedó con el total
+  // anterior y el cobro se rechazaba por "los pagos superan el total".
+  // Con un solo método se ajusta al nuevo total; con varios se piden de nuevo.
+  function reajustarMetodosAlTotal() {
+    const metodos = Object.keys(selectedMethods);
+    if (!metodos.length) return;
+    const subtotal = cart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0);
+    const total = Math.max(0, subtotal - calcDescuentoMonto() + propinaMonto);
+    if (metodos.length === 1) {
+      selectedMethods[metodos[0]] = total;
+    } else {
+      selectedMethods = {};
+      toast('El total cambió: vuelve a elegir los métodos de pago');
+    }
+    // Reflejar los montos en las filas que ya están en pantalla (sin volver a dibujarlas)
+    document.querySelectorAll('#methodsGrid .method-row, #csMethodsGrid .cs-method-row').forEach(row => {
+      const monto = selectedMethods[row.dataset.method];
+      row.classList.toggle('selected', monto !== undefined);
+      const input = row.querySelector('.method-amount');
+      if (input) input.value = monto > 0 ? dnFormatCOP(monto) : '';
+    });
+    actualizarMetodoPrincipal();
+    if (document.getElementById('cobroDrawerOverlay')?.classList.contains('open')) renderCobroDrawer();
+  }
 
   // Ordenes - Solo muestra citas de barberos pendientes de cobro
   window.openOrdenesModal = function() {
@@ -6554,19 +6711,59 @@
       }
       console.log('[Historial] Citas encontradas:', citasCobradas?.length || 0);
 
-      // ========== AGRUPAR POR CLIENTE (TICKETS) ==========
-      // Agrupar productos por cliente_id
+      // Tickets del día: cada fila del historial es un ticket, con su número y el total
+      // cobrado (ya con descuento). Las ventas sin ticket (antiguas) se agrupan por cliente.
+      const { data: ticketsHoy } = await sb.from('tickets')
+        .select('id, numero_ticket, cita_id, total, anulado')
+        .eq('sucursal_id', sedeId)
+        .gte('created_at', rangoUTC.start)
+        .lte('created_at', rangoUTC.end);
+      const ticketPorId = new Map((ticketsHoy || []).map(t => [t.id, t]));
+      const ticketPorCita = new Map((ticketsHoy || []).filter(t => t.cita_id && !t.anulado).map(t => [t.cita_id, t]));
+
+      // ========== AGRUPAR POR TICKET ==========
       const ticketsMap = new Map();
+
+      // Fila de un ticket real: total = lo cobrado según el ticket
+      const filaDeTicket = (t, base) => {
+        const key = `t_${t.id}`;
+        if (!ticketsMap.has(key)) {
+          ticketsMap.set(key, { ...base, ticketId: t.id, numeroTicket: t.numero_ticket, total: Number(t.total) || 0, items: [] });
+        }
+        return ticketsMap.get(key);
+      };
 
       // Agregar productos
       (ventasProductos || []).forEach(v => {
         const clienteId = v.cliente_id || 'sin_cliente';
         const timestamp = new Date(v.created_at).getTime();
+        const itemProducto = {
+          id: v.id,
+          tipo: 'producto',
+          nombre: v.inventario_productos_venta?.nombre || 'Producto',
+          cantidad: v.cantidad,
+          precio: v.precio_total,
+          raw: v
+        };
 
-        // Buscar ticket existente del mismo cliente (dentro de 5 minutos)
+        const t = v.ticket_id ? ticketPorId.get(v.ticket_id) : null;
+        if (t?.anulado) return;
+        if (t) {
+          filaDeTicket(t, {
+            clienteId,
+            cliente: v.usuarios?.full_name || 'Cliente',
+            phone: v.usuarios?.phone || '',
+            timestamp,
+            hora: new Date(v.created_at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+            metodo: v.metodo_pago
+          }).items.push(itemProducto);
+          return;
+        }
+
+        // Sin ticket: buscar fila del mismo cliente (dentro de 5 minutos)
         let ticketKey = null;
         for (const [key, ticket] of ticketsMap) {
-          if (ticket.clienteId === clienteId && Math.abs(ticket.timestamp - timestamp) < 300000) {
+          if (!ticket.ticketId && ticket.clienteId === clienteId && Math.abs(ticket.timestamp - timestamp) < 300000) {
             ticketKey = key;
             break;
           }
@@ -6612,15 +6809,6 @@
         const clienteId = c.cliente_id || 'sin_cliente';
         const timestamp = new Date(c.updated_at || c.created_at).getTime();
 
-        // Buscar ticket existente del mismo cliente
-        let ticketKey = null;
-        for (const [key, ticket] of ticketsMap) {
-          if (ticket.clienteId === clienteId && Math.abs(ticket.timestamp - timestamp) < 300000) {
-            ticketKey = key;
-            break;
-          }
-        }
-
         const servicioItem = {
           id: c.id,
           tipo: 'servicio',
@@ -6631,6 +6819,29 @@
           propina: c.propina || 0,
           raw: c
         };
+
+        const t = ticketPorCita.get(c.id);
+        if (t) {
+          const fila = filaDeTicket(t, {
+            clienteId,
+            cliente: c.usuarios?.full_name || 'Cliente',
+            phone: c.usuarios?.phone || '',
+            timestamp,
+            hora: new Date(c.updated_at || c.created_at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
+            propina: c.propina || 0
+          });
+          fila.items.push(servicioItem);
+          return;
+        }
+
+        // Sin ticket: buscar fila del mismo cliente (dentro de 5 minutos)
+        let ticketKey = null;
+        for (const [key, ticket] of ticketsMap) {
+          if (!ticket.ticketId && ticket.clienteId === clienteId && Math.abs(ticket.timestamp - timestamp) < 300000) {
+            ticketKey = key;
+            break;
+          }
+        }
 
         if (ticketKey) {
           const ticket = ticketsMap.get(ticketKey);
@@ -6686,7 +6897,7 @@
             <div style="flex:1;min-width:0;">
               <div style="font-weight:700;font-size:14px;">${ticket.cliente}</div>
               <div style="font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itemsResumen}</div>
-              <div style="font-size:11px;color:var(--text-secondary);">${ticket.hora} · ${ticket.items.length} item${ticket.items.length > 1 ? 's' : ''}</div>
+              <div style="font-size:11px;color:var(--text-secondary);">${ticket.numeroTicket ? ticket.numeroTicket + ' · ' : ''}${ticket.hora} · ${ticket.items.length} item${ticket.items.length > 1 ? 's' : ''}</div>
             </div>
             <div style="text-align:right;">
               <div style="font-weight:700;font-size:15px;color:#10b981;">${dnFormatCOP(ticket.total)}</div>
@@ -6731,7 +6942,10 @@
       tipo: primerItem.tipo,
       raw: primerItem.raw,
       esTicket: true,
-      ticketItems: ticket.items
+      ticketItems: ticket.items,
+      // Con el número de ticket, al guardar la corrección se anula el cobro anterior
+      // (sin él, el cobro nuevo quedaba duplicado en la caja)
+      ticketId: ticket.ticketId || null
     };
 
     // Cargar todos los items del ticket al carrito
@@ -7101,19 +7315,13 @@
       // Agregar items adicionales de la tabla
       if (itemsAdicionales && itemsAdicionales.length > 0) {
         itemsAdicionales.forEach(item => {
-          cart.push({
-            id: item.servicio_id || item.producto_id || item.id,
-            tipo: item.tipo || 'servicios',
-            nombre: item.nombre,
-            precio: item.precio,
-            cantidad: item.cantidad || 1,
+          cart.push(itemAdicionalACart(item, {
             citaExistente: citaId,
-            itemAdicionalId: item.id,
             barberoId: cita.barberos?.id,
             barberoNombre: cita.barberos?.usuarios?.full_name || 'Barbero',
             fecha: cita.fecha,
             hora: cita.hora_inicio
-          });
+          }));
         });
       }
 
@@ -7264,19 +7472,13 @@
       // Agregar items adicionales de la tabla cita_items_adicionales
       if (itemsAdicionales && itemsAdicionales.length > 0) {
         itemsAdicionales.forEach(item => {
-          cart.push({
-            id: item.servicio_id || item.producto_id || item.id,
-            tipo: item.tipo || 'servicios',
-            nombre: item.nombre,
-            precio: item.precio,
-            cantidad: item.cantidad || 1,
+          cart.push(itemAdicionalACart(item, {
             citaExistente: citaId,
-            itemAdicionalId: item.id,
             barberoId: orden.barberos?.id,
             barberoNombre: orden.barberos?.usuarios?.full_name || 'Barbero',
             fecha: orden.fecha,
             hora: orden.hora_inicio
-          });
+          }));
         });
       }
 
@@ -7737,7 +7939,8 @@
     const hasClient = clienteEncontrado || (clienteNombreEl?.value?.trim() && clienteSearchEl?.value?.trim());
     const hasMethod = Object.keys(selectedMethods).length > 0;
     const montoValido = ingresado >= totalSinPropina;
-    const canPay = cart.length > 0 && hasMethod && hasClient && montoValido;
+    const serviciosConPrecio = !cart.some(c => esPrecioEditable(c) && !(Number(c.precio) > 0));
+    const canPay = cart.length > 0 && hasMethod && hasClient && montoValido && serviciosConPrecio;
 
     document.getElementById('btnConfirmarPago').disabled = !canPay;
   }
@@ -7784,6 +7987,13 @@
     try {
       // procesarCobro ahora retorna el resultado con el ticket del servidor
       const resultado = await procesarCobro();
+      // procesarCobro sale sin error cuando una validación lo detiene (ya mostró el aviso):
+      // no se registró nada, así que no se muestra el éxito ni se vacía el carrito
+      if (!resultado?.success) {
+        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg><span>Confirmar Pago</span><span id="cobroTotal" style="margin-left:4px;">· ${dnFormatCOP(total)}</span>`;
+        updateCobroTotals();
+        return;
+      }
       closeCobroDrawer();
 
       // Mostrar popup simple de éxito
@@ -7815,39 +8025,12 @@
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;"><circle cx="12" cy="12" r="10"/></svg> Procesando...';
 
     try {
-      // Procesar cada servicio como cortesía embajador
-      for (const servicio of serviciosCart) {
-        if (servicio.citaExistente) {
-          // Obtener barbero_id de la cita para calcular comisión
-          const { data: citaData } = await sb.from('citas')
-            .select('barbero_id, precio')
-            .eq('id', servicio.citaExistente)
-            .single();
-
-          // Actualizar cita existente: marcar como cortesía embajador y finalizada
-          const { error } = await sb.from('citas').update({
-            estado: 'finalizada',
-            es_cortesia_embajador: true,
-            pagada_at: new Date().toISOString(),
-            metodo_pago: 'cortesia_embajador',
-            notas: (servicio.notas || '') + ' [Cortesía Embajador]'
-          }).eq('id', servicio.citaExistente);
-
-          if (error) throw error;
-          console.log('[Embajador] Cita actualizada:', servicio.citaExistente);
-
-          // Registrar comisión del barbero (aunque sea cortesía, la comisión se paga)
-          const barberoIdComision = citaData?.barbero_id || servicio.barberoId || barberoVenta?.id;
-          const precioComision = citaData?.precio || servicio.precio || 0;
-          if (barberoIdComision && precioComision > 0) {
-            await registrarComisionCortesia({
-              barberoId: barberoIdComision,
-              citaId: servicio.citaExistente,
-              precio: precioComision,
-              concepto: 'Cortesía Embajador'
-            });
-          }
-        }
+      // Un cierre por cita con el total de sus servicios (incluye los agregados en caja)
+      const { porCita } = agruparServiciosPorCita(serviciosCart);
+      for (const [citaId, items] of Object.entries(porCita)) {
+        await cerrarCitaComoCortesia(citaId, items, {
+          metodo: 'cortesia_embajador', embajador: true, etiqueta: '[Cortesía Embajador]', concepto: 'Cortesía Embajador'
+        });
       }
 
       closeCobroDrawer();
@@ -8200,7 +8383,15 @@
       console.warn('[procesarCobro] Ya hay un cobro en proceso, ignorando llamada duplicada');
       return { success: false, error: 'Cobro en proceso' };
     }
+    const sinPrecio = cart.find(c => esPrecioEditable(c) && !(Number(c.precio) > 0));
+    if (sinPrecio && !opciones.esCortesiaGeneral && !opciones.esCortesiaEmbajador && !descuento) {
+      toast(`Escribe el precio de ${sinPrecio.nombre} en el carrito`);
+      throw new Error('Servicio sin precio');
+    }
     _procesandoCobro = true;
+    // Ticket de productos ya cobrado mientras falta el de servicios: si este falla se
+    // anula, para que al reintentar no quede el producto cobrado dos veces.
+    let ticketProductosPendiente = null;
 
     let { esCortesiaEmbajador = false, esCortesiaGeneral = false, precioOriginal = 0 } = opciones;
 
@@ -8502,6 +8693,7 @@
 
         // Usar RPC unificado para productos
         const resultadoProductos = await dnRegistrarCobroV2({
+          descuentoMotivo: descuento?.motivo || (esCortesiaEmbajador ? 'Cortesía Embajador' : esCortesiaGeneral ? 'Cortesía' : null),
           sucursalId: sedeId,
           items: itemsProductos,
           metodosPago: metodosProductos,
@@ -8523,6 +8715,7 @@
 
         ticketProductosId = resultadoProductos.ticketId;
         ticketProductosNumero = resultadoProductos.numeroTicket;
+        if (serviciosCart.length > 0) ticketProductosPendiente = ticketProductosId;
         console.log('[Ventas] Productos cobrados con ticket:', ticketProductosNumero);
 
         // Registrar en ventas_productos para compatibilidad (con ticket_id)
@@ -8550,7 +8743,7 @@
             ticket_id: ticketProductosId
           });
         }
-        // NOTA: El descuento de inventario ya lo hace el RPC server-side
+        // El inventario lo descuenta el trigger trg_ventas_productos_stock al insertar en ventas_productos
       }
 
       // Registrar servicios (crear o actualizar citas)
@@ -8567,44 +8760,15 @@
         console.log(`[Ventas] Procesando como CORTESÍA (${tipoCortesia})`);
         console.log('[Ventas] serviciosCart:', serviciosCart.map(s => ({ nombre: s.nombre, citaExistente: s.citaExistente, barberoId: s.barberoId })));
 
-        for (const servicio of serviciosCart) {
-          if (servicio.citaExistente) {
-            // Obtener barbero_id de la cita para calcular comisión
-            const { data: citaData } = await sb.from('citas')
-              .select('barbero_id, precio')
-              .eq('id', servicio.citaExistente)
-              .single();
+        const { porCita, sinCita } = agruparServiciosPorCita(serviciosCart);
+        for (const [citaId, items] of Object.entries(porCita)) {
+          await cerrarCitaComoCortesia(citaId, items, {
+            metodo: metodoPagoCortesia, embajador: esCortesiaEmbajador, etiqueta: etiquetaNota, concepto: tituloCortesia
+          });
+        }
 
-            // Actualizar cita existente: marcar como cortesía y finalizada
-            const updateData = {
-              estado: 'finalizada',
-              pagada_at: new Date().toISOString(),
-              metodo_pago: metodoPagoCortesia,
-              notas: (servicio.notas || '') + ' ' + etiquetaNota
-            };
-            if (esCortesiaEmbajador) {
-              updateData.es_cortesia_embajador = true;
-            } else {
-              updateData.es_cortesia = true;
-            }
-
-            const { error } = await sb.from('citas').update(updateData).eq('id', servicio.citaExistente);
-
-            if (error) throw error;
-            console.log(`[${tituloCortesia}] Cita actualizada:`, servicio.citaExistente);
-
-            // Registrar comisión del barbero (aunque sea cortesía, la comisión se paga)
-            const barberoIdComision = citaData?.barbero_id || servicio.barberoId || barberoVenta?.id;
-            const precioComision = citaData?.precio || servicio.precio || 0;
-            if (barberoIdComision && precioComision > 0) {
-              await registrarComisionCortesia({
-                barberoId: barberoIdComision,
-                citaId: servicio.citaExistente,
-                precio: precioComision,
-                concepto: tituloCortesia
-              });
-            }
-          } else {
+        for (const servicio of sinCita) {
+          {
             // Crear cita walk-in para cortesía
             const ahora = new Date();
             const fechaHoy = dnTodayISO();
@@ -8850,6 +9014,7 @@
 
         // Usar sistema de cobro unificado V2 (maneja todo en una transacción)
         const resultadoWalkIn = await dnRegistrarCobroV2({
+          descuentoMotivo: descuento?.motivo || (esCortesiaEmbajador ? 'Cortesía Embajador' : esCortesiaGeneral ? 'Cortesía' : null),
           citaId: citaWalkIn.id,
           sucursalId: sedeId,
           items: itemsParaTicket,
@@ -8950,6 +9115,7 @@
 
           // Usar sistema de cobro unificado V2 (maneja todo en una transacción)
           const resultado = await dnRegistrarCobroV2({
+            descuentoMotivo: descuento?.motivo || (esCortesiaEmbajador ? 'Cortesía Embajador' : esCortesiaGeneral ? 'Cortesía' : null),
             citaId: primerItem.citaExistente,
             sucursalId: sedeId,
             items: itemsParaTicketCita,
@@ -9046,6 +9212,7 @@
 
           // Usar sistema de cobro unificado V2 (maneja todo en una transacción)
           const resultado = await dnRegistrarCobroV2({
+            descuentoMotivo: descuento?.motivo || (esCortesiaEmbajador ? 'Cortesía Embajador' : esCortesiaGeneral ? 'Cortesía' : null),
             citaId: nuevaCita.id,
             sucursalId: sedeId,
             items: itemsParaTicketNueva,
@@ -9075,6 +9242,8 @@
           // NOTA: Los pagos divididos y movimientos de caja ya fueron registrados por el RPC
         }
       }
+
+      ticketProductosPendiente = null;
 
       // ========== MOVIMIENTOS DE CAJA ==========
       // NOTA: Todos los movimientos de caja ahora se registran por el RPC registrar_cobro_v2
@@ -9167,7 +9336,18 @@
 
     } catch (err) {
       console.error('Error procesando venta:', err);
-      toast('Error al procesar la venta');
+      if (ticketProductosPendiente) {
+        const reversa = await dnAnularCobro({
+          ticketId: ticketProductosPendiente,
+          motivo: 'Falló el cobro del servicio; se revierte el de productos'
+        });
+        if (!reversa.success) console.error('[Ventas] No se pudo revertir el ticket de productos:', reversa.error);
+        toast(reversa.success
+          ? 'Error al procesar la venta. No se cobró nada, intenta de nuevo'
+          : 'Error al procesar la venta. Los productos sí quedaron cobrados, revisa el historial');
+      } else {
+        toast('Error al procesar la venta');
+      }
       throw err; // Re-throw para que confirmarPagoDrawer pueda manejarlo
     } finally {
       _procesandoCobro = false; // Siempre liberar el flag
@@ -9206,7 +9386,13 @@
     btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite;"><circle cx="12" cy="12" r="10"/></svg> Procesando...';
 
     try {
-      await procesarCobro();
+      const resultado = await procesarCobro();
+      if (!resultado?.success) {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        updateTotals();
+        return;
+      }
       // Para cortesías el popup de éxito ya se muestra en procesarCobro
       if (!esCortesiaGeneral) {
         showCobroExitoPopup();
@@ -10583,7 +10769,7 @@
               ${comisionSelector}
               ${agendarBtn}
             </div>
-            ${!agendarBtn ? `<div class="price">${dnFormatCOP(item.precio * item.cantidad)}</div>` : ''}
+            ${agendarBtn ? '' : (item.tipo === 'servicios' ? precioServicioInput(item, i, 'price') : `<div class="price">${dnFormatCOP(item.precio * item.cantidad)}</div>`)}
             ${qtyControls}
           </div>
         `;
@@ -11023,17 +11209,10 @@
       // Agregar items adicionales al carrito (productos/servicios agregados por el barbero)
       if (itemsAdicionales && itemsAdicionales.length > 0) {
         itemsAdicionales.forEach(item => {
-          cart.push({
-            id: item.id,
-            tipo: item.categoria === 'Producto' ? 'productos' : 'servicios',
-            nombre: item.nombre,
-            precio: Number(item.precio) || 0,
-            cantidad: 1,
+          cart.push(itemAdicionalACart(item, {
             barberoId: cita.barbero_id,
-            barberoNombre: barberoNombre,
-            itemAdicionalId: item.id, // Referencia al item adicional original
-            agregadoPor: item.agregado_por
-          });
+            barberoNombre: barberoNombre
+          }));
         });
       }
 
@@ -11120,9 +11299,9 @@
   }
 })();
 </script>
-<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261015b"></script>
 <script src="../assets/citas-estados.js"></script>
-<script src="../assets/mobile-nav.js"></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
 <script src="/assets/turbo-loader.js" defer></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>

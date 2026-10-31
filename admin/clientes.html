@@ -10,10 +10,10 @@
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="dns-prefetch" href="https://ygrmammcaupnygdxmgth.supabase.co">
 <!-- Preload CSS críticos -->
-<link rel="preload" href="../assets/design-system.css" as="style">
+<link rel="preload" href="../assets/design-system.css?v=20261015b" as="style">
 <link rel="preload" href="../assets/mobile-admin.css" as="style">
 <!-- Preload JS críticos -->
-<link rel="preload" href="../assets/supabase-client.js?v=20261014e" as="script">
+<link rel="preload" href="../assets/supabase-client.js?v=20261021" as="script">
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
 <link rel="manifest" href="../manifest.json">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
@@ -24,7 +24,7 @@
 <meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Clientes</title>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <link rel="stylesheet" href="../assets/mobile-admin.css">
 <style>
   /* Variables heredadas de design-system.css */
@@ -789,7 +789,7 @@
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/admin-sede-nav.js"></script>
 
@@ -1522,7 +1522,12 @@
     if (referidoPor) updateData.referido_por = referidoPor;
 
     try {
-      const { error } = await sb.from('usuarios').update(updateData).eq('id', currentClientId);
+      let { error } = await sb.from('usuarios').update(updateData).eq('id', currentClientId);
+      // Teléfono repetido: decir quién lo tiene y ofrecer pasárselo a este cliente
+      if (error?.code === '23505' && phone) {
+        if (!(await resolverTelefonoRepetido(phone))) return;
+        ({ error } = await sb.from('usuarios').update(updateData).eq('id', currentClientId));
+      }
       if (error) throw error;
       toast('Cliente actualizado.');
       document.getElementById('editBasicModal').classList.remove('show');
@@ -1534,13 +1539,36 @@
     }
   }
 
+  // El teléfono ya lo tiene otra cuenta de cliente (no puede haber dos clientes con el mismo número).
+  // Muestra a quién y, si se confirma, se lo quita a esa cuenta y lo deja en el cliente actual.
+  async function resolverTelefonoRepetido(phone) {
+    const { data: otro } = await sb.from('usuarios')
+      .select('id, full_name, total_visitas_weibook, created_at')
+      .eq('role', 'cliente').eq('phone', phone).neq('id', currentClientId)
+      .limit(1).maybeSingle();
+    if (!otro) { toast('No pudimos guardar: ese teléfono ya está registrado en otra cuenta.'); return false; }
+    const visitas = Number(otro.total_visitas_weibook) || 0;
+    const ok = confirm(`El número ${phone} ya está registrado a nombre de «${otro.full_name || 'otro cliente'}»` +
+      ` (${visitas} visita${visitas === 1 ? '' : 's'}, creado el ${new Date(otro.created_at).toLocaleDateString('es-CO')}).\n\n` +
+      `¿Quitarle el número a esa cuenta y dejarlo en este cliente?\n\nSi es la misma persona con dos cuentas, puedes buscar «${phone}» para revisarla.`);
+    if (!ok) return false;
+    const { error } = await sb.rpc('admin_mover_telefono_cliente', { p_origen: otro.id, p_destino: currentClientId, p_phone: phone });
+    if (error) { console.error(error); toast('No pudimos pasar el teléfono: ' + (error.message || '')); return false; }
+    toast(`Teléfono pasado desde «${otro.full_name || 'otra cuenta'}».`);
+    return true;
+  }
+
   // ---- Contacto ----
   async function saveContact(){
     if (!currentClientId) return;
     const phone = document.getElementById('ctPhone').value.trim();
     const email = document.getElementById('ctEmail').value.trim();
     try {
-      const { error } = await sb.from('usuarios').update({ phone: phone || null, email: email || null }).eq('id', currentClientId);
+      let { error } = await sb.from('usuarios').update({ phone: phone || null, email: email || null }).eq('id', currentClientId);
+      if (error?.code === '23505' && phone) {
+        if (!(await resolverTelefonoRepetido(phone))) return;
+        ({ error } = await sb.from('usuarios').update({ phone: phone || null, email: email || null }).eq('id', currentClientId));
+      }
       if (error) throw error;
       toast('Contacto actualizado.');
       await loadClientes();
@@ -1688,10 +1716,14 @@
 
   loadClientes();
   setupRealtimeSubscription();
+
+  // Abrir directamente un cliente: clientes.html?cliente=<id> (desde Reseñas)
+  const clienteParam = new URLSearchParams(location.search).get('cliente');
+  if (clienteParam) openProfile(clienteParam);
 </script>
 
-<script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261015b"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

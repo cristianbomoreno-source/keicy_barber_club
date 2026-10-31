@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Reportes</title>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <link rel="stylesheet" href="../assets/mobile-admin.css">
 <style>
   /* Variables heredadas de design-system.css */
@@ -118,6 +118,28 @@
   .bar-fill{ height:100%; border-radius:999px; background:linear-gradient(90deg, var(--gold), var(--gold-bright)); }
 
   .empty-row{ padding:24px 0; text-align:center; color:var(--text-secondary); font-size:13px; }
+
+  /* ---- Productos ---- */
+  .section-title{ font-size:18px; font-weight:800; margin:34px 0 4px; }
+  .section-sub{ font-size:12.5px; color:var(--text-secondary); margin-bottom:16px; }
+  .prod-filters{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  .prod-filters .filter-select, .prod-filters .filter-input{ flex:1 1 170px; min-width:0; }
+  .filter-input{ height:42px; border-radius:12px; padding:0 12px; background:var(--glass-2); border:1px solid var(--glass-border); color:var(--text); font-size:13px; font-family:inherit; }
+  .table-scroll{ overflow-x:auto; margin-top:14px; -webkit-overflow-scrolling:touch; }
+  .mov-table{ width:100%; border-collapse:collapse; font-size:12.5px; min-width:860px; }
+  .mov-table th{ text-align:left; font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--text-secondary); padding:8px 10px; border-bottom:1px solid var(--divider); white-space:nowrap; }
+  .mov-table td{ padding:9px 10px; border-bottom:1px solid var(--divider); vertical-align:top; }
+  .mov-table td.num, .mov-table th.num{ text-align:right; white-space:nowrap; }
+  .mov-table .muted{ color:var(--text-secondary); font-size:11px; }
+  .mov-tag{ display:inline-block; padding:2px 8px; border-radius:999px; font-size:10.5px; font-weight:700; white-space:nowrap; }
+  .mov-tag.venta{ background:rgba(255,172,72,0.16); color:var(--gold); }
+  .mov-tag.entrada{ background:rgba(76,175,80,0.16); color:var(--success); }
+  .mov-tag.salida{ background:rgba(239,83,80,0.14); color:var(--error); }
+  .mov-tag.neutral{ background:var(--glass-2); color:var(--text-secondary); }
+  .qty-pos{ color:var(--success); font-weight:800; }
+  .qty-neg{ color:var(--error); font-weight:800; }
+  .table-foot{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:12px; font-size:12px; color:var(--text-secondary); flex-wrap:wrap; }
+  .notice{ font-size:12px; color:var(--text-secondary); background:var(--glass-2); border:1px solid var(--glass-border); border-radius:12px; padding:10px 14px; margin-bottom:16px; }
 
   @media (max-width:767px){
     .sidebar{ display:none; }
@@ -307,6 +329,87 @@
       </div>
     </div>
 
+    <!-- ================= Productos ================= -->
+    <div id="productosSection">
+      <div class="section-title">Productos</div>
+      <div class="section-sub">Ventas, entradas, ajustes y comisiones de productos en el período y sede seleccionados arriba.</div>
+
+      <div class="notice" id="kardexNotice" style="display:none;"></div>
+
+      <div class="kpi-grid fade-in">
+        <div class="card kpi-card"><div class="lbl">Unidades vendidas</div><div class="val gold" id="pkUnidades">—</div><div class="sub" id="pkUnidadesSub">—</div></div>
+        <div class="card kpi-card"><div class="lbl">Ventas de productos</div><div class="val" id="pkVentas">—</div><div class="sub" id="pkVentasSub">—</div></div>
+        <div class="card kpi-card"><div class="lbl">Margen bruto</div><div class="val" id="pkMargen">—</div><div class="sub" id="pkMargenSub">Ventas − costo − comisiones</div></div>
+        <div class="card kpi-card"><div class="lbl">Comisiones de productos</div><div class="val" id="pkComisiones">—</div><div class="sub" id="pkComisionesSub">—</div></div>
+        <div class="card kpi-card"><div class="lbl">Unidades ingresadas</div><div class="val" id="pkEntradas">—</div><div class="sub" id="pkEntradasSub">—</div></div>
+        <div class="card kpi-card"><div class="lbl">Valor del inventario</div><div class="val" id="pkValorInv">—</div><div class="sub" id="pkValorInvSub">—</div></div>
+        <div class="card kpi-card"><div class="lbl">Bajo stock mínimo</div><div class="val" id="pkBajoStock">—</div><div class="sub" id="pkBajoStockSub">—</div></div>
+        <div class="card kpi-card"><div class="lbl">Sin ventas en el período</div><div class="val" id="pkSinVentas">—</div><div class="sub">Productos con stock que no rotaron</div></div>
+      </div>
+
+      <div class="split-grid">
+        <div class="panel fade-in">
+          <div class="panel-title">Productos más vendidos</div>
+          <div class="panel-sub">Por ingresos; debajo, unidades y margen.</div>
+          <div id="porProducto" style="margin-top:14px;"><div class="empty-row">Cargando…</div></div>
+        </div>
+        <div class="panel fade-in">
+          <div class="panel-title">Comisiones de productos por persona</div>
+          <div class="panel-sub">Quién se lleva la comisión de cada venta.</div>
+          <div id="porComisionProducto" style="margin-top:14px;"><div class="empty-row">Cargando…</div></div>
+        </div>
+      </div>
+
+      <div class="panel fade-in" style="margin-bottom:20px;">
+        <div class="panel-title">Movimientos de productos</div>
+        <div class="panel-sub">Cada venta, entrada, ajuste, devolución, alta y baja, con fecha y hora.</div>
+        <div class="prod-filters" style="margin-top:14px;">
+          <select class="filter-select" id="pfTipo">
+            <option value="">Todos los movimientos</option>
+            <option value="venta">Ventas</option>
+            <option value="entrada">Entradas de stock</option>
+            <option value="salida">Salidas / ajustes</option>
+            <option value="devolucion">Devoluciones (anulaciones)</option>
+          </select>
+          <select class="filter-select" id="pfProducto"><option value="">Todos los productos</option></select>
+          <select class="filter-select" id="pfComision"><option value="">Comisión: todos</option></select>
+          <select class="filter-select" id="pfMetodo"><option value="">Método de pago: todos</option></select>
+          <input class="filter-input" id="pfBuscar" type="search" placeholder="Buscar cliente, producto, ticket…">
+        </div>
+        <div class="table-scroll">
+          <table class="mov-table">
+            <thead><tr>
+              <th>Fecha</th><th>Movimiento</th><th>Producto</th><th>Sede</th><th class="num">Cant.</th>
+              <th class="num">Precio</th><th class="num">Total</th><th class="num">Comisión</th><th>Comisión para</th>
+              <th>Método</th><th>Cliente</th><th>Registró</th><th class="num">Stock</th>
+            </tr></thead>
+            <tbody id="movBody"><tr><td colspan="13" class="empty-row">Cargando…</td></tr></tbody>
+          </table>
+        </div>
+        <div class="table-foot">
+          <span id="movResumen">—</span>
+          <div style="display:flex; gap:8px;">
+            <div class="range-btn" id="movMasBtn" style="display:none;">Ver más</div>
+            <div class="range-btn" id="movExcelBtn">⬇ Excel de productos</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel fade-in" style="margin-bottom:20px;">
+        <div class="panel-title">Stock actual por producto</div>
+        <div class="panel-sub">Existencias hoy, valor a costo y días que alcanza según el ritmo de venta del período.</div>
+        <div class="table-scroll">
+          <table class="mov-table" style="min-width:760px;">
+            <thead><tr>
+              <th>Producto</th><th>Sede</th><th class="num">Stock</th><th class="num">Mínimo</th><th class="num">Costo</th>
+              <th class="num">Precio</th><th class="num">Valor a costo</th><th class="num">Vendidas</th><th class="num">Días de stock</th><th>Última venta</th>
+            </tr></thead>
+            <tbody id="stockBody"><tr><td colspan="10" class="empty-row">Cargando…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -333,7 +436,7 @@
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -466,6 +569,7 @@
     const { from, to } = getRangeDates();
     document.getElementById('chartSub').textContent = `${dnFormatDateRange(from,to)}`;
     document.getElementById('kIngresosSub').textContent = dnFormatDateRange(from,to);
+    loadProductos(from, to);
 
     try {
       // AISLAMIENTO TEST: Obtener IDs de sedes TEST para excluirlas de reportes
@@ -874,11 +978,359 @@
     toast('Excel descargado.');
   }
 
+  // =====================================================================
+  // Productos: ventas (ventas_productos) + entradas/ajustes (inventario_movimientos)
+  // =====================================================================
+  let prodData = null;        // { from, to, movs, stock, ... } del último período cargado
+  let movLimit = 200;         // filas visibles en la tabla; "Ver más" amplía
+
+  function esc(s){
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  }
+  function fechaHoraBogota(ts){
+    return ts ? new Date(ts).toLocaleString('es-CO', { timeZone:'America/Bogota', day:'2-digit', month:'short', year:'numeric', hour:'numeric', minute:'2-digit' }) : '—';
+  }
+  function sedeNombre(id){ return sedes.find(s => s.id === id)?.nombre || '—'; }
+  async function inChunks(ids, fn){
+    const out = [];
+    for (let i = 0; i < ids.length; i += 150) out.push(...await fn(ids.slice(i, i + 150)));
+    return out;
+  }
+
+  const MOV_LABEL = {
+    venta: 'Venta', entrada: 'Entrada de stock', salida: 'Salida / ajuste', devolucion: 'Devolución (anulación)',
+    alta: 'Producto creado', baja: 'Producto eliminado', inicial: 'Stock inicial'
+  };
+
+  async function loadProductos(from, to){
+    const desde = `${from}T00:00:00-05:00`, hasta = `${to}T23:59:59.999-05:00`;
+    try {
+      const sedesTestIds = await dnGetSedesTestIds();
+      const porSede = q => sedeFiltro ? q.eq('sucursal_id', sedeFiltro)
+        : (sedesTestIds.length ? q.not('sucursal_id', 'in', `(${sedesTestIds.join(',')})`) : q);
+
+      const [ventasRaw, stock, kardex] = await Promise.all([
+        fetchAllRows(() => porSede(sb.from('ventas_productos')
+          .select('id, created_at, sucursal_id, producto_id, cantidad, precio_unitario, precio_total, comision_monto, comision_para, barbero_id, metodo_pago, ticket_id, cliente_id, registrado_por, pagado, comision_admin_cobrada, inventario_productos_venta(nombre, costo, categoria)')
+          .eq('pagado', true)
+          .gte('created_at', desde).lte('created_at', hasta)
+          .order('created_at', { ascending:false }))),
+        fetchAllRows(() => porSede(sb.from('inventario_productos_venta')
+          .select('id, nombre, categoria, sucursal_id, cantidad, stock_minimo, costo, precio, comision, activo')
+          .order('nombre'))),
+        // Si la tabla del kardex aún no existe, el reporte sigue solo con ventas
+        fetchAllRows(() => porSede(sb.from('inventario_movimientos')
+          .select('id, created_at, producto_id, producto_nombre, sucursal_id, tipo, origen, cantidad, stock_anterior, stock_nuevo, costo_unitario, precio_unitario, usuario_id')
+          .gte('created_at', desde).lte('created_at', hasta)
+          .order('created_at', { ascending:false }))).then(rows => ({ rows }), error => ({ rows: [], error }))
+      ]);
+
+      // Excluir ventas cuyo ticket fue anulado o ya no existe
+      const ticketIds = [...new Set(ventasRaw.map(v => v.ticket_id).filter(Boolean))];
+      const tickets = await inChunks(ticketIds, async ids => {
+        const { data, error } = await sb.from('tickets').select('id, anulado, numero_ticket').in('id', ids);
+        if (error) throw error;
+        return data || [];
+      });
+      const ticketMap = Object.fromEntries(tickets.map(t => [t.id, t]));
+      const ventas = ventasRaw.filter(v => !v.ticket_id || (ticketMap[v.ticket_id] && !ticketMap[v.ticket_id].anulado));
+
+      // Nombres de clientes y de quien registró
+      const userIds = [...new Set([
+        ...ventas.flatMap(v => [v.cliente_id, v.registrado_por, v.barbero_id]),
+        ...kardex.rows.map(m => m.usuario_id)
+      ].filter(Boolean))];
+      const usuarios = await inChunks(userIds, async ids => {
+        const { data, error } = await sb.from('usuarios').select('id, full_name, username').in('id', ids);
+        if (error) throw error;
+        return data || [];
+      });
+      const userName = id => { const u = usuarios.find(x => x.id === id); return u ? (u.full_name || u.username || '—') : '—'; };
+      const productoInfo = Object.fromEntries(stock.map(p => [p.id, p]));
+
+      // Movimientos unificados
+      const movs = ventas.map(v => {
+        const costo = Number(v.inventario_productos_venta?.costo ?? productoInfo[v.producto_id]?.costo) || 0;
+        const cant = Number(v.cantidad) || 0;
+        const receptor = v.comision_para === 'barbero'
+          ? (v.barbero_id ? userName(v.barbero_id) : 'Barbero')
+          : 'Admin de sede';
+        return {
+          clase: 'venta', fecha: v.created_at, producto_id: v.producto_id,
+          producto: v.inventario_productos_venta?.nombre || productoInfo[v.producto_id]?.nombre || 'Producto eliminado',
+          sucursal_id: v.sucursal_id, cantidad: -cant,
+          precio: Number(v.precio_unitario) || 0, total: Number(v.precio_total) || 0,
+          costo: costo * cant, comision: Number(v.comision_monto) || 0,
+          receptor: (Number(v.comision_monto) || 0) > 0 || v.comision_para ? receptor : '—',
+          metodo: METODO_LABEL[v.metodo_pago] || v.metodo_pago || '—',
+          cliente: v.cliente_id ? userName(v.cliente_id) : '—',
+          registro: v.registrado_por ? userName(v.registrado_por) : '—',
+          ticket: ticketMap[v.ticket_id]?.numero_ticket || '',
+          stock: ''
+        };
+      });
+      kardex.rows.forEach(m => {
+        // Las salidas que hace el sistema al cobrar ya están como "Venta"
+        if (m.origen === 'sistema' && m.tipo === 'salida') return;
+        const clase = m.origen === 'sistema' ? 'devolucion'
+          : (m.origen === 'manual' ? m.tipo : m.origen);
+        const signo = m.tipo === 'entrada' ? 1 : -1;
+        movs.push({
+          clase, fecha: m.created_at, producto_id: m.producto_id,
+          producto: m.producto_nombre || productoInfo[m.producto_id]?.nombre || '—',
+          sucursal_id: m.sucursal_id, cantidad: signo * (Number(m.cantidad) || 0),
+          precio: Number(m.costo_unitario) || 0, total: (Number(m.costo_unitario) || 0) * (Number(m.cantidad) || 0),
+          costo: 0, comision: 0, receptor: '—', metodo: '—', cliente: '—',
+          registro: m.usuario_id ? userName(m.usuario_id) : (m.origen === 'sistema' ? 'Sistema' : '—'),
+          ticket: '', stock: `${m.stock_anterior ?? '—'} → ${m.stock_nuevo ?? '—'}`
+        });
+      });
+      movs.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+      prodData = { from, to, ventas, movs, stock, kardexError: kardex.error };
+      movLimit = 200;
+      fillProdFilters();
+      renderProductos();
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos cargar el reporte de productos.');
+    }
+  }
+
+  function fillProdFilters(){
+    const keep = (id, opts, allLabel) => {
+      const sel = document.getElementById(id);
+      const prev = sel.value;
+      sel.innerHTML = `<option value="">${allLabel}</option>` + opts.map(o => `<option value="${esc(o.v)}">${esc(o.l)}</option>`).join('');
+      if (opts.some(o => o.v === prev)) sel.value = prev;
+    };
+    const prods = {};
+    prodData.stock.forEach(p => { prods[p.id] = p.nombre; });
+    prodData.movs.forEach(m => { if (m.producto_id && !prods[m.producto_id]) prods[m.producto_id] = m.producto; });
+    keep('pfProducto', Object.entries(prods).map(([v, l]) => ({ v, l })).sort((a, b) => a.l.localeCompare(b.l)), 'Todos los productos');
+    const receptores = [...new Set(prodData.movs.filter(m => m.clase === 'venta' && m.receptor !== '—').map(m => m.receptor))].sort();
+    keep('pfComision', receptores.map(r => ({ v: r, l: r })), 'Comisión: todos');
+    const metodos = [...new Set(prodData.movs.filter(m => m.clase === 'venta').map(m => m.metodo))].sort();
+    keep('pfMetodo', metodos.map(r => ({ v: r, l: r })), 'Método de pago: todos');
+  }
+
+  function movsFiltrados(){
+    const tipo = document.getElementById('pfTipo').value;
+    const prod = document.getElementById('pfProducto').value;
+    const com = document.getElementById('pfComision').value;
+    const met = document.getElementById('pfMetodo').value;
+    const q = document.getElementById('pfBuscar').value.trim().toLowerCase();
+    return prodData.movs.filter(m => {
+      if (tipo === 'salida' && !(m.clase === 'salida' || m.clase === 'baja')) return false;
+      if (tipo === 'entrada' && !(m.clase === 'entrada' || m.clase === 'alta' || m.clase === 'inicial')) return false;
+      if (tipo && !['salida', 'entrada'].includes(tipo) && m.clase !== tipo) return false;
+      if (prod && m.producto_id !== prod) return false;
+      if (com && m.receptor !== com) return false;
+      if (met && m.metodo !== met) return false;
+      if (q && ![m.producto, m.cliente, m.registro, m.ticket, m.receptor, sedeNombre(m.sucursal_id)].some(s => String(s).toLowerCase().includes(q))) return false;
+      return true;
+    });
+  }
+
+  function renderProductos(){
+    if (!prodData) return;
+    const { ventas, movs, stock, kardexError } = prodData;
+    const prodSel = document.getElementById('pfProducto').value;
+    const comSel = document.getElementById('pfComision').value;
+    const metSel = document.getElementById('pfMetodo').value;
+    // KPIs y paneles respetan los filtros de producto, comisión y método
+    const ventasF = movs.filter(m => m.clase === 'venta'
+      && (!prodSel || m.producto_id === prodSel) && (!comSel || m.receptor === comSel) && (!metSel || m.metodo === metSel));
+    const entradasF = movs.filter(m => (m.clase === 'entrada' || m.clase === 'alta') && (!prodSel || m.producto_id === prodSel));
+    const stockF = stock.filter(p => p.activo !== false && (!prodSel || p.id === prodSel));
+
+    const notice = document.getElementById('kardexNotice');
+    if (kardexError) {
+      notice.style.display = 'block';
+      notice.textContent = 'Por ahora solo se muestran ventas. Las entradas y ajustes de stock aparecerán aquí cuando se active el registro de movimientos de inventario.';
+    } else notice.style.display = 'none';
+
+    const unidades = ventasF.reduce((s, m) => s - m.cantidad, 0);
+    const totalVentas = ventasF.reduce((s, m) => s + m.total, 0);
+    const totalCosto = ventasF.reduce((s, m) => s + m.costo, 0);
+    const totalCom = ventasF.reduce((s, m) => s + m.comision, 0);
+    const comBarberos = ventasF.filter(m => m.receptor !== 'Admin de sede').reduce((s, m) => s + m.comision, 0);
+    const margen = totalVentas - totalCosto - totalCom;
+    const entradasUnid = entradasF.reduce((s, m) => s + m.cantidad, 0);
+    const valorInv = stockF.reduce((s, p) => s + (Number(p.cantidad) || 0) * (Number(p.costo) || 0), 0);
+    const valorInvVenta = stockF.reduce((s, p) => s + (Number(p.cantidad) || 0) * (Number(p.precio) || 0), 0);
+    const bajo = stockF.filter(p => (Number(p.cantidad) || 0) <= (Number(p.stock_minimo) || 0));
+    const vendidosIds = new Set(ventasF.map(m => m.producto_id));
+    const sinVentas = stockF.filter(p => (Number(p.cantidad) || 0) > 0 && !vendidosIds.has(p.id));
+
+    document.getElementById('pkUnidades').textContent = unidades;
+    document.getElementById('pkUnidadesSub').textContent = `${ventasF.length} venta${ventasF.length === 1 ? '' : 's'}`;
+    document.getElementById('pkVentas').textContent = dnFormatCOP(totalVentas);
+    document.getElementById('pkVentasSub').textContent = `Costo de lo vendido: ${dnFormatCOP(totalCosto)}`;
+    const mEl = document.getElementById('pkMargen');
+    mEl.textContent = dnFormatCOP(margen);
+    mEl.classList.toggle('bad', margen < 0);
+    document.getElementById('pkMargenSub').textContent = totalVentas ? `${Math.round(margen / totalVentas * 100)}% de las ventas` : 'Ventas − costo − comisiones';
+    document.getElementById('pkComisiones').textContent = dnFormatCOP(totalCom);
+    document.getElementById('pkComisionesSub').textContent = `Barberos ${dnFormatCOP(comBarberos)} · Admin ${dnFormatCOP(totalCom - comBarberos)}`;
+    document.getElementById('pkEntradas').textContent = kardexError ? '—' : entradasUnid;
+    document.getElementById('pkEntradasSub').textContent = kardexError ? 'Registro no activado' : `${entradasF.length} movimiento${entradasF.length === 1 ? '' : 's'}`;
+    document.getElementById('pkValorInv').textContent = dnFormatCOP(valorInv);
+    document.getElementById('pkValorInvSub').textContent = `A precio de venta: ${dnFormatCOP(valorInvVenta)}`;
+    const bEl = document.getElementById('pkBajoStock');
+    bEl.textContent = bajo.length;
+    bEl.classList.toggle('bad', bajo.length > 0);
+    document.getElementById('pkBajoStockSub').textContent = bajo.length ? bajo.slice(0, 3).map(p => p.nombre).join(', ') + (bajo.length > 3 ? '…' : '') : 'Todo en orden';
+    document.getElementById('pkSinVentas').textContent = sinVentas.length;
+
+    // Top productos
+    const porProd = {};
+    ventasF.forEach(m => {
+      const k = m.producto_id || m.producto;
+      if (!porProd[k]) porProd[k] = { name: m.producto, value: 0, unidades: 0, margen: 0 };
+      porProd[k].value += m.total; porProd[k].unidades += -m.cantidad; porProd[k].margen += m.total - m.costo - m.comision;
+    });
+    const topProd = Object.values(porProd).sort((a, b) => b.value - a.value).slice(0, 10);
+    const elProd = document.getElementById('porProducto');
+    if (!topProd.length) elProd.innerHTML = '<div class="empty-row">Sin ventas de productos en este período.</div>';
+    else {
+      const max = Math.max(...topProd.map(i => i.value));
+      elProd.innerHTML = topProd.map(it => `
+        <div class="bar-row">
+          <div class="bar-row-top"><span class="name">${esc(it.name)}</span><span class="amt">${dnFormatCOP(it.value)}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${max ? Math.max(4, it.value / max * 100) : 0}%;"></div></div>
+          <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">${it.unidades} unid. · Margen ${dnFormatCOP(it.margen)}</div>
+        </div>`).join('');
+    }
+
+    // Comisiones por persona
+    const porRec = {};
+    ventasF.forEach(m => {
+      if (!m.comision) return;
+      if (!porRec[m.receptor]) porRec[m.receptor] = { name: m.receptor, value: 0, unidades: 0 };
+      porRec[m.receptor].value += m.comision; porRec[m.receptor].unidades += -m.cantidad;
+    });
+    const recs = Object.values(porRec).sort((a, b) => b.value - a.value);
+    const elRec = document.getElementById('porComisionProducto');
+    if (!recs.length) elRec.innerHTML = '<div class="empty-row">Sin comisiones de productos en este período.</div>';
+    else {
+      const max = Math.max(...recs.map(i => i.value));
+      elRec.innerHTML = recs.map(it => `
+        <div class="bar-row">
+          <div class="bar-row-top"><span class="name">${esc(it.name)}</span><span class="amt">${dnFormatCOP(it.value)}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${max ? Math.max(4, it.value / max * 100) : 0}%;"></div></div>
+          <div style="font-size:11px; color:var(--text-secondary); margin-top:3px;">${it.unidades} unidad${it.unidades === 1 ? '' : 'es'} vendida${it.unidades === 1 ? '' : 's'}</div>
+        </div>`).join('');
+    }
+
+    renderMovTabla();
+    renderStockTabla(stockF, ventasF);
+  }
+
+  function movTagClass(clase){
+    if (clase === 'venta') return 'venta';
+    if (['entrada', 'alta', 'inicial', 'devolucion'].includes(clase)) return 'entrada';
+    if (['salida', 'baja'].includes(clase)) return 'salida';
+    return 'neutral';
+  }
+
+  function renderMovTabla(){
+    const rows = movsFiltrados();
+    const body = document.getElementById('movBody');
+    if (!rows.length) {
+      body.innerHTML = '<tr><td colspan="13" class="empty-row">Sin movimientos con estos filtros.</td></tr>';
+    } else {
+      body.innerHTML = rows.slice(0, movLimit).map(m => `
+        <tr>
+          <td style="white-space:nowrap;">${fechaHoraBogota(m.fecha)}${m.ticket ? `<div class="muted">${esc(m.ticket)}</div>` : ''}</td>
+          <td><span class="mov-tag ${movTagClass(m.clase)}">${MOV_LABEL[m.clase] || m.clase}</span></td>
+          <td>${esc(m.producto)}</td>
+          <td>${esc(sedeNombre(m.sucursal_id))}</td>
+          <td class="num"><span class="${m.cantidad >= 0 ? 'qty-pos' : 'qty-neg'}">${m.cantidad > 0 ? '+' : ''}${m.cantidad}</span></td>
+          <td class="num">${m.precio ? dnFormatCOP(m.precio) : '—'}${m.clase !== 'venta' && m.precio ? '<div class="muted">costo</div>' : ''}</td>
+          <td class="num">${m.total ? dnFormatCOP(m.total) : '—'}</td>
+          <td class="num">${m.comision ? dnFormatCOP(m.comision) : '—'}</td>
+          <td>${esc(m.receptor)}</td>
+          <td>${esc(m.metodo)}</td>
+          <td>${esc(m.cliente)}</td>
+          <td>${esc(m.registro)}</td>
+          <td class="num">${esc(m.stock) || '—'}</td>
+        </tr>`).join('');
+    }
+    const ent = rows.filter(m => m.cantidad > 0).reduce((s, m) => s + m.cantidad, 0);
+    const sal = rows.filter(m => m.cantidad < 0).reduce((s, m) => s - m.cantidad, 0);
+    document.getElementById('movResumen').textContent =
+      `${rows.length} movimiento${rows.length === 1 ? '' : 's'} · +${ent} entradas · −${sal} salidas` +
+      (rows.length > movLimit ? ` · mostrando ${movLimit}` : '');
+    document.getElementById('movMasBtn').style.display = rows.length > movLimit ? 'block' : 'none';
+  }
+
+  function renderStockTabla(stockF, ventasF){
+    const dias = daysBetweenInclusive(prodData.from, prodData.to);
+    const vendidas = {}, ultima = {};
+    ventasF.forEach(m => {
+      vendidas[m.producto_id] = (vendidas[m.producto_id] || 0) - m.cantidad;
+      if (!ultima[m.producto_id] || m.fecha > ultima[m.producto_id]) ultima[m.producto_id] = m.fecha;
+    });
+    const body = document.getElementById('stockBody');
+    if (!stockF.length) { body.innerHTML = '<tr><td colspan="10" class="empty-row">Sin productos.</td></tr>'; return; }
+    const filas = stockF.map(p => {
+      const st = Number(p.cantidad) || 0, v = vendidas[p.id] || 0;
+      return { p, st, v, diasStock: v > 0 ? Math.round(st / (v / dias)) : null };
+    }).sort((a, b) => (a.diasStock ?? 1e9) - (b.diasStock ?? 1e9) || b.v - a.v);
+    body.innerHTML = filas.map(({ p, st, v, diasStock }) => {
+      const bajo = st <= (Number(p.stock_minimo) || 0);
+      return `
+        <tr>
+          <td>${esc(p.nombre)}${p.categoria ? `<div class="muted">${esc(p.categoria)}</div>` : ''}</td>
+          <td>${esc(sedeNombre(p.sucursal_id))}</td>
+          <td class="num"><span class="${bajo ? 'qty-neg' : ''}">${st}</span></td>
+          <td class="num">${Number(p.stock_minimo) || 0}</td>
+          <td class="num">${dnFormatCOP(Number(p.costo) || 0)}</td>
+          <td class="num">${dnFormatCOP(Number(p.precio) || 0)}</td>
+          <td class="num">${dnFormatCOP(st * (Number(p.costo) || 0))}</td>
+          <td class="num">${v}</td>
+          <td class="num">${diasStock === null ? '—' : diasStock}</td>
+          <td>${ultima[p.id] ? fechaHoraBogota(ultima[p.id]) : '<span class="muted">Sin ventas</span>'}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  ['pfTipo', 'pfProducto', 'pfComision', 'pfMetodo'].forEach(id =>
+    document.getElementById(id).addEventListener('change', () => { movLimit = 200; renderProductos(); }));
+  let pfBuscarT;
+  document.getElementById('pfBuscar').addEventListener('input', () => {
+    clearTimeout(pfBuscarT);
+    pfBuscarT = setTimeout(() => { movLimit = 200; renderMovTabla(); }, 200);
+  });
+  document.getElementById('movMasBtn').addEventListener('click', () => { movLimit += 300; renderMovTabla(); });
+
+  document.getElementById('movExcelBtn').addEventListener('click', () => {
+    if (!prodData) { toast('Espera a que carguen los datos del período.'); return; }
+    const wb = XLSX.utils.book_new();
+    const movRows = [
+      ['Fecha', 'Movimiento', 'Producto', 'Sede', 'Cantidad', 'Precio / costo unit.', 'Total', 'Costo de lo vendido', 'Comisión', 'Comisión para', 'Método', 'Cliente', 'Registró', 'Ticket', 'Stock'],
+      ...movsFiltrados().map(m => [
+        fechaHoraBogota(m.fecha), MOV_LABEL[m.clase] || m.clase, m.producto, sedeNombre(m.sucursal_id), m.cantidad,
+        m.precio, m.total, m.costo, m.comision, m.receptor, m.metodo, m.cliente, m.registro, m.ticket, m.stock
+      ])
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(movRows), 'Movimientos');
+    const stockRows = [
+      ['Producto', 'Categoría', 'Sede', 'Stock', 'Mínimo', 'Costo', 'Precio', 'Comisión por unidad', 'Valor a costo', 'Activo'],
+      ...prodData.stock.map(p => [p.nombre, p.categoria || '', sedeNombre(p.sucursal_id), Number(p.cantidad) || 0, Number(p.stock_minimo) || 0,
+        Number(p.costo) || 0, Number(p.precio) || 0, Number(p.comision) || 0, (Number(p.cantidad) || 0) * (Number(p.costo) || 0), p.activo === false ? 'No' : 'Sí'])
+    ];
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(stockRows), 'Stock actual');
+    XLSX.writeFile(wb, `productos-keicy-${prodData.from}_a_${prodData.to}.xlsx`);
+    toast('Excel de productos descargado.');
+  });
+
   Promise.all([initSedeSelector(), initConfig()]).then(loadReportes);
 </script>
 
-<script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261015b"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

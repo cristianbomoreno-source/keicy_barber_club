@@ -15,7 +15,7 @@
 <meta name="theme-color" content="#000000">
 <title>Keicy Barbería · Cuadre de caja</title>
 <script src="../assets/theme-manager.js"></script>
-<link rel="stylesheet" href="../assets/design-system.css">
+<link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <link rel="stylesheet" href="../assets/mobile-admin.css">
 <link rel="stylesheet" href="../assets/dn-modals.css">
 <style>
@@ -489,6 +489,20 @@
   .pc-row{ display:flex; justify-content:space-between; align-items:center; font-size:12.5px; padding:7px 0; color:#C9C9C9; border-bottom:1px solid rgba(255,255,255,0.04); }
   .pc-row:last-child{ border-bottom:none; }
   .pc-row b{ color:#111111; font-weight:700; }
+  .dp-modal{ max-width:520px; max-height:90vh; overflow-y:auto; }
+  .dp-sub{ font-size:12px; color:var(--text-secondary); margin:-4px 0 12px; }
+  .dp-sec{ font-size:10.5px; font-weight:800; letter-spacing:.5px; text-transform:uppercase; color:var(--gold); margin:14px 0 6px; display:flex; justify-content:space-between; }
+  .dp-item{ display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid rgba(127,127,127,0.15); font-size:12.5px; }
+  .dp-item:last-child{ border-bottom:none; }
+  .dp-item .dp-l{ min-width:0; }
+  .dp-item .dp-t{ font-weight:700; }
+  .dp-item .dp-d{ font-size:11px; color:var(--text-secondary); margin-top:2px; }
+  .dp-item .dp-v{ text-align:right; white-space:nowrap; font-weight:700; }
+  .dp-item .dp-v small{ display:block; font-weight:500; font-size:10.5px; color:var(--text-secondary); }
+  .dp-neg{ color:var(--error); }
+  .dp-tag{ display:inline-block; font-size:9.5px; font-weight:800; padding:1px 6px; border-radius:99px; background:rgba(255,172,72,0.18); color:var(--gold); margin-left:4px; vertical-align:middle; }
+  .dp-pagada{ opacity:.45; }
+  .dp-metodo{ font-size:12px; color:var(--text-secondary); margin-top:10px; text-align:center; }
   .pc-total{ margin-top:10px; padding:13px 16px; border-radius:16px; background:linear-gradient(135deg, rgba(255,172,72,0.16), rgba(255,172,72,0.05)); border:1px solid rgba(255,172,72,0.4); display:flex; justify-content:space-between; align-items:center; }
   .pc-total span{ font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--gold); }
   .pc-total b{ font-size:19px; font-weight:800; }
@@ -500,6 +514,9 @@
   .pc-metodo-btn .icon{ font-size:20px; }
   .pc-metodo-btn .txt{ font-size:12px; font-weight:600; color:rgba(255,255,255,0.8); }
   .pc-metodo-btn.active .txt{ color:var(--gold); }
+  .pc-split{ display:flex; gap:10px; margin-top:10px; }
+  .pc-split label{ flex:1; display:flex; flex-direction:column; gap:4px; font-size:11px; color:rgba(255,255,255,0.6); }
+  .pc-split input{ width:100%; background:#fff; border:1px solid var(--divider); border-radius:8px; padding:8px 10px; color:#000; font-size:14px; text-align:right; font-family:inherit; }
   .pc-metodo-note{ font-size:11px; color:rgba(255,255,255,0.4); margin-top:10px; text-align:center; font-style:italic; }
 
   /* ========== MODAL PREMIUM DE COMISIONES (ESTILO WEIBOOK) ========== */
@@ -1830,7 +1847,7 @@
       <div class="caja-cerrada-card">
         <div class="caja-cerrada-card-title">Iniciar nuevo turno</div>
         <div class="caja-cerrada-card-text">
-          Al abrir un nuevo turno podrás registrar ventas, gastos y movimientos. Se te pedirá seleccionar responsable, base de caja e inventario de bebidas.
+          Al abrir un nuevo turno podrás registrar ventas, gastos y movimientos. Se te pedirá seleccionar responsable y base de caja.
         </div>
         <button class="caja-cerrada-btn abrir-turno" onclick="openAperturaModal()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
@@ -2149,8 +2166,8 @@
       </div>
     </div>
 
-    <!-- Paso 3: Inventario de bebidas -->
-    <div class="apertura-section">
+    <!-- Paso 3: Inventario de bebidas (oculto mientras la nevera esté desactivada) -->
+    <div class="apertura-section" id="aperturaBebidasSection">
       <label class="apertura-label">Inventario inicial de bebidas</label>
       <div class="apertura-bebidas" id="aperturaBebidas">
         <div class="apertura-loading">Cargando bebidas...</div>
@@ -2228,6 +2245,13 @@
             <span>Retiros de dinero</span>
           </div>
           <div class="cierre-row-value" id="cierreRetiros">-$0</div>
+        </div>
+        <div class="cierre-row" id="cierreGastosOtrosRow" style="display:none;">
+          <div class="cierre-row-left">
+            <div class="cierre-row-icon minus">−</div>
+            <span id="cierreGastosOtrosLabel">Gastos por otros medios <span style="font-size:11px;color:var(--text-3);">(no salen del efectivo)</span></span>
+          </div>
+          <div class="cierre-row-value red" id="cierreGastosOtros">-$0</div>
         </div>
       </div>
 
@@ -2339,6 +2363,7 @@
             <span class="label">Dinero retirado:</span>
             <span class="value" id="ticketRetirado">(-)$0</span>
           </div>
+          <div id="ticketGastosOtros"></div>
           <div class="resumen-ticket-row total">
             <span class="label">TOTAL EN CAJA EN CIERRE:</span>
             <span class="value" id="ticketTotal">$0</span>
@@ -2434,15 +2459,39 @@
           <span class="icon">🏦</span>
           <span class="txt">Transferencia</span>
         </button>
+        <button type="button" class="pc-metodo-btn" data-metodo="mixto" onclick="selectMetodoPago('mixto')">
+          <span class="icon">💵🏦</span>
+          <span class="txt">Ambos</span>
+        </button>
+      </div>
+      <div class="pc-split" id="pcSplitBox" style="display:none;">
+        <label>Efectivo<input type="text" inputmode="numeric" id="pcSplitEfectivo" placeholder="$0" oninput="actualizarSplitPago('efectivo')"></label>
+        <label>Transferencia<input type="text" inputmode="numeric" id="pcSplitTransferencia" placeholder="$0" oninput="actualizarSplitPago('transferencia')"></label>
       </div>
       <div class="pc-metodo-note" id="pcMetodoNote">Se descontará de la caja</div>
     </div>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closePagoComisionModal()">Cancelar</button>
-      <button class="modal-confirm" onclick="confirmPagoComision()">Confirmar pago</button>
+      <button class="modal-confirm" onclick="revisarPagoComision()">Revisar y pagar</button>
     </div>
   </div>
 </div>
+
+<!-- Desglose de todo lo que se le paga al colaborador, antes de pagar -->
+<div class="modal-bg" id="desglosePagoModalBg" style="z-index:200;">
+  <div class="modal-box pc-modal dp-modal">
+    <h3>Desglose del pago</h3>
+    <div class="dp-sub" id="dpSub">—</div>
+    <div class="dp-body" id="dpBody"></div>
+    <div class="pc-total"><span>Total a pagar</span><b id="dpTotal">—</b></div>
+    <div class="dp-metodo" id="dpMetodo"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="cerrarDesglosePago()">Volver</button>
+      <button class="modal-confirm" id="dpConfirmBtn" onclick="confirmPagoComision()">Pagar</button>
+    </div>
+  </div>
+</div>
+
 
 <!-- Modal: Reversar pago de comisión -->
 <div class="modal-bg" id="reversarPagoModalBg">
@@ -2739,7 +2788,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
 <script src="/assets/utils.js"></script>
 <script src="../assets/turbo-loader.js" defer></script>
 <script src="../assets/dn-modals.js"></script>
@@ -3610,7 +3659,7 @@
       .lte('created_at', rangoFiltro.end);
 
     let citasQuery = sb.from('citas')
-      .select('id, precio, comision_calculada, comision_pagada, propina, barbero_id, sucursal_id, barberos(comision_pct, usuarios!barberos_id_fkey(full_name, username, avatar_url))')
+      .select('id, precio, comision_calculada, comision_pagada, propina, barbero_id, sucursal_id, hora_inicio, metodo_pago, servicios_adicionales, servicios(nombre), cliente:usuarios!citas_cliente_id_fkey(full_name), barberos(comision_pct, usuarios!barberos_id_fkey(full_name, username, avatar_url))')
       .eq('estado','finalizada')
       .gte('pagada_at', rangoFiltro.start)
       .lte('pagada_at', rangoFiltro.end);
@@ -3628,7 +3677,7 @@
       .lte('created_at', rangoFiltro.end);
 
     let pagosComisionesQuery = sb.from('pagos_comisiones')
-      .select('id, barbero_id, sucursal_id, total_pagado, metodo_pago, created_at')
+      .select('id, barbero_id, sucursal_id, total_pagado, metodo_pago, monto_efectivo, monto_transferencia, created_at')
       .gte('created_at', rangoFiltro.start)
       .lte('created_at', rangoFiltro.end);
 
@@ -3649,7 +3698,7 @@
 
     // Query para comisiones de productos de barberos
     let comisionesBarberosProductosQuery = sb.from('ventas_productos')
-      .select('id, precio_total, comision_monto, comision_para, barbero_id, created_at')
+      .select('id, precio_total, comision_monto, comision_para, barbero_id, created_at, cantidad, inventario_productos_venta(nombre)')
       .eq('pagado', true)
       .eq('sucursal_id', sedeId)
       .eq('comision_para', 'barbero')
@@ -3891,8 +3940,15 @@
     const retiros = sum(movimientos.filter(m => m.tipo === 'retiro'), m => m.monto);
     const entregas = sum(movimientos.filter(m => m.tipo === 'entrega'), m => m.monto);
 
+    // Gastos pagados por QR, transferencia, etc.: no salen del efectivo, pero deben verse en el cierre
+    const gastosOtrosPorMetodo = {};
+    movimientos.filter(m => m.tipo === 'gasto' && m.metodo_pago && m.metodo_pago !== 'efectivo').forEach(m => {
+      gastosOtrosPorMetodo[m.metodo_pago] = (gastosOtrosPorMetodo[m.metodo_pago] || 0) + (Number(m.monto) || 0);
+    });
+    const gastosOtros = Object.values(gastosOtrosPorMetodo).reduce((s, v) => s + v, 0);
+
     const resultado = base + ventasEf + ingresos - gastosEfectivo - retiros - entregas;
-    return {base, ventasEf, ingresos, gastos, gastosSinComisiones, gastosEfectivo, gastosEfectivoSinComisiones, comisionesEfectivo, retiros, entregas, resultado};
+    return {base, ventasEf, ingresos, gastos, gastosSinComisiones, gastosEfectivo, gastosEfectivoSinComisiones, comisionesEfectivo, gastosOtros, gastosOtrosPorMetodo, retiros, entregas, resultado};
   }
 
   function renderKpis(){
@@ -4733,12 +4789,52 @@
 
   function selectMetodoPago(metodo) {
     pagoComisionMetodo = metodo;
-    document.querySelectorAll('.pc-metodo-btn').forEach(btn => {
+    document.querySelectorAll('#pagoComisionModalBg .pc-metodo-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.metodo === metodo);
     });
+    document.getElementById('pcSplitBox').style.display = metodo === 'mixto' ? 'flex' : 'none';
+    if (metodo === 'mixto') {
+      document.getElementById('pcSplitEfectivo').value = '';
+      document.getElementById('pcSplitTransferencia').value = dnFormatCOP(totalPagoComisionActual());
+    }
+    actualizarNotaMetodo();
+  }
+
+  // Total a pagar con los descuentos que haya en el modal
+  function totalPagoComisionActual() {
+    const b = porBarberoCache[pagoComisionBarberoId];
+    if (!b) return 0;
+    const totalDescuentos = descuentosLista.filter(d => d).reduce((sum, d) => sum + (d.monto || 0), 0);
+    return Math.max(0, b.comision + b.propinas - b.consumoBebidas - totalDescuentos);
+  }
+
+  const soloDigitos = v => parseInt(String(v || '').replace(/\D/g, ''), 10) || 0;
+
+  // Pago dividido: al escribir un monto, el otro se completa con lo que falta
+  function actualizarSplitPago(editado) {
+    const total = totalPagoComisionActual();
+    const efEl = document.getElementById('pcSplitEfectivo');
+    const trEl = document.getElementById('pcSplitTransferencia');
+    if (editado === 'efectivo') {
+      const ef = Math.min(soloDigitos(efEl.value), total);
+      efEl.value = ef ? dnFormatCOP(ef) : '';
+      trEl.value = dnFormatCOP(total - ef);
+    } else {
+      const tr = Math.min(soloDigitos(trEl.value), total);
+      trEl.value = tr ? dnFormatCOP(tr) : '';
+      efEl.value = dnFormatCOP(total - tr);
+    }
+    actualizarNotaMetodo();
+  }
+
+  function actualizarNotaMetodo() {
     const note = document.getElementById('pcMetodoNote');
-    if (metodo === 'efectivo') {
+    if (pagoComisionMetodo === 'efectivo') {
       note.textContent = 'Se descontará de la caja';
+      note.style.color = 'rgba(255,255,255,0.4)';
+    } else if (pagoComisionMetodo === 'mixto') {
+      const ef = soloDigitos(document.getElementById('pcSplitEfectivo').value);
+      note.textContent = `Solo los ${dnFormatCOP(ef)} en efectivo se descontarán de la caja`;
       note.style.color = 'rgba(255,255,255,0.4)';
     } else {
       note.textContent = 'No afecta el efectivo en caja';
@@ -4771,11 +4867,7 @@
     document.getElementById('pcDescuentosContainer').innerHTML = '';
     descuentosLista = [];
     // Reset botones de método de pago
-    document.querySelectorAll('.pc-metodo-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.metodo === 'efectivo');
-    });
-    document.getElementById('pcMetodoNote').textContent = 'Se descontará de la caja';
-    document.getElementById('pcMetodoNote').style.color = 'rgba(255,255,255,0.4)';
+    selectMetodoPago('efectivo');
     document.getElementById('pagoComisionModalBg').classList.add('show');
   }
 
@@ -4831,10 +4923,90 @@
     const totalDescuentos = descuentosLista.filter(d => d).reduce((sum, d) => sum + (d.monto || 0), 0);
     const total = b.comision + b.propinas - b.consumoBebidas - totalDescuentos;
     document.getElementById('pcTotal').textContent = dnFormatCOP(Math.max(0, total));
+    if (pagoComisionMetodo === 'mixto') actualizarSplitPago('efectivo');
   }
 
-  function closePagoComisionModal(){ document.getElementById('pagoComisionModalBg').classList.remove('show'); }
+  // ---- Desglose antes de pagar ----
+  function datosPagoComision() {
+    const b = porBarberoCache[pagoComisionBarberoId];
+    if (!b) return null;
+    const descuentosValidos = descuentosLista.filter(d => d && d.monto > 0);
+    const descuentoAdicional = descuentosValidos.reduce((sum, d) => sum + d.monto, 0);
+    const totalPago = Math.max(0, b.comision + b.propinas - b.consumoBebidas - descuentoAdicional);
+    let montoEfectivo = pagoComisionMetodo === 'efectivo' ? totalPago : 0;
+    let montoTransferencia = pagoComisionMetodo === 'transferencia' ? totalPago : 0;
+    if (pagoComisionMetodo === 'mixto') {
+      montoEfectivo = soloDigitos(document.getElementById('pcSplitEfectivo').value);
+      montoTransferencia = soloDigitos(document.getElementById('pcSplitTransferencia').value);
+    }
+    return { b, descuentosValidos, descuentoAdicional, totalPago, montoEfectivo, montoTransferencia };
+  }
+
+  function revisarPagoComision() {
+    const d = datosPagoComision();
+    if (!d) return;
+    const { b, descuentosValidos, totalPago, montoEfectivo, montoTransferencia } = d;
+    const pendientes = citasHoy.filter(c => c.barbero_id === pagoComisionBarberoId && !c.comision_pagada);
+    if (!pendientes.length) { toast('Esa comisión ya está pagada'); closePagoComisionModal(); return; }
+    if (pagoComisionMetodo === 'mixto') {
+      if (!montoEfectivo || !montoTransferencia) { toast('Escribe cuánto va en efectivo y cuánto por transferencia'); return; }
+      if (montoEfectivo + montoTransferencia !== totalPago) { toast(`Efectivo + transferencia debe sumar ${dnFormatCOP(totalPago)}`); return; }
+    }
+    const esc = t => String(t ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+    const item = (titulo, detalle, valor, sub = '', cls = '') => `
+      <div class="dp-item ${cls}"><div class="dp-l"><div class="dp-t">${titulo}</div>${detalle ? `<div class="dp-d">${detalle}</div>` : ''}</div>
+      <div class="dp-v">${valor}${sub ? `<small>${sub}</small>` : ''}</div></div>`;
+    const seccion = (t, total) => `<div class="dp-sec"><span>${t}</span><span>${total}</span></div>`;
+
+    const citas = citasHoy.filter(c => c.barbero_id === pagoComisionBarberoId)
+      .sort((x, y) => String(x.hora_inicio || '').localeCompare(String(y.hora_inicio || '')));
+    let html = seccion(`Servicios (${citas.length})`, dnFormatCOP(citas.reduce((t, c) => t + (c.comision_calculada != null ? Number(c.comision_calculada) : (Number(c.precio) || 0) * b.comisionPct / 100), 0)));
+    html += citas.map(c => {
+      const nombres = [c.servicios?.nombre || 'Servicio', ...(c.servicios_adicionales || []).map(a => a?.nombre).filter(Boolean)];
+      const com = c.comision_calculada != null ? Number(c.comision_calculada) : Math.round((Number(c.precio) || 0) * b.comisionPct / 100);
+      const pct = Number(c.precio) ? Math.round(com / Number(c.precio) * 100) : b.comisionPct;
+      const cortesia = /cortesia/.test(c.metodo_pago || '') ? `<span class="dp-tag">${c.metodo_pago === 'cortesia_embajador' ? 'Cortesía embajador' : 'Cortesía'}</span>` : '';
+      return item(`${esc(nombres.join(' + '))}${cortesia}`,
+        `${String(c.hora_inicio || '').slice(0, 5)} · ${esc(c.cliente?.full_name || 'Cliente')} · ${dnFormatCOP(c.precio)}${c.comision_pagada ? ' · ya pagada' : ''}`,
+        dnFormatCOP(com), `${pct}%${Number(c.propina) ? ` · propina ${dnFormatCOP(c.propina)}` : ''}`, c.comision_pagada ? 'dp-pagada' : '');
+    }).join('');
+
+    const productos = comisionesBarberosProductosHoy.filter(v => v.barbero_id === pagoComisionBarberoId && Number(v.comision_monto));
+    if (productos.length) {
+      html += seccion('Comisión por productos', dnFormatCOP(productos.reduce((t, v) => t + Number(v.comision_monto), 0)));
+      html += productos.map(v => item(esc(v.inventario_productos_venta?.nombre || 'Producto') + (v.cantidad > 1 ? ` ×${v.cantidad}` : ''),
+        `Venta ${dnFormatCOP(v.precio_total)}`, dnFormatCOP(v.comision_monto))).join('');
+    }
+    if (b.propinas) html += seccion('Propinas', dnFormatCOP(b.propinas));
+
+    const bebidas = consumosBebidasHoy.filter(cb => cb.barbero_id === pagoComisionBarberoId);
+    if (bebidas.length) {
+      html += seccion('Bebidas consumidas (se descuentan)', '-' + dnFormatCOP(b.consumoBebidas));
+      html += bebidas.map(cb => item(esc(cb.bebida_nombre || 'Bebida'), '', `<span class="dp-neg">-${dnFormatCOP(cb.precio)}</span>`)).join('');
+    }
+    if (descuentosValidos.length) {
+      html += seccion('Otros descuentos', '-' + dnFormatCOP(d.descuentoAdicional));
+      html += descuentosValidos.map(x => item(esc(x.motivo || 'Descuento'), '', `<span class="dp-neg">-${dnFormatCOP(x.monto)}</span>`)).join('');
+    }
+
+    document.getElementById('dpSub').textContent = `${b.nombre} · ${pendientes.length} servicio${pendientes.length === 1 ? '' : 's'} por pagar`;
+    document.getElementById('dpBody').innerHTML = html;
+    document.getElementById('dpTotal').textContent = dnFormatCOP(totalPago);
+    document.getElementById('dpMetodo').textContent = pagoComisionMetodo === 'mixto'
+      ? `Efectivo ${dnFormatCOP(montoEfectivo)} + transferencia ${dnFormatCOP(montoTransferencia)}`
+      : (pagoComisionMetodo === 'efectivo' ? 'En efectivo (se descuenta de la caja)' : 'Por transferencia');
+    const btn = document.getElementById('dpConfirmBtn');
+    btn.disabled = false;
+    btn.textContent = `Pagar ${dnFormatCOP(totalPago)}`;
+    document.getElementById('desglosePagoModalBg').classList.add('show');
+  }
+
+  function cerrarDesglosePago() { document.getElementById('desglosePagoModalBg').classList.remove('show'); }
+  function closePagoComisionModal(){ document.getElementById('pagoComisionModalBg').classList.remove('show'); cerrarDesglosePago(); }
   async function confirmPagoComision(){
+    const dpBtn = document.getElementById('dpConfirmBtn');
+    if (dpBtn?.disabled) return;
+    if (dpBtn) { dpBtn.disabled = true; dpBtn.textContent = 'Pagando…'; }
     const barberoId = pagoComisionBarberoId;
     const b = porBarberoCache[barberoId];
     const pendientes = citasHoy.filter(c=>c.barbero_id===barberoId && !c.comision_pagada);
@@ -4847,6 +5019,16 @@
     const totalPago = Math.max(0, b.comision + b.propinas - b.consumoBebidas - descuentoAdicional);
     const responsable = user?.full_name || user?.username || 'Admin';
 
+    // Cuánto va por cada medio (efectivo, transferencia o ambos)
+    let montoEfectivo = pagoComisionMetodo === 'efectivo' ? totalPago : 0;
+    let montoTransferencia = pagoComisionMetodo === 'transferencia' ? totalPago : 0;
+    if (pagoComisionMetodo === 'mixto') {
+      montoEfectivo = soloDigitos(document.getElementById('pcSplitEfectivo').value);
+      montoTransferencia = soloDigitos(document.getElementById('pcSplitTransferencia').value);
+      if (!montoEfectivo || !montoTransferencia) { toast('Escribe cuánto va en efectivo y cuánto por transferencia'); return; }
+      if (montoEfectivo + montoTransferencia !== totalPago) { toast(`Efectivo + transferencia debe sumar ${dnFormatCOP(totalPago)}`); return; }
+    }
+
     // Marcar citas como pagadas
     const { error } = await sb.from('citas').update({ comision_pagada:true, comision_pagada_at:new Date().toISOString() }).in('id', ids);
     if (error) { toast('Error al marcar como pagada'); return; }
@@ -4854,7 +5036,8 @@
     // Construir desglose de servicios para el ticket
     const desglose = pendientes.map(c => ({
       cita_id: c.id,
-      servicio: c.servicio_nombre || 'Servicio',
+      servicio: [c.servicios?.nombre, ...(c.servicios_adicionales || []).map(a => a?.nombre)].filter(Boolean).join(' + ') || 'Servicio',
+      cliente: c.cliente?.full_name || null,
       precio: c.precio || 0,
       comision: c.comision_calculada || Math.round((c.precio || 0) * (b.comisionPct / 100)),
       propina: c.propina || 0
@@ -4872,6 +5055,8 @@
         descuento_motivo: descuentoMotivo || null,
         total_pagado: totalPago,
         metodo_pago: pagoComisionMetodo,
+        monto_efectivo: montoEfectivo,
+        monto_transferencia: montoTransferencia,
         desglose: desglose,
         cantidad_servicios: b.servicios,
         pagado_por: responsable
@@ -4880,19 +5065,21 @@
       console.warn('No se pudo guardar en pagos_comisiones:', e);
     }
 
-    // Si es efectivo, registrar como gasto de caja
-    if (pagoComisionMetodo === 'efectivo' && sesionActual && sesionActual.estado === 'abierta') {
+    // La parte en efectivo se registra como gasto de caja
+    if (montoEfectivo > 0 && sesionActual && sesionActual.estado === 'abierta') {
       await sb.from('caja_movimientos').insert({
         sesion_id: sesionActual.id,
         tipo: 'gasto',
-        monto: totalPago,
-        descripcion: `Pago comisión a ${b.nombre}${descuentoAdicional > 0 ? ` (desc: ${dnFormatCOP(descuentoAdicional)})` : ''}`,
+        monto: montoEfectivo,
+        descripcion: `Pago comisión a ${b.nombre}${pagoComisionMetodo === 'mixto' ? ' (parte en efectivo)' : ''}${descuentoAdicional > 0 ? ` (desc: ${dnFormatCOP(descuentoAdicional)})` : ''}`,
         created_by: responsable
       });
     }
 
     closePagoComisionModal();
-    toast(`Comisión pagada${pagoComisionMetodo === 'efectivo' ? ' (descontado de caja)' : ' por transferencia'}`);
+    toast(pagoComisionMetodo === 'mixto'
+      ? `Comisión pagada: ${dnFormatCOP(montoEfectivo)} en efectivo y ${dnFormatCOP(montoTransferencia)} por transferencia`
+      : `Comisión pagada${pagoComisionMetodo === 'efectivo' ? ' (descontado de caja)' : ' por transferencia'}`);
     loadAll();
   }
 
@@ -4914,7 +5101,8 @@
       return;
     }
 
-    reversarPagoData = { barberoId, pagoId: pago.id, metodo: pago.metodo_pago, total: pago.total_pagado };
+    const efectivoPagado = pago.metodo_pago === 'efectivo' ? Number(pago.total_pagado) || 0 : Number(pago.monto_efectivo) || 0;
+    reversarPagoData = { barberoId, pagoId: pago.id, efectivo: efectivoPagado };
 
     document.getElementById('rpAvatarWrap').innerHTML = b.foto
       ? `<img src="${b.foto}" class="pc-avatar-img" style="object-fit:cover;">`
@@ -4922,7 +5110,9 @@
     document.getElementById('rpNombre').textContent = b.nombre;
     document.getElementById('rpServicios2').textContent = b.servicios;
     document.getElementById('rpTotalPagado').textContent = dnFormatCOP(pago.total_pagado);
-    document.getElementById('rpMetodo').textContent = pago.metodo_pago === 'efectivo' ? 'Efectivo' : 'Transferencia';
+    document.getElementById('rpMetodo').textContent = pago.metodo_pago === 'mixto'
+      ? `Efectivo ${dnFormatCOP(pago.monto_efectivo)} + Transferencia ${dnFormatCOP(pago.monto_transferencia)}`
+      : (pago.metodo_pago === 'efectivo' ? 'Efectivo' : 'Transferencia');
     document.getElementById('rpFecha').textContent = new Date(pago.created_at).toLocaleString('es-CO', { dateStyle:'short', timeStyle:'short' });
 
     document.getElementById('reversarPagoModalBg').classList.add('show');
@@ -4936,7 +5126,7 @@
   async function confirmReversarPago() {
     console.log('[confirmReversarPago] Iniciando con data:', reversarPagoData);
     if (!reversarPagoData) return;
-    const { barberoId, pagoId, metodo, total } = reversarPagoData;
+    const { barberoId, pagoId, efectivo } = reversarPagoData;
     const b = porBarberoCache[barberoId];
 
     try {
@@ -4963,7 +5153,7 @@
       if (errorPago) throw errorPago;
 
       closeReversarPagoModal();
-      toast(`Pago reversado${metodo === 'efectivo' ? ' - recuerda agregar $' + total.toLocaleString() + ' a la caja' : ''}`);
+      toast(`Pago reversado${efectivo > 0 ? ' - recuerda agregar ' + dnFormatCOP(efectivo) + ' a la caja' : ''}`);
       loadAll();
     } catch (err) {
       console.error('[confirmReversarPago] Error completo:', err);
@@ -5376,6 +5566,12 @@
     // así el desglose suma exactamente el saldo final
     document.getElementById('cierreGastos').textContent = '-' + dnFormatCOP(c.gastosEfectivo);
     document.getElementById('cierreRetiros').textContent = '-' + dnFormatCOP(c.retiros + c.entregas);
+    const nombreMetodo = id => metodosPagoActivos.find(m => m.id === id)?.name || id;
+    const metodosGastoOtros = Object.keys(c.gastosOtrosPorMetodo);
+    document.getElementById('cierreGastosOtrosRow').style.display = c.gastosOtros > 0 ? '' : 'none';
+    document.getElementById('cierreGastosOtrosLabel').innerHTML =
+      `Gastos por ${metodosGastoOtros.map(nombreMetodo).join(', ') || 'otros medios'} <span style="font-size:11px;color:var(--text-3);">(no salen del efectivo)</span>`;
+    document.getElementById('cierreGastosOtros').textContent = '-' + dnFormatCOP(c.gastosOtros);
 
     // Composición por método de pago (monto y cantidad)
     const porMetodo = {};
@@ -5403,6 +5599,10 @@
       const val = porMetodo[m.id] || 0;
       const cant = cantidadPorMetodo[m.id] || 0;
       const icon = METODO_ICONS[m.id] || '•';
+      const gasto = c.gastosOtrosPorMetodo[m.id] || 0;
+      const gastoHtml = gasto > 0
+        ? `<div style="font-size:11px;color:var(--text-3);text-align:right;">Gastos −${dnFormatCOP(gasto)} · Neto ${dnFormatCOP(val - gasto)}</div>`
+        : '';
       return `
         <div class="cierre-metodo-row">
           <div class="cierre-metodo-left">
@@ -5410,7 +5610,7 @@
             <span>${m.name}</span>
             <span style="font-size:11px;color:var(--text-3);margin-left:6px;">(${cant})</span>
           </div>
-          <div class="cierre-metodo-value">${dnFormatCOP(val)}</div>
+          <div><div class="cierre-metodo-value">${dnFormatCOP(val)}</div>${gastoHtml}</div>
         </div>
       `;
     }).join('');
@@ -5420,6 +5620,9 @@
   }
 
   // ---- Apertura / cierre de caja ----
+  // Inventario de nevera (bebidas) desactivado en todas las sedes desde el 17-oct-2026.
+  // Para reactivarlo, poner en true.
+  const NEVERA_ACTIVA = false;
   let bebidasApertura = []; // Para guardar el inventario de bebidas al abrir
 
   async function handleCajaAction(){
@@ -5464,10 +5667,10 @@
     }
 
     // Cargar bebidas
-    const { data: bebidas } = await sb.from('bebidas_inventario')
-      .select('*')
-      .eq('activo', true)
-      .order('orden');
+    document.getElementById('aperturaBebidasSection').style.display = NEVERA_ACTIVA ? '' : 'none';
+    const { data: bebidas } = NEVERA_ACTIVA
+      ? await sb.from('bebidas_inventario').select('*').eq('activo', true).order('orden')
+      : { data: [] };
 
     bebidasApertura = (bebidas || []).map(b => ({
       id: b.id,
@@ -5756,6 +5959,10 @@
     // Egresos en efectivo (incluye pagos a colaboradores)
     document.getElementById('ticketEgresos').textContent = `(-)${dnFormatCOP(calculo.gastosEfectivo)}`;
     document.getElementById('ticketRetirado').textContent = `(-)${dnFormatCOP(calculo.retiros + calculo.entregas)}`;
+    // Gastos por QR/transferencia: se informan aparte porque no restan del efectivo en caja
+    document.getElementById('ticketGastosOtros').innerHTML = Object.entries(calculo.gastosOtrosPorMetodo || {}).map(([id, monto]) =>
+      `<div class="resumen-ticket-row negative"><span class="label">Gastos por ${metodos.find(m => m.id === id)?.name || id} (no en efectivo):</span><span class="value">(-)${dnFormatCOP(monto)}</span></div>`
+    ).join('');
 
     // Total en caja
     document.getElementById('ticketTotal').textContent = dnFormatCOP(calculo.resultado);
@@ -6001,6 +6208,7 @@
       descripcion: descripcion,
       created_by: responsable,
       metodo_pago: gastoMetodoSeleccionado,
+      afecta_efectivo: gastoMetodoSeleccionado === 'efectivo',
       categoria: gastoTipoSeleccionado
     });
 
@@ -6042,8 +6250,8 @@
   });
 </script>
 
-<script src="../assets/mobile-nav.js"></script>
-<script src="../assets/admin-sede-sidebar.js?v=20261014c"></script>
+<script src="../assets/mobile-nav.js?v=20261015b"></script>
+<script src="../assets/admin-sede-sidebar.js?v=20261015b"></script>
 <script src="/assets/offline-manager.js" defer></script>
 </body>
 </html>

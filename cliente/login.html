@@ -606,8 +606,15 @@
             <label class="checkbox-label">
               <input type="checkbox" id="acceptPolicy" required>
               <span class="checkmark"></span>
-              <span class="checkbox-text">
-                Acepto la <a href="politica-datos.html" target="_blank">Política de Tratamiento de Datos</a> conforme a la Ley 1581 de 2012
+              <span class="checkbox-text" id="acceptPolicyText">
+                Acepto los <a href="/terms.html" target="_blank">Términos y Condiciones</a> del Club y autorizo el tratamiento de mis datos según la <a href="/privacy.html" target="_blank">Política de Tratamiento de Datos</a> (Ley 1581 de 2012)
+              </span>
+            </label>
+            <label class="checkbox-label" style="margin-top:10px;">
+              <input type="checkbox" id="acceptMarketing">
+              <span class="checkmark"></span>
+              <span class="checkbox-text" id="acceptMarketingText">
+                Quiero recibir promociones y beneficios exclusivos del Club (descuentos y cortesías con negocios aliados) por WhatsApp, SMS o correo. Opcional; puedo cancelarlo cuando quiera.
               </span>
             </label>
           </div>
@@ -680,7 +687,8 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../assets/supabase-client.js?v=20261014e"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
+<script src="/assets/legal.js?v=1"></script>
 <script>
   // State
   let currentClienteId = null;
@@ -904,7 +912,7 @@
         p_cliente_id: currentClienteId,
         p_pin: pin,
         p_acepto_politica: true,
-        p_version_politica: '1.0'
+        p_version_politica: DN_LEGAL.versiones.privacidad
       });
 
       if (error) throw error;
@@ -916,6 +924,21 @@
         btn.textContent = 'Crear PIN';
         return;
       }
+
+      // Prueba de la aceptación (fecha, IP, navegador, texto y versión)
+      const publicidad = document.getElementById('acceptMarketing').checked;
+      DN_LEGAL.registrar({
+        canal: 'club_registro',
+        usuarioId: currentClienteId,
+        telefono: currentFullPhone,
+        documentos: [
+          { documento: 'terminos', aceptado: true },
+          { documento: 'privacidad', aceptado: true },
+          { documento: 'publicidad', aceptado: publicidad }
+        ],
+        texto: document.getElementById('acceptPolicyText').textContent.replace(/\s+/g, ' ').trim() +
+          ' | Publicidad: ' + (publicidad ? 'SÍ' : 'NO')
+      });
 
       // Save to password manager
       await saveCredentials(currentFullPhone, pin);
