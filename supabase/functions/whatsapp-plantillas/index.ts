@@ -3,13 +3,13 @@
 // GET  → estado de las plantillas propias en cada cuenta (WABA) de las sedes
 // POST { accion: 'crear', nombre: 'confirmacion' | 'recordatorio_cita' | 'gracias_visita' | 'todas' }
 //      → la crea en cada cuenta, con el logo de Keicy como encabezado
+// POST { accion: 'probar', plantilla?: nombre | 'todas' } → prueba solo al número de pruebas
 // POST { accion: 'suscribir' } → apunta los eventos de cada cuenta al webhook de Keicy
 // =====================================================
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { esLlamadaDeLaApp, respuestaNoAutorizada } from '../_shared/auth.ts';
-import { whatsappHabilitado } from '../_shared/whatsapp/config.ts';
 
 const GRAPH = 'https://graph.facebook.com/v21.0';
 
@@ -75,7 +75,7 @@ const PLANTILLAS: Record<string, unknown> = {
       HEADER_LOGO,
       {
         type: 'BODY',
-        text: '¡Gracias por tu visita, {{1}}! 💈\n\nTu pago de {{2}} ha sido registrado. Con los botones de abajo puedes ver tu recibo y calificar la atención de {{3}}.',
+        text: '¡Gracias por tu visita, {{1}}! 💈\n\nTu pago de {{2}} ha sido registrado. Con los botones de abajo puedes ver tu recibo y calificar la atención de {{3}} en nuestra barbería.',
         example: { body_text: [['Juan', '$ 35.000', 'Carlos']] }
       },
       {
@@ -128,31 +128,39 @@ serve(async (req) => {
   if (req.method === 'POST') {
     const body = await req.json().catch(() => ({}));
 
-    // Prueba: envía gracias_visita con datos de ejemplo a un número (desde la sede indicada)
+    // Prueba: envía las plantillas con datos de ejemplo SOLO al número de pruebas
+    // (app_config.whatsapp_numero_pruebas). Funciona con el interruptor general apagado,
+    // así se prueban los mensajes sin que les llegue nada a los clientes.
     if (body?.accion === 'probar') {
-      if (!(await whatsappHabilitado())) return json({ error: 'WhatsApp desactivado (app_config.whatsapp_enabled)' }, 409);
-      const tel = String(body.telefono || '').replace(/\D/g, '');
-      const to = tel.length === 10 ? '57' + tel : tel;
+      const { data: cfg } = await sb.from('app_config').select('value').eq('key', 'whatsapp_numero_pruebas').maybeSingle();
+      const to = String(cfg?.value ?? '').replace(/\D/g, '');
+      if (to.length < 11) return json({ error: 'Falta app_config.whatsapp_numero_pruebas' }, 400);
       const { data: sede } = await sb.from('sucursales').select('nombre, whatsapp_phone_number_id')
         .ilike('nombre', `%${body.sede || ''}%`).not('whatsapp_phone_number_id', 'is', null).limit(1).maybeSingle();
-      if (!sede || to.length < 11) return json({ error: 'Sede o teléfono inválido' }, 400);
-      const r = await fetch(`${GRAPH}/${sede.whatsapp_phone_number_id}/messages`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp', to, type: 'template',
-          template: {
-            name: 'gracias_visita', language: { code: 'es' },
-            components: [
-              { type: 'header', parameters: [{ type: 'image', image: { link: LOGO_URL } }] },
-              { type: 'body', parameters: [{ type: 'text', text: 'Prueba' }, { type: 'text', text: '$ 35.000' }, { type: 'text', text: 'Keicy Barber Club' }] },
-              { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: 'reservar/' }] },
-              { type: 'button', sub_type: 'url', index: '1', parameters: [{ type: 'text', text: 'reservar/' }] }
-            ]
-          }
-        })
-      });
-      return json({ sede: sede.nombre, to, respuesta: await r.json() }, r.ok ? 200 : 400);
+      if (!sede) return json({ error: 'Sede sin número de WhatsApp' }, 400);
+      const header = { type: 'header', parameters: [{ type: 'image', image: { link: LOGO_URL } }] };
+      const texto = (...v: string[]) => ({ type: 'body', parameters: v.map(t => ({ type: 'text', text: t })) });
+      const EJEMPLOS: Record<string, unknown[]> = {
+        confirmacion: [header, texto('Prueba', sede.nombre, 'Mañana', '4 de noviembre de 2026', '3:00 PM', 'Keicy')],
+        recordatorio_cita: [header, texto('Prueba', sede.nombre, '3:00 PM', 'Keicy')],
+        gracias_visita: [header, texto('Prueba', '$ 35.000', 'Keicy'),
+          { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: 'reservar/' }] },
+          { type: 'button', sub_type: 'url', index: '1', parameters: [{ type: 'text', text: 'reservar/' }] }]
+      };
+      const nombres = !body.plantilla || body.plantilla === 'todas' ? Object.keys(EJEMPLOS) : [body.plantilla];
+      if (!nombres.every((n: string) => EJEMPLOS[n])) return json({ error: 'Plantilla desconocida' }, 400);
+      for (const nombre of nombres) {
+        const r = await fetch(`${GRAPH}/${sede.whatsapp_phone_number_id}/messages`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messaging_product: 'whatsapp', to, type: 'template',
+            template: { name: nombre, language: { code: 'es' }, components: EJEMPLOS[nombre] }
+          })
+        });
+        resultado[nombre] = await r.json();
+      }
+      return json({ sede: sede.nombre, to, resultado });
     }
 
     // Suscribe la app a cada cuenta (WABA) con el webhook de Keicy. La app de Meta es
