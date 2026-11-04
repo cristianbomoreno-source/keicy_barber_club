@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script src="/assets/theme-manager.js"></script>
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -432,6 +433,7 @@
     }
   }
 </style>
+<link rel="stylesheet" href="/assets/apple-style.css?v=20261103">
 </head>
 <body>
 
@@ -547,6 +549,17 @@
     <button class="btn-save" id="btnSave" onclick="saveProfile()">
       Guardar cambios
     </button>
+  </div>
+
+  <div class="form-section">
+    <div class="section-title">Apariencia</div>
+    <div class="form-card">
+      <div class="a-theme-row">
+        <span>Modo oscuro</span>
+        <button type="button" class="a-switch" role="switch" aria-label="Modo oscuro" aria-checked="true" id="themeSwitch" onclick="dnToggleTheme(); this.setAttribute('aria-checked', dnGetTheme() === 'dark')"></button>
+        <script>document.getElementById('themeSwitch').setAttribute('aria-checked', dnGetTheme() === 'dark');</script>
+      </div>
+    </div>
   </div>
 
   <div class="logout-section">

@@ -1,0 +1,297 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Keicy Barber Club · Capa visual estilo Apple
+   Se carga de última en cada página. Solo cambia la apariencia: no depende
+   de ningún JS y se puede quitar borrando el <link>.
+   Paleta: Manual de Marca (negro, oro #FFAC48, blanco). Modos claro y oscuro.
+   El prefijo html[data-theme] le gana a los :root y estilos de cada página.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── Tokens ─────────────────────────────────────────────────────────────── */
+html[data-theme="dark"] {
+  --bg: #000000; --bg-deep: #000000; --surface: #1c1c1e; --bg-card: #1c1c1e; --card: #1c1c1e;
+  --bg-elevated: #2c2c2e; --card-2: #2c2c2e; --bg-hover: #2c2c2e;
+  --text: #ffffff; --text-primary: #ffffff; --text-secondary: #98989f; --text-muted: #98989f;
+  --divider: rgba(255,255,255,.08); --border: rgba(255,255,255,.08); --border-subtle: rgba(255,255,255,.08); --border-light: rgba(255,255,255,.08);
+  --gold: #FFAC48; --gold-primary: #FFAC48; --gold-bright: #FFC27A; --accent: #FFAC48; --accent-bright: #FFC27A;
+  --on-gold: #000000;
+  --success: #30d158; --error: #ff453a; --danger: #ff453a; --warning: #ffd60a;
+  --glass: rgba(37,37,39,.62); --glass-card: #1c1c1e; --glass-border: rgba(255,255,255,.12); --glass-active: rgba(255,255,255,.14);
+  --nav-color: #98989f; --nav-color-active: #FFAC48;
+  --bw-bg: #000000; --bw-bg-card: #1c1c1e; --bw-bg-secondary: #2c2c2e; --bw-text: #ffffff; --bw-text-secondary: #98989f; --bw-text-muted: #98989f;
+  --bw-border: rgba(255,255,255,.08); --bw-border-light: rgba(255,255,255,.08); --bw-gold: #FFAC48;
+  --bw-shadow-sm: none; --bw-shadow-md: none; --bw-shadow-card: none;
+  --a-field: rgba(255,255,255,.07); --a-track: rgba(255,255,255,.07); --a-sheet: #2c2c2e;
+  color-scheme: dark;
+}
+html[data-theme="light"] {
+  --bg: #f2f2f7; --bg-deep: #f2f2f7; --surface: #ffffff; --bg-card: #ffffff; --card: #ffffff;
+  --bg-elevated: #ffffff; --card-2: #e5e5ea; --bg-hover: #e5e5ea;
+  --text: #000000; --text-primary: #000000; --text-secondary: #6c6c70; --text-muted: #6c6c70;
+  --divider: rgba(0,0,0,.08); --border: rgba(0,0,0,.08); --border-subtle: rgba(0,0,0,.08); --border-light: rgba(0,0,0,.08);
+  /* El oro de marca no se lee sobre blanco (1,9:1): en claro se usa su versión profunda (4,9:1). */
+  --gold: #9A5A00; --gold-primary: #9A5A00; --gold-bright: #9A5A00; --accent: #9A5A00; --accent-bright: #9A5A00;
+  --on-gold: #ffffff;
+  --success: #1a7f37; --error: #d70015; --danger: #d70015; --warning: #a05a00;
+  --glass: rgba(250,250,252,.72); --glass-card: #ffffff; --glass-border: rgba(0,0,0,.08); --glass-active: rgba(0,0,0,.08);
+  --nav-color: #6c6c70; --nav-color-active: #9A5A00;
+  --bw-bg: #f2f2f7; --bw-bg-card: #ffffff; --bw-bg-secondary: #e5e5ea; --bw-text: #000000; --bw-text-secondary: #6c6c70; --bw-text-muted: #6c6c70;
+  --bw-border: rgba(0,0,0,.08); --bw-border-light: rgba(0,0,0,.08); --bw-gold: #9A5A00;
+  --bw-shadow-sm: none; --bw-shadow-md: none; --bw-shadow-card: none;
+  --a-field: rgba(0,0,0,.05); --a-track: rgba(0,0,0,.06); --a-sheet: #ffffff;
+  color-scheme: light;
+}
+html[data-theme] {
+  --font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, system-ui, sans-serif;
+  --a-title: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, system-ui, sans-serif;
+  --font-size-page-title: 34px; --font-size-section-title: 20px; --font-size-card-title: 17px;
+  --font-size-body: 15px; --font-size-small: 13px; --font-size-caption: 12px;
+  --font-size-button: 17px; --font-size-input: 17px; --font-size-label: 13px; --font-size-nav: 11px;
+  --nav-height: 68px; --nav-total: calc(84px + env(safe-area-inset-bottom, 0px)); --bottom-nav-height: 68px;
+  --bottom-nav-total: calc(84px + env(safe-area-inset-bottom, 0px));
+  --a-press: transform .15s ease-out;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────── */
+html[data-theme] body {
+  background: var(--bg) !important;
+  color: var(--text);
+  font-family: var(--font-family) !important;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+html[data-theme] body :is(h1,h2,h3,h4,p,span,div,a,button,input,select,textarea,label,td,th) { font-family: var(--font-family); }
+html[data-theme] body :is(.hero-name,.large-title,.text-page-title,.header-greeting,.premium-greeting-name,.caja-header-title,.page-title) {
+  font-family: var(--a-title); font-weight: 700; letter-spacing: -.025em;
+}
+html[data-theme] :is(.kpi-value,.stat-value,.premium-metric-value,.caja-total-value,.total-value,.time-value-lg,.premium-sales-amount) { font-variant-numeric: tabular-nums; }
+@media (max-width: 640px) {
+  html[data-theme] input:not([type=checkbox]):not([type=radio]), html[data-theme] textarea, html[data-theme] select { font-size: 16px !important; }
+}
+
+/* ── Barras de pestañas de vidrio ───────────────────────────────────────── */
+html[data-theme] :is(.mobile-nav,.tab-bar,.bottom-nav,.premium-bottom-nav,.dn-bottom-nav) {
+  left: 16px !important; right: 16px !important;
+  bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+  max-width: 520px; margin: 0 auto !important;
+  height: 68px !important; min-height: 0 !important; padding: 6px !important; gap: 2px;
+  box-sizing: border-box !important;
+  border-radius: 999px !important;
+  background: var(--glass) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 30px -8px rgba(0,0,0,.5);
+  transform: translate3d(0,0,0);
+}
+html[data-theme] :is(.mobile-nav-item,.tab-item,.bottom-nav .nav-item,.premium-nav-item) {
+  flex: 1 1 0 !important; min-width: 0; height: 100% !important; padding: 0 !important; gap: 3px !important;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-radius: 999px !important; background: transparent !important;
+  color: var(--nav-color) !important; font-size: 11px !important; font-weight: 500;
+  transition: var(--a-press);
+}
+html[data-theme] :is(.mobile-nav-item,.tab-item,.bottom-nav .nav-item,.premium-nav-item) svg { width: 24px !important; height: 24px !important; }
+html[data-theme] :is(.mobile-nav-item,.tab-item,.bottom-nav .nav-item,.premium-nav-item):active { transform: scale(.96); }
+html[data-theme] :is(.mobile-nav-item,.tab-item,.bottom-nav .nav-item,.premium-nav-item).active {
+  background: var(--glass-active) !important; color: var(--gold) !important;
+}
+
+/* ── Encabezados ────────────────────────────────────────────────────────── */
+html[data-theme] .header {
+  background: color-mix(in srgb, var(--bg) 72%, transparent) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 0 !important;
+}
+html[data-theme] .header-title { font-size: 26px !important; font-weight: 700; letter-spacing: -.02em; font-family: var(--a-title); }
+html[data-theme] :is(.header-back,.hero-icon-btn,.icon-btn,.premium-notif-btn) {
+  width: 44px; height: 44px; border-radius: 50% !important; border: 0 !important;
+  background: var(--card-2) !important; color: var(--text); transition: var(--a-press);
+}
+html[data-theme] :is(.header-back,.hero-icon-btn,.icon-btn,.premium-notif-btn):active { transform: scale(.94); }
+html[data-theme] :is(.section-title,.panel-title) { font-size: 20px !important; font-weight: 700; letter-spacing: -.01em; color: var(--text) !important; text-transform: none !important; }
+
+/* ── Tarjetas y grupos ──────────────────────────────────────────────────── */
+html[data-theme] :is(.card,.card-glass,.panel,.glass-card,.form-card,.kpi-card,.stat-item,.premium-metric-card,.premium-progress-card,.premium-expenses-card,.caja-total-card,.caja-calculo-card) {
+  border: 0 !important; box-shadow: none !important;
+  border-radius: 1.25rem !important;
+}
+/* Las tarjetas con color propio en el HTML (p. ej. Miembros Black) lo conservan. */
+html[data-theme] :is(.card,.card-glass,.panel,.glass-card,.form-card,.kpi-card,.stat-item,.premium-metric-card,.premium-progress-card,.premium-expenses-card,.caja-total-card,.caja-calculo-card):not([style*="background"]) {
+  background: var(--card) !important;
+}
+html[data-theme] .form-card { overflow: hidden; }
+html[data-theme] .form-row { min-height: 3.25rem; border-color: var(--divider) !important; }
+html[data-theme] .form-icon { width: 32px !important; height: 32px !important; border-radius: .55rem !important; color: #fff !important; background: linear-gradient(180deg,#737881,#4d5158) !important; }
+html[data-theme] .form-icon svg { width: 18px; height: 18px; color: #fff; stroke: currentColor; }
+html[data-theme] .form-label { font-size: 13px !important; color: var(--text-secondary) !important; }
+html[data-theme] :is(.form-value,.form-input) { font-size: 17px !important; color: var(--text) !important; }
+
+/* Tono fijo por concepto: citas índigo, dinero teal, personas azul, club oro,
+   inventario verde, ajustes gris. Se repite en todas las áreas. */
+html[data-theme] :is(.premium-shortcut,.client-card) { transition: var(--a-press); }
+html[data-theme] .premium-shortcut:active { transform: scale(.97); }
+html[data-theme] .premium-shortcut { background: var(--card) !important; border: 0 !important; border-radius: 1.25rem !important; box-shadow: none !important; min-height: 92px; }
+html[data-theme] .premium-shortcut-icon svg { color: #fff !important; stroke: #fff; }
+html[data-theme] .premium-shortcut-label { font-size: 13px !important; font-weight: 600; color: var(--text) !important; }
+
+/* ── Botones ────────────────────────────────────────────────────────────── */
+html[data-theme] :is(.btn,.btn-primary,.btn-gold,.btn-secondary,.btn-ghost,.btn-danger,.btn-save,.btn-logout,.see-btn,.action-btn,.add-service-btn,.logout-btn,.caja-action-btn,.btn-cerrar-caja) {
+  border-radius: 999px !important; font-weight: 600;
+  transition: background-color .15s ease-out, color .15s ease-out, opacity .15s ease-out, transform .15s ease-out;
+}
+html[data-theme] :is(.btn,.btn-primary,.btn-gold,.btn-secondary,.btn-ghost,.btn-danger,.btn-save,.btn-logout,.action-btn):active { transform: scale(.97); }
+html[data-theme] :is(.btn-primary,.btn-gold,.btn-save) {
+  min-height: 48px; background: var(--gold) !important; color: var(--on-gold) !important; border: 0 !important; box-shadow: none !important; font-size: 17px;
+}
+html[data-theme] :is(.btn-secondary,.btn-ghost) { min-height: 44px; background: var(--card-2) !important; color: var(--text) !important; border: 0 !important; }
+
+/* ── Campos ─────────────────────────────────────────────────────────────── */
+html[data-theme] :is(.input,.textarea,.form-control) {
+  min-height: 48px; border: 1px solid transparent !important; border-radius: 1rem !important;
+  background: var(--a-field) !important; color: var(--text) !important; font-size: 17px; box-shadow: none !important;
+}
+html[data-theme] :is(.input,.textarea,.form-control):focus { outline: 2px solid color-mix(in srgb, var(--gold) 60%, transparent); outline-offset: 0; }
+html[data-theme] .label { font-size: 13px !important; font-weight: 600; color: var(--text-secondary) !important; }
+
+/* ── Control segmentado ─────────────────────────────────────────────────── */
+html[data-theme] .tabs { background: var(--a-track) !important; border: 0 !important; border-radius: 999px !important; padding: 4px; }
+html[data-theme] .tab { min-height: 40px; border: 0 !important; border-radius: 999px !important; font-size: 15px !important; font-weight: 600; color: var(--text-secondary); background: transparent !important; }
+html[data-theme] .tab.active { background: var(--glass-active) !important; color: var(--text) !important; }
+
+/* ── Diálogos ───────────────────────────────────────────────────────────── */
+html[data-theme] .modal-overlay { background: rgba(0,0,0,.5) !important; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+html[data-theme] .modal-box { background: var(--a-sheet) !important; border: 0 !important; border-radius: 2rem !important; box-shadow: 0 24px 60px -12px rgba(0,0,0,.6), 0 0 0 1px var(--divider) !important; }
+html[data-theme] .modal-title { font-size: 26px !important; font-weight: 700; letter-spacing: -.02em; }
+
+/* ── Tablas de los paneles ──────────────────────────────────────────────── */
+html[data-theme] th { font-size: 13px !important; color: var(--text-secondary) !important; font-weight: 600; }
+html[data-theme] tr { border-color: var(--divider); }
+
+/* ── Escritorio: barra lateral de vidrio flotante ───────────────────────── */
+@media (min-width: 901px) {
+  html[data-theme] .sidebar {
+    background: var(--glass) !important; border: 1px solid var(--glass-border) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+    top: 12px !important; bottom: 12px !important; left: 12px !important; height: auto !important;
+    border-radius: 2rem !important; box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 30px -8px rgba(0,0,0,.35);
+  }
+  html[data-theme] .nav-link { border-radius: 999px !important; font-size: 15px; font-weight: 600; }
+}
+
+/* ── Rellenos de oro: en los dos modos usan el oro de marca con texto negro ── */
+html[data-theme] { --a-fill: #FFAC48; --a-on-fill: #000000; --on-gold: #000000; }
+html[data-theme="dark"] {
+  --club-bg: #000000; --club-surface: #1c1c1e; --club-surface-2: #2c2c2e; --club-text: #ffffff;
+  --club-text-secondary: #98989f; --club-text-muted: #98989f; --club-gold: #FFAC48; --club-divider: rgba(255,255,255,.08); --club-shadow: none;
+}
+html[data-theme="light"] {
+  --premium-gold: #9A5A00;
+  --card-2: #f2f2f7; --bw-bg-secondary: #f2f2f7; --bw-gold-dark: #9A5A00;
+  --club-bg: #f2f2f7; --club-surface: #ffffff; --club-surface-2: #f2f2f7; --club-text: #000000;
+  --club-text-secondary: #6c6c70; --club-text-muted: #6c6c70; --club-gold: #9A5A00; --club-gold-bright: #9A5A00; --club-gold-dark: #9A5A00;
+  --club-divider: rgba(0,0,0,.08); --club-shadow: none;
+}
+html[data-theme] :is(.btn-primary,.btn-gold,.btn-save,.btn.gold,#dnPushSi,.tab-btn.active,.mv-tab.active,.sec-tab.active,.inv-tab.active,.range-btn.active,.categoria-filter.active,
+  .mv-avatar,.avatar,.sidebar-card-avatar,.orden-card-avatar,.profile-avatar,.avatar-edit,.step-dot.active,.progress-step.active,.ranking-pos.gold,.add-service-btn,
+  .ticket-btn.primary,.ticket-header,.seat-btn.gold,.hero-puesto,.reserva-hora,.reserva-time,
+  .nav-link.active,.btn-cerrar-turno,.btn-gold-sm,.catalog-tab.active,.sede-tab.active,.share-link-copy,.add-btn,.period-tab.active,.share-link-icon,.view-tab.active,.cart-count,.top-rank,.theme-option.active,
+  .profile-badge:not(.bronce):not(.plata):not(.oro):not(.black):not(.ninguna),.bar-fill,.caja-meta-bar-fill,.shift-fill,.top-bar-fill,.profile-avatar-ring) {
+  background: var(--a-fill) !important; color: var(--a-on-fill) !important; border-color: transparent !important;
+}
+html[data-theme] :is(.btn-primary,.btn-gold,.btn-save,.add-service-btn,.ticket-btn.primary) svg { stroke: currentColor; }
+html[data-theme] :is(.header-back,.hero-icon-btn,.icon-btn,.premium-notif-btn,.header-btn) { background: var(--a-track) !important; border: 0 !important; }
+html[data-theme] .header-btn { width: 44px; height: 44px; }
+html[data-theme="light"] :is(.header-back,.header-btn,.icon-btn) svg { stroke: #000; color: #000; }
+html[data-theme="light"] :is(.cart-sheet-footer) { background: var(--card) !important; }
+html[data-theme="light"] .categoria-filter:not(.active) { background: var(--card) !important; color: var(--text) !important; }
+
+/* ── Aviso de notificaciones ──────────────────────────────────────────── */
+html[data-theme] #dnPushAviso > * { border-radius: 1.25rem !important; }
+html[data-theme] #dnPushSi, html[data-theme] #dnPushNo { height: 44px !important; border-radius: 999px !important; font-size: 15px !important; }
+
+/* ── Caja: acciones sobre la barra de pestañas ────────────────────────── */
+@media (max-width: 900px) {
+  html[data-theme] .caja-actions-bar {
+    left: 16px !important; right: 16px !important; bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
+    border: 1px solid var(--glass-border) !important; border-radius: 999px !important; box-shadow: none !important;
+    background: var(--glass) !important; -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+    padding: 6px 8px !important;
+  }
+}
+
+/* ── Accesos rápidos: tarjetas de color con ícono 3D ──────────────────── */
+html[data-theme] .premium-shortcut { min-width: 104px; padding: 12px !important; align-items: flex-start !important; justify-content: space-between; gap: 10px; border-radius: 1.75rem !important; position: relative; }
+html[data-theme] .premium-shortcut-label { color: #fff !important; font-size: 15px !important; font-weight: 700; letter-spacing: -.01em; }
+html[data-theme] .premium-shortcut-icon { background: center / contain no-repeat !important; width: 48px !important; height: 48px !important; filter: drop-shadow(0 6px 10px rgba(0,0,0,.35)); }
+html[data-theme] .premium-shortcut-icon svg { display: none !important; }
+html[data-theme] .premium-shortcut { background: linear-gradient(180deg,#737881,#4d5158) !important; }
+html[data-theme] .premium-shortcut[href*="barberos"] { background: linear-gradient(180deg,#3d8fd6,#2867a3) !important; }
+html[data-theme] .premium-shortcut[href*="calendario"] { background: linear-gradient(180deg,#4044b8,#2d2f8f) !important; }
+html[data-theme] .premium-shortcut[href*="fidelizacion"] { background: linear-gradient(180deg,#8a6431,#6a4a22) !important; }
+html[data-theme] .premium-shortcut[href*="inventario"] { background: linear-gradient(180deg,#43a05a,#2a773d) !important; }
+html[data-theme] .premium-shortcut[href*="reportes"] { background: linear-gradient(180deg,#44708b,#345a72) !important; }
+html[data-theme] .premium-shortcut[href*="resenas"] { background: linear-gradient(180deg,#7b56c9,#563596) !important; }
+html[data-theme] .premium-shortcut[href*="barberos"] .premium-shortcut-icon { background-image: url(/assets/icons/3d/barber-pole.png) !important; }
+html[data-theme] .premium-shortcut[href*="calendario"] .premium-shortcut-icon { background-image: url(/assets/icons/3d/spiral-calendar.png) !important; }
+html[data-theme] .premium-shortcut[href*="fidelizacion"] .premium-shortcut-icon { background-image: url(/assets/icons/3d/trophy.png) !important; }
+html[data-theme] .premium-shortcut[href*="inventario"] .premium-shortcut-icon { background-image: url(/assets/icons/3d/package.png) !important; }
+html[data-theme] .premium-shortcut[href*="reportes"] .premium-shortcut-icon { background-image: url(/assets/icons/3d/bar-chart.png) !important; }
+html[data-theme] .premium-shortcut[href*="resenas"] .premium-shortcut-icon { background-image: url(/assets/icons/3d/star.png) !important; }
+
+/* ── Estados vacíos con ícono 3D ──────────────────────────────────────── */
+html[data-theme] .empty-icon { width: 72px !important; height: 72px !important; border: 0 !important; background: url(/assets/icons/3d/scissors.png) center / contain no-repeat !important; filter: drop-shadow(0 6px 10px rgba(0,0,0,.35)); }
+html[data-theme] .empty-icon svg { display: none; }
+
+/* ── Recepción en móvil: se apila en vez de cortarse a la derecha ─────── */
+@media (max-width: 767px) {
+  html[data-theme] .main { min-width: 0; max-width: 100%; }
+  html[data-theme] .header-row { flex-direction: column; align-items: flex-start; }
+  html[data-theme] .topbar { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+  html[data-theme] .topbar-card { padding: 14px !important; min-width: 0; }
+  html[data-theme] .main-layout { grid-template-columns: minmax(0,1fr) !important; }
+  html[data-theme] .seat-grid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; grid-template-rows: none !important; grid-auto-rows: minmax(190px, auto); }
+  html[data-theme] .seat-card { min-width: 0; }
+  html[data-theme] .seat-btn { height: 36px !important; }
+}
+html[data-theme] .seat-card, html[data-theme] .topbar-card { background: var(--card) !important; border: 0 !important; border-radius: 1.25rem !important; }
+html[data-theme] :is(.user-chip,.icon-pill) { background: var(--card) !important; border: 0 !important; }
+html[data-theme="light"] .icon-pill svg { stroke: #000; }
+
+/* ── Tema: interruptor del cliente ────────────────────────────────────── */
+html[data-theme] .a-theme-row { display: flex; align-items: center; gap: 12px; min-height: 3.25rem; padding: 8px 16px; font-size: 17px; }
+html[data-theme] .a-theme-row span { flex: 1; min-width: 0; }
+html[data-theme] .a-switch { position: relative; width: 52px; height: 32px; border: 0; border-radius: 999px; background: rgba(120,120,128,.32); cursor: pointer; transition: background-color .15s ease-out; flex-shrink: 0; }
+html[data-theme] .a-switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 28px; height: 28px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .15s ease-out; }
+html[data-theme="dark"] .a-switch { background: var(--success); }
+html[data-theme="dark"] .a-switch::after { transform: translateX(20px); }
+
+/* ── Hero con foto: siempre sobre oscuro, en los dos modos ────────────── */
+html[data-theme] .hero-icon-btn { background: rgba(255,255,255,.18) !important; }
+html[data-theme] .hero-icon-btn svg { stroke: #fff !important; color: #fff !important; }
+html[data-theme] :is(.cs-cobrar-btn,.premium-sales-btn,.am-day-item.today) { background: var(--a-fill) !important; color: var(--a-on-fill) !important; }
+html[data-theme] body :is(.cs-cobrar-btn,.premium-sales-btn,.am-day-item.today) * { color: var(--a-on-fill) !important; }
+html[data-theme="light"] [style*="color:#FFAC48"], html[data-theme="light"] [style*="color: #FFAC48"] { color: var(--gold) !important; }
+
+/* ── Contraste de colores fijos heredados ─────────────────────────────── */
+html[data-theme="dark"] { --error: #ff6961; --danger: #ff6961; }
+html[data-theme] body :is(.am-time-slot.am-time-slot,.am-day-name.am-day-name,.premium-metric-delta-text,.premium-visit-time) { color: var(--text-secondary) !important; }
+html[data-theme] .share-link-btn.whatsapp { color: #000 !important; }
+html[data-theme="light"] body :is(.premium-progress-pct.premium-progress-pct,.premium-today-badge.premium-today-badge,.premium-section-link,.profile-puesto,.info-value.gold,.val.gold,.ganancias-avatar,.premium-today-badge) { color: var(--gold) !important; }
+html[data-theme="light"] :is(.stat-value.green,.info-value.green,.val.green,.am-barbero-espacios,[style*="5EEAB2" i]) { color: var(--success) !important; }
+html[data-theme="light"] :is(.info-value.red,.config-name.danger) { color: var(--error) !important; }
+html[data-theme="light"] :is(.am-espacios-pocos,.stat-value.orange) { color: var(--warning) !important; }
+html[data-theme="light"] :is(.n,.lbl,.seat-status.st-libre) { color: var(--text-secondary) !important; }
+html[data-theme="light"] .seat-status.st-agendado { color: #0a60b5 !important; }
+html[data-theme="light"] :is(.ordenes-count,.badge-count,.bell-badge,#mvOrdenesBadge,.mv-tab .count,.cart-sheet-title .count,.cart-fab .count,.step-title .num) { color: #fff !important; }
+html[data-theme="light"] .dn-toast-icon { color: var(--success) !important; }
+
+/* ── Gráficos y agenda en modo claro ──────────────────────────────────── */
+html[data-theme="light"] :is(.donut-wrap,.gauge-wrap) [stroke="#2B2B2B" i] { stroke: #e5e5ea; }
+html[data-theme="light"] .donut-wrap text { fill: var(--text) !important; }
+html[data-theme="light"] .sidebar-toggle-btn :is(svg,path) { stroke: #000 !important; }
+html[data-theme="light"] .cname { color: var(--text) !important; text-shadow: none !important; }
+
+/* ── Texto mínimo de 12 px ────────────────────────────────────────────── */
+html[data-theme] :is([style*="font-size:7"],[style*="font-size:8"],[style*="font-size:9"],[style*="font-size:10"],[style*="font-size:11"],[style*="font-size: 9"],[style*="font-size: 10"],[style*="font-size: 11"]) { font-size: 12px !important; }
+html[data-theme] :is(#cajaHoraApertura,#cajaSessionId,#cajaStatusText,#shiftEnd,#shiftStart,#todayLabel,.alerts-empty,.ap-count,.ap-title,.badge-soon,.badge.doc,.badge.no,.bar-label,.caja-action-btn,.caja-action-btn.gasto,.caja-action-btn.ingreso,.caja-meta-label,.caja-meta-msg,.caja-mov-concepto,.caja-movimientos-refresh,.caja-responsable-label,.caja-responsable-name,.caja-tab,.caja-tab.active,.caja-total-label,.caja-ventas-title,.card-hint,.card-inf-btn,.card-label,.card-rating,.card-role.barbero,.card-spec,.card-stat-label,.card-status.active,.card-username,.cat-count,.checkpoint-label,.cierre-ganancia-label,.cierre-stat-label,.client-eyebrow,.colaborador-stats,.comparacion-nota,.cs-section-title,.delta.eq,.donut-center-label,.hdr-clock,.hdr-estado.busy,.hdr-puesto,.hero-puesto,.hub-badge.ready,.hub-badge.soon,.info-label,.kpi-label,.mov-tag.neutral,.mov-tag.venta,.premium-greeting-label,.premium-sales-label,.premium-section-link,.premium-sede-label,.premium-today-badge,.premium-today-stat-label,.premium-visit-sede,.resumen-label,.seat-barber-name,.seat-btn,.seat-btn.muted,.seat-client.empty,.seat-puesto,.seat-status.st-agendado,.seat-status.st-libre,.stat-label,.stat-meta,.step-tile-label,.steps-card-label,.swipe-pending-txt,.time-card-label,.time-next-row,.tl-hmark,.tl-libre,.top-count,.topbar-lbl,.topbar-sub,.total-badge,.total-label) { font-size: 12px !important; }
