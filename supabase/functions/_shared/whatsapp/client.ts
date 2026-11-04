@@ -7,6 +7,7 @@ import {
   getWhatsAppCredentials,
   createSupabaseClient,
   whatsappHabilitado,
+  esNumeroPruebas,
   formatPhoneForWhatsApp
 } from './config.ts';
 import type {
@@ -151,8 +152,8 @@ export async function sendWhatsAppText(
   text: string,
   citaId?: string
 ): Promise<SendMessageResponse> {
-  // Interruptor general: con WhatsApp desactivado no se llama a Meta
-  if (!(await whatsappHabilitado())) {
+  // Interruptor general: con WhatsApp desactivado solo se responde al número de pruebas
+  if (!(await whatsappHabilitado()) && !(await esNumeroPruebas(to))) {
     console.log('[WhatsApp Client] WhatsApp desactivado (app_config.whatsapp_enabled), no se envía');
     return { success: false, error: 'WhatsApp desactivado', errorCode: 'WHATSAPP_DESACTIVADO' };
   }

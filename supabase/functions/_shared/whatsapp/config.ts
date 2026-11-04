@@ -43,6 +43,20 @@ export async function whatsappHabilitado(): Promise<boolean> {
   return String(data?.value ?? '').replace(/"/g, '') === 'true';
 }
 
+/**
+ * Número de pruebas (app_config.whatsapp_numero_pruebas). Las respuestas de texto a este
+ * número salen aunque el interruptor general esté apagado.
+ */
+export async function esNumeroPruebas(phone: string): Promise<boolean> {
+  const { data } = await createSupabaseClient()
+    .from('app_config')
+    .select('value')
+    .eq('key', 'whatsapp_numero_pruebas')
+    .maybeSingle();
+  const pruebas = String(data?.value ?? '').replace(/\D/g, '');
+  return pruebas.length >= 11 && formatPhoneForWhatsApp(phone) === pruebas;
+}
+
 // Crear cliente de Supabase con service_role para operaciones internas
 export function createSupabaseClient() {
   const supabaseUrl = Deno.env.get('SUPABASE_URL');

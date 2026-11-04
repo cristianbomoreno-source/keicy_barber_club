@@ -140,9 +140,14 @@ serve(async (req) => {
       if (!sede) return json({ error: 'Sede sin número de WhatsApp' }, 400);
       const header = { type: 'header', parameters: [{ type: 'image', image: { link: LOGO_URL } }] };
       const texto = (...v: string[]) => ({ type: 'body', parameters: v.map(t => ({ type: 'text', text: t })) });
+      // Botones de prueba: el webhook responde sin tocar ninguna cita
+      const botones = ['CONFIRMAR', 'CANCELAR'].map((accion, i) => ({
+        type: 'button', sub_type: 'quick_reply', index: String(i),
+        parameters: [{ type: 'payload', payload: `PRUEBA:${accion}` }]
+      }));
       const EJEMPLOS: Record<string, unknown[]> = {
-        confirmacion: [header, texto('Prueba', sede.nombre, 'Mañana', '4 de noviembre de 2026', '3:00 PM', 'Keicy')],
-        recordatorio_cita: [header, texto('Prueba', sede.nombre, '3:00 PM', 'Keicy')],
+        confirmacion: [header, texto('Prueba', sede.nombre, 'Mañana', '4 de noviembre de 2026', '3:00 PM', 'Keicy'), ...botones],
+        recordatorio_cita: [header, texto('Prueba', sede.nombre, '3:00 PM', 'Keicy'), ...botones],
         gracias_visita: [header, texto('Prueba', '$ 35.000', 'Keicy'),
           { type: 'button', sub_type: 'url', index: '0', parameters: [{ type: 'text', text: 'reservar/' }] },
           { type: 'button', sub_type: 'url', index: '1', parameters: [{ type: 'text', text: 'reservar/' }] }]

@@ -18,6 +18,7 @@ import {
   verifyWebhookToken,
   validateWebhookSignature,
   getSucursalByPhoneNumberId,
+  esNumeroPruebas,
   createSupabaseClient
 } from '../_shared/whatsapp/config.ts';
 import {
@@ -65,6 +66,30 @@ interface CoexistenceMessageEcho {
   text?: { body: string };
   status?: string;
 }
+
+// Se envía después de que el cliente confirma su cita
+const POLITICAS_MSG = `📋 *Parce Antes de tu cita, ten presente:*
+
+⏰ *Puntualidad*
+• Llega 10 min antes
+• Tiempo de espera máxima : 15 minutos ⏳
+• Después serás re-agendado según disponibilidad 👊🏻
+
+⚠️ *Importante*
+
+• A la tercera falla no podrás agendar
+• Avísanos con tiempo si no puedes asistir por fa 🙏🏻
+
+💳 *Métodos de pago*
+
+• 💵 Efectivo — Siempre disponible
+
+• 🏧 QR — Paga desde cualquier app bancaria
+
+• Tarjeta — paga con cualquier tarjeta
+
+
+💛 ¡Te esperamos en la barber y siempre mil gracias por la LEALTAD! ❤️`;
 
 // Headers CORS (Meta requiere respuestas CORS)
 const corsHeaders = {
@@ -275,6 +300,23 @@ async function processIncomingMessage(
   // Procesar botones con action tokens
   if (messageType === 'button' && message.button) {
     const buttonPayload = message.button.payload;
+
+    // Botones de whatsapp-plantillas {accion:'probar'}: solo responden al número de pruebas
+    if (buttonPayload.startsWith('PRUEBA:')) {
+      if (!(await esNumeroPruebas(fromPhone))) {
+        console.warn(`[Webhook] Prueba ignorada desde ${fromPhone}`);
+        return;
+      }
+      if (buttonPayload === 'PRUEBA:CONFIRMAR') {
+        await sendWhatsAppText(sucursalId, fromPhone, '¡Tu cita ha sido confirmada! Te esperamos.');
+        await new Promise(r => setTimeout(r, 1500));
+        await sendWhatsAppText(sucursalId, fromPhone, POLITICAS_MSG);
+      } else {
+        await sendWhatsAppText(sucursalId, fromPhone, 'Tu cita ha sido cancelada. Si cambias de opinión, agenda una nueva en nuestra web.');
+      }
+      return;
+    }
+
     const parsed = parseActionTokenPayload(buttonPayload);
 
     if (parsed) {
@@ -294,32 +336,9 @@ async function processIncomingMessage(
 
       // Si fue una confirmación exitosa, enviar mensaje de políticas
       if (result.success && parsed.action === 'CONFIRMAR' && !result.message?.includes('ya está confirmada')) {
-        const politicasMsg = `📋 *Parce Antes de tu cita, ten presente:*
-
-⏰ *Puntualidad*
-• Llega 10 min antes
-• Tiempo de espera máxima : 15 minutos ⏳
-• Después serás re-agendado según disponibilidad 👊🏻
-
-⚠️ *Importante*
-
-• A la tercera falla no podrás agendar
-• Avísanos con tiempo si no puedes asistir por fa 🙏🏻
-
-💳 *Métodos de pago*
-
-• 💵 Efectivo — Siempre disponible
-
-• 🏧 QR — Paga desde cualquier app bancaria
-
-• Tarjeta — paga con cualquier tarjeta
-
-
-💛 ¡Te esperamos en la barber y siempre mil gracias por la LEALTAD! ❤️`;
-
         // Esperar un momento antes de enviar el segundo mensaje
         await new Promise(r => setTimeout(r, 1500));
-        await sendWhatsAppText(sucursalId, fromPhone, politicasMsg);
+        await sendWhatsAppText(sucursalId, fromPhone, POLITICAS_MSG);
         console.log(`[Webhook] Políticas enviadas a ${fromPhone}`);
       }
     } else {
@@ -344,31 +363,8 @@ async function processIncomingMessage(
 
         // Si fue una confirmación exitosa, enviar mensaje de políticas
         if (result.success && parsed.action === 'CONFIRMAR' && !result.message?.includes('ya está confirmada')) {
-          const politicasMsg = `📋 *Parce Antes de tu cita, ten presente:*
-
-⏰ *Puntualidad*
-• Llega 10 min antes
-• Tiempo de espera máxima : 15 minutos ⏳
-• Después serás re-agendado según disponibilidad 👊🏻
-
-⚠️ *Importante*
-
-• A la tercera falla no podrás agendar
-• Avísanos con tiempo si no puedes asistir por fa 🙏🏻
-
-💳 *Métodos de pago*
-
-• 💵 Efectivo — Siempre disponible
-
-• 🏧 QR — Paga desde cualquier app bancaria
-
-• Tarjeta — paga con cualquier tarjeta
-
-
-💛 ¡Te esperamos en la barber y siempre mil gracias por la LEALTAD! ❤️`;
-
           await new Promise(r => setTimeout(r, 1500));
-          await sendWhatsAppText(sucursalId, fromPhone, politicasMsg);
+          await sendWhatsAppText(sucursalId, fromPhone, POLITICAS_MSG);
           console.log(`[Webhook] Políticas enviadas a ${fromPhone}`);
         }
       }
