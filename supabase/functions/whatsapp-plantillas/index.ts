@@ -219,7 +219,7 @@ serve(async (req) => {
     const { data: lineas } = await sb.from('sucursales').select('nombre, whatsapp_phone_number_id, whatsapp_phone_number')
       .not('whatsapp_phone_number_id', 'is', null);
     for (const l of lineas || []) {
-      const r = await fetch(`${GRAPH}/${l.whatsapp_phone_number_id}?fields=display_phone_number,verified_name`, {
+      const r = await fetch(`${GRAPH}/${l.whatsapp_phone_number_id}?fields=display_phone_number,verified_name,status,platform_type,is_on_biz_app,name_status,messaging_limit_tier,health_status`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       resultado[l.nombre] = { en_base_de_datos: l.whatsapp_phone_number, segun_meta: await r.json() };
