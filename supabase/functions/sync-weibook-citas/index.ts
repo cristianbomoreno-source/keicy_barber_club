@@ -85,6 +85,25 @@ interface WeibookReservation {
   }>;
 }
 
+interface Servicio {
+  id: string;
+  nombre: string;
+  precio: number | null;
+}
+
+// Nombre en WeiBook -> nombre en el catálogo, cuando no son iguales
+const SERVICIO_ALIAS: Record<string, string> = {};
+
+// Compara sin tildes, mayúsculas ni signos
+function normalizarNombre(nombre: string): string {
+  return nombre
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
 function createSupabaseClient() {
   return createClient(
     Deno.env.get('SUPABASE_URL')!,
@@ -145,7 +164,7 @@ function findBarbero(collaboratorName: string | undefined) {
   return null;
 }
 
-async function fetchWeibookReservations(date: string, branchId: string, token: string): Promise<WeibookReservation[]> {
+async function fetchWeibookReservations(date: string, branchId: string, token: string): Promise<WeibookReservation[] | null> {
   try {
     const res = await fetch(WEIBOOK_API, {
       method: 'POST',
@@ -170,20 +189,26 @@ async function fetchWeibookReservations(date: string, branchId: string, token: s
 
     if (!res.ok || data.message) {
       console.error(`[Sync] Error ${res.status} para ${date} branch ${branchId}:`, data.message || 'Unknown error');
-      return [];
+      return null;
     }
 
-    console.log(`[Sync] ${date} branch ${branchId}: ${data.reservations?.length || 0} reservaciones`);
-    return data.reservations || [];
+    if (!Array.isArray(data.reservations)) {
+      console.error(`[Sync] Respuesta sin reservaciones para ${date} branch ${branchId}`);
+      return null;
+    }
+
+    console.log(`[Sync] ${date} branch ${branchId}: ${data.reservations.length} reservaciones`);
+    return data.reservations;
   } catch (err) {
     console.error(`[Sync] Error fetch ${date}:`, err);
-    return [];
+    return null;
   }
 }
 
 function getDatesToSync(daysAhead: number = 60): string[] {
   const dates: string[] = [];
-  const today = new Date();
+  // Hoy en Bogotá: desde las 7 p. m. la fecha UTC ya es mañana
+  const today = new Date(Date.now() - 5 * 60 * 60 * 1000);
 
   // Sincronizar próximos N días (por defecto 60)
   for (let i = 0; i < daysAhead; i++) {
@@ -245,6 +270,36 @@ serve(async (req) => {
   // Si se envía fecha específica, solo sincronizar ese día
   // Si no, sincronizar próximos 60 días (para cron)
   const dates = body.fecha ? [body.fecha] : getDatesToSync(60);
+
+  const { data: catalogo } = await supabase
+    .from('servicios')
+    .select('id, nombre, precio')
+    .eq('activo', true);
+  const serviciosPorNombre = new Map<string, Servicio>(
+    (catalogo || []).map(s => [normalizarNombre(s.nombre), s])
+  );
+  const sinEquivalente = new Set<string>();
+  const camposServicio = new Set<string>();
+
+  const buscarServicio = (nombre: string | undefined): Servicio | null => {
+    if (!nombre) return null;
+    const clave = normalizarNombre(nombre);
+    const servicio = serviciosPorNombre.get(normalizarNombre(SERVICIO_ALIAS[clave] || clave));
+    if (!servicio) sinEquivalente.add(nombre);
+    return servicio || null;
+  };
+
+  // Primer servicio como principal; el resto, como adicionales de la cita
+  const leerServicios = (res: WeibookReservation) => {
+    const [principal, ...resto] = res.services || [];
+    Object.keys(principal || {}).forEach(k => camposServicio.add(k));
+    const adicionales = resto.map(s => {
+      const encontrado = buscarServicio(s.service_name);
+      return { nombre: encontrado?.nombre || s.service_name, precio: encontrado?.precio ?? s.cost_service ?? 0 };
+    }).filter(s => s.nombre);
+    return { servicio: buscarServicio(principal?.service_name), adicionales };
+  };
+
   console.log(`[Sync] Procesando ${dates.length} día(s): ${dates.join(', ')}`);
 
   for (const date of dates) {
@@ -252,10 +307,15 @@ serve(async (req) => {
 
     const allReservations: WeibookReservation[] = [];
     const canceledIds: string[] = [];
+    let consultaFallida = false;
 
     // Obtener citas de ambas sedes
     for (const branch of BRANCHES) {
       const reservations = await fetchWeibookReservations(date, branch.id, WEIBOOK_TOKEN);
+      if (!reservations) {
+        consultaFallida = true;
+        break;
+      }
 
       for (const r of reservations) {
         // Detectar citas canceladas
@@ -269,6 +329,12 @@ serve(async (req) => {
           allReservations.push(r);
         }
       }
+    }
+
+    // Sin respuesta de WeiBook no se sabe qué citas existen: no tocar ese día
+    if (consultaFallida) {
+      results.errors++;
+      continue;
     }
 
     // Eliminar duplicados
@@ -337,11 +403,24 @@ serve(async (req) => {
         // Verificar si ya existe
         const { data: existing } = await supabase
           .from('citas')
-          .select('id')
+          .select('id, servicio_id, precio, servicios_adicionales')
           .like('notas', `%${res._id}%`)
           .limit(1);
 
+        const { servicio, adicionales } = leerServicios(res);
+
         if (existing && existing.length > 0) {
+          // Lo que el barbero ya definió en la cita no se pisa
+          const cita = existing[0];
+          const serviciosFaltantes: Record<string, unknown> = {};
+          if (!cita.servicio_id && servicio) {
+            serviciosFaltantes.servicio_id = servicio.id;
+            if (cita.precio == null) serviciosFaltantes.precio = servicio.precio;
+          }
+          if (!cita.servicios_adicionales?.length && adicionales.length > 0) {
+            serviciosFaltantes.servicios_adicionales = adicionales;
+          }
+
           // Actualizar barbero, sucursal, fecha Y HORA si cambió
           await supabase
             .from('citas')
@@ -351,9 +430,10 @@ serve(async (req) => {
               fecha: fechaParsed,
               hora_inicio: horaInicioParsed,
               hora_fin: horaFinParsed,
+              ...serviciosFaltantes,
               sync_weibook_at: new Date().toISOString()
             })
-            .eq('id', existing[0].id);
+            .eq('id', cita.id);
           results.updated++;
           continue;
         }
@@ -435,32 +515,6 @@ serve(async (req) => {
         const horaInicio = horaInicioParsed;
         const horaFin = horaFinParsed;
 
-        // Buscar servicio - si no hay match claro, dejar sin servicio para que el barbero defina
-        const serviceName = res.services?.[0]?.service_name;
-        let servicioId: string | null = null;
-        let precio: number | null = null;
-
-        if (serviceName) {
-          const { data: servicios } = await supabase
-            .from('servicios')
-            .select('id, precio, nombre')
-            .eq('activo', true)
-            .ilike('nombre', `%${serviceName}%`)
-            .limit(1);
-
-          if (servicios && servicios.length > 0) {
-            // Solo asignar si el nombre coincide razonablemente
-            const svcNombre = servicios[0].nombre.toLowerCase();
-            const weibookNombre = serviceName.toLowerCase();
-            // Match exacto o el servicio contiene el nombre de WeiBook
-            if (svcNombre === weibookNombre || svcNombre.includes(weibookNombre) || weibookNombre.includes(svcNombre)) {
-              servicioId = servicios[0].id;
-              precio = servicios[0].precio || null;
-            }
-            // Si no hay match claro, servicio_id y precio quedan null - el barbero define
-          }
-        }
-
         // Crear cita
         const { error: insertError } = await supabase
           .from('citas')
@@ -470,9 +524,10 @@ serve(async (req) => {
             hora_fin: horaFin,
             cliente_id: clienteId,
             barbero_id: barberoInfo.id,
-            servicio_id: servicioId,
+            servicio_id: servicio?.id ?? null,
             sucursal_id: barberoInfo.sucursal,
-            precio,
+            precio: servicio?.precio ?? null,
+            servicios_adicionales: adicionales,
             estado: 'agendada',
             notas: `WeiBook: ${res._id}`,
             sync_weibook_at: new Date().toISOString()
@@ -490,6 +545,13 @@ serve(async (req) => {
         results.errors++;
       }
     }
+  }
+
+  if (camposServicio.size > 0) {
+    console.log(`[Sync] Campos de servicio en WeiBook: ${[...camposServicio].join(', ')}`);
+  }
+  if (sinEquivalente.size > 0) {
+    console.log(`[Sync] Servicios sin equivalente: ${[...sinEquivalente].join(' | ')}`);
   }
 
   console.log(`[Sync] Completado: ${results.created} creadas, ${results.updated} actualizadas, ${results.canceled} canceladas, ${results.skipped} omitidas, ${results.errors} errores`);
