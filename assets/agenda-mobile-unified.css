@@ -428,14 +428,26 @@
   border-left-width: 0;
   border-bottom: 1px solid rgba(0,0,0,0.2);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.agenda-mobile.am-compressed .am-cita-content {
+  min-width: 0;
+  width: 100%;
 }
 
 .agenda-mobile.am-compressed .am-cita-cliente,
 .agenda-mobile.am-compressed .am-cita-servicio {
-  display: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+.agenda-mobile.am-compressed .am-cita-cliente { font-size: 12px !important; font-weight: 700 !important; margin-top: 0 !important; line-height: 1.25 !important; }
+.agenda-mobile.am-compressed .am-cita-servicio { display: block !important; font-size: 11px !important; line-height: 1.2 !important; }
+[data-theme="light"] .agenda-mobile.am-compressed .am-cita .am-cita-cliente,
+[data-theme="light"] .agenda-mobile.am-compressed .am-cita .am-cita-servicio,
+[data-theme="light"] .agenda-mobile.am-compressed .am-cita .am-cita-hora { color: #111111 !important; }
 /* Hora siempre visible incluso en modo comprimido */
 .agenda-mobile.am-compressed .am-cita-hora {
   display: block;

@@ -12,7 +12,7 @@
 <!-- Preload CSS críticos -->
 <link rel="preload" href="../assets/design-system.css?v=20261015b" as="style">
 <link rel="preload" href="../assets/mobile-admin.css" as="style">
-<link rel="preload" href="../assets/agenda-mobile-unified.css" as="style">
+<link rel="preload" href="../assets/agenda-mobile-unified.css?v=20261104" as="style">
 <!-- Preload JS críticos -->
 <link rel="preload" href="../assets/supabase-client.js?v=20261021" as="script">
 <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script" crossorigin>
@@ -28,7 +28,7 @@
 <script src="../assets/theme-manager.js"></script>
 <link rel="stylesheet" href="../assets/design-system.css?v=20261015b">
 <link rel="stylesheet" href="../assets/mobile-admin.css">
-<link rel="stylesheet" href="../assets/agenda-mobile-unified.css">
+<link rel="stylesheet" href="../assets/agenda-mobile-unified.css?v=20261104">
 <link rel="stylesheet" href="../assets/agenda-weibook.css?v=20261017">
 <style>
   :root{
@@ -344,7 +344,8 @@
   .appt-block .t{ font-size:9px; font-weight:700; letter-spacing:0.2px; opacity:0.85; }
   .appt-block .dur{ font-size:7px; font-weight:700; background:rgba(0,0,0,0.25); padding:2px 5px; border-radius:5px; }
   .appt-block .n{ font-size:11px; font-weight:700; line-height:1.25; margin-top:2px; letter-spacing:0.1px; word-break:break-word; }
-  .appt-block .s{ font-size:8px; opacity:.7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:3px; margin-top:1px; }
+  html[data-theme="light"] body .appt-block .n{ color:inherit !important; }
+  .appt-block .s{ font-size:11px; opacity:.85; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:3px; margin-top:1px; }
   .appt-block .s svg{ width:10px; height:10px; flex-shrink:0; opacity:0.7; }
 
   /* Estados Premium de Citas */
@@ -1027,7 +1028,7 @@
   [data-theme="light"] .config-slider-track { background:var(--border); }
   [data-theme="light"] .config-checkbox-box { background:var(--bg); border-color:var(--border); }
 </style>
-<link rel="stylesheet" href="/assets/apple-style.css?v=20261103">
+<link rel="stylesheet" href="/assets/apple-style.css?v=20261104">
 </head>
 <body>
 

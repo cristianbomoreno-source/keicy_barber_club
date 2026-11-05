@@ -59,7 +59,6 @@ html[data-theme] body {
   color: var(--text);
   font-family: var(--font-family) !important;
   -webkit-font-smoothing: antialiased;
-  overscroll-behavior-y: none;
 }
 html[data-theme] body :is(h1,h2,h3,h4,p,span,div,a,button,input,select,textarea,label,td,th) { font-family: var(--font-family); }
 html[data-theme] body :is(.hero-name,.large-title,.text-page-title,.header-greeting,.premium-greeting-name,.caja-header-title,.page-title) {
@@ -295,3 +294,7 @@ html[data-theme="light"] .cname { color: var(--text) !important; text-shadow: no
 /* ── Texto mínimo de 12 px ────────────────────────────────────────────── */
 html[data-theme] :is([style*="font-size:7"],[style*="font-size:8"],[style*="font-size:9"],[style*="font-size:10"],[style*="font-size:11"],[style*="font-size: 9"],[style*="font-size: 10"],[style*="font-size: 11"]) { font-size: 12px !important; }
 html[data-theme] :is(#cajaHoraApertura,#cajaSessionId,#cajaStatusText,#shiftEnd,#shiftStart,#todayLabel,.alerts-empty,.ap-count,.ap-title,.badge-soon,.badge.doc,.badge.no,.bar-label,.caja-action-btn,.caja-action-btn.gasto,.caja-action-btn.ingreso,.caja-meta-label,.caja-meta-msg,.caja-mov-concepto,.caja-movimientos-refresh,.caja-responsable-label,.caja-responsable-name,.caja-tab,.caja-tab.active,.caja-total-label,.caja-ventas-title,.card-hint,.card-inf-btn,.card-label,.card-rating,.card-role.barbero,.card-spec,.card-stat-label,.card-status.active,.card-username,.cat-count,.checkpoint-label,.cierre-ganancia-label,.cierre-stat-label,.client-eyebrow,.colaborador-stats,.comparacion-nota,.cs-section-title,.delta.eq,.donut-center-label,.hdr-clock,.hdr-estado.busy,.hdr-puesto,.hero-puesto,.hub-badge.ready,.hub-badge.soon,.info-label,.kpi-label,.mov-tag.neutral,.mov-tag.venta,.premium-greeting-label,.premium-sales-label,.premium-section-link,.premium-sede-label,.premium-today-badge,.premium-today-stat-label,.premium-visit-sede,.resumen-label,.seat-barber-name,.seat-btn,.seat-btn.muted,.seat-client.empty,.seat-puesto,.seat-status.st-agendado,.seat-status.st-libre,.stat-label,.stat-meta,.step-tile-label,.steps-card-label,.swipe-pending-txt,.time-card-label,.time-next-row,.tl-hmark,.tl-libre,.top-count,.topbar-lbl,.topbar-sub,.total-badge,.total-label) { font-size: 12px !important; }
+
+/* ── Logo blanco en modo oscuro ───────────────────────────────────────── */
+html[data-theme="dark"] :is(img[src*="logo-oro"],img[src*="logo-transparent"],img[src$="/logo.png"]) { filter: brightness(0) invert(1) !important; }
+html[data-theme="dark"] .sidebar-logo-icon { content: url(/assets/logo-transparent.png); object-fit: contain; border-radius: 0; filter: brightness(0) invert(1) !important; }
