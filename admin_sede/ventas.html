@@ -8550,33 +8550,6 @@
             return;
           }
         }
-
-        // REGLA: Nequi solo se puede usar para productos, no para servicios
-        const serviciosCart = cart.filter(c => c.tipo === 'servicios');
-        const productosCart = cart.filter(c => c.tipo === 'productos');
-        const subtotalServicios = serviciosCart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0) - descuentoServicios;
-        const subtotalProductos = productosCart.reduce((sum, c) => sum + (c.precio * c.cantidad), 0) - descuentoProductos;
-        const montoNequi = selectedMethods['nequi'] || 0;
-
-        if (montoNequi > 0 && serviciosCart.length > 0) {
-          // Hay Nequi y hay servicios - validar que Nequi no exceda el total de productos
-          if (montoNequi > subtotalProductos) {
-            toast('Nequi solo se puede usar para pagar productos, no servicios');
-            if (btn) btn.disabled = false;
-            updateTotals();
-            return;
-          }
-          // Validar que los otros métodos cubran los servicios
-          const otrosMetodos = Object.entries(selectedMethods)
-            .filter(([m, v]) => m !== 'nequi')
-            .reduce((sum, [m, v]) => sum + v, 0);
-          if (otrosMetodos < subtotalServicios) {
-            toast(`Falta cubrir $${dnFormatCOP(subtotalServicios - otrosMetodos)} de servicios (Nequi solo aplica a productos)`);
-            if (btn) btn.disabled = false;
-            updateTotals();
-            return;
-          }
-        }
       }
       console.log('[Ventas] Métodos de pago:', metodosOrdenados, selectedMethods);
 
@@ -8625,46 +8598,21 @@
           };
         });
 
-        // REGLA CLARA: Nequi SOLO para productos, otros métodos para servicios
-        // Esta regla es estricta para evitar confusiones en el cierre de caja
+        // Todos los métodos (Nequi incluido) sirven para productos y servicios.
+        // Con servicios en el carrito, los productos toman de cada método su parte proporcional;
+        // lo que queda de cada método va al cobro del servicio.
         const serviciosCartLocal = cart.filter(c => c.tipo === 'servicios');
         const subtotalServiciosLocal = serviciosCartLocal.reduce((sum, c) => sum + (c.precio * c.cantidad), 0) - descuentoServicios;
 
         let metodosProductos = [];
-        const montoNequi = selectedMethods['nequi'] || 0;
-        const metodosNoNequi = Object.entries(selectedMethods).filter(([m]) => m !== 'nequi');
-        const totalNoNequi = metodosNoNequi.reduce((s, [, v]) => s + v, 0);
+        const metodosUsados = Object.entries(selectedMethods).filter(([, v]) => v > 0);
+        const totalMetodos = metodosUsados.reduce((s, [, v]) => s + v, 0);
 
         if (serviciosCartLocal.length > 0 && subtotalServiciosLocal > 0) {
-          // HAY SERVICIOS Y PRODUCTOS: distribuir métodos de forma clara
-
-          // 1. Nequi va COMPLETO a productos (es la regla del negocio)
-          if (montoNequi > 0) {
-            metodosProductos.push({ metodo: 'nequi', monto: Math.min(montoNequi, subtotalProductos) });
-          }
-
-          // 2. Calcular si Nequi cubre todo el producto
-          const cubiertoPorNequi = metodosProductos.reduce((s, m) => s + m.monto, 0);
-          const faltaParaProductos = subtotalProductos - cubiertoPorNequi;
-
-          // 3. Si Nequi NO cubre todo el producto, usar otros métodos para lo que falte
-          if (faltaParaProductos > 0 && totalNoNequi > subtotalServiciosLocal) {
-            // Solo usar de otros métodos lo que sobre después de cubrir servicios
-            const disponibleParaProductos = totalNoNequi - subtotalServiciosLocal;
-            let acumulado = 0;
-
-            for (const [metodo, monto] of metodosNoNequi) {
-              const proporcion = monto / totalNoNequi;
-              const paraProducto = Math.min(
-                Math.round(disponibleParaProductos * proporcion),
-                faltaParaProductos - acumulado
-              );
-              if (paraProducto > 0) {
-                metodosProductos.push({ metodo, monto: paraProducto });
-                acumulado += paraProducto;
-              }
-              if (acumulado >= faltaParaProductos) break;
-            }
+          if (totalMetodos > 0) {
+            metodosProductos = metodosUsados
+              .map(([metodo, monto]) => ({ metodo, monto: Math.round(subtotalProductos * monto / totalMetodos) }))
+              .filter(m => m.monto > 0);
           }
         } else {
           // NO HAY SERVICIOS: todos los métodos van a productos
@@ -8688,7 +8636,7 @@
 
         console.log('[Ventas] DISTRIBUCIÓN DE MÉTODOS:');
         console.log('[Ventas]   Producto total:', subtotalProductos, '| Servicio total:', subtotalServiciosLocal);
-        console.log('[Ventas]   Nequi disponible:', montoNequi, '| Otros disponible:', totalNoNequi);
+        console.log('[Ventas]   Métodos:', selectedMethods);
 
         console.log('[Ventas] Métodos para productos:', metodosProductos, 'Usados:', metodosUsadosEnProductos);
 
@@ -8998,13 +8946,7 @@
         }));
 
         // Preparar métodos de pago para SERVICIO (excluir lo usado en productos)
-        // Nequi NO va a servicios si hay productos (regla del negocio)
         const metodosParaCobro = Object.entries(selectedMethods)
-          .filter(([metodo]) => {
-            // Si hay productos y es Nequi, NO incluir en servicios
-            if (productosCart.length > 0 && metodo === 'nequi') return false;
-            return true;
-          })
           .map(([metodo, monto]) => ({
             metodo,
             monto: monto - (metodosUsadosEnProductos[metodo] || 0)
@@ -9099,13 +9041,7 @@
           }));
 
           // Preparar métodos de pago para SERVICIO (excluir lo usado en productos)
-          // Nequi NO va a servicios si hay productos (regla del negocio)
           const metodosParaCobroCita = Object.entries(selectedMethods)
-            .filter(([metodo]) => {
-              // Si hay productos y es Nequi, NO incluir en servicios
-              if (productosCart.length > 0 && metodo === 'nequi') return false;
-              return true;
-            })
             .map(([metodo, monto]) => ({
               metodo,
               monto: monto - (metodosUsadosEnProductos[metodo] || 0)
@@ -9196,13 +9132,7 @@
           }));
 
           // Preparar métodos de pago para SERVICIO (excluir lo usado en productos)
-          // Nequi NO va a servicios si hay productos (regla del negocio)
           const metodosParaCobroNueva = Object.entries(selectedMethods)
-            .filter(([metodo]) => {
-              // Si hay productos y es Nequi, NO incluir en servicios
-              if (productosCart.length > 0 && metodo === 'nequi') return false;
-              return true;
-            })
             .map(([metodo, monto]) => ({
               metodo,
               monto: monto - (metodosUsadosEnProductos[metodo] || 0)
