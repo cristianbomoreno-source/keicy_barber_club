@@ -555,6 +555,12 @@
   .det-client-phone{ font-size:13px; color:var(--gold); cursor:pointer; margin-top:4px; }
   .det-client-phone:hover{ text-decoration:underline; }
   .det-badges{ display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .det-edit-cliente-btn{ background:var(--bg-hover); border:0; border-radius:999px; color:var(--text-primary); font-size:13px; font-weight:600; padding:8px 14px; cursor:pointer; flex-shrink:0; }
+  .det-edit-cliente{ display:flex; flex-direction:column; gap:10px; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border-subtle); }
+  .det-edit-cliente label{ font-size:13px; font-weight:600; color:var(--text-secondary); display:flex; flex-direction:column; gap:4px; }
+  .det-edit-cliente input{ height:44px; border:0; border-radius:12px; background:var(--bg-hover); color:var(--text-primary); font-size:16px; padding:0 12px; }
+  .det-edit-cliente .det-edit-acciones{ display:flex; gap:8px; margin-top:4px; }
+  .det-edit-cliente .det-edit-acciones button{ flex:1; height:44px; border:0; border-radius:999px; font-size:15px; font-weight:600; cursor:pointer; }
   .det-badge{ padding:4px 10px; border-radius:20px; font-size:10px; font-weight:700; display:inline-flex; align-items:center; gap:4px; }
   .det-badge.categoria{ background:var(--gold-glow); color:var(--gold); border:1px solid rgba(255,172,72,0.3); }
   .det-badge.cortes{ background:rgba(96,165,250,0.12); color:#93C5FD; border:1px solid rgba(96,165,250,0.2); }
@@ -3809,14 +3815,16 @@
 
     document.getElementById('detBody').innerHTML = `
       <!-- Header con cliente -->
-      <div class="det-header">
+      <div class="det-header" id="detClienteHeader">
         <div class="det-avatar">${initials}</div>
         <div class="det-client-info">
           <div class="det-client-name" ${clienteId ? `onclick="openClientePerfil('${clienteId}')"` : ''}>${name}</div>
           ${phone ? `<div class="det-client-phone" onclick="showPhoneOptions('${phone}', '${name}')">${phone}</div>` : ''}
           ${badgesHtml ? `<div class="det-badges">${badgesHtml}</div>` : ''}
         </div>
+        ${clienteId ? `<button type="button" class="det-edit-cliente-btn" onclick="abrirEditarClienteCita('${clienteId}')">Editar</button>` : ''}
       </div>
+      <div class="det-edit-cliente" id="detClienteEdit" style="display:none;"></div>
 
       <!-- Estado y editar -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
@@ -4154,6 +4162,69 @@
   }
 
   function closeDetail(){ document.getElementById('detailModal').classList.remove('show'); }
+
+  // ---- Editar datos del cliente desde el pop up de la cita ----
+  async function abrirEditarClienteCita(clienteId) {
+    const box = document.getElementById('detClienteEdit');
+    const { data: cli, error } = await sb.from('usuarios').select('id, full_name, phone, email').eq('id', clienteId).single();
+    if (error || !cli) { toast('No pudimos cargar los datos del cliente.'); return; }
+    const attr = v => String(v || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    box.innerHTML = `
+      <label>Nombre<input id="decNombre" type="text" value="${attr(cli.full_name)}" autocomplete="off"></label>
+      <label>Teléfono<input id="decPhone" type="tel" inputmode="numeric" value="${attr(cli.phone)}" autocomplete="off"></label>
+      <label>Correo<input id="decEmail" type="email" value="${attr(cli.email)}" autocomplete="off"></label>
+      <div class="det-edit-acciones">
+        <button type="button" style="background:var(--bg-hover);color:var(--text-primary);" onclick="cerrarEditarClienteCita()">Cancelar</button>
+        <button type="button" id="decGuardar" style="background:var(--gold);color:#000;" onclick="guardarClienteCita('${clienteId}')">Guardar</button>
+      </div>`;
+    document.getElementById('detClienteHeader').style.display = 'none';
+    box.style.display = 'flex';
+    document.getElementById('decNombre').focus();
+  }
+
+  function cerrarEditarClienteCita() {
+    document.getElementById('detClienteEdit').style.display = 'none';
+    document.getElementById('detClienteHeader').style.display = '';
+  }
+
+  async function guardarClienteCita(clienteId) {
+    const fullName = document.getElementById('decNombre').value.trim();
+    const phone = document.getElementById('decPhone').value.replace(/\D/g, '') || null;
+    const email = document.getElementById('decEmail').value.trim() || null;
+    if (!fullName) { toast('Escribe el nombre del cliente.'); return; }
+    const btn = document.getElementById('decGuardar');
+    btn.disabled = true;
+    const updateData = { full_name: fullName, phone, email };
+    try {
+      let { data: filas, error } = await sb.from('usuarios').update(updateData).eq('id', clienteId).select('id');
+      // Teléfono repetido: decir quién lo tiene y ofrecer pasárselo a este cliente (igual que en Clientes)
+      if (error?.code === '23505' && phone) {
+        const { data: otro } = await sb.from('usuarios')
+          .select('id, full_name').eq('role', 'cliente').eq('phone', phone).neq('id', clienteId)
+          .limit(1).maybeSingle();
+        if (!otro) { toast('Ese teléfono ya está registrado en otra cuenta.'); return; }
+        const ok = confirm(`El número ${phone} ya está registrado a nombre de «${otro.full_name || 'otro cliente'}».\n\n¿Quitarle el número a esa cuenta y dejarlo en este cliente?`);
+        if (!ok) return;
+        const { error: movErr } = await sb.rpc('admin_mover_telefono_cliente', { p_origen: otro.id, p_destino: clienteId, p_phone: phone });
+        if (movErr) { toast('No pudimos pasar el teléfono: ' + (movErr.message || '')); return; }
+        ({ data: filas, error } = await sb.from('usuarios').update(updateData).eq('id', clienteId).select('id'));
+      }
+      if (error) throw error;
+      if (!filas?.length) { toast('Tu cuenta no tiene permiso para editar clientes.'); return; }
+      // Reflejar el cambio en todas las citas del día de este cliente
+      allCitas.forEach(c => {
+        if (c.cliente_id === clienteId && c.usuarios) { c.usuarios.full_name = fullName; c.usuarios.phone = phone; }
+      });
+      toast('Datos del cliente actualizados.');
+      renderAllSections();
+      if (detailCitaId) openDetail(detailCitaId);
+    } catch (err) {
+      console.error(err);
+      toast('No pudimos guardar los datos del cliente.');
+    } finally {
+      btn.disabled = false;
+    }
+  }
 
   // ---- Perfil de cliente ----
   async function openClientePerfil(clienteId) {

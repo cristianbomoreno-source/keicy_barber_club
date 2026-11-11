@@ -3,9 +3,9 @@
 // VERSIÓN OPTIMIZADA - Carga ultra rápida
 // ============================================
 
-const CACHE_NAME = 'keicy-barber-club-v41';
-const STATIC_CACHE = 'keicy-barber-club-static-v40';
-const API_CACHE = 'keicy-barber-club-api-v40';
+const CACHE_NAME = 'keicy-barber-club-v42';
+const STATIC_CACHE = 'keicy-barber-club-static-v41';
+const API_CACHE = 'keicy-barber-club-api-v41';
 const OFFLINE_PAGE = '/offline.html';
 
 // Assets críticos para pre-cachear (carga instantánea)
