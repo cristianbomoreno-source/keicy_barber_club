@@ -2089,6 +2089,19 @@
   const user = dnRequireAdmin();
   const isAdminSedeMode = new URLSearchParams(window.location.search).get('admin_sede') === '1';
 
+  // Desde esta agenda (solo admin y admin de sede) se pueden agendar hasta dos citas a la misma hora
+  // con el mismo barbero. Las reservas web y la app del barbero siguen en una sola.
+  const MAX_CITAS_MISMA_HORA = 2;
+  const MSG_HORARIO_LLENO = 'Ese barbero ya tiene dos citas en ese horario.';
+  function citasCruzadas(barberoId, startMin, endMin, exceptoId) {
+    return allCitas.filter(c => {
+      if (c.id === exceptoId || c.barbero_id !== barberoId || ['cancelada','sin_respuesta'].includes(c.estado)) return false;
+      const s = toMin(c.hora_inicio);
+      const en = c.hora_fin ? toMin(c.hora_fin) : s + (c.servicios?.duracion_min || 30);
+      return startMin < en && endMin > s;
+    }).length;
+  }
+
 
   dnInitSidebarCard(loadAll);
 
@@ -3234,13 +3247,7 @@
       toast('Ese horario está fuera del horario de trabajo del barbero.'); return;
     }
 
-    const overlap = allCitas.some(c => {
-      if (c.id === citaId || c.barbero_id !== newBarberoId || ['cancelada','sin_respuesta'].includes(c.estado)) return false;
-      const s = toMin(c.hora_inicio);
-      const en = c.hora_fin ? toMin(c.hora_fin) : s + (c.servicios?.duracion_min || 30);
-      return startMin < en && endMin > s;
-    });
-    if (overlap) { toast('Ese barbero ya tiene una cita en ese horario.'); return; }
+    if (citasCruzadas(newBarberoId, startMin, endMin, citaId) >= MAX_CITAS_MISMA_HORA) { toast(MSG_HORARIO_LLENO); return; }
 
     const toHHMMSS = (m) => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:00`;
     const oldBarberoId = cita.barbero_id;
@@ -3915,6 +3922,11 @@
       actions = `<button class="apple-btn" style="background:rgba(107,114,128,0.15);color:var(--text-secondary);justify-content:center;" onclick="closeDetail()">Cerrar</button>`;
     } else if (c.estado === 'cancelada') {
       actions = `<button class="apple-btn" style="background:rgba(107,114,128,0.15);color:var(--text-secondary);justify-content:center;" onclick="closeDetail()">Cerrar</button>`;
+    }
+    // Segunda cita a la misma hora con el mismo barbero (solo desde esta agenda de admin)
+    if (!['cancelada', 'finalizada'].includes(c.estado) &&
+        citasCruzadas(c.barbero_id, toMin(c.hora_inicio), toMin(c.hora_fin || c.hora_inicio)) < MAX_CITAS_MISMA_HORA) {
+      actions += `<button class="apple-btn" style="background:var(--bg-hover);color:var(--text-primary);justify-content:center;" onclick="closeDetail(); openNewAppt('${c.barbero_id}', '${c.hora_inicio.slice(0,5)}')">Otra cita a esta hora</button>`;
     }
     document.getElementById('detActions').innerHTML = actions;
     const modal = document.getElementById('detailModal');
@@ -5146,12 +5158,6 @@
     // Normalizar hora seleccionada (quitar segundos si los tiene)
     const selectedNorm = selected ? selected.slice(0, 5) : '10:00';
 
-    // Obtener citas del barbero para la fecha seleccionada
-    const citasBarbero = barberoId ? allCitas.filter(c =>
-      c.barbero_id === barberoId &&
-      !['cancelada', 'sin_respuesta'].includes(c.estado)
-    ) : [];
-
     let html = '';
     for (let m = START_MIN; m <= END_MIN - 60; m += 60) {
       const hh = String(Math.floor(m/60)).padStart(2,'0');
@@ -5160,14 +5166,8 @@
       // Verificar si es hora de almuerzo (13:00-14:00)
       if (hh === '13') continue;
 
-      // Verificar si hay cita en esta hora
-      const horaOcupada = citasBarbero.some(c => {
-        const inicioMin = toMin(c.hora_inicio);
-        const finMin = c.hora_fin ? toMin(c.hora_fin) : inicioMin + 60;
-        return m >= inicioMin && m < finMin;
-      });
-
-      if (horaOcupada) continue;
+      // La hora solo se oculta si el barbero ya tiene el máximo de citas en ella
+      if (barberoId && citasCruzadas(barberoId, m, m + 60) >= MAX_CITAS_MISMA_HORA) continue;
 
       html += `<option value="${val}" ${val===selectedNorm?'selected':''}>${fmtTime(val+':00')}</option>`;
     }
@@ -5394,13 +5394,7 @@
       }
 
       // Verificar que no cruce con otra cita existente
-      const cruzaConExistente = allCitas.some(c => {
-        if (c.barbero_id !== barberoId || ['cancelada','sin_respuesta'].includes(c.estado)) return false;
-        const s = toMin(c.hora_inicio);
-        const en = c.hora_fin ? toMin(c.hora_fin) : s + (c.servicios?.duracion_min || 30);
-        return startMin < en && endMin > s;
-      });
-      if (cruzaConExistente) { toast('Ese barbero ya tiene una cita en ese horario.'); return; }
+      if (citasCruzadas(barberoId, startMin, endMin) >= MAX_CITAS_MISMA_HORA) { toast(MSG_HORARIO_LLENO); return; }
 
       // Preparar servicios adicionales (todos excepto el principal)
       const serviciosAdicionales = services.slice(1).map(s => ({
@@ -5829,12 +5823,7 @@
       toast('Ese horario está fuera del horario de trabajo del barbero.'); return;
     }
 
-    const overlap = allCitas.some(c => {
-      if (c.id === citaId || c.barbero_id !== newBarberoId || ['cancelada','sin_respuesta'].includes(c.estado)) return false;
-      const s = toMin(c.hora_inicio), en = c.hora_fin ? toMin(c.hora_fin) : s + (c.servicios?.duracion_min || 30);
-      return startMin < en && endMin > s;
-    });
-    if (overlap) { toast('Ese barbero ya tiene una cita en ese horario.'); return; }
+    if (citasCruzadas(newBarberoId, startMin, endMin, citaId) >= MAX_CITAS_MISMA_HORA) { toast(MSG_HORARIO_LLENO); return; }
 
     const toHHMMSS = (m) => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:00`;
     const oldBarberoId = cita.barbero_id;

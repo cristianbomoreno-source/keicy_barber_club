@@ -656,9 +656,10 @@
           html += renderBloqueo(bloqueo);
         });
 
-        // Citas de este barbero
+        // Citas de este barbero: las que se cruzan (el admin puede agendar dos a la misma hora) van lado a lado
+        var carriles = calcularCarriles(barberosCitas);
         barberosCitas.forEach(function(cita) {
-          html += renderCita(cita);
+          html += renderCita(cita, carriles[cita.id]);
         });
       }
 
@@ -674,7 +675,30 @@
     updateNowLine();
   }
 
-  function renderCita(cita) {
+  // Asigna a cada cita un carril (col) y cuántos carriles tiene su grupo de citas cruzadas (total)
+  function calcularCarriles(citas) {
+    var toMin = function(t) { var p = parseTime(t); return p.hours * 60 + p.minutes; };
+    var orden = citas.slice().sort(function(a, b) { return toMin(a.hora_inicio) - toMin(b.hora_inicio); });
+    var res = {};
+    var grupo = [], finGrupo = -1, finCarriles = [];
+    var cerrarGrupo = function() {
+      grupo.forEach(function(id) { res[id].total = finCarriles.length; });
+      grupo = []; finCarriles = [];
+    };
+    orden.forEach(function(c) {
+      var ini = toMin(c.hora_inicio), fin = toMin(c.hora_fin);
+      if (ini >= finGrupo) cerrarGrupo();
+      var col = finCarriles.findIndex(function(f) { return f <= ini; });
+      if (col === -1) { col = finCarriles.length; finCarriles.push(fin); } else { finCarriles[col] = fin; }
+      res[c.id] = { col: col, total: 1 };
+      grupo.push(c.id);
+      finGrupo = Math.max(finGrupo, fin);
+    });
+    cerrarGrupo();
+    return res;
+  }
+
+  function renderCita(cita, carril) {
     const horaInicio = parseTime(cita.hora_inicio);
     const horaFin = parseTime(cita.hora_fin);
 
@@ -703,7 +727,12 @@
     const horaStr = cita.hora_inicio.slice(0, 5);
 
     // Construir HTML con texto horizontal
-    let citaHtml = '<div class="am-cita ' + cita.estado + '" style="top: ' + top + 'px; height: ' + height + 'px" data-cita-id="' + cita.id + '">' +
+    let anchoStyle = '';
+    if (carril && carril.total > 1) {
+      const ancho = 100 / carril.total;
+      anchoStyle = '; left: ' + (carril.col * ancho) + '%; right: auto; width: ' + ancho + '%';
+    }
+    let citaHtml = '<div class="am-cita ' + cita.estado + '" style="top: ' + top + 'px; height: ' + height + 'px' + anchoStyle + '" data-cita-id="' + cita.id + '">' +
       '<div class="am-cita-hora">' + horaStr + '</div>' +
       '<div class="am-cita-content">' +
       '<div class="am-cita-cliente">' + primerNombre + '</div>';
