@@ -628,6 +628,8 @@
     color:var(--text-primary); padding:0 16px; font-size:13.5px; font-family:inherit; transition:all .2s ease;
   }
   .field input:focus, .field select:focus{ outline:none; border-color:var(--gold-primary); background:var(--bg-hover); }
+  .field input[type="date"]{ -webkit-appearance:none; appearance:none; display:flex; align-items:center; text-align:left; }
+  html[data-theme="dark"] .field input[type="date"]{ color-scheme:dark; }
   .field-row{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
   /* Campo de teléfono con prefijo */
@@ -1525,6 +1527,10 @@
       <div class="field">
         <label>Barbero</label>
         <select id="naBarbero" onchange="updateHorasDisponibles()"></select>
+      </div>
+      <div class="field">
+        <label>Fecha</label>
+        <input type="date" id="naFecha" onchange="cambiarFechaNewAppt(this.value)">
       </div>
       <div class="field">
         <label>Hora (solo en punto)</label>
@@ -5201,8 +5207,27 @@
     renderServiciosByCategory(null);
     updateServiceSummary();
 
+    document.getElementById('naFecha').value = selectedDate;
     document.getElementById('newApptSub').textContent = fmtDateLong(selectedDate);
     document.getElementById('newApptModal').classList.add('show');
+  }
+  // Cambiar la fecha desde el pop up: la agenda se mueve a ese día para que la
+  // disponibilidad, los bloqueos y las citas que se validan sean los de esa fecha.
+  async function cambiarFechaNewAppt(iso){
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || '')) { document.getElementById('naFecha').value = selectedDate; return; }
+    if (iso === selectedDate) return;
+    selectedDate = iso;
+    document.getElementById('newApptSub').textContent = fmtDateLong(selectedDate);
+    const select = document.getElementById('naHora');
+    select.disabled = true;
+    try {
+      await loadAll();
+      if (viewMode === 'semana') renderWeekView();
+      if (viewMode === 'mes') renderMonthView();
+    } finally {
+      select.disabled = false;
+      updateHorasDisponibles();
+    }
   }
   function closeNewAppt(){ document.getElementById('newApptModal').classList.remove('show'); }
 
@@ -5343,6 +5368,7 @@
     const phone = countryCode === '57' ? phoneDigits : countryCode + phoneDigits;
     const services = getSelectedServices();
     if (!barberoId || !hora || !phoneDigits) { toast('Completa todos los campos.'); return; }
+    if (document.getElementById('naFecha').value !== selectedDate) { toast('Espera a que cargue la agenda de esa fecha.'); return; }
     if (!services.length) { toast('Selecciona al menos un servicio.'); return; }
 
     // ADMINS: Sin restricciones de fecha/hora - pueden agendar en cualquier momento
