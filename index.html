@@ -176,8 +176,8 @@
   <link rel="preconnect" href="https://ygrmammcaupnygdxmgth.supabase.co">
 
   <!-- Preload imagen crítica LCP -->
-  <link rel="preload" as="image" href="assets/pingpong-club.jpg" fetchpriority="high">
-  <link href="https://fonts.googleapis.com/css2?family=Trirong:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="assets/keicy-fachada.jpg" fetchpriority="high">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,600..900,100,0&family=Trirong:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -203,7 +203,9 @@
       --white: #FFFFFF;
       --gray-text: #B3B3B3;
 
-      --font-heading: 'Roca', 'Trirong', serif;
+      /* Manual de marca: Roca Bold en mayúscula para titulares (fuente con licencia, aún sin archivos);
+         mientras tanto Fraunces suave, del mismo estilo retro. Trirong para textos. */
+      --font-heading: 'Roca', 'Fraunces', 'Trirong', serif;
       --font-body: 'Trirong', Georgia, serif;
       --nav-height: 70px;
       --safe-top: env(safe-area-inset-top);
@@ -2819,6 +2821,8 @@
         min-width: 100px;
       }
     }
+      /* Fraunces suave y sin rasgos "wonky", más cercana a Roca */
+    html { font-variation-settings: "SOFT" 100, "WONK" 0; }
   </style>
 <style>img[src*="logo-oro"]{filter:brightness(0) invert(1)}</style>
 </head>
@@ -2881,8 +2885,8 @@
   <section class="hero" id="inicio">
     <div class="hero-bg">
       <picture>
-        <source srcset="assets/pingpong-club.webp" type="image/webp">
-        <img src="assets/pingpong-club.jpg" alt="Zona de ping pong de Keicy Barber Club en Cali" loading="eager" fetchpriority="high" width="900" height="1200">
+        <source srcset="assets/keicy-fachada.webp" type="image/webp">
+        <img src="assets/keicy-fachada.jpg" alt="Fachada de Keicy Barber Club en La Flora, Cali" loading="eager" fetchpriority="high" width="900" height="1200">
       </picture>
     </div>
     <div class="hero-overlay"></div>
@@ -3113,7 +3117,7 @@
     <div class="club-grid">
       <div class="club-image">
         <picture>
-            <img src="assets/pingpong-club.jpg" alt="Keicy Barber Club - Mejor barbería exclusiva para hombres en Cali con zona de entretenimiento" loading="lazy" width="900" height="1200">
+            <img src="assets/keicy-fachada.jpg" alt="Keicy Barber Club - Barbería exclusiva para hombres en La Flora, Cali" loading="lazy" width="900" height="1200">
           </picture>
       </div>
       <div class="club-content">
