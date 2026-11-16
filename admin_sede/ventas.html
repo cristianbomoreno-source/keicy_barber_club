@@ -6969,7 +6969,8 @@
           cart.push({
             id: servicio.id,
             nombre: servicio.nombre,
-            precio: item.raw.precio - (item.propina || 0),
+            // citas.precio ya incluye los adicionales, que se cargan aparte abajo
+            precio: item.raw.precio - (item.propina || 0) - (item.raw.servicios_adicionales || []).reduce((s, a) => s + (Number(a.precio) || 0), 0),
             cantidad: 1,
             tipo: 'servicios',
             imagen: servicio.foto_url,
@@ -7086,7 +7087,8 @@
         cart.push({
           id: servicio.id,
           nombre: servicio.nombre,
-          precio: venta.raw.precio - (venta.raw.propina || 0),
+          // citas.precio ya incluye los adicionales, que se cargan aparte abajo
+          precio: venta.raw.precio - (venta.raw.propina || 0) - (venta.raw.servicios_adicionales || []).reduce((s, a) => s + (Number(a.precio) || 0), 0),
           cantidad: 1,
           tipo: 'servicios',
           imagen: servicio.foto_url,

@@ -3755,10 +3755,12 @@
     const canEditService = !['finalizada', 'cancelada', 'pendiente_pago'].includes(c.estado);
 
     // Calcular total con propina y servicios adicionales
-    const precioBase = Number(c.precio) || 0;
+    // citas.precio ya incluye los servicios adicionales: no se vuelven a sumar
     const propina = Number(c.propina) || 0;
     const adicionales = (c.servicios_adicionales || []).reduce((sum, s) => sum + (Number(s.precio) || 0), 0);
-    const totalConPropina = precioBase + propina + adicionales;
+    const precioTotalCita = Number(c.precio) || 0;
+    const precioBase = Math.max(precioTotalCita - adicionales, 0);
+    const totalConPropina = precioTotalCita + propina;
 
     // Construir servicios adicionales si existen (con opción de eliminar si se puede editar)
     let serviciosAdicionalesHtml = '';
@@ -4037,7 +4039,7 @@
         .from('citas')
         .update({
           servicio_id: newServiceId,
-          precio: newPrecio,
+          precio: newPrecio + (c.servicios_adicionales || []).reduce((sum, s) => sum + (Number(s.precio) || 0), 0),
           hora_fin: nuevaHoraFin
         })
         .eq('id', citaId);
@@ -4136,7 +4138,7 @@
     try {
       const { error } = await sb
         .from('citas')
-        .update({ servicios_adicionales: nuevosServicios })
+        .update({ servicios_adicionales: nuevosServicios, precio: (Number(c.precio) || 0) + precio })
         .eq('id', citaId);
 
       if (error) throw error;
@@ -4163,7 +4165,7 @@
     try {
       const { error } = await sb
         .from('citas')
-        .update({ servicios_adicionales: serviciosActuales })
+        .update({ servicios_adicionales: serviciosActuales, precio: Math.max((Number(c.precio) || 0) - (Number(servicioEliminado.precio) || 0), 0) })
         .eq('id', citaId);
 
       if (error) throw error;
