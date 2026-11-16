@@ -92,7 +92,10 @@ interface Servicio {
 }
 
 // Nombre en WeiBook -> nombre en el catálogo, cuando no son iguales
-const SERVICIO_ALIAS: Record<string, string> = {};
+const SERVICIO_ALIAS: Record<string, string> = {
+  'depilacion en combo nariz y orejas': 'Depilación combo (nariz y orejas)',
+  'pigmentancion de barba': 'Pigmentación de barba',
+};
 
 // Compara sin tildes, mayúsculas ni signos
 function normalizarNombre(nombre: string): string {
