@@ -1748,21 +1748,14 @@
             <input type="email" class="form-input" id="clientEmailNew" placeholder="tu@email.com">
           </div>
 
-          <!-- Autorizaciones (Ley 1581 de 2012 y Ley 1480 de 2011). La de datos se da al tocar
-               Continuar con el aviso a la vista (conducta inequívoca, Decreto 1377/2013 art. 7).
-               La de publicidad es aparte, opcional y nunca viene marcada. -->
-          <div class="legal-consent">
-            <label class="legal-check">
-              <input type="checkbox" id="aceptoPublicidad">
-              <span id="aceptoPublicidadTexto">Quiero recibir promociones y beneficios exclusivos del Club (descuentos y cortesías con negocios aliados) por WhatsApp, SMS o correo. Opcional; puedo cancelarlo cuando quiera.</span>
-            </label>
-          </div>
-
+          <!-- Autorizaciones (Ley 1581 de 2012 y Ley 1480 de 2011): se dan al tocar Continuar
+               con el aviso a la vista (conducta inequívoca, Decreto 1377/2013 art. 7), incluida
+               la de promociones, que se puede cancelar cuando el cliente quiera. -->
           <button class="btn-gold" id="clientContinueBtn" disabled style="width:100%; height:48px; border-radius:12px; font-size:14px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:8px; margin-top:14px;">
             Continuar
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#111" stroke-width="2.4"><path d="M9 18l6-6-6-6"/></svg>
           </button>
-          <p class="legal-aviso" id="aceptoLegalTexto">Al dar Continuar aceptas los <a href="/terms.html" target="_blank">Términos y Condiciones</a> y la <a href="/reembolsos.html" target="_blank">Política de Cancelaciones</a>, y autorizas a Keicy Barber Club a tratar tus datos según la <a href="/privacy.html" target="_blank">Política de Tratamiento de Datos</a> para gestionar tus citas y enviarte confirmaciones y recordatorios por WhatsApp.</p>
+          <p class="legal-aviso" id="aceptoLegalTexto">Al dar Continuar aceptas los <a href="/terms.html" target="_blank">Términos y Condiciones</a> y la <a href="/reembolsos.html" target="_blank">Política de Cancelaciones</a>, y autorizas a Keicy Barber Club a tratar tus datos según la <a href="/privacy.html" target="_blank">Política de Tratamiento de Datos</a> para gestionar tus citas y enviarte confirmaciones y recordatorios por WhatsApp, y para enviarte promociones y beneficios exclusivos del Club (descuentos y cortesías con negocios aliados) por WhatsApp, SMS o correo. Puedes cancelar las promociones cuando quieras.</p>
         </div>
       </div>
 
@@ -2377,8 +2370,6 @@
   clientLastNameInputNew.addEventListener('input', () => { state.cliente.lastName = clientLastNameInputNew.value.trim(); validateClientForm(); });
   clientEmailInputNew.addEventListener('input', () => { state.cliente.email = clientEmailInputNew.value.trim(); validateClientForm(); });
 
-  const aceptoPublicidadInput = document.getElementById('aceptoPublicidad');
-
   function validateClientForm() {
     const hasPhone = clientPhoneInputNew.value.replace(/\D/g, '').length >= 7;
     const hasName = state.cliente.name.length > 0;
@@ -2391,7 +2382,7 @@
   let consentimientoRegistrado = '';
   function registrarConsentimientoReserva(clienteId, telefono, nombre) {
     if (!window.DN_LEGAL) return;
-    const publicidad = aceptoPublicidadInput.checked;
+    const publicidad = true; // se acepta al tocar Continuar, con el aviso a la vista
     const clave = `${clienteId || telefono}|${publicidad}`;
     if (consentimientoRegistrado === clave) return;
     consentimientoRegistrado = clave;
@@ -2406,9 +2397,7 @@
         { documento: 'privacidad', aceptado: true },
         { documento: 'publicidad', aceptado: publicidad }
       ],
-      texto: document.getElementById('aceptoLegalTexto').textContent.replace(/\s+/g, ' ').trim() +
-        ' | Publicidad: ' + (publicidad ? 'SÍ' : 'NO') + ' — ' +
-        document.getElementById('aceptoPublicidadTexto').textContent.trim()
+      texto: document.getElementById('aceptoLegalTexto').textContent.replace(/\s+/g, ' ').trim()
     });
   }
 
