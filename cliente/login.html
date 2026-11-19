@@ -12,7 +12,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="Keicy Barber">
 <meta name="theme-color" content="#000000">
-<title>Club de Leales | Keicy Barberia</title>
+<title>Mi cuenta | Keicy Barber Club</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Trirong:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -494,8 +494,8 @@
 <div class="container">
   <div class="header">
     <img src="../assets/logo-oro.png" alt="Keicy Barber" class="logo">
-    <h1 class="title">Club de Leales</h1>
-    <p class="subtitle" id="headerSubtitle">Ingresa con tu numero de telefono para ver tus beneficios exclusivos</p>
+    <h1 class="title">Mi cuenta</h1>
+    <p class="subtitle" id="headerSubtitle">Ingresa con tu número de teléfono para ver tus cortes</p>
   </div>
 
   <div class="form-section">
@@ -506,7 +506,7 @@
           <div class="user-avatar" id="userAvatar">--</div>
           <div class="user-info">
             <div class="user-name" id="userName">Cliente</div>
-            <div class="user-meta" id="userMeta">Club de Leales</div>
+            <div class="user-meta" id="userMeta">Mi cuenta</div>
           </div>
           <div class="user-badge sin-pin" id="userBadge">--</div>
         </div>
@@ -609,7 +609,7 @@
               <input type="checkbox" id="acceptPolicy" required>
               <span class="checkmark"></span>
               <span class="checkbox-text" id="acceptPolicyText">
-                Acepto los <a href="/terms.html" target="_blank">Términos y Condiciones</a> del Club y autorizo el tratamiento de mis datos según la <a href="/privacy.html" target="_blank">Política de Tratamiento de Datos</a> (Ley 1581 de 2012)
+                Acepto los <a href="/terms.html" target="_blank">Términos y Condiciones</a> y autorizo el tratamiento de mis datos según la <a href="/privacy.html" target="_blank">Política de Tratamiento de Datos</a> (Ley 1581 de 2012)
               </span>
             </label>
             <label class="checkbox-label" style="margin-top:10px;">
@@ -700,7 +700,7 @@
   // Check existing session
   const existingSession = dnGetLealtadSession();
   if (existingSession && existingSession.cliente_token) {
-    window.location.href = 'club.html';
+    window.location.href = 'mi-cuenta.html';
   }
 
   // Helpers
@@ -1030,7 +1030,7 @@
       });
 
       // Redirect
-      window.location.href = 'club.html';
+      window.location.href = 'mi-cuenta.html';
 
     } catch (err) {
       console.error('Error:', err);

@@ -108,9 +108,8 @@
     } else if (path.includes('/cliente/')) {
       // En cliente, precargar otras páginas de cliente
       preloads.push(
-        '/cliente/home.html',
-        '/cliente/login.html',
-        '/cliente/club.html'
+        '/cliente/mi-cuenta.html',
+        '/cliente/login.html'
       );
     } else if (path.includes('/admin_sede/')) {
       // En admin sede, precargar páginas principales

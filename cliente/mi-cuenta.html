@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<script src="/assets/theme-manager.js"></script>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="manifest" href="../manifest.json">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon-v3.png">
+<link rel="icon" href="../assets/favicon-32-v3.png">
+<meta name="theme-color" content="#000000">
+<title>Mi cuenta | Keicy Barber Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Trirong:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000000;
+    --surface: #141414;
+    --text: #FFFFFF;
+    --text-secondary: #B3B3B3;
+    --gold: #FFAC48;
+    --divider: rgba(255,255,255,0.1);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Trirong', Georgia, serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  #app {
+    max-width: 520px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: max(32px, var(--safe-top)) 20px max(32px, var(--safe-bottom));
+    text-align: center;
+  }
+  .logo { height: 64px; margin-bottom: 28px; }
+  .saludo { font-size: 20px; font-weight: 600; margin-bottom: 28px; }
+  .card {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 20px;
+    padding: 36px 20px;
+  }
+  .cortes { font-size: 72px; font-weight: 800; color: var(--gold); line-height: 1; }
+  .cortes-label { margin-top: 10px; font-size: 16px; color: var(--text-secondary); }
+  .salir {
+    margin-top: 32px;
+    background: none;
+    border: 1px solid var(--divider);
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 22px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .salir:hover { color: var(--text); border-color: var(--gold); }
+</style>
+</head>
+<body>
+<div id="app">
+  <img src="../assets/logo-oro.png" alt="Keicy Barber Club" class="logo">
+  <div class="saludo" id="saludo">Hola</div>
+  <div class="card">
+    <div class="cortes" id="cortes">–</div>
+    <div class="cortes-label" id="cortesLabel">cortes en Keicy Barber Club</div>
+  </div>
+  <button class="salir" onclick="salir()">Cerrar sesión</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../assets/supabase-client.js?v=20261021"></script>
+<script>
+  // Keicy aún no tiene Club de Leales: el cliente solo ve cuántos cortes lleva
+  let session = dnGetLealtadSession();
+  if (!session || !session.cliente_token) {
+    if (session) dnClearLealtadSession();
+    window.location.replace('login.html');
+  }
+
+  function pintar(nombre, cortes) {
+    const primerNombre = (nombre || '').trim().split(/\s+/)[0];
+    document.getElementById('saludo').textContent = primerNombre ? `Hola, ${primerNombre}` : 'Hola';
+    const n = Number(cortes) || 0;
+    document.getElementById('cortes').textContent = n;
+    document.getElementById('cortesLabel').textContent =
+      (n === 1 ? 'corte' : 'cortes') + ' en Keicy Barber Club';
+  }
+
+  async function cargar() {
+    if (!session) return;
+    pintar(session.full_name, session.total_visitas_weibook || session.total_visitas);
+    try {
+      const { data, error } = await dnClienteRpc('dn_cliente_perfil');
+      if (error || !data) return;
+      session = {
+        ...session,
+        full_name: data.full_name,
+        total_visitas: data.total_visitas_weibook,
+        total_visitas_weibook: data.total_visitas_weibook
+      };
+      dnSaveLealtadSession(session);
+      pintar(session.full_name, session.total_visitas_weibook);
+    } catch (err) {
+      console.error('Error cargando cortes:', err);
+    }
+  }
+
+  function salir() {
+    dnClearLealtadSession();
+    window.location.replace('login.html');
+  }
+
+  cargar();
+</script>
+</body>
+</html>
