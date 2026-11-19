@@ -2108,6 +2108,42 @@
     }).length;
   }
 
+  // Revisa contra la base de datos (no solo lo que tiene cargado esta pantalla) si el barbero ya
+  // tiene citas en ese horario: así se ven también las que acaba de crear otro admin o el admin de sede.
+  // Si ya hay una, pide confirmar antes de poner la segunda; con MAX_CITAS_MISMA_HORA no deja más.
+  async function confirmarHorarioBarbero(barberoId, fecha, startMin, endMin, exceptoId, sinPreguntar) {
+    let cruzadas = [];
+    try {
+      const { data, error } = await sb.from('citas')
+        .select('id, hora_inicio, hora_fin, estado, cliente_nombre, usuarios!citas_cliente_id_fkey(full_name)')
+        .eq('barbero_id', barberoId).eq('fecha', fecha)
+        .not('estado', 'in', '(cancelada,sin_respuesta,no_show)');
+      if (error) throw error;
+      cruzadas = (data || []).filter(c => {
+        if (c.id === exceptoId) return false;
+        const s = toMin(c.hora_inicio);
+        const en = c.hora_fin ? toMin(c.hora_fin) : s + 60;
+        return startMin < en && endMin > s;
+      });
+    } catch (e) {
+      console.error('No se pudo revisar el horario en la base de datos:', e);
+      const n = citasCruzadas(barberoId, startMin, endMin, exceptoId);
+      cruzadas = Array.from({ length: n }, () => ({}));
+    }
+    if (cruzadas.length >= MAX_CITAS_MISMA_HORA) { toast(MSG_HORARIO_LLENO); return false; }
+    if (cruzadas.length > 0 && !sinPreguntar) {
+      const b = allBarberos.find(x => x.id === barberoId);
+      const nombreBarbero = b?.usuarios?.full_name || b?.usuarios?.username || 'Este barbero';
+      const otra = cruzadas[0];
+      const cliente = otra.cliente_nombre || otra.usuarios?.full_name || 'otro cliente';
+      const hora = otra.hora_inicio ? fmtTime(otra.hora_inicio) : 'esa hora';
+      return confirm(`${nombreBarbero} ya tiene una cita a las ${hora} con ${cliente}.
+
+¿Seguro que quieres agendar otra a la misma hora?`);
+    }
+    return true;
+  }
+
 
   dnInitSidebarCard(loadAll);
 
@@ -3253,7 +3289,7 @@
       toast('Ese horario está fuera del horario de trabajo del barbero.'); return;
     }
 
-    if (citasCruzadas(newBarberoId, startMin, endMin, citaId) >= MAX_CITAS_MISMA_HORA) { toast(MSG_HORARIO_LLENO); return; }
+    if (!(await confirmarHorarioBarbero(newBarberoId, selectedDate, startMin, endMin, citaId))) return;
 
     const toHHMMSS = (m) => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:00`;
     const oldBarberoId = cita.barbero_id;
@@ -3934,7 +3970,7 @@
     // Segunda cita a la misma hora con el mismo barbero (solo desde esta agenda de admin)
     if (!['cancelada', 'finalizada'].includes(c.estado) &&
         citasCruzadas(c.barbero_id, toMin(c.hora_inicio), toMin(c.hora_fin || c.hora_inicio)) < MAX_CITAS_MISMA_HORA) {
-      actions += `<button class="apple-btn" style="background:var(--bg-hover);color:var(--text-primary);justify-content:center;" onclick="closeDetail(); openNewAppt('${c.barbero_id}', '${c.hora_inicio.slice(0,5)}')">Otra cita a esta hora</button>`;
+      actions += `<button class="apple-btn" style="background:var(--bg-hover);color:var(--text-primary);justify-content:center;" onclick="closeDetail(); openNewAppt('${c.barbero_id}', '${c.hora_inicio.slice(0,5)}'); naCitaDobleIntencional = true;">Otra cita a esta hora</button>`;
     }
     document.getElementById('detActions').innerHTML = actions;
     const modal = document.getElementById('detailModal');
@@ -5188,7 +5224,10 @@
     document.getElementById('naHora').innerHTML = hourOptionsHtml(horaActual, barberoId);
   }
 
+  // true solo cuando se abre desde "Otra cita a esta hora": ahí la segunda cita es a propósito
+  let naCitaDobleIntencional = false;
   function openNewAppt(barberoId, timeStr){
+    naCitaDobleIntencional = false;
     naFoundClient = null;
     document.getElementById('naBarbero').innerHTML = allBarberos.map(b =>
       `<option value="${b.id}">${b.usuarios?.full_name || b.usuarios?.username || 'Barbero'}</option>`).join('');
@@ -5422,7 +5461,8 @@
       }
 
       // Verificar que no cruce con otra cita existente
-      if (citasCruzadas(barberoId, startMin, endMin) >= MAX_CITAS_MISMA_HORA) { toast(MSG_HORARIO_LLENO); return; }
+      const citaDobleIntencional = naCitaDobleIntencional;
+      if (!(await confirmarHorarioBarbero(barberoId, selectedDate, startMin, endMin, null, citaDobleIntencional))) return;
 
       // Preparar servicios adicionales (todos excepto el principal)
       const serviciosAdicionales = services.slice(1).map(s => ({
@@ -5851,7 +5891,7 @@
       toast('Ese horario está fuera del horario de trabajo del barbero.'); return;
     }
 
-    if (citasCruzadas(newBarberoId, startMin, endMin, citaId) >= MAX_CITAS_MISMA_HORA) { toast(MSG_HORARIO_LLENO); return; }
+    if (!(await confirmarHorarioBarbero(newBarberoId, selectedDate, startMin, endMin, citaId))) return;
 
     const toHHMMSS = (m) => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}:00`;
     const oldBarberoId = cita.barbero_id;
